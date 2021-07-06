@@ -1,0 +1,5 @@
+#!/bin/sh
+PGPLOT_DIR="/usr/lib/"
+export PGPLOT_DIR
+cd /home/marco/Workspace
+./qtSource/ksemaw/ksemaw

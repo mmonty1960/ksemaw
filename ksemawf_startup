@@ -1,0 +1,5 @@
+#!/bin/sh
+export PGPLOT_FONT=/usr/lib/grfont.dat
+/home/$USER/Workspace/qtSource/ksemaw/pgxwin_server &
+cd /home/$USER/Workspace
+./qtSource/ksemaw/ksemawf

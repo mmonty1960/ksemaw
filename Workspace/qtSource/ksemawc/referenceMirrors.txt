@@ -1,0 +1,16 @@
+RIF05
+al__/RIF05corr.txt
+RIF06_before_5_December_1994
+al__/RIF06before5Dic1994corr.txt
+RIF06_after_5_Decembre_1994
+al__/RIF06after5Dic1994corr.txt
+RIF05_after_18 March_1996
+al__/RIF05after18March1996corr.txt
+RIF08_since_13_December_2011
+al__/ri008.v2.rn
+RIF08_after_17_January_2018
+al__/ri008.v3.rn
+RIF_PV_ENEA
+al__/rifPVenea.v1.rn
+Labsphere PTFE SRS-99-020
+Spectralon/LabspeherePTFE8715.txt

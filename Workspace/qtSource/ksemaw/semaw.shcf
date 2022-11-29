@@ -1,4 +1,0 @@
-#!/bin/sh
-gfortran *.f -Wunused-parameter -Wall -fbounds-check -g -o ksemawf -L /usr/local/pgplot -lpgplot -lX11
-#gfortran valin.f simula.f analitico.f ibridone.f kernel.f matinv.f -o ksemawf -g -lpgplot -lX11 -L/usr/lib/sminpack -lsminpack 
-#gfortran valin.f simula.f analitico.f ibridone.f kernel.f matinv.f -o ../semaw -Wunused -g -lpgplot -lX11 -L/usr/lib/sminpack -lsminpack 

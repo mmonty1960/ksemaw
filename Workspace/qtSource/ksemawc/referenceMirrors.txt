@@ -12,5 +12,3 @@ RIF08_after_17_January_2018
 al__/ri008.v3.rn
 RIF_PV_ENEA
 al__/rifPVenea.v1.rn
-Labsphere PTFE SRS-99-020
-Spectralon/LabspeherePTFE8715.txt

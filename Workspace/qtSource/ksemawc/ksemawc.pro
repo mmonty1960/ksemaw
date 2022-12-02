@@ -18,7 +18,7 @@ win32 {
     QT += core gui
     include( .\QWT_win.pri )
     CONFIG+= c++11 gui console
-    INCLUDEPATH += . c:\Qwt-6.2.0\src c:\Program Files\Tools\mingw810_64\cminpack-1.3.8 C:\gsl-2.7\build C:\gsl-2.7\build\gsl
+    INCLUDEPATH += . c:\Qwt-6.2.0\src c:\Programm Files\Tools\mingw810_64\cminpack-1.3.8
     LIBS += -L"C:/Program Files/Tools/mingw810_64/cminpack-1.3.8/build" -lcminpack
     HEADERS += cminpack.h
 }
@@ -32,7 +32,7 @@ unix {
 # Input
 HEADERS += ksemawc.h
 FORMS += ksemawc.ui
-SOURCES += ksemawc.cpp main.cpp
+SOURCES += ksemawc.cpp main.cpp 
 
 target.path=.\
 INSTALLS += target

@@ -29,7 +29,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 */
 
 
-
+/*
 //C   par[60][5] matrix where several different parameters are stored
 //C
 //C      [1][1],[1][2]........NMIN, NMAX [solution search range ]
@@ -280,6 +280,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C         int(rxy[25][4]) = 2 => eV step
 //C
 //C    ARSE[500][2] service array
+*/
 
 #include <QtGui>
 #include "ksemawc.h"
@@ -411,7 +412,7 @@ ksemawc::ksemawc(QWidget *parent) :
     printf("              Program C++ kSEMAW\n\n");
     printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
     printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 1.0.0 23 November 2022\n\n");
+    printf("         version 1.0.0 2 December 2022\n\n");
     printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
     printf("          email: marco.montecchi@enea.it\n ");
     printf("          Porting to Windows and advanced oscillators by\n");
@@ -649,21 +650,20 @@ ksemawc::ksemawc(QWidget *parent) :
 #define IS_POSIX 0
 #endif
 
+    QDir dir;  //current directory
+    dir.cdUp();//cd ..
+    dir.cdUp();//cd ..
     if (IS_POSIX == 1) {
         //Linux path initialization
-        pathroot="/home/"+uName+"/Workspace/";
-        fRefMir=pathroot+"qtSource/ksemawc/referenceMirrors.txt";
-        fStdSpect=pathroot+"qtSource/ksemawc/standardSpectra.txt";
+        //nothing to do
     }
     else {
         //windows path inizialization
-        //pathroot=getenv("PWD");
-        QDir dir;
-        pathroot=dir.absolutePath();
-        pathroot=pathroot+"/workspace/";
-        fRefMir=pathroot+"referenceMirrors.txt";
-        fStdSpect=pathroot+"standardSpectra.txt";
+        dir.cdUp();//cd ..
     }
+    pathroot=dir.absolutePath()+"/";
+    fRefMir=pathroot+"qtSource/ksemawc/referenceMirrors.txt";
+    fStdSpect=pathroot+"qtSource/ksemawc/standardSpectra.txt";
     fileStore=pathroot+"temp/defau.1.Spj";
     fNKsim=pathroot+"expo/NKsim.dat";
     fMisSim=pathroot+"expo/MisSim.dat";

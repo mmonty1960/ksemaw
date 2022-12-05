@@ -24,6 +24,14 @@ Code source files, compiled Windows version, user manual as well as a sample of 
 
 kSEMAWc can be installed in different ways:  copying the 64bit Windows10 executable version folder or compiling the source files in Linux or Windows OS.
 
+The installation of the precompiled Windows executable simply consists in:
+
+• download the zipped file from https://github.com/mmonty1960/ksemawc
+
+• extract the folder Workspace to any position on the user hard disk
+
+• create a shortcut to the ksemawc.exe file contained in Workspace\qtSource\kSEMAWc\bin
+
 License:
 The code source files are distributed as open source software under the GNU General Public
 License as published by the Free Software Foundation version 3.

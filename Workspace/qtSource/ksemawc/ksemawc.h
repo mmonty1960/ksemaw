@@ -129,6 +129,7 @@ public Q_SLOTS:
      void PanFitPar();
      void PanFitChoice();
      void AdjTheta();
+     void AdjRoughMax();
      void RefreshModel();
      void SetModel(const int &);
      void closeEvent ( QCloseEvent * event );
@@ -240,7 +241,7 @@ public Q_SLOTS:
      void setKindOsc19();
      void setKindOsc20();
      void setFontDia();
-     void msgErrLoad(QString fnERR);
+     void msgErrLoad(QString where, QString fnERR);
 };
 
 #endif

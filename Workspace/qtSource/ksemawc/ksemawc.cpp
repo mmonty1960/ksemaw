@@ -412,7 +412,7 @@ ksemawc::ksemawc(QWidget *parent) :
     printf("              Program C++ kSEMAW\n\n");
     printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
     printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 1.0.1 1 February 2023\n\n");
+    printf("         version 1.0.2 12 February 2023\n\n");
     printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
     printf("          email: marco.montecchi@enea.it\n");
     printf("          Porting to Windows and advanced oscillators by\n");
@@ -2681,6 +2681,11 @@ void ksemawc::LoadFilenk(){
                 if(nV!=5){
                     printf("nV=%d line=%s\n",nV,line.toStdString().c_str());
                     printf("LoadFilenk-> ERROR reading file-nk= %s: separator char invalid\n",fnam.toStdString().c_str());
+                    QMessageBox msgBox;
+                    msgBox.setText("LoadFilenk-> ERROR reading file-nk="+fnam+"\n: separator char invalid or ERRn and ERRk missing");
+                    msgBox.setStandardButtons(QMessageBox::Ok);
+                    msgBox.exec();
+                    return;
                     continue;
                 }
             }
@@ -3514,7 +3519,11 @@ void ksemawc::MCRange(){
         }
         else{
             if(DATO[imis]>0) DATO[imis]=0;
-            if(imis>=7 && DATO[imis+1]>0) DATO[imis+1]=0;
+            if(imis>=7 && DATO[imis+1]>0){
+                DATO[imis+1]=0;
+                idToCheckBox["checkB_mis"+QString::number(imis)+"_3"] -> setCheckState(Qt::Unchecked);
+                idToCheckBox["checkB_mis"+QString::number(imis+1)+"_3"] -> setCheckState(Qt::Checked);
+            }
         }
         if(imis>=7) imis++;
     }
@@ -4368,7 +4377,7 @@ void ksemawc::saveNKsim(){
                 this,
                 "Filename to save NKsim",
                 pathroot+"expo/",
-                "dat file (*.dat)");
+                "nk file (*.nk)");
     QFile file(fn2s);
     if( file.exists() ){
         QMessageBox msgBox;
@@ -5260,7 +5269,7 @@ void ksemawc::CalcMis(double mc[15][202]){
                 else
                     FM=FM+pow((mc[ic][i]-ELI[ic-6][i][1])/ELI[ic-6][i][2],2.)/201.;
             }
-            par[35+ic][1]=FM;
+            par[35+ic][1]=sqrt(FM);
             if(ic<=6)
                 PLOTline1bar2(1,0,iColor,ic,201,Xp,Yp,ErrXp,ErrYp);
             else if(ic==7 || ic==9 || ic==11 || ic==13)
@@ -6786,6 +6795,10 @@ void ksemawc::SPADA(){
                     if(nV!=5){
                         printf("nV=%d line=%s\n",nV,line.toStdString().c_str());
                         printf("SPADA-> ERROR reading file-nk= %s: separator char invalid\n",fnam.toStdString().c_str());
+                        QMessageBox msgBox;
+                        msgBox.setText("LoadFilenk-> ERROR reading file-nk="+fnam+"\n: separator char invalid or ERRn and ERRk missing");
+                        msgBox.setStandardButtons(QMessageBox::Ok);
+                        msgBox.exec();
                         continue;
                     }
                 }
@@ -9229,12 +9242,14 @@ int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
         ev=12400./wl;
         par[7][1]=wl;
         par[24][2]=i;
-        FDISP(ioptf,ev);
-        MIS[16][i][1]=sqn;
-        CNK[1][2]=sqn;
-        MIS[16][i][2]=sqk;
-        CNK[1][3]=sqk;
-
+        if(ioptf<1 || ioptf>7){
+            FDISP(ioptf,ev);
+            MIS[16][i][1]=sqn;
+            CNK[1][2]=sqn;
+            MIS[16][i][2]=sqk;
+            CNK[1][3]=sqk;
+        }
+        CNK[1][1]=ioptf;
         //computing Tn Rn R1
         if(DATO[1]==2 || DATO[3]==2 || DATO[5]==2){
             ASSEMBLER(i,wl,1,0.,vot);
@@ -9288,7 +9303,7 @@ int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
         }
     }
     // monitor values
-    printf("|FSEM> chi2=%.9g\t",chi2);
+    printf("|FSEM> ioptf=%d chi2=%.9g\t",ioptf,chi2);
     for(int i=0;i<n;i++)
         printf("p[%d]=%.9g\t",i,x[i]);
     printf("\n");

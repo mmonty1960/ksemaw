@@ -38,10 +38,10 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C      [4][1],[4][2]........LAMBDAmin,LAMBDAmax of loaded data-file
 //C      [5][1],[5][2]........ /  ,  /
 //C      [6][1],[6][2]........TETA,  /
-//C      [7][1],[7][2]........LAMBDA, index-color
-//C      [8][1],[8][2]........jobtot , jobview
+//C      [7][1],[7][2]........LAMBDA, /
+//C      [8][1],[8][2]........ / ,    /
 //C      [9][1],[9][2]........if 1 k>=0, if 1 nk_sim->temp from scratch
-//C     [10][1],[10][2].......if 1 plot eps1 eps2 , /
+//C     [10][1],[10][2].......if 1 plot eps1 eps2 , if 1 no 3-points limit in ELI resampling
 //C     [11][1],[11][2].......attenuation coeff. of k by Fit#N , /
 //C     [12][1],[12][2]....... / , /
 //C     [13][1],[13][2]....... / , /
@@ -56,7 +56,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C     [22][1],[22][2].......mr[0=>R absolute, 1=> R*Rrif] , Nmis enabled
 //C     [23][1],[23][2].......1 to load SF files, 1 to load ELI files  (0 no files to load)
 //C     [24][1],[24][2].......IUVIR,index-lambda
-//C     [25][1],[25][2].......tol, /
+//C     [25][1],[25][2]....... /, /
 //C     [26][1],[26][2]....... / ,/
 //C     [27][1],[27][2].......chi2_initial ,S1P2
 //C     [28][1] .............N discretization for computing <f[x]>
@@ -86,8 +86,8 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C        [ 1-14][4]   /
 //C        [21-26][4]   /
 //C            [31][5]  log scale of k-plot [0->linear 1->logarithmic]
-//C            [32][5]  0->fit_n   1->fit_nk   2->fit epsi1 and epsi2
-//C            [33][5]  /
+//C            [32][5]  0->fit_n   1->fit_nk   2->fit epsi1 and epsicomplex<long double> DirCodyUrb(long double E,long double C,long double E0,long double E3,long double D)2
+//C            [33][5]  Delta & Psi units [0-> Delta(deg) Psi(deg) 1-> cos(Delta) tan (Psi)
 //C            [34][5]  N parameters displayed in dat-fit tab
 //C            [35][5]  N parameters enabled to fit
 //C
@@ -100,7 +100,8 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C         [36-53][5]  PPM[17]
 //C
 //C
-//C        IUVIR : kind of wavelength range = 1 UV-VIS-NIR
+//C        IUVIR : kind of wavelength range = 1 UV-VIS-NIRsetting-file exists! /home/marco/.config/ksemawc/ksemawc.conf
+
 //C                                           2 IR
 //C
 //C
@@ -138,7 +139,8 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C   DATO[14] loaded experimental measurements saved in par:
 //C                         DATO[i]=par[i][4]
 //C       i=1: Tnormal
-//C       i=2: Tpolarised
+//C       i=2: Tpolarisedsetting-file exists! /home/marco/.config/ksemawc/ksemawc.conf
+
 //C       i=3: Rnormal
 //C       i=4: Rpolarised
 //C       i=5: R1_normal
@@ -156,7 +158,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C
 //C
 //C
-//c **** pm[200][5] generalized multilayer & oscillators ****
+//c **** pm[201][6] generalized multilayer & oscillators ****
 //c        [i][1] = parameter value
 //c        [i][2] = managment in data-fit: 0 -> constant
 //c                                        j -> P[j] where P is a fit parameter
@@ -315,6 +317,8 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 #include <QFontDialog>
 #include <QApplication>
 #include <QFontInfo>
+#include <vector>
+#include <QSettings>
 
 //global variables
 QString fnproject,pathroot,fileStore,fStdSpect,fRefMir,fNKsim,fMisSim,filechi2;
@@ -383,10 +387,14 @@ long double ReM0M3(long double E,long double E0,long double E3,long double reD);
 long double aImM0M3(long double E,long double E0,long double E3,long double reD);
 long double ReTaucL(long double E,long double E0,long double D,long double E3);
 long double aImTaucL(long double E,long double E0,long double D,long double E3);
+complex<long double> DirCodyUrb(long double E,long double C,long double E0,long double E3,long double D);
+complex<long double> DirTaucUrb(long double E,long double C,long double E0,long double E3,long double D);
+complex<long double> IndirCodyUrb(long double E,long double C,long double E0,long double E3,long double D);
+complex<long double> IndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D);
 void ASSEMBLER(int iwl,double wl, int ikind,double teta,double vot[6][3]);
 void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi[6][3]);
 void CALFRE(int NFA,double wl,complex<double> pq,complex<double> IR[999],double d[999],complex<double> out[9][3]);
-int SOLVE(int imis,int iWL,double Xp[202],double Yp[202]);
+int SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp);
 double FMER(double k);
 double FindRoot(double (*FT)(double),double t,double dt,double dlim,double tol);
 int FSQ(void *p, int m, int n, const double *x, double *fvec, int iflag);
@@ -402,6 +410,7 @@ static struct pointToFit2{
     int Nt;
 }pTF2[1];
 
+
 ksemawc::ksemawc(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ksemawc)
@@ -412,7 +421,7 @@ ksemawc::ksemawc(QWidget *parent) :
     printf("              Program C++ kSEMAW\n\n");
     printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
     printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 1.0.2 12 February 2023\n\n");
+    printf("         version 2.0 24 April 2023\n\n");
     printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
     printf("          email: marco.montecchi@enea.it\n");
     printf("          Porting to Windows and advanced oscillators by\n");
@@ -587,6 +596,7 @@ ksemawc::ksemawc(QWidget *parent) :
     connect(ui->cBParFit_16,SIGNAL(currentIndexChanged(int)),this,SLOT(PanFitChoice()));
     connect(ui->cBParFit_17,SIGNAL(currentIndexChanged(int)),this,SLOT(PanFitChoice()));
     connect(ui->pushButton_PlotExpMis,SIGNAL(clicked()), this, SLOT(PlotMENK()));
+    connect(ui->pushButton_PlotExpMis2,SIGNAL(clicked()), this, SLOT(PlotMENK()));
     connect(ui->pushButton_Simulate,SIGNAL(clicked()), this, SLOT(Simula()));
     connect(ui->pushButton_modelSim,SIGNAL(clicked()), this, SLOT(Simula()));
     connect(ui->pushButton_PlotAve,SIGNAL(clicked()), this, SLOT(PlotAve()));
@@ -700,10 +710,7 @@ ksemawc::ksemawc(QWidget *parent) :
     par[4][3]=.005;   //relative error of reference mirror reflectance
     par[5][3]=.0005;  //reading error
     par[6][3]=1.0;    // ... depending on wavelengh
-    par[7][2]=1;       //color index
     par[7][3]=1.2505E-7; //cte used for computing the substrate contribution to PDS signal
-    par[8][1]=0.;     //Number of comleted job in Data Fit
-    par[8][2]=0.;     //Number of the job which best-fit parameters are displayed in Data Fit
     par[11][1]=1;     //attenuation coeff. of k by Fit#N
     par[11][2]=0;     //is set to 1 when ludcmp found singular matrix
     par[21][3]=.001;  //n step
@@ -1448,10 +1455,14 @@ ksemawc::ksemawc(QWidget *parent) :
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Quant-inhomo");
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Flat");
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Drude");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Indirect-Gap-Cody");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Indirect-Gap-Tauc");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Direct-Gap-Cody");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Direct-Gap-Tauc");
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Cody");
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Tauc");
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Cody");
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Tauc");
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Cody-Urbach");
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Tauc-Urbach");
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Cody-Urbach");
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Tauc-Urbach");
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->setCurrentIndex(-1);
     }
     occupyPF=0;
@@ -1503,6 +1514,33 @@ ksemawc::ksemawc(QWidget *parent) :
     ParFitLab[10]="_D";
     ParFitLab[11]="_W";
 
+    //set the latest Size & font if settings exist
+    QSettings settings("ksemawc","ksemawc");
+    QString usnam=settings.fileName();
+    cout<<"setting-file exists! "<<usnam.toStdString()<<"\n";
+    if (settings.status() == QSettings::NoError && settings.status() != QSettings::FormatError && settings.status() !=QSettings::AccessError){
+        restoreGeometry(settings.value("geometry").toByteArray());
+        QVariant fontFamily=settings.value("fontFamily",QString());
+        int fontSize = settings.value("pointSize", int()).toInt();
+        bool fontIsBold = settings.value("bold", false).toBool();
+        bool fontIsItalic = settings.value("italic", false).toBool();
+        //cout << "font= "  << (fontFamily.toString()).toStdString()<<"\n";
+        //cout << "size = " << fontSize<<"\n";
+        //cout << "bold = " << fontIsBold<<"\n";
+        //cout << "italic= "<<fontIsItalic<<"\n";
+        QFont font;
+        font.setFamily(fontFamily.toString());
+        font.setPointSize(fontSize);
+        font.setBold(fontIsBold);
+        font.setItalic(fontIsItalic);
+        const QWidgetList allWidgets = QApplication::allWidgets();
+        for (QWidget *widget : allWidgets){
+            widget->setFont(font);
+            widget->update();
+        }
+        QCoreApplication::processEvents();
+    }
+
     SaveSetting(-1);//save
 }
 
@@ -1510,6 +1548,9 @@ ksemawc::ksemawc(QWidget *parent) :
 
 void ksemawc::closeEvent ( QCloseEvent * event )
 {
+    //save widget size
+    QSettings settings("ksemawc","ksemawc");
+    settings.setValue("geometry", saveGeometry());
     qApp->quit();
 }
 
@@ -1529,6 +1570,16 @@ void ksemawc::setFontDia(){
         // the user canceled the dialog; font is set to the initial
         // value, in this case Helvetica [Cronyx], 10
     }
+    //cout << "fontFamily= "  << font.family().toStdString()<<"\n";
+    //cout << "size = " << font.pointSize()<<"\n";
+    //cout << "bold = " << font.bold()<<"\n";
+    //cout << "italic = " << font.italic()<<"\n";
+    //save the choice
+    QSettings settings("ksemawc","ksemawc");
+    settings.setValue("fontFamily", font.family());
+    settings.setValue("pointSize", font.pointSize());
+    settings.setValue("bold", font.bold());
+    settings.setValue("italic", font.italic());
 }
 
 
@@ -1561,12 +1612,17 @@ void ksemawc::ReadSetting(QString filename){
     QString as = dtTm.toString("yyyy-MM-dd HH:mm:ss");
     cout<<"date: "<<as.toStdString()<<"\n";
     QDateTime tLim(QDate(2022, 1, 1), QTime(0, 00, 0));
+    QDateTime tLim2(QDate(2023, 4, 11), QTime(0, 00, 0));
     int old0new1=0;
     if(dtTm<tLim)
-        printf("The project kind is old\n");
-    else{
-        printf("The project kind is new\n");
+        printf("The project is older than January 2022\n");
+    else if(dtTm>=tLim && dtTm<tLim2){
+        printf("The project is newer than January 2022 and older than 11 April 2023\n");
         old0new1=1;
+    }
+    else{
+        printf("The project version is up-to-date\n");
+        old0new1=2;
     }
     QFile file(filename);
     if (!file.open (QIODevice::ReadOnly | QIODevice::Text)){
@@ -1667,10 +1723,6 @@ void ksemawc::ReadSetting(QString filename){
         for(int j=1;j<=5;j++){
             stream>> par[i][j];
         }
-    }
-    if(filename!=fileStore){
-        par[8][1]=0.;
-        par[8][2]=0.;
     }
     if(!fnE1.contains("mate/aa999")){
         line2=fnE1.section('.', 1, 1);
@@ -1793,10 +1845,8 @@ void ksemawc::ReadSetting(QString filename){
     ui->dSB_PAR_4_3 -> setValue(par[4][3]);
     ui->dSB_PAR_5_3 -> setValue(par[5][3]);
     ui->dSB_PAR_6_1 -> setValue(par[6][1]);
-    ui->sB_PAR_8_1 -> setValue(NINT(par[8][1]));
-    if(par[8][2]>par[8][1])
-        par[8][2]=par[8][1];
-    ui->sB_PAR_8_2 -> setValue(NINT(par[8][2]));
+    ui->sB_PAR_8_1 -> setValue(0);
+    ui->sB_PAR_8_2 -> setValue(0);
     if(NINT(par[9][1])==1)
         ui->checkBox_setPsoK -> setCheckState ( Qt::Checked );
     else
@@ -1805,9 +1855,13 @@ void ksemawc::ReadSetting(QString filename){
         ui->cBox_PAR_10_1 -> setCheckState (Qt::Unchecked);
     else
         ui->cBox_PAR_10_1 -> setCheckState (Qt::Checked);
+    if(NINT(par[10][2])==0)
+        ui->checkBox_3points -> setCheckState (Qt::Checked);
+    else
+        ui->checkBox_3points -> setCheckState (Qt::Unchecked);
     if(old0new1==0){
         QMessageBox msgBox;
-        msgBox.setText("The project kind is old => k=0*f(epsi1,epsi2)=0");
+        msgBox.setText("The project kind is old => k=extinction_coefficient=0");
         msgBox.setInformativeText("Would you like to update to k=f(epsi1,epsi2)?");
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Cancel);
@@ -1850,6 +1904,7 @@ void ksemawc::ReadSetting(QString filename){
         ui->checkBox_logScale->setCheckState(Qt::Unchecked);
     else
         ui->checkBox_logScale->setCheckState(Qt::Checked);
+    ui->comboBox_DeltaPsiScale ->setCurrentIndex(NINT(par[33][5]));
     nlayer=NINT(par[51][2]);//N, layer
     int isimmetry=NINT(par[52][2]);
     if(isimmetry==0)
@@ -1893,6 +1948,57 @@ void ksemawc::ReadSetting(QString filename){
         //printf("pm[%d][1-5]: %f %f %f %f %f\n",i,pm[i][1],pm[i][2],pm[i][3],pm[i][4],pm[i][5]);
     }
     //printf("\tReadSetting: pm[100][1]= %f\n",pm[100][1]);
+    if(old0new1<2){//renormalization of oscillator coeff for old project
+        for(int i=1;i<=20;i++){
+            if(pm[101+(i-1)*5][1]==1){//Lorentz
+                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*PIG/2.;
+                pm[104+(i-1)*5][1]=pm[104+(i-1)*5][1]/2.;
+            }
+            else if(pm[101+(i-1)*5][1]==2){//Quantum
+                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*PIG*pm[104+(i-1)*5][1]*pm[103+(i-1)*5][1];
+            }
+            else if(pm[101+(i-1)*5][1]==3){//Inhomo
+                double sqrln2=0.832554611;
+                long double E0=abs(pm[103+(i-1)*5][1]);
+                long double D=abs(pm[104+(i-1)*5][1]);
+                long double Kinho=pow((D/sqrln2),2.)/2*exp(-pow(E0*sqrln2/D,2.))+
+                                    E0*D/sqrln2/2.*sqrt(PIG)*erfcl(-E0*sqrln2/D);
+                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*Kinho;
+            }
+            else if(pm[101+(i-1)*5][1]==5){//Drude
+                double E0=abs(pm[103+(i-1)*5][1]);
+                pm[102+(i-1)*5][1]=E0*E0*PIG/2.;
+                pm[103+(i-1)*5][1]=0.;
+            }
+            else if(pm[101+(i-1)*5][1]==6){//Indirect-Cody
+                double E0=abs(pm[103+(i-1)*5][1]);
+                double De=abs(pm[105+(i-1)*5][1]);
+                double KCi=E0*De+De*De/2.;
+                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KCi;
+            }
+            else if(pm[101+(i-1)*5][1]==7){//Indirect-Tauc
+                double E0=abs(pm[103+(i-1)*5][1]);
+                double De=abs(pm[105+(i-1)*5][1]);
+                double r=E0/De;
+                double KTi=2.*(8.*r*r*log((4.*r+1.)/(4.*r)) + 8.*pow((r+1.),2.)*log((4.*r+4.)/(4.*r+3.))
+                           - (1.+8.*r*(r+1.))*log((4.*r+3.)/(4.*r+1.)) );
+                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KTi;
+            }
+            else if(pm[101+(i-1)*5][1]==8){//Direct-Cody
+                double E0=abs(pm[103+(i-1)*5][1]);
+                double K=abs(pm[105+(i-1)*5][1]);
+                double KCd=PIG/16.*K*K*(2.*E0+K);
+                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KCd*PIG;
+            }
+            else if(pm[101+(i-1)*5][1]==9){//Direct-Tauc
+                double E0=abs(pm[103+(i-1)*5][1]);
+                double K=abs(pm[105+(i-1)*5][1]);
+                double KTd=PIG/2.*(2.*E0+K-2.*sqrt(E0*(E0+K)));
+                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KTd;
+            }
+        }
+    }
+
     //PF
     for(int i=1;i<=21;i++){
         for(int j=1;j<=7;j++){
@@ -2147,7 +2253,7 @@ void ksemawc::SaveSetting(int iCall){
         itab=ui->tabWidget -> currentIndex();
     else
         itab=iCall;
-    if(itab==1){
+    if(itab==1){//Model TAB
         state=ui->checkBox_setPsoK -> checkState ();
         if( state == Qt::Checked )
             par[9][1]=1.;
@@ -2206,7 +2312,7 @@ void ksemawc::SaveSetting(int iCall){
 //            if(i==7 || i==9 || i==11 ) i++;
 //        }
     }
-    else if(itab==2){
+    else if(itab==2){//Simulation TAB
         int ioptFit=ui->cB_cnk1a -> currentIndex();
         if(ioptFit>0 && ioptFit<8){
             printf("-> SaveOsc pf[%d,i]\n",ioptFit);
@@ -2233,7 +2339,7 @@ void ksemawc::SaveSetting(int iCall){
             pf[ioptFit][1]=j-2;
         }
     }
-    else if(itab==3){
+    else if(itab==3){//Numerical Search TAB
         for(int i=1;i<=14;i++){
             state2=idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> checkState ();
             if(state2==Qt::Checked){
@@ -2241,7 +2347,7 @@ void ksemawc::SaveSetting(int iCall){
             }
         }
     }
-    else if(itab==4){
+    else if(itab==4){//Data Fit TAB
         printf("-> savePanFit\n");
         int n,n1,n2,ip,jpf;
         QString Lj,Valore;
@@ -2359,7 +2465,8 @@ void ksemawc::SaveSetting(int iCall){
     else{
         NANK[12]=stringa+"."+lab;
         out << stringa+"."+lab << "\n";
-        ui->dSB_PAR_14_1-> setValue(ui->cBteE1 -> currentText().toDouble());
+        if(itab==0)
+            ui->dSB_PAR_14_1-> setValue(ui->cBteE1 -> currentText().toDouble());
     }
     lab=ui->cBmis9 -> currentText();
     state=ui->checkB_mis9_1->checkState();
@@ -2505,13 +2612,16 @@ void ksemawc::SaveSetting(int iCall){
     par[4][3]=ui->dSB_PAR_4_3 -> value();
     par[5][3]=ui->dSB_PAR_5_3 -> value();
     par[6][1]=ui->dSB_PAR_6_1 -> value();
-    par[8][1]=ui->sB_PAR_8_1 -> value();
-    par[8][2]=ui->sB_PAR_8_2 -> value();
     state=ui->cBox_PAR_10_1 -> checkState ();
     if(state==Qt::Unchecked)
         par[10][1]=0;
     else
         par[10][1]=1;//plot eps1 eps2
+    state=ui->checkBox_3points -> checkState ();
+    if(state==Qt::Checked)
+        par[10][2]=0;
+    else
+        par[10][2]=1;//no 3 points constrain in ELI resampling
     par[10][3]=ui->comboB_PAR_10_3 -> currentIndex();
     int expA=ui->spinBox_expAENS->value();
     double valA=ui->doubleSpinBox_valAENS->value();
@@ -2542,6 +2652,7 @@ void ksemawc::SaveSetting(int iCall){
         if(rxy[17][1]<=0.)
             rxy[17][1]=rxy[17][2]/10000.;
     }
+    par[33][5]=ui->comboBox_DeltaPsiScale->currentIndex();
     if(fabs(par[21][3]) < 0.003*fabs(rxy[16][2]-rxy[16][1]))
         par[21][3]=0.003*fabs(rxy[16][2]-rxy[16][1]);
     if(fabs(par[22][3]) < 0.003*fabs(rxy[17][2]-rxy[17][1]))
@@ -4366,6 +4477,8 @@ void ksemawc::rangeWL(){
         ui->DP_RXY_20_1 ->setText(QString::number(Lmin));
         ui->DP_RXY_20_2 ->setText(QString::number(Lmax));
     }
+    ui->dSB_WLsearchNK->setMinimum(Lmin);
+    ui->dSB_WLsearchNK->setMaximum(Lmax);
 }
 
 
@@ -5026,7 +5139,7 @@ void ksemawc::PlotNK(int iRD){
 
 void ksemawc::Simula(){
     printf("->Simula\n");
-    SaveSetting(-1);//(2)
+    SaveSetting(-1);
     double mc[15][202];
     Qt::CheckState state,state1;
     state=ui->cBox_PAR_19_1 -> checkState();
@@ -5436,7 +5549,6 @@ void ksemawc::PlotAve(){
     iColor++;
     PLOTline1bar2(1,0,iColor,10,91,tet,rho1,ErrXp,ErrYp);
     iColor++;
-    par[7][2]=iColor;
     SaveSetting(-1);
     // saving <T> <R> <R1> vs teta
     QString fname2=pathroot+"expo/ThetaRhoVStheta.dat";
@@ -5565,8 +5677,8 @@ void ksemawc::searchNK(){
     par[2][1]=rxy[17][1];
     par[2][2]=rxy[17][2];
 
-    int Ndat=0,iCol=0;
-    double Xp[202],Yp[202],ErrXp[202],ErrYp[202],DT;
+    int Ndat=0,iCol=0,Ndata=300;
+    double Xp[Ndata],Yp[Ndata],ErrXp[Ndata],ErrYp[Ndata];
     int iChoiceWL=ui->comboBox_searchNK -> currentIndex();
     if(iChoiceWL==0)
         par[7][1]=ui->dSB_WLsearchNK -> value();
@@ -5586,36 +5698,17 @@ void ksemawc::searchNK(){
         if(DATO[imis]==2){
             if(imis<=6){
                 iCol=imis;
-                DT=MIS[imis][iWL][2];
-                printf("imis=%d: %f +-%f\n ",imis,MIS[imis][iWL][1],DT);
-                MIS[imis][iWL][1]=MIS[imis][iWL][1]-DT;
-                Ndat=SOLVE(imis,iWL,Xp,Yp);
-                printf("Ndat= %d\n",Ndat);
-                PLOTline1bar2(1,0,iCol,11,Ndat,Xp,Yp,ErrXp,ErrYp);
-                MIS[imis][iWL][1]=MIS[imis][iWL][1]+2.*DT;
-                Ndat=SOLVE(imis,iWL,Xp,Yp);
-                printf("Ndat= %d\n",Ndat);
-                PLOTline1bar2(1,0,iCol,11,Ndat,Xp,Yp,ErrXp,ErrYp);
-                MIS[imis][iWL][1]=MIS[imis][iWL][1]-DT;
+                printf("imis=%d: %f +-%f\n ",imis,MIS[imis][iWL][1],MIS[imis][iWL][2]);
+                Ndat=SOLVE(imis,iWL,Xp,Yp,ErrYp);
+                PLOTline1bar2(2,0,iCol,11,Ndat,Xp,Yp,ErrXp,ErrYp);
             }
             else{
                 int I=imis-6;
                 if(I==1 || I==3 || I==5 || I==7) iCol=1;
                 if(I==2 || I==4 || I==6 || I==8) iCol=4;
-                DT=ELI[I][iWL][2];
-                ELI[I][iWL][1]=ELI[I][iWL][1]-DT;
-                if(ELI[I][iWL][1]<-180.) ELI[I][iWL][1]=ELI[I][iWL][1]+360.;
-                if(ELI[I][iWL][1]>180.) ELI[I][iWL][1]=ELI[I][iWL][1]-360.;
-                Ndat=SOLVE(imis,iWL,Xp,Yp);
-                PLOTline1bar2(1,0,iCol,11,Ndat,Xp,Yp,ErrXp,ErrYp);
-                ELI[I][iWL][1]=ELI[I][iWL][1]+2.*DT;
-                if(ELI[I][iWL][1]<-180.) ELI[I][iWL][1]=ELI[I][iWL][1]+360.;
-                if(ELI[I][iWL][1]>180.) ELI[I][iWL][1]=ELI[I][iWL][1]-360.;
-                Ndat=SOLVE(imis,iWL,Xp,Yp);
-                PLOTline1bar2(1,0,iCol,11,Ndat,Xp,Yp,ErrXp,ErrYp);
-                ELI[I][iWL][1]=ELI[I][iWL][1]-DT;
-                if(ELI[I][iWL][1]<-180.) ELI[I][iWL][1]=ELI[I][iWL][1]+360.;
-                if(ELI[I][iWL][1]>180.) ELI[I][iWL][1]=ELI[I][iWL][1]-360.;
+                printf("imis=%d: %f +-%f\n ",imis,ELI[I][iWL][1],ELI[I][iWL][2]);
+                Ndat=SOLVE(imis,iWL,Xp,Yp,ErrYp);
+                PLOTline1bar2(2,0,iCol,11,Ndat,Xp,Yp,ErrXp,ErrYp);
             }
         }
     }
@@ -5779,8 +5872,10 @@ void ksemawc::NumericalSearch(){
 
 void ksemawc::selectNsol(){
     iSelected=0;
-    printf("Please delimit with a polygon the n-solutions to be deleted!\n");
-    printf("Left click to set a point; right click on the last one!\n");
+    QMessageBox msgBox;
+    msgBox.setText("Please delimit with a polygon the n-solutions to be deleted!\n\nLeft click to set a point; right click on the last one!\n");
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
     m_picker = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
         G12_wn->canvas() );
@@ -5982,8 +6077,6 @@ void ksemawc::IbridKernel(QString rc){
     }
     // initialization
     int ioptf=NINT(pm[100][1]);
-    int jobview=NINT(par[8][2]);
-    printf("jobview=%d\n",jobview);
     double chi2fin=par[55][2];
     double fredeg=par[56][2];
     // minimal initialization
@@ -6607,9 +6700,7 @@ void ksemawc::IbridKernel(QString rc){
         //save Job# in /temp
         if(ieon==2 || (ieon==0 && (r=="f" || r=="i" || r=="fsem"))){
             jobtot++;
-            jobview=jobtot;
-            par[8][1]=jobtot;
-            par[8][2]=jobtot;
+            int jobview=jobtot;
             QString fileStorecurrent=fileStore;
             fileStore=pathroot+"temp/semaw"+QString::number(jobtot)+".Spj";
             SaveSetting(4);
@@ -6654,25 +6745,25 @@ void ksemawc::GoBest(){
 
 void ksemawc::GoPrevious(){
     int jobview=ui->sB_PAR_8_2->value();
-    int jobtot=ui->sB_PAR_8_1->value();
+    //int jobtot=ui->sB_PAR_8_1->value();
     if(jobview<=1)
         return;
     jobview--;
     QString ftmp=pathroot+"temp/semaw"+QString::number(jobview)+".Spj";
     ReadSetting(ftmp);
-    ui->sB_PAR_8_1->setValue(jobtot);
+    //ui->sB_PAR_8_1->setValue(jobtot);
     ui->sB_PAR_8_2->setValue(jobview);
 }
 
 void ksemawc::GoNext(){
     int jobview=ui->sB_PAR_8_2->value();
-    int jobtot=ui->sB_PAR_8_1->value();
+    //int jobtot=ui->sB_PAR_8_1->value();
     if(jobview>=jobtot)
         return;
     jobview++;
     QString ftmp=pathroot+"temp/semaw"+QString::number(jobview)+".Spj";
     ReadSetting(ftmp);
-    ui->sB_PAR_8_1->setValue(jobtot);
+    //ui->sB_PAR_8_1->setValue(jobtot);
     ui->sB_PAR_8_2->setValue(jobview);
 }
 
@@ -7380,7 +7471,7 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
                 N=N+STEP;
             }
         }
-        else if(NPM>3 && I>=21){ //ellissometric measurement
+        else if(NPM>3 && I>=21 && NINT(par[10][2])==0){ //ellissometric measurement
             if(iw==1)
                 cout<<"... ELLI meas -> set NPM=3!"<<"\n";
             while(X[N+STEP]<WL)
@@ -7437,11 +7528,10 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
             p[0]=0.;
             p[1]=0.;
             p[2]=p[2]/double(NPM);
-            double tol=par[25][1];
+            double tol=sqrt(dpmpar(1));
             int Info=lmdif1(FPAR, &pTF2, mFit, nFit, p,fvec, tol, iwa, wa, lwa);
             if(Info<=0)
                 printf("improper input parameters\n");
-            //CALL LMDIF1(FPAR,mFit,nFit,P,FVEC,TOL,INFO,IWA,WA,LWA)
             c=p[2];
             b=p[1];
             a=p[0];
@@ -7583,6 +7673,22 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
                 Ydw=Ymin;
             Py[i]=0.5*(log10(Yup)+log10(Ydw));
             ErrYp[i]=0.5*(log10(Yup)-log10(Ydw));
+        }
+    }
+    if(ic==7 && NINT(par[33][5]==1) ){
+        for(int i=0;i<Ndata;i++){
+            double Yup=cos((Yp[i]+ErrYp[i])*deg2rad);
+            double Ydw=cos((Yp[i]-ErrYp[i])*deg2rad);
+            Py[i]=0.5*(Yup+Ydw);
+            ErrYp[i]=0.5*abs(Yup-Ydw);
+        }
+    }
+    if(ic==8 && NINT(par[33][5]==1) ){
+        for(int i=0;i<Ndata;i++){
+            double Yup=tan((Yp[i]+ErrYp[i])*deg2rad);
+            double Ydw=tan((Yp[i]-ErrYp[i])*deg2rad);
+            Py[i]=0.5*(Yup+Ydw);
+            ErrYp[i]=0.5*abs(Yup-Ydw);
         }
     }
     if(ic<1 ||ic>15)//if(Ndata==0 || ic<1 ||ic>15)
@@ -7892,7 +7998,10 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
         G6_Apds->show();
     }
     else if(ic==7){
-        G7_D -> setAxisTitle(0,"Delta");
+        if( NINT(par[33][5]==0) )
+            G7_D -> setAxisTitle(0,"Delta (deg)");
+        else
+            G7_D -> setAxisTitle(0,"cos(Delta)");
         if(L1E2==1)
             G7_D -> setAxisTitle(2,"wavelength (A)");
         else
@@ -7900,13 +8009,19 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
         dataPlot->attach(G7_D);
         if(iL1B2==2)
             range_plot->attach(G7_D);
-        G7_D->setAxisScale(0,rxy[7][1],rxy[7][2],0);
+        if( NINT(par[33][5]==0) )
+            G7_D->setAxisScale(0,rxy[7][1],rxy[7][2],0);
+        else
+            G7_D->setAxisScale(0,cos(rxy[7][1]*deg2rad),cos(rxy[7][2]*deg2rad),0);
         G7_D->setAxisScale(2,WEmin,WEmax,0);
         G7_D -> setAutoReplot();
         G7_D->show();
     }
     else if(ic==8){
-        G8_P -> setAxisTitle(0,"Psi");
+        if( NINT(par[33][5]==0) )
+            G8_P -> setAxisTitle(0,"Psi (deg)");
+        else
+            G8_P -> setAxisTitle(0,"tan(Psi)");
         if(L1E2==1)
             G8_P -> setAxisTitle(2,"wavelength (A)");
         else
@@ -7914,7 +8029,10 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
         dataPlot->attach(G8_P);
         if(iL1B2==2)
             range_plot->attach(G8_P);
-        G8_P->setAxisScale(0,rxy[8][1],rxy[8][2],0);
+        if( NINT(par[33][5]==0) )
+            G8_P->setAxisScale(0,rxy[8][1],rxy[8][2],0);
+        else
+            G8_P->setAxisScale(0,tan(rxy[8][1]*deg2rad),tan(rxy[8][2]*deg2rad),0);
         G8_P->setAxisScale(2,WEmin,WEmax,0);
         G8_P -> setAutoReplot();
         G8_P->show();
@@ -8023,10 +8141,12 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
 
 void COSVNK(double VNK[17][3],int L){
     // L = index of wavelenght
+    //printf("->COSVNK iWL=%d\n",L);
     for(int J=1;J<=16;J++){
         int io=NINT(CNK[J][1]);
-        if(io>=0 && io<=17)
+        if(io>=0 && io<=17){
             SETVNK(io,J,VNK,L);
+        }
         else if(io>=0){
             int i1=NINT(CNK[J][1]/1000.);
             int i2=NINT((CNK[J][1]-i1*1000.)/10.);
@@ -8048,6 +8168,7 @@ void COSVNK(double VNK[17][3],int L){
 void SETVNK(int io,int J,double VNK[17][3],int L){
     // L = index of wavelenght
     // set VNK(J,1) and VNK(J,2) given CNK(J,k)
+    //printf("-> SETVNK @ iWL=%d CNK[%d][1]=%d\n",L,J,io);
     if(io==0){
         VNK[J][1]=CNK[J][2];
         VNK[J][2]=CNK[J][3];
@@ -8106,6 +8227,7 @@ void EMA(double N,double K,double NA,double KA,double FA){
 
 void FDISP(int iopt,double eV){
     // nk computing by oscillators
+    //printf("->FDISP @ E=%f\n",eV);
     double cln2=0.693147181;
     double sqrln2=0.832554611;
 
@@ -8124,21 +8246,22 @@ void FDISP(int iopt,double eV){
         long double K=abs(pm[105+(i-1)*5][1]);
         eprj=0.;
         epij=0.;
-        // goto(1,2,3,4,5,6,7,8,9) ifu
         if(ifu==1){
-            long double den=pow(E0*E0-E*E,2.)+pow(E*D,2.);// classic oscillator
-            eprj=C*(E0*E0-E*E)/den;
-            epij=C*E*D/den;//K was deleted
+            long double den=pow(E0*E0-E*E,2.)+pow(2.*E*D,2.);// classic oscillator
+            eprj=2.*C/PIG*(E0*E0-E*E)/den;
+            epij=2.*C/PIG*2.*E*D/den;//K was deleted
         }
         else if(ifu==2){
             long double x=(E0-E)/D;// homogeneous quantum oscillator
-            eprj=C*x/(1+x*x);
-            epij=C/(1+x*x);//K was deleted
+            eprj=C/(PIG*D*E0)*x/(1+x*x);
+            epij=C/(PIG*D*E0)/(1+x*x);//K was deleted
         }
         else if(ifu==3){
             long double x=(E0-E)/D; //inomogeneous quantum oscillator
-            eprj=C*DAWS(sqrln2*x);
-            epij=C*exp(-cln2*x*x);//K was deleted
+            long double Kinho=pow((D/sqrln2),2.)/2*exp(-pow(E0*sqrln2/D,2.))+
+                                E0*D/sqrln2/2.*sqrt(PIG)*erfcl(-E0*sqrln2/D);
+            eprj=C/Kinho*DAWS(sqrln2*x);
+            epij=C/Kinho*exp(-cln2*x*x);//K was deleted
         }
         else if(ifu==4){
             eprj=C*C;// only in this case C=n_cte !
@@ -8150,44 +8273,80 @@ void FDISP(int iopt,double eV){
         }
         else if(ifu==6){
             double De=K;// indirect Gap Cody
-            eprj=C*(2.*ICCODYRE(E,E0+3.*De/4.,D)-2.*ICCODYRE(E,E0+De/4.,D)+
-                    16./De/De*(I2CODYRE(E,E0,E0+De/4.,D)-I2CODYRE(E,E0,E0,D)-
-                               I2CODYRE(E,E0+De/2.,E0+3.*De/4.,D)+
-                               I2CODYRE(E,E0+De/2.,E0+De/4.,D)+I2CODYRE(E,E0+De,E0+De,D)-
-                               I2CODYRE(E,E0+De,E0+3.*De/4.,D)));
+            double KCi=E0*De+De*De/2.;
+            eprj=C/KCi*(2.*ICCODYRE(E,E0+3.*De/4.,D)-2.*ICCODYRE(E,E0+De/4.,D)+
+                              16./De/De*(I2CODYRE(E,E0,E0+De/4.,D)-I2CODYRE(E,E0,E0,D)-
+                                               I2CODYRE(E,E0+De/2.,E0+3.*De/4.,D)+
+                                               I2CODYRE(E,E0+De/2.,E0+De/4.,D)+I2CODYRE(E,E0+De,E0+De,D)-
+                                               I2CODYRE(E,E0+De,E0+3.*De/4.,D)));
 
-            epij=C*(2.*ICCODYIM(E,E0+3.*De/4.,D)-2.*ICCODYIM(E,E0+De/4.,D)+
-                    16./De/De*(I2CODYIM(E,E0,E0+De/4.,D)-I2CODYIM(E,E0,E0,D)-
-                               I2CODYIM(E,E0+De/2.,E0+3.*De/4.,D)+
-                               I2CODYIM(E,E0+De/2.,E0+De/4.,D)+I2CODYIM(E,E0+De,E0+De,D)-
-                               I2CODYIM(E,E0+De,E0+3.*De/4.,D)));
+            epij=C/KCi*(2.*ICCODYIM(E,E0+3.*De/4.,D)-2.*ICCODYIM(E,E0+De/4.,D)+
+                              16./De/De*(I2CODYIM(E,E0,E0+De/4.,D)-I2CODYIM(E,E0,E0,D)-
+                                               I2CODYIM(E,E0+De/2.,E0+3.*De/4.,D)+
+                                               I2CODYIM(E,E0+De/2.,E0+De/4.,D)+I2CODYIM(E,E0+De,E0+De,D)-
+                                               I2CODYIM(E,E0+De,E0+3.*De/4.,D)));
         }
         else if(ifu==7){
             double De=K;// indirect Gap Tauc
-            eprj=C*(2.*ICTAUCRE(E,E0+3.*De/4.,D)-2.*ICTAUCRE(E,E0+De/4.,D)+
-                    16./De/De*(I2TAUCRE(E,E0,E0+De/4.,D)-I2TAUCRE(E,E0,E0,D)-
-                               I2TAUCRE(E,E0+De/2.,E0+3.*De/4.,D)+
-                               I2TAUCRE(E,E0+De/2.,E0+De/4.,D)+I2TAUCRE(E,E0+De,E0+De,D)-
-                               I2TAUCRE(E,E0+De,E0+3.*De/4.,D)));
+            double r=E0/De;
+            double KTi=2.*(8.*r*r*log((4.*r+1.)/(4.*r)) + 8.*pow((r+1.),2.)*log((4.*r+4.)/(4.*r+3.))
+                               - (1.+8.*r*(r+1.))*log((4.*r+3.)/(4.*r+1.)) );
+            eprj=C/KTi*(2.*ICTAUCRE(E,E0+3.*De/4.,D)-2.*ICTAUCRE(E,E0+De/4.,D)+
+                              16./De/De*(I2TAUCRE(E,E0,E0+De/4.,D)-I2TAUCRE(E,E0,E0,D)-
+                                               I2TAUCRE(E,E0+De/2.,E0+3.*De/4.,D)+
+                                               I2TAUCRE(E,E0+De/2.,E0+De/4.,D)+I2TAUCRE(E,E0+De,E0+De,D)-
+                                               I2TAUCRE(E,E0+De,E0+3.*De/4.,D)));
 
-            epij=C*(2.*ICTAUCIM(E,E0+3.*De/4.,D)-2.*ICTAUCIM(E,E0+De/4.,D)+
-                    16./De/De*(I2TAUCIM(E,E0,E0+De/4.,D)-I2TAUCIM(E,E0,E0,D)-
-                               I2TAUCIM(E,E0+De/2.,E0+3.*De/4.,D)+
-                               I2TAUCIM(E,E0+De/2.,E0+De/4.,D)+I2TAUCIM(E,E0+De,E0+De,D)-
-                               I2TAUCIM(E,E0+De,E0+3.*De/4.,D)));
+            epij=C/KTi*(2.*ICTAUCIM(E,E0+3.*De/4.,D)-2.*ICTAUCIM(E,E0+De/4.,D)+
+                              16./De/De*(I2TAUCIM(E,E0,E0+De/4.,D)-I2TAUCIM(E,E0,E0,D)-
+                                               I2TAUCIM(E,E0+De/2.,E0+3.*De/4.,D)+
+                                               I2TAUCIM(E,E0+De/2.,E0+De/4.,D)+I2TAUCIM(E,E0+De,E0+De,D)-
+                                               I2TAUCIM(E,E0+De,E0+3.*De/4.,D)));
         }
         else if(ifu==8){
             double E3=K+E0;// direct Gap Cody
-            eprj=C*ReM0M3(E,E0,E3,D);
-            epij=C*aImM0M3(E,E0,E3,D);
+            double KCd=PIG/16.*K*K*(2.*E0+K);
+            eprj=C/KCd*ReM0M3(E,E0,E3,D);
+            epij=C/KCd*aImM0M3(E,E0,E3,D);
         }
         else if(ifu==9){
             double E3=K+E0; //direct Gap Tauc
-            eprj=C*ReTaucL(E,E0,D,E3);
-            epij=C*aImTaucL(E,E0,D,E3);
+            double KTd=PIG/2.*(2.*E0+K-2.*sqrt(E0*(E0+K)));
+            eprj=C/KTd*ReTaucL(E,E0,D,E3);
+            epij=C/KTd*aImTaucL(E,E0,D,E3);
+        }
+        else if(ifu==10){
+            complex<long double> cmpxOut;
+            long double E3=K+E0;// Indirect gap Cody with Urbach tail and K-K integral
+            cmpxOut=IndirCodyUrb(E,C,E0,E3,D);
+            eprj=real(cmpxOut);
+            epij=imag(cmpxOut);
+        }
+        else if(ifu==11){
+            complex<long double> cmpxOut;
+            long double E3=K+E0;// Indirect gap Tauc with Urbach tail and K-K integral
+            cmpxOut=IndirTaucUrb(E,C,E0,E3,D);
+            eprj=real(cmpxOut);
+            epij=imag(cmpxOut);
+        }
+        else if(ifu==12){
+            complex<long double> cmpxOut;
+            long double E3=K+E0;// Direct gap Cody with Urbach tail and K-K integral
+            cmpxOut=DirCodyUrb(E,C,E0,E3,D);
+            eprj=real(cmpxOut);
+            epij=imag(cmpxOut);
+        }
+        else if(ifu==13){
+            complex<long double> cmpxOut;
+            long double E3=K+E0;// Direct gap Tauc with Urbach tail and K-K integral
+            cmpxOut=DirTaucUrb(E,C,E0,E3,D);
+            eprj=real(cmpxOut);
+            epij=imag(cmpxOut);
         }
         epr=epr+eprj;
         epi=epi+epij;
+        //if(eV>4.067 && eV<4.069)
+        //    printf("eprj=%Lf epij=%Lf\n",eprj,epij);
     }
     EpsiR=epr;
     EpsiI=epi;
@@ -8198,7 +8357,7 @@ void FDISP(int iopt,double eV){
 
 long double I2CODYRE(long double E,long double E0,long double Ep,long double D){
     long double value=0.5/PIG*((Ep-E)*(3.*E-4.*E0+Ep)+4.*D*(E-E0)*
-                          atan2(E-Ep,D)+(pow(E-E0,2.)-D*D)*log(D*D+pow(E-Ep,2.)));
+                      atan2(E-Ep,D)+(pow(E-E0,2.)-D*D)*log(D*D+pow(E-Ep,2.)));
     return(value);
 }
 
@@ -8209,8 +8368,8 @@ long double ICCODYRE(long double E,long double Ep,long double D){
 
 
 long double I2CODYIM(long double E,long double E0,long double Ep,long double D){
-    long double value=1./PIG*(D*D-pow(E-E0,2.))*atan2(E-Ep,D)+
-            D*(Ep-E+(E-E0)*log(D*D+pow(E-Ep,2.)));
+    long double value=1./PIG*((D*D-pow(E-E0,2.))*atan2(E-Ep,D)+
+                       D*(Ep-E+(E-E0)*log(D*D+pow(E-Ep,2.))));
     return(value);
 }
 
@@ -8221,28 +8380,28 @@ long double ICCODYIM(long double E,long double Ep,long double D){
 
 long double ICTAUCRE(long double E,long double Ep,long double D){
     long double value=(-4.*D*E*atan2(E-Ep,D)+2.*E*(D*D+E*E)/Ep+(E*E-D*D)*
-                  log((D*D+pow(E-Ep,2.))/(Ep*Ep)))/(2.*PIG*pow(D*D+E*E,2.));
+                      log((D*D+pow(E-Ep,2.))/(Ep*Ep)))/(2.*PIG*pow(D*D+E*E,2.));
     return(value);
 }
 
 long double I2TAUCRE(long double E,long double E0,long double Ep,long double D){
     long double value=(4.*D*E0*(D*D+E*E-E*E0)*atan2(E-Ep,D)+(pow(D,4.)+
-                                                        E*E*pow(E-E0,2.)+D*D*(2.*E*E-2.*E*E0-E0*E0))*log(D*D+pow(E-Ep,2.))+
-                  2.*E0*(E*(D*D+E*E)*E0/Ep+(E*E*(2.*E-E0)+D*D*(2.*E+E0))*log(Ep)))/
-            (2.*PIG*pow(D*D+E*E,2.));
+                       E*E*pow(E-E0,2.)+D*D*(2.*E*E-2.*E*E0-E0*E0))*log(D*D+pow(E-Ep,2.))+
+                        2.*E0*(E*(D*D+E*E)*E0/Ep+(E*E*(2.*E-E0)+D*D*(2.*E+E0))*log(Ep)))/
+                        (2.*PIG*pow(D*D+E*E,2.));
     return(value);
 }
 
 long double ICTAUCIM(long double E,long double Ep,long double D){
     long double value=-((E*E-D*D)*atan2(E-Ep,D)+D*((D*D+E*E)/Ep+
-                                              E*log((D*D+pow(E-Ep,2.))/(Ep*Ep))))/(PIG*pow(D*D+E*E,2.));
+                       E*log((D*D+pow(E-Ep,2.))/(Ep*Ep))))/(PIG*pow(D*D+E*E,2.));
     return(value);
 }
 
 long double I2TAUCIM(long double E,long double E0,long double Ep,long double D){
     long double value=-((pow(D,4.)+E*E*pow(E-E0,2.)+D*D*(2.*E*E-2.*E*E0-E0*E0))*
-                   atan2(E-Ep,D)+D*E0*(E0*(D*D+E*E)/Ep+(D*D+E*E-E*E0)*
-                                       log(Ep*Ep/(D*D+pow(E-Ep,2.)))))/(PIG*pow(D*D+E*E,2.));
+                       atan2(E-Ep,D)+D*E0*(E0*(D*D+E*E)/Ep+(D*D+E*E-E*E0)*
+                       log(Ep*Ep/(D*D+pow(E-Ep,2.)))))/(PIG*pow(D*D+E*E,2.));
     return(value);
 }
 
@@ -8292,7 +8451,7 @@ long double ReFdirGap(long double E,long double E0,long double D,long double x){
     complex<long double> aim(0.,1.);
     long double ldv2=2.0;
     long double value=real(ldv2*sqrt(dc*xc+b)-sqrt(aim*dc-b)*atan(sqrt((dc*xc+b)/
-                                                                (aim*dc-b)))-sqrt(b+aim*dc)*atanh(sqrt((dc*xc+b)/(aim*dc+b))));
+                    (aim*dc-b)))-sqrt(b+aim*dc)*atanh(sqrt((dc*xc+b)/(aim*dc+b))));
     return(value);
 }
 
@@ -8303,7 +8462,7 @@ long double aImFdirGap(long double E,long double E0,long double D,long double x)
     complex<long double> xc(x,0.);
     complex<long double> aim(0.,1.);
     long double value=real(aim*(-sqrt(aim*dc-b)*atan(sqrt((dc*xc+b)/
-                                                     (aim*dc-b)))+sqrt(b+aim*dc)*atanh(sqrt((dc*xc+b)/(aim*dc+b)))));
+                       (aim*dc-b)))+sqrt(b+aim*dc)*atanh(sqrt((dc*xc+b)/(aim*dc+b)))));
     return(value);
 }
 
@@ -8313,9 +8472,8 @@ long double ReM0M3(long double E,long double E0,long double E3,long double reD){
     complex<long double> b((E3-E)/reD,0.);
     complex<long double> d(reD,0.);
     complex<long double> aim(0.,1.);
-    complex<long double> pi(acos(-1.),0.);
     long double ldv=0.5;
-    complex<long double> ctmp=ldv*d*pi*(a+b-2.*real(sqrt(a+aim)*sqrt(b+aim)));
+    complex<long double> ctmp=ldv*d*(a+b-2.*real(sqrt(a+aim)*sqrt(b+aim)));
     return(real(ctmp));
 }
 
@@ -8324,8 +8482,7 @@ long double aImM0M3(long double E,long double E0,long double E3,long double reD)
     complex<long double> b((E3-E)/reD,0.);
     complex<long double> d(reD,0.);
     complex<long double> aim(0.,1.);
-    complex<long double> pi(acos(-1.),0.);
-    complex<long double> ctmp=-pi*d*(1.-imag(sqrt(a+aim)*sqrt(b+aim)));
+    complex<long double> ctmp=-d*(1.-imag(sqrt(a+aim)*sqrt(b+aim)));
     return(real(ctmp));
 }
 
@@ -8340,9 +8497,9 @@ long double ReTaucL(long double E,long double E0,long double D,long double E3){
     long double ldv2=2.0;
     long double ldv4=4.0;
     complex<long double> cTmp=ldv/(cD-aim*cE)*(ldv2*aim*cD+ldv2*cE-ldv2*sqrt(cE0*cE3)-(aim-ldv1)*
-                                          sqrt(ldv2)*sqrt(cD-aim*(cE-cE0))*sqrt(-aim*cD-cE+cE3) );
+                               sqrt(ldv2)*sqrt(cD-aim*(cE-cE0))*sqrt(-aim*cD-cE+cE3) );
     cTmp=cTmp+ldv/(cD+aim*cE)*(-ldv2*aim*cD+ldv2*cE-ldv2*sqrt(cE0*cE3)+(aim+ldv1)*
-                               sqrt(ldv2)*sqrt(cD+aim*(cE-cE0))*sqrt(aim*cD-cE+cE3) );
+            sqrt(ldv2)*sqrt(cD+aim*(cE-cE0))*sqrt(aim*cD-cE+cE3) );
     cTmp=cTmp+cE*pow(cD-aim*cE,2.)*sqrt(cD+aim*(cE-cE0))*sqrt(cD+aim*(cE-cE3))/
             pow(cD*cD+cE*cE,2.);
     cTmp=cTmp+cE*pow(cD+aim*cE,2.)*sqrt(cD-aim*(cE-cE0))*sqrt(cD-aim*(cE-cE3))/
@@ -8363,14 +8520,387 @@ long double aImTaucL(long double E,long double E0,long double D,long double E3){
     long double ldv=0.5;
     long double ldv4=4.0;
     complex<long double> cTmp=-pow(cD-aim*cE,2.)*sqrt(cD+aim*(cE-cE0))*sqrt(cD+aim*(cE-cE3))/
-            pow(cD*cD+cE*cE,2.);
+                                pow(cD*cD+cE*cE,2.);
     cTmp=cTmp-pow(cD+aim*cE,2.)*sqrt(cD-aim*(cE-cE3))*sqrt(cD-aim*(cE-cE0))/
-            pow(cD*cD+cE*cE,2.);
+          pow(cD*cD+cE*cE,2.);
     cTmp=cTmp+cD*(cD*cD*(cE0+cE3)+cE*(-ldv4*cE0*cE3+cE*(cE0+cE3)))/
-            pow(cD*cD+cE*cE,2.)/sqrt(cE0*cE3);
+           pow(cD*cD+cE*cE,2.)/sqrt(cE0*cE3);
     return(real(ldv*cTmp));
 }
 
+complex<long double> DirCodyUrb(long double E,long double C,long double E0,long double E3,long double D){
+    //printf("->DirCodyUrb E=%Lf\n",E);
+    long double Ex, Ey, chi1, chi1old, chi2, Emin, Emax, chi2x, de, x;
+    int n1=0,n2=0;
+    complex<long double> chic;
+    long double KCd=PIG/16.*(E3-E0)*(E3-E0)*(2.*E0+E3-E0);
+    Ex=((D+E3+E0)-sqrt(D*D+(E3-E0)*(E3-E0)))/2.;
+    Ey=((E3+E0-D)+sqrt(D*D+(E3-E0)*(E3-E0)))/2.;
+    if(E<Ex){
+        chi2=C/KCd*sqrt((Ex-E0)*(E3-Ex))*exp((E-Ex)/D);
+    }
+    else if(E<Ey){
+        chi2=C/KCd*sqrt((E-E0)*(E3-E));
+    }
+    else{
+        chi2=C/KCd*sqrt((Ey-E0)*(E3-Ey))*exp((Ey-E)/D);
+    }
+    // chi1 calculation by Kramers-Kronig integration
+
+    int nstep=50;
+    chi1=0.;
+    do{
+        chi1old=chi1;
+        chi1=0.;
+        //Emin, Emax calculation so that alpha(Em)<1e-2 cm^-1
+        Emin=log(1.973e-7/(E0*C/KCd*sqrt((Ex-E0)*(E3-Ex))*exp(-Ex/D)))*D;
+        Emax=-log(1.973e-7/(E3*C/KCd*sqrt((Ey-E0)*(E3-Ey))*exp(Ey/D)))*D;
+        //printf("-> Emin=%Lf Emax=%Lf E=%Lf\n",Emin,Emax,E);
+
+        if (E>=Emax || E<=Emin){
+            de=(Emax-Emin)/nstep;
+            n1=2*int((Emax-Emin)/de/2.); //n1 must be even
+            n2=0.;
+        }
+        else{
+            de=(Emax-Emin)/nstep;
+            if((Emax-E)<de*2.){
+                Emax=E+de*2.;
+                n1=2;
+            }
+            else{
+                n1=2*int((Emax-E)/de/2.); //n1 must be even
+            }
+            de=(Emax-E)/n1;
+            n2=2*int((E-Emin)/de/2.); //n2 must be even
+            Emin=E-de*n2;
+        }
+        //if(E>4.067 && E<4.069)
+        //    printf("Emin=%Lf Emax=%Lf n1=%d n2=%d nstep=%d\n",Emin,Emax,n1,n2,nstep);
+        for(int j=1;j<=(n1+n2+1);j=j+2){
+            if (n2!=0){
+                x=E+de*(j-n2);
+            }
+            else{
+                x=Emin+de*j;
+            }
+            //if (j!=n2) {
+            if(x<Ex){
+                chi2x=C/KCd*sqrt((Ex-E0)*(E3-Ex))*exp((x-Ex)/D);
+            }
+            else if(x<Ey){
+                chi2x=C/KCd*sqrt((x-E0)*(E3-x));
+            }
+            else{
+                chi2x=C/KCd*sqrt((Ey-E0)*(E3-Ey))*exp((Ey-x)/D);
+            }
+            chi1=chi1+chi2x*x/(x*x-E*E);
+            //if(E>4.067 && E<4.069)
+            //    printf("j=%d n2=%d x=%Lf E=%Lf\n",j,n2,x,E);
+        }
+        chi1=chi1*2.*de*2./PIG;
+        nstep=nstep*2;
+    }while(((chi1-chi1old)/chi1)>0.001 && nstep<401);
+
+    //    printf("E= %Lf Emin= %Lf Emax=%Lf de=%Lf n1=%d n2=%d chi1=%Lf \n", E,Emin,Emax,de,n1,n2,chi1);
+    chic=complex<long double>(chi1,chi2);
+    return(chic);
+}
+
+complex<long double> DirTaucUrb(long double E,long double C,long double E0,long double E3,long double D){
+    long double Ex, Ey, chi1, chi1old, chi2, Emin, Emax, chi2x, de, x, q, a1,a2,a0,r;
+    int n1=0,n2=0;
+    complex<long double> s1,s2,chic;
+    complex<long double> aim(0.,1.);
+    long double KTd=PIG/2.*(E0+E3-2.*sqrt(E0*E3));
+
+    a2=D-E0-E3;
+    a1=E0*E3-D*(E3+E0)*1.5;
+    a0=D*E0*E3*2.;
+    q=a1/3.-a2*a2/9.;
+    r=(a1*a2-a0*3.)/6.-a2*a2*a2/27.;
+
+//  long double dis=q*q*q+r*r;
+    s1=pow((r+aim*sqrt(-(q*q*q+r*r))),1./3.);
+    s2=pow((r-aim*sqrt(-(q*q*q+r*r))),1./3.);
+
+//    Ex=real(s1+s2-a2/3.); unphysical root
+    long double r32=sqrt(3.)/2.;
+    long double due=2.;
+//   Ex=real(aim*(s1-s2)*r32-(s1+s2)/due-a2/3.); unphysical root
+    Ex=real(-aim*(s1-s2)*r32-(s1+s2)/due-a2/3.);
+
+    a2=-D-E0-E3;
+    a1=E0*E3+D*(E3+E0)*1.5;
+    a0=-D*E0*E3*2.;
+    q=a1/3.-a2*a2/9.;
+    r=(a1*a2-a0*3.)/6.-a2*a2*a2/27.;
+
+//  long double dis=q*q*q+r*r;
+    s1=pow((r+aim*sqrt(-(q*q*q+r*r))),1./3.);
+    s2=pow((r-aim*sqrt(-(q*q*q+r*r))),1./3.);
+
+    Ey=real(s1+s2-a2/3.);
+//   Ey=real(aim*(s1-s2)*r32-(s1+s2)/due-a2/3.); unphysical root
+//   Ey=real(-aim*(s1-s2)*r32-(s1+s2)/due-a2/3.); unphysical root
+
+    if(E<Ex){
+        chi2=C/KTd*sqrt((Ex-E0)*(E3-Ex))*exp((E-Ex)/D)/(Ex*Ex);
+    }
+    else if(E<Ey){
+        chi2=C/KTd*sqrt((E-E0)*(E3-E))/(E*E);
+    }
+    else{
+        chi2=C/KTd*sqrt((Ey-E0)*(E3-Ey))*exp((Ey-E)/D)/(Ey*Ey);
+    }
+
+//    printf("->DirTaucUrb chi2=%Lf a2=%Lf a1=%Lf a0=%Lf r=%Lf q=%Lf dis=%Lf Ex=%Lf Ey=%Lf \n",chi2, a2, a1, a0, r, q, dis,Ex, Ey);
+
+    // chi1 calculation by Kramers-Kronig integration
+
+    int nstep=50;
+    chi1=0.;
+    do{
+        chi1old=chi1;
+        chi1=0.;
+        //Emin, Emax calculation so that alpha(Em)<1e-2 cm^-1
+        Emin=log(1.973e-7/(E0*C/KTd/(Ex*Ex)*sqrt((Ex-E0)*(E3-Ex))*exp(-Ex/D)))*D;
+        Emax=-log(1.973e-7/(E3*C/KTd/(Ey*Ey)*sqrt((Ey-E0)*(E3-Ey))*exp(Ey/D)))*D;
+        //printf("-> Emin=%Lf Emax=%Lf E=%Lf\n",Emin,Emax,E);
+
+        if (E>=Emax || E<=Emin){
+            de=(Emax-Emin)/nstep;
+            n1=2*int((Emax-Emin)/de/2.); //n1 must be even
+            n2=0.;
+        }
+        else{
+            de=(Emax-Emin)/nstep;
+            if((Emax-E)<de*2.){
+                Emax=E+de*2.;
+                n1=2;
+            }
+            else{
+                n1=2*int((Emax-E)/de/2.); //n1 must be even
+            }
+            de=(Emax-E)/n1;
+            n2=2*int((E-Emin)/de/2.); //n2 must be even
+            Emin=E-de*n2;
+        }
+        //if(E>4.067 && E<4.069)
+        //    printf("Emin=%Lf Emax=%Lf n1=%d n2=%d nstep=%d\n",Emin,Emax,n1,n2,nstep);
+        for(int j=1;j<=(n1+n2+1);j=j+2){
+            if (n2!=0){
+                x=E+de*(j-n2);
+            }
+            else{
+                x=Emin+de*j;
+            }
+            if(x<Ex){
+                chi2x=C/KTd/(Ex*Ex)*sqrt((Ex-E0)*(E3-Ex))*exp((x-Ex)/D);
+            }
+            else if(x<Ey){
+                chi2x=C/KTd/(x*x)*sqrt((x-E0)*(E3-x));
+            }
+            else{
+                chi2x=C/KTd/(Ey*Ey)*sqrt((Ey-E0)*(E3-Ey))*exp((Ey-x)/D);
+            }
+            chi1=chi1+chi2x*x/(x*x-E*E);
+            //if(E>4.067 && E<4.069)
+            //    printf("j=%d n2=%d x=%Lf E=%Lf\n",j,n2,x,E);
+        }
+        chi1=chi1*2.*de*2./PIG;
+        nstep=nstep*2;
+    }while(((chi1-chi1old)/chi1)>0.001 && nstep<401);
+
+    //    printf("E= %Lf Emin= %Lf Emax=%Lf de=%Lf n1=%d n2=%d chi1=%Lf \n", E,Emin,Emax,de,n1,n2,chi1);
+    chic=complex<long double>(chi1,chi2);
+    return(chic);
+}
+
+complex<long double> IndirCodyUrb(long double E,long double C,long double E0,long double E3,long double D){
+    //printf("->DirCodyUrb E=%Lf\n",E);
+    long double Ex, Ey, chi1, chi1old, chi2, Emin, Emax,W, KCi, chi2x, de, x;
+    int n1=0,n2=0;
+    complex<long double> chic;
+    W=E3-E0;
+    KCi=W*(E0+W*0.5);
+    Ex=E0+D*2.;
+    Ey=E3-D*2.;
+    if(E<=Ex){
+        chi2=C*16./KCi/(W*W)*(Ex-E0)*(Ex-E0)*exp((E-Ex)/D);
+    }
+    else if(E>Ex && E<=(E0+W/4.)){
+        chi2=C*16./KCi/(W*W)*(E-E0)*(E-E0);
+    }
+    else if(E>(E0+W/4.) && E<=(E0+W*3./4.)){
+        chi2=C/KCi*(-(E-E0-W/2.)*(E-E0-W/2.)*16./(W*W)+2.);
+    }
+    else if(E>(E0+W*3./4.) && E<Ey){
+        chi2=C*16./KCi/(W*W)*(E-E3)*(E-E3);
+    }
+    else{
+        chi2=C*16./KCi/(W*W)*(Ey-E3)*(Ey-E3)*exp(-(E-Ey)/D);
+    }
+    // chi1 calculation by Kramers-Kronig integration
+
+    int nstep=50;
+    chi1=0.;
+    do{
+        chi1old=chi1;
+        chi1=0.;
+        //Emin, Emax calculation so that alpha(Em)<1e-2 cm^-1
+        Emin=log(1.973e-7/(E0*C*16./KCi/(W*W)*(Ex-E0)*(Ex-E0)*exp(-Ex/D)))*D;
+        Emax=-log(1.973e-7/(E3*C*16./KCi/(W*W)*(Ey-E3)*(Ey-E3)*exp(Ey/D)))*D;
+        //printf("-> Emin=%Lf Emax=%Lf E=%Lf\n",Emin,Emax,E);
+
+        if (E>=Emax || E<=Emin){
+            de=(Emax-Emin)/nstep;
+            n1=2*int((Emax-Emin)/de/2.); //n1 must be even
+            n2=0.;
+        }
+        else{
+            de=(Emax-Emin)/nstep;
+            if((Emax-E)<de*2.){
+                Emax=E+de*2.;
+                n1=2;
+            }
+            else{
+                n1=2*int((Emax-E)/de/2.); //n1 must be even
+            }
+            de=(Emax-E)/n1;
+            n2=2*int((E-Emin)/de/2.); //n2 must be even
+            Emin=E-de*n2;
+        }
+        //if(E>4.067 && E<4.069)
+        //    printf("Emin=%Lf Emax=%Lf n1=%d n2=%d nstep=%d\n",Emin,Emax,n1,n2,nstep);
+        for(int j=1;j<=(n1+n2+1);j=j+2){
+            if (n2!=0){
+                x=E+de*(j-n2);
+            }
+            else{
+                x=Emin+de*j;
+            }
+            if(x<=Ex){
+                chi2x=C*16./KCi/(W*W)*(Ex-E0)*(Ex-E0)*exp((x-Ex)/D);
+            }
+            else if(x>Ex && x<=(E0+W/4.)){
+                chi2x=C*16./KCi/(W*W)*(x-E0)*(x-E0);
+            }
+            else if(x>(E0+W/4.) && x<=(E0+W*3./4.)){
+                chi2x=C/KCi*(-(x-E0-W/2.)*(x-E0-W/2.)*16./(W*W)+2.);
+            }
+            else if(x>(E0+W*3./4.) && x<Ey){
+                chi2x=C*16./KCi/(W*W)*(x-E3)*(x-E3);
+            }
+            else{
+                chi2x=C*16./KCi/(W*W)*(Ey-E3)*(Ey-E3)*exp(-(x-Ey)/D);
+            }
+            chi1=chi1+chi2x*x/(x*x-E*E);
+            //if(E>4.067 && E<4.069)
+            //    printf("j=%d n2=%d x=%Lf E=%Lf\n",j,n2,x,E);
+        }
+        chi1=chi1*2.*de*2./PIG;
+        nstep=nstep*2;
+    }while(((chi1-chi1old)/chi1)>0.001 && nstep<401);
+
+    //    printf("E= %Lf Emin= %Lf Emax=%Lf de=%Lf n1=%d n2=%d chi1=%Lf \n", E,Emin,Emax,de,n1,n2,chi1);
+    chic=complex<long double>(chi1,chi2);
+    return(chic);
+}
+
+complex<long double> IndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D){
+    //printf("->DirCodyUrb E=%Lf\n",E);
+    long double Ex, Ey, chi1, chi1old, chi2, Emin, Emax,W, KTi, chi2x, r, de, x;
+    int n1=0,n2=0;
+    complex<long double> chic;
+    W=E3-E0;
+    r=E0/W;
+    KTi=2.*(8.*r*r*log((4.*r+1.)/(4.*r)) + 8.*pow((r+1.),2.)*log((4.*r+4.)/(4.*r+3.))
+                       - (1.+8.*r*(r+1.))*log((4.*r+3.)/(4.*r+1.)) );
+    Ex=(E0+sqrt(E0*E0+E0*D*8.))/2.;
+    Ey=(E3+sqrt(E3*E3-E3*D*8.))/2.;
+    if(E<=Ex){
+        chi2=C*16./KTi/(W*W)/(Ex*Ex)*(Ex-E0)*(Ex-E0)*exp((E-Ex)/D);
+    }
+    else if(E>Ex && E<=(E0+W/4.)){
+        chi2=C*16./KTi/(W*W)/(E*E)*(E-E0)*(E-E0);
+    }
+    else if(E>(E0+W/4.) && E<=(E0+W*3./4.)){
+        chi2=C/KTi/(E*E)*(-(E-E0-W/2.)*(E-E0-W/2.)*16./(W*W)+2.);
+    }
+    else if(E>(E0+W*3./4.) && E<E3){
+        chi2=C*16./KTi/(W*W)/(E*E)*(E-E3)*(E-E3);
+    }
+    else{
+        chi2=C*16./KTi/(W*W)/(Ey*Ey)*(Ey-E3)*(Ey-E3)*exp(-(E-Ey)/D);
+    }
+    // chi1 calculation by Kramers-Kronig integration
+
+    int nstep=50;
+    chi1=0.;
+    do{
+        chi1old=chi1;
+        chi1=0.;
+        //Emin, Emax calculation so that alpha(Em)<1e-2 cm^-1
+        Emin=log(1.973e-7/(E0*C*16./KTi/(W*W)*(Ex-E0)*(Ex-E0)*exp(-Ex/D)))*D;
+        Emax=-log(1.973e-7/(E3*C*16./KTi/(W*W)*(Ey-E3)*(Ey-E3)*exp(Ey/D)))*D;
+        //printf("-> Emin=%Lf Emax=%Lf E=%Lf\n",Emin,Emax,E);
+
+        if (E>=Emax || E<=Emin){
+            de=(Emax-Emin)/nstep;
+            n1=2*int((Emax-Emin)/de/2.); //n1 must be even
+            n2=0.;
+        }
+        else{
+            de=(Emax-Emin)/nstep;
+            if((Emax-E)<de*2.){
+                Emax=E+de*2.;
+                n1=2;
+            }
+            else{
+                n1=2*int((Emax-E)/de/2.); //n1 must be even
+            }
+            de=(Emax-E)/n1;
+            n2=2*int((E-Emin)/de/2.); //n2 must be even
+            Emin=E-de*n2;
+        }
+        //if(E>4.067 && E<4.069)
+        //    printf("Emin=%Lf Emax=%Lf n1=%d n2=%d nstep=%d\n",Emin,Emax,n1,n2,nstep);
+        for(int j=1;j<=(n1+n2+1);j=j+2){
+            if (n2!=0){
+                x=E+de*(j-n2);
+            }
+            else{
+                x=Emin+de*j;
+            }
+
+            if(x<=Ex){
+                chi2x=C*16./KTi/(W*W)/(Ex*Ex)*(Ex-E0)*(Ex-E0)*exp((x-Ex)/D);
+            }
+            else if(x>Ex && x<=(E0+W/4.)){
+                chi2x=C*16./KTi/(W*W)/(x*x)*(x-E0)*(x-E0);
+            }
+            else if(x>(E0+W/4.) && x<=(E0+W*3./4.)){
+                chi2x=C/KTi/(x*x)*(-(x-E0-W/2.)*(x-E0-W/2.)*16./(W*W)+2.);
+            }
+            else if(x>(E0+W*3./4.) && x<E3){
+                chi2x=C*16./KTi/(W*W)/(x*x)*(x-E3)*(x-E3);
+            }
+            else{
+                chi2x=C*16./KTi/(W*W)/(Ey*Ey)*(Ey-E3)*(Ey-E3)*exp(-(x-Ey)/D);
+            }
+            chi1=chi1+chi2x*x/(x*x-E*E);
+            //if(E>4.067 && E<4.069)
+            //    printf("j=%d n2=%d x=%Lf E=%Lf\n",j,n2,x,E);
+        }
+        chi1=chi1*2.*de*2./PIG;
+        nstep=nstep*2;
+    }while(((chi1-chi1old)/chi1)>0.001 && nstep<401);
+
+    //    printf("E= %Lf Emin= %Lf Emax=%Lf de=%Lf n1=%d n2=%d chi1=%Lf \n", E,Emin,Emax,de,n1,n2,chi1);
+    chic=complex<long double>(chi1,chi2);
+    return(chic);
+}
 void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
     int ivnkdw,ivnkup;
     double VNK[17][3],vosi[6][3];
@@ -8947,10 +9477,10 @@ void CALFRE(int NFA,double wl,complex<double> pq,complex<double> IR[999],double 
 }
 
 
-int SOLVE(int imis,int iWL,double Xp[202],double Yp[202]){
+int SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp){
     int Ndat=0;
     int ikind=0,ivot=0,IPD=0;
-    double F[4],tetar=0.,NCL,KCL,vot[6][3];
+    double tetar=0.,KCL,vot[6][3];
     //   iWL= wl index
 
     // set type and input medium
@@ -9012,64 +9542,36 @@ int SOLVE(int imis,int iWL,double Xp[202],double Yp[202]){
     double LAM=MIS[7][iWL][1];
     printf("-> SOLVE: imis=%d ikind=%d iWL=%d s1p2=%d teta=%f\n",imis,ikind,iWL,s1p2,tetar);
     tetar=tetar*deg2rad;
-    double DW,ZLIM,DZ,W;
-    for(int IZ=2;IZ>=1;IZ--){
-        ZLIM=(par[IZ][2]-par[IZ][1])/500.;
-        DW=(par[3-IZ][2]-par[3-IZ][1])/50.;
-        for(int I=1;I<=51;I++){
-            W=par[3-IZ][1]+(I-1)*DW;
-            DZ=par[IZ][2]-par[IZ][1];
-            for(int L=1;L<=2;L++){
-                double Z=par[IZ][1]+(L-1)*DZ;
-                if(IZ==2){
-                    NCL=W;
-                    KCL=Z;
-                }
-                else{
-                    NCL=Z;
-                    KCL=W;
-                }
-                CNK[1][2]=NCL;
-                CNK[1][3]=KCL;
-                ASSEMBLER(iWL,LAM,ikind,tetar,vot);
-                F[L]=0.;
-                if(imis<=6)
-                    F[L]=F[L]+MIS[imis][iWL][1]-vot[ivot][s1p2];
-                else
-                    F[L]=F[L]+sin(deg2rad*(ELI[imis-6][iWL][1]-vot[ivot][IPD+1])/2.);
+    double Dn=(par[1][2]-par[1][1])/100.;//n-step
+    double Dk=(par[2][2]-par[2][1])/500.;//k-step
+    double k1,FM,FMold=1.E+10;
+    CNK[1][1]=0;//nk are unknown
+    for(int iN=0;iN<101;iN++){
+        CNK[1][2]=par[1][1]+iN*Dn;
+        FMold=1.E+10;
+        for(int iK=0;iK<501;iK++){
+            KCL=par[2][1]+iK*Dk;
+            CNK[1][3]=KCL;
+            ASSEMBLER(iWL,LAM,ikind,tetar,vot);
+            if(imis<=6)
+                FM=abs(MIS[imis][iWL][1]-vot[ivot][s1p2])/MIS[imis][iWL][2];
+            else
+                FM=abs(sin(deg2rad*(ELI[imis-6][iWL][1]-vot[ivot][IPD+1])/2.))/(deg2rad*ELI[imis-6][iWL][2]);
+            if(FM<=1. && FMold>1.){
+                k1=KCL;
+                //printf("k1=%f ",KCL);
             }
-            if(F[1]*F[2]<0.){
-                double Z=par[IZ][1];
-                DZ=DZ/2.;
-                while(abs(DZ)>ZLIM){
-                    Z=Z+DZ;
-                    if(IZ==2){
-                        NCL=W;
-                        KCL=Z;
-                    }
-                    else{
-                        NCL=Z;
-                        KCL=W;
-                    }
-                    CNK[1][2]=NCL;
-                    CNK[1][3]=KCL;
-                    ASSEMBLER(iWL,LAM,ikind,tetar,vot);
-                    F[3]=0.;
-                    if(imis<=6)
-                        F[3]=F[3]+MIS[imis][iWL][1]-vot[ivot][s1p2];
-                    else
-                        F[3]=F[3]+sin(deg2rad*(ELI[imis-6][iWL][1]-vot[ivot][IPD+1])/2.);
-                    if(F[3]*F[1]<0.)
-                        DZ=-DZ/2.;
-                    else
-                        DZ=DZ/2;
-                    F[1]=F[3];
-                }
-                Xp[Ndat]=NCL;
-                Yp[Ndat]=KCL;
-                //printf("Xp[%d]=%f Yp[%d]=%f\n",Ndat,Xp[Ndat],Ndat,Yp[Ndat]);
+            else if(FM>1. && FMold<=1.){
+                Xp[Ndat]=CNK[1][2];
+                Yp[Ndat]=0.5*(k1+KCL);
+                ErrYp[Ndat]=0.5*(KCL-k1);
+                if(ErrYp[Ndat]<Dk/4.)
+                    ErrYp[Ndat]=Dk/4.;
+                //printf("Ndat=%d Xp=%f Yp=%f ErrYp=%f ",Ndat,Xp[Ndat],Yp[Ndat],ErrYp[Ndat]);
                 Ndat++;
             }
+            //printf("n=%f k=%f FM=%f FMold=%f\n",CNK[1][2],CNK[1][3],FM,FMold);
+            FMold=FM;
         }
     }
     return(Ndat);
@@ -9161,8 +9663,8 @@ int FSQ(void *p, int m, int n, const double *x, double *fvec, int iflag){
     int j=-1;
     double chi2=0.;
     double fredeg=real(m-n);
-    double erynMIN=(par[16][2]-par[16][1])/1.e5;
-    double erykMIN=(par[17][2]-par[17][1])/1.e5;
+    double erynMIN=(par[16][2]-par[16][1])/1.e4;
+    double erykMIN=(par[17][2]-par[17][1])/1.e4;
     double wl,ev,y,ery;
     for(int i=1;i<=md;i++){
         if(NINT(SOL[i][6])==1){//the data is enabled

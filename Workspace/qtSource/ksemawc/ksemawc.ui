@@ -2074,12 +2074,15 @@
          <item>
           <widget class="QCheckBox" name="checkBox_3points">
            <property name="text">
-            <string>force resempling to cross experimental data</string>
+            <string>force resampling to cross experimental data</string>
            </property>
            <property name="checked">
             <bool>true</bool>
            </property>
           </widget>
+         </item>
+         <item>
+          <layout class="QFormLayout" name="formLayout_2"/>
          </item>
          <item>
           <spacer name="horizontalSpacer_12">
@@ -2518,6 +2521,19 @@
          <item row="3" column="3">
           <layout class="QFormLayout" name="formLayout"/>
          </item>
+         <item row="3" column="2">
+          <spacer name="horizontalSpacer_15">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </item>
        <item>
@@ -2619,6 +2635,9 @@
             <double>5000.000000000000000</double>
            </property>
           </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_eVrange"/>
          </item>
          <item>
           <widget class="QCheckBox" name="checkB_RXY_25_4">
@@ -14611,7 +14630,7 @@
              <item>
               <widget class="QCheckBox" name="cBox_PAR_10_1">
                <property name="text">
-                <string>Plot epsi1 epsi2</string>
+                <string>Plot epsi1 epsi2 Absorptance</string>
                </property>
               </widget>
              </item>
@@ -18182,7 +18201,7 @@
             </size>
            </property>
            <property name="text">
-            <string>1</string>
+            <string>100</string>
            </property>
           </widget>
          </item>

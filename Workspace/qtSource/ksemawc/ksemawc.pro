@@ -15,16 +15,18 @@ TARGET = ksemawc
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 win32 {
-    QT += core gui
+QT += core gui
     include( .\QWT_win.pri )
     CONFIG+= c++11 gui console
+#	INCLUDEPATH += . c:\Qwt-6.2.0\src c:\Programmi\Tools\mingw810_64\cminpack-1.3.8
+        INCLUDEPATH += C:\gsl-2.7\include C:\gsl-2.7\include\gsl
+    LIBS += -L"C:/gsl-2.7/bin" -lgsl-25
     LIBS += -L"C:/Program Files/Tools/mingw810_64/cminpack-1.3.8/build" -lcminpack
-    HEADERS += cminpack.h
 }
 
 unix {
     CONFIG += link_pkgconfig
-    PKGCONFIG += cminpack cblas blas qwt
+    PKGCONFIG += cminpack cblas blas qwt gsl
 }
 INCLUDEPATH += .
 

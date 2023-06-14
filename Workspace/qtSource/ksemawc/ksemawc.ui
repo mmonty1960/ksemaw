@@ -10,8 +10,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1329</width>
-    <height>909</height>
+    <width>1301</width>
+    <height>907</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -1175,7 +1175,7 @@
             <double>90.000000000000000</double>
            </property>
            <property name="value">
-            <double>60.000000000000000</double>
+            <double>0.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -2101,25 +2101,6 @@
        </item>
        <item>
         <layout class="QGridLayout" name="gridLayout_3">
-         <item row="0" column="5">
-          <widget class="QLineEdit" name="WLmax7">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <widget class="QCheckBox" name="checkB_mis7_1">
            <property name="sizePolicy">
@@ -2141,32 +2122,6 @@
          </item>
          <item row="0" column="1">
           <widget class="QComboBox" name="cBmis7">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>78</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="3">
-          <widget class="QComboBox" name="cBteE4">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QComboBox" name="cBmis11">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -2206,8 +2161,21 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="5">
-          <widget class="QLineEdit" name="WLmax9">
+         <item row="0" column="3">
+          <widget class="QComboBox" name="cBteE1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="currentIndex">
+            <number>-1</number>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4">
+          <widget class="QLineEdit" name="WLmin7">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -2225,8 +2193,8 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="5">
-          <widget class="QLineEdit" name="WLmax13">
+         <item row="0" column="5">
+          <widget class="QLineEdit" name="WLmax7">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -2241,22 +2209,6 @@
            </property>
            <property name="readOnly">
             <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QComboBox" name="cBmis9">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>78</width>
-             <height>0</height>
-            </size>
            </property>
           </widget>
          </item>
@@ -2279,59 +2231,24 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="3">
-          <widget class="QComboBox" name="cBteE1">
+         <item row="1" column="1">
+          <widget class="QComboBox" name="cBmis9">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="currentIndex">
-            <number>-1</number>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="5">
-          <widget class="QLineEdit" name="WLmax11">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QLineEdit" name="lineEdit_E2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="minimumSize">
             <size>
-             <width>0</width>
+             <width>78</width>
              <height>0</height>
             </size>
            </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
           </widget>
          </item>
-         <item row="4" column="2">
-          <widget class="QLineEdit" name="lineEdit_E4">
+         <item row="1" column="2">
+          <widget class="QLineEdit" name="lineEdit_E2">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -2359,22 +2276,41 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
-          <widget class="QCheckBox" name="checkB_mis13_1">
+         <item row="1" column="4">
+          <widget class="QLineEdit" name="WLmin9">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="minimumSize">
+           <property name="maximumSize">
             <size>
-             <width>0</width>
-             <height>0</height>
+             <width>16777215</width>
+             <height>16777215</height>
             </size>
            </property>
-           <property name="text">
-            <string>ELI-4</string>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="5">
+          <widget class="QLineEdit" name="WLmax9">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -2397,27 +2333,8 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="4">
-          <widget class="QLineEdit" name="WLmin13">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QComboBox" name="cBmis13">
+         <item row="2" column="1">
+          <widget class="QComboBox" name="cBmis11">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -2444,25 +2361,6 @@
             <size>
              <width>0</width>
              <height>0</height>
-            </size>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="4">
-          <widget class="QLineEdit" name="WLmin9">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
             </size>
            </property>
            <property name="readOnly">
@@ -2499,8 +2397,8 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="4">
-          <widget class="QLineEdit" name="WLmin7">
+         <item row="2" column="5">
+          <widget class="QLineEdit" name="WLmax11">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -2518,21 +2416,107 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="3">
-          <layout class="QFormLayout" name="formLayout"/>
-         </item>
-         <item row="3" column="2">
-          <spacer name="horizontalSpacer_15">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+         <item row="3" column="0">
+          <widget class="QCheckBox" name="checkB_mis13_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="minimumSize">
             <size>
-             <width>40</width>
-             <height>20</height>
+             <width>0</width>
+             <height>0</height>
             </size>
            </property>
-          </spacer>
+           <property name="text">
+            <string>ELI-4</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="cBmis13">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>78</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLineEdit" name="lineEdit_E4">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
+          <widget class="QComboBox" name="cBteE4">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="4">
+          <widget class="QLineEdit" name="WLmin13">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="5">
+          <widget class="QLineEdit" name="WLmax13">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -10937,7 +10921,10 @@
         </layout>
        </item>
        <item>
-        <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0,0,0,0,0,0,0,0,0,0" columnminimumwidth="0,1000,0,0,0,0,0,1000,0,0,0,0">
+        <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,1500,0,0,0,0,0,1500,0,0,0,0" columnminimumwidth="0,1500,0,0,0,0,0,1500,0,0,0,0">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetDefaultConstraint</enum>
+         </property>
          <item row="0" column="0">
           <widget class="QLabel" name="label_154">
            <property name="sizePolicy">
@@ -13429,7 +13416,7 @@
               <double>90.000000000000000</double>
              </property>
              <property name="value">
-              <double>60.000000000000000</double>
+              <double>0.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -14630,7 +14617,7 @@
              <item>
               <widget class="QCheckBox" name="cBox_PAR_10_1">
                <property name="text">
-                <string>Plot epsi1 epsi2 Absorptance</string>
+                <string>Plot epsi1 epsi2</string>
                </property>
               </widget>
              </item>
@@ -17844,14 +17831,415 @@
       <attribute name="title">
        <string>Graph Range</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_23">
+      <layout class="QVBoxLayout" name="verticalLayout_10">
        <item>
         <layout class="QGridLayout" name="gridLayout_9">
          <property name="spacing">
-          <number>1</number>
+          <number>0</number>
          </property>
-         <item row="20" column="4">
-          <widget class="QLineEdit" name="DP_RXY_12_4">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_185">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>8</pointsize>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>ABSCISSA</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="checkB_RXY_25_3">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string> set eV scale </string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_83">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>X</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="label_84">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Xmin</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QLabel" name="label_85">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Xmax</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QLabel" name="label_86">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>VALmin</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="4">
+          <widget class="QLabel" name="label_87">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>VALmax</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="5">
+          <widget class="QLabel" name="label_115">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>units</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_78">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>wl</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="DP_RXY_20_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>2000</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QLineEdit" name="DP_RXY_20_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>20000</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="3">
+          <widget class="QLineEdit" name="DP_RXY_20_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="4">
+          <widget class="QLineEdit" name="DP_RXY_20_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="5">
+          <widget class="QLabel" name="label_92">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Angstrom</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_79">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>d</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="DP_RXY_22_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QLineEdit" name="DP_RXY_22_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>1000</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
+          <widget class="QLineEdit" name="DP_RXY_22_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="4">
+          <widget class="QLineEdit" name="DP_RXY_22_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="5">
+          <widget class="QLabel" name="label_93">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Angstrom</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_81">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Theta</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QLineEdit" name="DP_RXY_21_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="2">
+          <widget class="QLineEdit" name="DP_RXY_21_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>90</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="3">
+          <widget class="QLineEdit" name="DP_RXY_21_3">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -17888,27 +18276,8 @@
            </property>
           </widget>
          </item>
-         <item row="12" column="1">
-          <widget class="QLineEdit" name="DP_RXY_6_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="14" column="5">
-          <widget class="QLabel" name="label_100">
+         <item row="4" column="5">
+          <widget class="QLabel" name="label_94">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -17916,48 +18285,10 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>%</string>
+            <string>deg</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="1">
-          <widget class="QLineEdit" name="DP_RXY_4_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="26" column="2">
-          <widget class="QLineEdit" name="DP_RXY_26_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>1.9</string>
            </property>
           </widget>
          </item>
@@ -17980,44 +18311,19 @@
            </property>
           </widget>
          </item>
-         <item row="28" column="3">
-          <widget class="QLineEdit" name="DP_RXY_24_3">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
+         <item row="6" column="0">
+          <widget class="QLabel" name="label_82">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
            </property>
            <property name="text">
-            <string>lineWidth</string>
+            <string>Y</string>
            </property>
-          </widget>
-         </item>
-         <item row="15" column="4">
-          <widget class="QLineEdit" name="DP_RXY_7_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -18037,49 +18343,8 @@
            </property>
           </widget>
          </item>
-         <item row="19" column="1">
-          <widget class="QLineEdit" name="DP_RXY_11_1">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QLineEdit" name="DP_RXY_21_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_81">
+         <item row="6" column="2">
+          <widget class="QLabel" name="label_91">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -18087,86 +18352,10 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Theta</string>
+            <string>Ymax</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="4">
-          <widget class="QLineEdit" name="DP_RXY_4_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="17" column="0">
-          <widget class="QLabel" name="label_68">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>DELTA-2</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="18" column="2">
-          <widget class="QLineEdit" name="DP_RXY_10_2">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="3">
-          <widget class="QLineEdit" name="DP_RXY_22_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
            </property>
           </widget>
          </item>
@@ -18186,176 +18375,8 @@
            </property>
           </widget>
          </item>
-         <item row="13" column="2">
-          <widget class="QLineEdit" name="DP_RXY_18_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>100</string>
-           </property>
-          </widget>
-         </item>
-         <item row="16" column="3">
-          <widget class="QLineEdit" name="DP_RXY_8_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="21" column="4">
-          <widget class="QLineEdit" name="DP_RXY_13_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="24" column="4">
-          <widget class="QLineEdit" name="DP_RXY_16_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="18" column="3">
-          <widget class="QLineEdit" name="DP_RXY_10_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="34" column="0">
-          <spacer name="verticalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="25" column="1">
-          <widget class="QLineEdit" name="DP_RXY_17_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="24" column="3">
-          <widget class="QLineEdit" name="DP_RXY_16_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="28" column="4">
-          <widget class="QLineEdit" name="DP_RXY_24_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>/</string>
-           </property>
-          </widget>
-         </item>
-         <item row="22" column="0">
-          <widget class="QLabel" name="label_73">
+         <item row="6" column="4">
+          <widget class="QLabel" name="label_90">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -18363,129 +18384,15 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>PSI-4</string>
+            <string>VALmax</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
-         <item row="23" column="2">
-          <widget class="QLineEdit" name="DP_RXY_15_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>10</string>
-           </property>
-          </widget>
-         </item>
-         <item row="28" column="1">
-          <widget class="QLineEdit" name="DP_RXY_24_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>width</string>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="4">
-          <widget class="QLineEdit" name="DP_RXY_5_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="25" column="3">
-          <widget class="QLineEdit" name="DP_RXY_17_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="19" column="3">
-          <widget class="QLineEdit" name="DP_RXY_11_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="16" column="2">
-          <widget class="QLineEdit" name="DP_RXY_8_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>180</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="2">
-          <widget class="QLabel" name="label_91">
+         <item row="6" column="5">
+          <widget class="QLabel" name="label_114">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -18493,233 +18400,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Ymax</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="18" column="0">
-          <widget class="QLabel" name="label_69">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>PSI-2</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="16" column="5">
-          <widget class="QLabel" name="label_102">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>idem</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="17" column="4">
-          <widget class="QLineEdit" name="DP_RXY_9_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="label_82">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Y</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="21" column="2">
-          <widget class="QLineEdit" name="DP_RXY_13_2">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="19" column="5">
-          <widget class="QLabel" name="label_105">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>idem</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="0">
-          <widget class="QLabel" name="label_64">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>R1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="1">
-          <widget class="QLineEdit" name="DP_RXY_3_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="17" column="5">
-          <widget class="QLabel" name="label_103">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>idem</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="4">
-          <widget class="QLineEdit" name="DP_RXY_3_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="0">
-          <widget class="QLabel" name="label_61">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Tp</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="24" column="2">
-          <widget class="QLineEdit" name="DP_RXY_16_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>1.9</string>
-           </property>
-          </widget>
-         </item>
-         <item row="23" column="5">
-          <widget class="QLabel" name="label_111">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>/</string>
+            <string>units</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
@@ -18742,60 +18423,6 @@
            </property>
           </widget>
          </item>
-         <item row="26" column="0">
-          <widget class="QLabel" name="label_191">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>eps1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="12" column="3">
-          <widget class="QLineEdit" name="DP_RXY_6_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="24" column="1">
-          <widget class="QLineEdit" name="DP_RXY_16_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>1.2</string>
-           </property>
-          </widget>
-         </item>
          <item row="7" column="1">
           <widget class="QLineEdit" name="DP_RXY_1_1">
            <property name="sizePolicy">
@@ -18812,130 +18439,6 @@
            </property>
            <property name="text">
             <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QCheckBox" name="checkB_RXY_25_3">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string> set eV scale </string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="25" column="0">
-          <widget class="QLabel" name="label_76">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>k</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QLineEdit" name="DP_RXY_20_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>20000</string>
-           </property>
-          </widget>
-         </item>
-         <item row="15" column="1">
-          <widget class="QLineEdit" name="DP_RXY_7_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>-180</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="5">
-          <widget class="QLabel" name="label_114">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>units</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="26" column="1">
-          <widget class="QLineEdit" name="DP_RXY_26_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>1.2</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="4">
-          <widget class="QLineEdit" name="DP_RXY_2_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
            </property>
           </widget>
          </item>
@@ -18958,608 +18461,8 @@
            </property>
           </widget>
          </item>
-         <item row="17" column="1">
-          <widget class="QLineEdit" name="DP_RXY_9_1">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="20" column="2">
-          <widget class="QLineEdit" name="DP_RXY_12_2">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="5">
-          <widget class="QLabel" name="label_93">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Angstrom</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="13" column="0">
-          <widget class="QLabel" name="label_77">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>A=1-T-R</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="25" column="2">
-          <widget class="QLineEdit" name="DP_RXY_17_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>1</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="3">
-          <widget class="QLineEdit" name="DP_RXY_20_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="28" column="0">
-          <widget class="QLabel" name="label_189">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>graph</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="22" column="2">
-          <widget class="QLineEdit" name="DP_RXY_14_2">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="16" column="1">
-          <widget class="QLineEdit" name="DP_RXY_8_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="25" column="4">
-          <widget class="QLineEdit" name="DP_RXY_17_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="26" column="4">
-          <widget class="QLineEdit" name="DP_RXY_26_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="5">
-          <widget class="QLabel" name="label_98">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>%</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_83">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="2">
-          <widget class="QLineEdit" name="DP_RXY_5_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>100</string>
-           </property>
-          </widget>
-         </item>
-         <item row="16" column="4">
-          <widget class="QLineEdit" name="DP_RXY_8_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="20" column="1">
-          <widget class="QLineEdit" name="DP_RXY_12_1">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="5">
-          <widget class="QLabel" name="label_96">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>%</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="2">
-          <widget class="QLabel" name="label_85">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Xmax</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="label_79">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>d</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="18" column="1">
-          <widget class="QLineEdit" name="DP_RXY_10_1">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="15" column="0">
-          <widget class="QLabel" name="label_66">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>DELTA-1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="19" column="2">
-          <widget class="QLineEdit" name="DP_RXY_11_2">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="19" column="4">
-          <widget class="QLineEdit" name="DP_RXY_11_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLabel" name="label_84">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Xmin</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="5">
-          <widget class="QLabel" name="label_115">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>units</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="23" column="1">
-          <widget class="QLineEdit" name="DP_RXY_15_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="5">
-          <widget class="QLabel" name="label_99">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>%</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2">
-          <widget class="QLineEdit" name="DP_RXY_22_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>1000</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="2">
-          <widget class="QLineEdit" name="DP_RXY_2_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>100</string>
-           </property>
-          </widget>
-         </item>
-         <item row="13" column="4">
-          <widget class="QLineEdit" name="DP_RXY_18_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="12" column="0">
-          <widget class="QLabel" name="label_65">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Apds</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="13" column="5">
-          <widget class="QLabel" name="label_110">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>/</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="23" column="0">
-          <widget class="QLabel" name="label_74">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>MF</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="23" column="3">
-          <widget class="QLineEdit" name="DP_RXY_15_3">
+         <item row="7" column="3">
+          <widget class="QLineEdit" name="DP_RXY_1_3">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -19596,27 +18499,8 @@
            </property>
           </widget>
          </item>
-         <item row="17" column="3">
-          <widget class="QLineEdit" name="DP_RXY_9_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="20" column="0">
-          <widget class="QLabel" name="label_71">
+         <item row="7" column="5">
+          <widget class="QLabel" name="label_95">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -19624,18 +18508,31 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>PSI-3</string>
+            <string>%</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
-         <item row="20" column="3">
-          <widget class="QLineEdit" name="DP_RXY_12_3">
-           <property name="enabled">
-            <bool>false</bool>
+         <item row="8" column="0">
+          <widget class="QLabel" name="label_61">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
+           <property name="text">
+            <string>Tp</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
+          <widget class="QLineEdit" name="DP_RXY_2_1">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -19648,29 +18545,13 @@
              <height>0</height>
             </size>
            </property>
-          </widget>
-         </item>
-         <item row="26" column="3">
-          <widget class="QLineEdit" name="DP_RXY_26_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
+           <property name="text">
+            <string>0</string>
            </property>
           </widget>
          </item>
-         <item row="12" column="2">
-          <widget class="QLineEdit" name="DP_RXY_6_2">
+         <item row="8" column="2">
+          <widget class="QLineEdit" name="DP_RXY_2_2">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -19685,6 +18566,60 @@
            </property>
            <property name="text">
             <string>100</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="3">
+          <widget class="QLineEdit" name="DP_RXY_2_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="4">
+          <widget class="QLineEdit" name="DP_RXY_2_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="5">
+          <widget class="QLabel" name="label_96">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -19704,284 +18639,8 @@
            </property>
           </widget>
          </item>
-         <item row="7" column="5">
-          <widget class="QLabel" name="label_95">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>%</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="15" column="3">
-          <widget class="QLineEdit" name="DP_RXY_7_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="21" column="5">
-          <widget class="QLabel" name="label_107">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>idem</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="28" column="2">
-          <widget class="QLineEdit" name="DP_RXY_24_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>aspect</string>
-           </property>
-          </widget>
-         </item>
-         <item row="9" column="3">
-          <widget class="QLineEdit" name="DP_RXY_3_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="3">
-          <widget class="QLineEdit" name="DP_RXY_4_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="26" column="5">
-          <widget class="QLabel" name="label_177">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>/</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="14" column="3">
-          <widget class="QLineEdit" name="DP_RXY_23_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="0">
-          <widget class="QLabel" name="label_63">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Rp</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="18" column="4">
-          <widget class="QLineEdit" name="DP_RXY_10_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="17" column="2">
-          <widget class="QLineEdit" name="DP_RXY_9_2">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="6" column="4">
-          <widget class="QLabel" name="label_90">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>VALmax</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="21" column="1">
-          <widget class="QLineEdit" name="DP_RXY_13_1">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="23" column="4">
-          <widget class="QLineEdit" name="DP_RXY_15_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="22" column="3">
-          <widget class="QLineEdit" name="DP_RXY_14_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="13" column="1">
-          <widget class="QLineEdit" name="DP_RXY_18_1">
+         <item row="9" column="1">
+          <widget class="QLineEdit" name="DP_RXY_3_1">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -20018,7 +18677,1372 @@
            </property>
           </widget>
          </item>
+         <item row="9" column="3">
+          <widget class="QLineEdit" name="DP_RXY_3_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="4">
+          <widget class="QLineEdit" name="DP_RXY_3_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="5">
+          <widget class="QLabel" name="label_97">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="0">
+          <widget class="QLabel" name="label_63">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Rp</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="1">
+          <widget class="QLineEdit" name="DP_RXY_4_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="2">
+          <widget class="QLineEdit" name="DP_RXY_4_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>100</string>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="3">
+          <widget class="QLineEdit" name="DP_RXY_4_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="4">
+          <widget class="QLineEdit" name="DP_RXY_4_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="5">
+          <widget class="QLabel" name="label_98">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="0">
+          <widget class="QLabel" name="label_64">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>R1</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="1">
+          <widget class="QLineEdit" name="DP_RXY_5_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="2">
+          <widget class="QLineEdit" name="DP_RXY_5_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>100</string>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="3">
+          <widget class="QLineEdit" name="DP_RXY_5_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="4">
+          <widget class="QLineEdit" name="DP_RXY_5_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="5">
+          <widget class="QLabel" name="label_99">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="0">
+          <widget class="QLabel" name="label_65">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Apds</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="1">
+          <widget class="QLineEdit" name="DP_RXY_6_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="2">
+          <widget class="QLineEdit" name="DP_RXY_6_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>100</string>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="3">
+          <widget class="QLineEdit" name="DP_RXY_6_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="4">
+          <widget class="QLineEdit" name="DP_RXY_6_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="5">
+          <widget class="QLabel" name="label_109">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="13" column="0">
+          <widget class="QLabel" name="label_77">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>A_front=1-Tn-Rn</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="13" column="1">
+          <widget class="QLineEdit" name="DP_RXY_18_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="13" column="2">
+          <widget class="QLineEdit" name="DP_RXY_18_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>100</string>
+           </property>
+          </widget>
+         </item>
+         <item row="13" column="3">
+          <widget class="QLineEdit" name="DP_RXY_18_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="13" column="4">
+          <widget class="QLineEdit" name="DP_RXY_18_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="13" column="5">
+          <widget class="QLabel" name="label_110">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="0">
+          <widget class="QLabel" name="label_74">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>A_back=1-Tn-R1</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="1">
+          <widget class="QLineEdit" name="DP_RXY_15_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="2">
+          <widget class="QLineEdit" name="DP_RXY_15_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>100</string>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="3">
+          <widget class="QLineEdit" name="DP_RXY_15_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="4">
+          <widget class="QLineEdit" name="DP_RXY_15_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="14" column="5">
+          <widget class="QLabel" name="label_111">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="15" column="0">
+          <widget class="QLabel" name="label_80">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Tau, Rho, Rho1</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="15" column="1">
+          <widget class="QLineEdit" name="DP_RXY_23_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="15" column="2">
+          <widget class="QLineEdit" name="DP_RXY_23_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>100</string>
+           </property>
+          </widget>
+         </item>
+         <item row="15" column="3">
+          <widget class="QLineEdit" name="DP_RXY_23_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="15" column="4">
+          <widget class="QLineEdit" name="DP_RXY_23_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="15" column="5">
+          <widget class="QLabel" name="label_100">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>%</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="16" column="0">
+          <widget class="QLabel" name="label_66">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>DELTA-1</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="16" column="1">
+          <widget class="QLineEdit" name="DP_RXY_7_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>-180</string>
+           </property>
+          </widget>
+         </item>
+         <item row="16" column="2">
+          <widget class="QLineEdit" name="DP_RXY_7_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>180</string>
+           </property>
+          </widget>
+         </item>
+         <item row="16" column="3">
+          <widget class="QLineEdit" name="DP_RXY_7_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="16" column="4">
+          <widget class="QLineEdit" name="DP_RXY_7_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="16" column="5">
+          <widget class="QComboBox" name="comboBox_DeltaPsiScale">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="currentIndex">
+            <number>0</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>deg</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>cos(DELTA) tan(PSI)</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item row="17" column="0">
+          <widget class="QLabel" name="label_67">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>PSI-1</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="17" column="1">
+          <widget class="QLineEdit" name="DP_RXY_8_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>0</string>
+           </property>
+          </widget>
+         </item>
+         <item row="17" column="2">
+          <widget class="QLineEdit" name="DP_RXY_8_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>180</string>
+           </property>
+          </widget>
+         </item>
+         <item row="17" column="3">
+          <widget class="QLineEdit" name="DP_RXY_8_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="17" column="4">
+          <widget class="QLineEdit" name="DP_RXY_8_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="17" column="5">
+          <widget class="QLabel" name="label_102">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>idem</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="18" column="0">
+          <widget class="QLabel" name="label_68">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>DELTA-2</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="18" column="1">
+          <widget class="QLineEdit" name="DP_RXY_9_1">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="18" column="2">
+          <widget class="QLineEdit" name="DP_RXY_9_2">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="18" column="3">
+          <widget class="QLineEdit" name="DP_RXY_9_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="18" column="4">
+          <widget class="QLineEdit" name="DP_RXY_9_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="18" column="5">
+          <widget class="QLabel" name="label_103">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>idem</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="19" column="0">
+          <widget class="QLabel" name="label_69">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>PSI-2</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="19" column="1">
+          <widget class="QLineEdit" name="DP_RXY_10_1">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="19" column="2">
+          <widget class="QLineEdit" name="DP_RXY_10_2">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="19" column="3">
+          <widget class="QLineEdit" name="DP_RXY_10_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="19" column="4">
+          <widget class="QLineEdit" name="DP_RXY_10_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="19" column="5">
+          <widget class="QLabel" name="label_104">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>idem</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="20" column="0">
+          <widget class="QLabel" name="label_70">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>DELTA-3</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="20" column="1">
+          <widget class="QLineEdit" name="DP_RXY_11_1">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="20" column="2">
+          <widget class="QLineEdit" name="DP_RXY_11_2">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="20" column="3">
+          <widget class="QLineEdit" name="DP_RXY_11_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="20" column="4">
+          <widget class="QLineEdit" name="DP_RXY_11_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
          <item row="20" column="5">
+          <widget class="QLabel" name="label_105">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>idem</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="21" column="0">
+          <widget class="QLabel" name="label_71">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>PSI-3</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="21" column="1">
+          <widget class="QLineEdit" name="DP_RXY_12_1">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="21" column="2">
+          <widget class="QLineEdit" name="DP_RXY_12_2">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="21" column="3">
+          <widget class="QLineEdit" name="DP_RXY_12_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="21" column="4">
+          <widget class="QLineEdit" name="DP_RXY_12_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="21" column="5">
           <widget class="QLabel" name="label_106">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
@@ -20034,8 +20058,309 @@
            </property>
           </widget>
          </item>
-         <item row="8" column="3">
-          <widget class="QLineEdit" name="DP_RXY_2_3">
+         <item row="22" column="0">
+          <widget class="QLabel" name="label_72">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>DELTA-4</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="22" column="1">
+          <widget class="QLineEdit" name="DP_RXY_13_1">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="22" column="2">
+          <widget class="QLineEdit" name="DP_RXY_13_2">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="22" column="3">
+          <widget class="QLineEdit" name="DP_RXY_13_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="22" column="4">
+          <widget class="QLineEdit" name="DP_RXY_13_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="22" column="5">
+          <widget class="QLabel" name="label_107">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>idem</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="23" column="0">
+          <widget class="QLabel" name="label_73">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>PSI-4</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="23" column="1">
+          <widget class="QLineEdit" name="DP_RXY_14_1">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="23" column="2">
+          <widget class="QLineEdit" name="DP_RXY_14_2">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>slave</string>
+           </property>
+          </widget>
+         </item>
+         <item row="23" column="3">
+          <widget class="QLineEdit" name="DP_RXY_14_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="23" column="4">
+          <widget class="QLineEdit" name="DP_RXY_14_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="23" column="5">
+          <widget class="QLabel" name="label_108">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>idem</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="24" column="0">
+          <widget class="QLabel" name="label_75">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>n</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="24" column="1">
+          <widget class="QLineEdit" name="DP_RXY_16_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>1.2</string>
+           </property>
+          </widget>
+         </item>
+         <item row="24" column="2">
+          <widget class="QLineEdit" name="DP_RXY_16_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>1.9</string>
+           </property>
+          </widget>
+         </item>
+         <item row="24" column="3">
+          <widget class="QLineEdit" name="DP_RXY_16_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="24" column="4">
+          <widget class="QLineEdit" name="DP_RXY_16_4">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -20069,8 +20394,8 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label_78">
+         <item row="25" column="0">
+          <widget class="QLabel" name="label_76">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -20078,161 +20403,15 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>wl</string>
+            <string>k</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
-         <item row="1" column="4">
-          <widget class="QLabel" name="label_87">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>VALmax</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="16" column="0">
-          <widget class="QLabel" name="label_67">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>PSI-1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="3">
-          <widget class="QLineEdit" name="DP_RXY_1_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="22" column="1">
-          <widget class="QLineEdit" name="DP_RXY_14_1">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>slave</string>
-           </property>
-          </widget>
-         </item>
-         <item row="14" column="2">
-          <widget class="QLineEdit" name="DP_RXY_23_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>100</string>
-           </property>
-          </widget>
-         </item>
-         <item row="12" column="4">
-          <widget class="QLineEdit" name="DP_RXY_6_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="5">
-          <widget class="QLabel" name="label_92">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Angstrom</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="4">
-          <widget class="QLineEdit" name="DP_RXY_20_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="1">
-          <widget class="QLineEdit" name="DP_RXY_2_1">
+         <item row="25" column="1">
+          <widget class="QLineEdit" name="DP_RXY_17_1">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -20250,8 +20429,8 @@
            </property>
           </widget>
          </item>
-         <item row="11" column="1">
-          <widget class="QLineEdit" name="DP_RXY_5_1">
+         <item row="25" column="2">
+          <widget class="QLineEdit" name="DP_RXY_17_2">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -20265,55 +20444,45 @@
             </size>
            </property>
            <property name="text">
-            <string>0</string>
+            <string>1</string>
            </property>
           </widget>
          </item>
-         <item row="12" column="5">
-          <widget class="QLabel" name="label_109">
+         <item row="25" column="3">
+          <widget class="QLineEdit" name="DP_RXY_17_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="text">
-            <string>%</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
            </property>
           </widget>
          </item>
-         <item row="1" column="3">
-          <widget class="QLabel" name="label_86">
+         <item row="25" column="4">
+          <widget class="QLineEdit" name="DP_RXY_17_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="text">
-            <string>VALmin</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="19" column="0">
-          <widget class="QLabel" name="label_70">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>DELTA-3</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
            </property>
           </widget>
          </item>
@@ -20330,8 +20499,8 @@
            </property>
           </widget>
          </item>
-         <item row="9" column="5">
-          <widget class="QLabel" name="label_97">
+         <item row="26" column="0">
+          <widget class="QLabel" name="label_191">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -20339,31 +20508,15 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>%</string>
+            <string>eps1</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
-         <item row="18" column="5">
-          <widget class="QLabel" name="label_104">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>idem</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="DP_RXY_22_1">
+         <item row="26" column="1">
+          <widget class="QLineEdit" name="DP_RXY_26_1">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -20377,28 +20530,12 @@
             </size>
            </property>
            <property name="text">
-            <string>0</string>
+            <string>1.2</string>
            </property>
           </widget>
          </item>
-         <item row="14" column="0">
-          <widget class="QLabel" name="label_80">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Tau, Rho, Rho1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="10" column="2">
-          <widget class="QLineEdit" name="DP_RXY_4_2">
+         <item row="26" column="2">
+          <widget class="QLineEdit" name="DP_RXY_26_2">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -20412,28 +20549,50 @@
             </size>
            </property>
            <property name="text">
-            <string>100</string>
+            <string>1.9</string>
            </property>
           </widget>
          </item>
-         <item row="24" column="0">
-          <widget class="QLabel" name="label_75">
+         <item row="26" column="3">
+          <widget class="QLineEdit" name="DP_RXY_26_3">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="text">
-            <string>n</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
            </property>
           </widget>
          </item>
-         <item row="28" column="5">
-          <widget class="QLabel" name="label_190">
+         <item row="26" column="4">
+          <widget class="QLineEdit" name="DP_RXY_26_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="26" column="5">
+          <widget class="QLabel" name="label_177">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
              <horstretch>0</horstretch>
@@ -20445,282 +20604,6 @@
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="5">
-          <widget class="QLabel" name="label_94">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>deg</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="14" column="1">
-          <widget class="QLineEdit" name="DP_RXY_23_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="22" column="5">
-          <widget class="QLabel" name="label_108">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>idem</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="3">
-          <widget class="QLineEdit" name="DP_RXY_21_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="21" column="0">
-          <widget class="QLabel" name="label_72">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>DELTA-4</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_185">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>8</pointsize>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="text">
-            <string>ABSCISSA</string>
-           </property>
-          </widget>
-         </item>
-         <item row="21" column="3">
-          <widget class="QLineEdit" name="DP_RXY_13_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="22" column="4">
-          <widget class="QLineEdit" name="DP_RXY_14_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="3">
-          <widget class="QLineEdit" name="DP_RXY_5_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="13" column="3">
-          <widget class="QLineEdit" name="DP_RXY_18_3">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="2">
-          <widget class="QLineEdit" name="DP_RXY_21_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>90</string>
-           </property>
-          </widget>
-         </item>
-         <item row="14" column="4">
-          <widget class="QLineEdit" name="DP_RXY_23_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="15" column="2">
-          <widget class="QLineEdit" name="DP_RXY_7_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>180</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="DP_RXY_20_1">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>2000</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="4">
-          <widget class="QLineEdit" name="DP_RXY_22_4">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>70</width>
-             <height>0</height>
-            </size>
            </property>
           </widget>
          </item>
@@ -20832,6 +20715,120 @@
            </property>
           </widget>
          </item>
+         <item row="28" column="0">
+          <widget class="QLabel" name="label_189">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>graph</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="28" column="1">
+          <widget class="QLineEdit" name="DP_RXY_24_1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>width</string>
+           </property>
+          </widget>
+         </item>
+         <item row="28" column="2">
+          <widget class="QLineEdit" name="DP_RXY_24_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>aspect</string>
+           </property>
+          </widget>
+         </item>
+         <item row="28" column="3">
+          <widget class="QLineEdit" name="DP_RXY_24_3">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>lineWidth</string>
+           </property>
+          </widget>
+         </item>
+         <item row="28" column="4">
+          <widget class="QLineEdit" name="DP_RXY_24_4">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>/</string>
+           </property>
+          </widget>
+         </item>
+         <item row="28" column="5">
+          <widget class="QLabel" name="label_190">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>/</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
          <item row="29" column="0">
           <widget class="QPushButton" name="pushButton_setFont">
            <property name="sizePolicy">
@@ -20843,29 +20840,6 @@
            <property name="text">
             <string>Set Font</string>
            </property>
-          </widget>
-         </item>
-         <item row="15" column="5">
-          <widget class="QComboBox" name="comboBox_DeltaPsiScale">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="currentIndex">
-            <number>0</number>
-           </property>
-           <item>
-            <property name="text">
-             <string>deg</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>cos(DELTA) tan(PSI)</string>
-            </property>
-           </item>
           </widget>
          </item>
         </layout>
@@ -20889,8 +20863,8 @@
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout_7">
-     <item row="0" column="0">
-      <widget class="QPushButton" name="pBloadPro">
+     <item row="1" column="0">
+      <widget class="QPushButton" name="pBloadFnk">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
@@ -20910,7 +20884,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Load Spj!</string>
+        <string>Load nk!</string>
        </property>
       </widget>
      </item>
@@ -20964,6 +20938,69 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="0">
+      <widget class="QPushButton" name="pBloadPro">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Load Spj!</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="pBclearFnk">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Clear nk !</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QLabel" name="label_187">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>info:</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="3">
       <widget class="QLabel" name="label_113">
        <property name="sizePolicy">
@@ -20993,10 +21030,10 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="pBloadFnk">
+     <item row="1" column="4">
+      <widget class="QLineEdit" name="lineEdit_infoFnk">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -21006,40 +21043,6 @@
          <width>16777215</width>
          <height>16777215</height>
         </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Load nk!</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QPushButton" name="pBclearFnk">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <pointsize>8</pointsize>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Clear nk !</string>
        </property>
       </widget>
      </item>
@@ -21065,35 +21068,6 @@
        </property>
        <property name="text">
         <string>mate/aa999.9</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3">
-      <widget class="QLabel" name="label_187">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>info:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="4">
-      <widget class="QLineEdit" name="lineEdit_infoFnk">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
        </property>
       </widget>
      </item>

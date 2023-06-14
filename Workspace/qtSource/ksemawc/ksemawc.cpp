@@ -243,7 +243,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C
 //C       J= 1 <-> Tnormal
 //C       J= 2 <-> Tpolarised
-//C       J= 3 <-> Rnormla
+//C       J= 3 <-> Rnormal
 //C       J= 4 <-> Rpolarised
 //C       J= 5 <-> R1_normal
 //C       J= 6 <-> Apds
@@ -255,10 +255,10 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C       J=12 <-> PSI_3
 //C       J=13 <-> Delta_4
 //C       J=14 <-> PSI_4
-//C       J=15 <-> /
+//C       J=15 <-> A_back=1-Tn-R1
 //C       J=16 <-> n
 //C       J=17 <-> k
-//C       J=18 <-> A=1-Tn-Rn
+//C       J=18 <-> A_front=1-Tn-Rn
 //C       J=19 <-> /
 //C       J=20 <-> Lambda [Angstrom]
 //C       J=21 <-> Teta [deg]
@@ -304,6 +304,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 #include <qwt_series_data.h>
 #include <qwt_plot_grid.h>
 #include <qwt_legend.h>
+#include <qwt_plot_item.h>
 #include <qwt_plot_marker.h>
 #include <qwt_symbol.h>
 #include <qwt_interval.h>
@@ -328,13 +329,13 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 QString fnproject,pathroot,fileStore,fStdSpect,fRefMir,fNKsim,fMisSim,filechi2;
 QString info,fnk[9],fnSample,fnTn,fnTp,fnRn,fnRp,fnR1,fnApds,fnE1,fnE2,fnE3,fnE4,fnFnk,ParFitLab[12],NANK[17];
 
-QwtPlot *G1_Tn, *G2_Tp, *G3_Rn, *G4_Rp, *G5_R1, *G6_Apds, *G7_D, *G8_P, *G9_A, *G10_tTR, *G11_nk, *G12_wn, *G13_wk, *G14_we1, *G15_we2;
+QwtPlot *G1_Tn, *G2_Tp, *G3_Rn, *G4_Rp, *G5_R1, *G6_Apds, *G7_D, *G8_P, *G9_Af, *G10_tTR, *G11_nk, *G12_wn, *G13_wk, *G14_we1, *G15_we2, *G16_Ab;
 QColor myColor[7]={Qt::black,Qt::blue,Qt::cyan,Qt::green,Qt::magenta,Qt::red,Qt::yellow};
 QString labelQwt;//label to use in absorptance plot
 int iColor=0;
 int iSelected=0;//used to stop recursive n-selection by polygon
 
-int ink,lastIndex,ifn,npp,ppm[18],nPar,nlayer,lastTab,occupyPF,iwspj,lastTabB5,DATO[15],IXW[16],iw=0,L1E2=2,iRecChi2=0;
+int ink,lastIndex,ifn,npp,ppm[18],nPar,nlayer,lastTab,occupyPF,iwspj,lastTabB5,DATO[15],IXW[17],iw=0,L1E2=2,iRecChi2=0;
 int ifirstcall=0;//used to initialize fit
 int ifirstWarning=0;//used to warn about T+R>1
 int jobtot=0;
@@ -785,16 +786,20 @@ ksemawc::ksemawc(QWidget *parent) :
         rxy[i][3]=.0;  //min-data
         rxy[i][4]=.0;  //max-data
     }
-    for(int i=16;i<=19;i++){//n k A
+    for(int i=16;i<=17;i++){//n k
         rxy[i][1]=.0;
-        rxy[i][2]=1.0;
+        rxy[i][2]=2.0;
         rxy[i][3]=.0;
-        rxy[i][4]=1.0;
+        rxy[i][4]=.0;
     }
+    rxy[15][1]=-10.0;
+    rxy[15][2]=100.0;
+    rxy[15][3]=.0;
+    rxy[15][4]=.0;
     rxy[18][1]=-10.0;
     rxy[18][2]=100.0;
     rxy[18][3]=.0;
-    rxy[18][4]=100.0;
+    rxy[18][4]=.0;
     rxy[20][1]=2000.; //wlmin
     rxy[20][2]=30000.;//wlmax
     rxy[20][3]=2000.; //wlmin
@@ -1462,7 +1467,7 @@ ksemawc::ksemawc(QWidget *parent) :
                         -> setText(QString::number(rxy[i][j]));
         }
     }
-    for(int i=1;i<=15;i++)
+    for(int i=1;i<=16;i++)
         IXW[i]=-1;//no graph window
 
     //oscillator list
@@ -4637,7 +4642,7 @@ void ksemawc::tabChanged(){
     printf("-> tabChanged:  itab=%d lastTab=%d\n",itab,lastTab);
     SaveSetting(lastTab);
     QString filepro=ui->lineEdit_P -> text();
-    if(filepro.contains("mate/aa999")){
+    if(filepro.contains("mate/aa999") && itab!=5){
         ui->tabWidget -> setCurrentIndex(0);
         if(iwspj==0){
             msgBox.setText("First of all you MUST name the Project!");
@@ -5034,9 +5039,11 @@ void ksemawc::PlotME(){
             PLOTline1bar2(2,iRD,0,iGraph,0,Xp,Yp,ErrXp,ErrYp);//erase without data plot
     }
 
-    iRD=0;
+    iRD=1;
     if(DATO[1]>0 && DATO[3]>0){
         int iPlotA=0;
+        rxy[18][3]=1000.;
+        rxy[18][4]=-1000.;
         for(int L=1;L<=Ndata;L++){
             Xp[L-1]=MIS[7][L][1];
             Yp[L-1]=(1.-MIS[1][L][1]-MIS[3][L][1])*100.;//A=1-T-R
@@ -5047,9 +5054,8 @@ void ksemawc::PlotME(){
         }
         ui->DP_RXY_18_3 -> setText(QString::number(rxy[18][3]));
         ui->DP_RXY_18_4 -> setText(QString::number(rxy[18][4]));
-        iRD=1;
         labelQwt="A_front";
-        PLOTline1bar2(2,iRD,5,9,Ndata,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(2,iRD,0,9,Ndata,Xp,Yp,ErrXp,ErrYp);
         if(ifirstWarning==0 && iPlotA>0){
             QMessageBox msgBox;
             msgBox.setText("ATTENTION: Tnorm + Rnorm > 0 !!!\nPlease check your measurements.");
@@ -5061,22 +5067,20 @@ void ksemawc::PlotME(){
 
     if(DATO[1]>0 && DATO[5]>0){
         int iPlotA=0;
+        rxy[15][3]=1000.;
+        rxy[15][4]=-1000.;
         for(int L=1;L<=Ndata;L++){
             Xp[L-1]=MIS[7][L][1];
-            Yp[L-1]=(1.-MIS[1][L][1]-MIS[5][L][1])*100.;//A=1-T-R
+            Yp[L-1]=(1.-MIS[1][L][1]-MIS[5][L][1])*100.;//A=1-T-R1
             ErrYp[L-1]=(MIS[1][L][2]+MIS[5][L][2])*100.;//error
             if(Yp[L-1]<0.) iPlotA++;
-            rxy[18][3]=min(rxy[18][3],Yp[L-1]);
-            rxy[18][4]=max(rxy[18][4],Yp[L-1]);
+            rxy[15][3]=min(rxy[15][3],Yp[L-1]);
+            rxy[15][4]=max(rxy[15][4],Yp[L-1]);
         }
-        ui->DP_RXY_18_3 -> setText(QString::number(rxy[18][3]));
-        ui->DP_RXY_18_4 -> setText(QString::number(rxy[18][4]));
-        if(iRD==1)
-            iRD=0;
-        else
-            iRD=1;
+        ui->DP_RXY_15_3 -> setText(QString::number(rxy[15][3]));
+        ui->DP_RXY_15_4 -> setText(QString::number(rxy[15][4]));
         labelQwt="A_back";
-        PLOTline1bar2(2,iRD,1,9,Ndata,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(2,iRD,0,16,Ndata,Xp,Yp,ErrXp,ErrYp);
         if(ifirstWarning<=0 && iPlotA>0){
             QMessageBox msgBox;
             msgBox.setText("ATTENTION: Tnorm + R1norm > 0 !!!\nPlease check your measurements.");
@@ -5460,17 +5464,19 @@ void ksemawc::CalcMis(double mc[15][202]){
                 PLOTline1bar2(1,0,iColor,8,201,Xp,Yp,ErrXp,ErrYp);
         }
     }
-    if(NINT(par[10][1])==1){
+    if(DATO[1]>0 && DATO[3]>0){
         for(int i=1;i<=201;i++){
             Yp[i-1]=(1.-mc[1][i]-mc[3][i])*100.;
         }
         labelQwt="A_front";
-        PLOTline1bar2(1,0,5,9,201,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(1,0,iColor,9,201,Xp,Yp,ErrXp,ErrYp);
+    }
+    if(DATO[1]>0 && DATO[5]>0){
         for(int i=1;i<=201;i++){
             Yp[i-1]=(1.-mc[1][i]-mc[5][i])*100.;
         }
         labelQwt="A_back";
-        PLOTline1bar2(1,0,1,9,201,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(1,0,iColor,16,201,Xp,Yp,ErrXp,ErrYp);
     }
     if(IXW[12]>0){
         PLOTline1bar2(1,0,iColor,12,201,Xp,nn,ErrXp,ErrYp);
@@ -7734,13 +7740,14 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     //    ic= 6: G6_Apds
     //    ic= 7: G7_D(elta)
     //    ic= 8: G8_P(si)
-    //    ic= 9: G9_A
+    //    ic= 9: G9_Af
     //    ic=10: G10_tTR
     //    ic=11: G11_nk
     //    ic=12: G12_wn
     //    ic=13: G13_wk
     //    ic=14: G14_we1
     //    ic=15: G15_we2
+    //    ic=16: G16_Ab
     int graphDrift=40;
     double Px[Ndata],Py[Ndata],Ymin=rxy[17][1],Ymax=rxy[17][2];
     for(int i=0;i<Ndata;i++){
@@ -7780,7 +7787,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
             ErrYp[i]=0.5*abs(Yup-Ydw);
         }
     }
-    if(ic<1 ||ic>15)//if(Ndata==0 || ic<1 ||ic>15)
+    if(ic<1 ||ic>16)//if(Ndata==0 || ic<1 ||ic>16)
         return;
     int wGhx=int(rxy[24][1]);
     int wGhy=int(rxy[24][2]);
@@ -7851,12 +7858,12 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
                                                          G8_P->canvas() );
         }
         if(ic==9){
-            G9_A=new QwtPlot();
-            G9_A->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
+            G9_Af=new QwtPlot();
+            G9_Af->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
             nOpenGraph++;
             QwtPlotPicker *m_picker9 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
                                                          QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G9_A->canvas() );
+                                                         G9_Af->canvas() );
         }
         if(ic==10){
             G10_tTR=new QwtPlot();
@@ -7906,6 +7913,14 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
                                                          QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
                                                          G15_we2->canvas() );
         }
+        if(ic==16){
+            G16_Ab=new QwtPlot();
+            G16_Ab->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
+            nOpenGraph++;
+            QwtPlotPicker *m_picker16 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
+                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
+                                                         G16_Ab->canvas() );
+        }
         IXW[ic]=1;
     }
     else{
@@ -7942,8 +7957,8 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
             G8_P->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
         }
         if(ic==9 && iRD==1){
-            G9_A->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G9_A->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
+            G9_Af->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
+            G9_Af->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
         }
         if(ic==10 && iRD==1){
             G10_tTR->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
@@ -7968,6 +7983,10 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
         if(ic==15 && iRD==1){
             G15_we2->detachItems(QwtPlotItem::Rtti_PlotCurve,true);
             G15_we2->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
+        }
+        if(ic==16 && iRD==1){
+            G16_Ab->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
+            G16_Ab->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
         }
     }
     double WEmin=rxy[20][1],WEmax=rxy[20][2];
@@ -8128,19 +8147,22 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
         G8_P->show();
     }
     else if(ic==9){
-        G9_A -> setAxisTitle(0,"Absorptance (%)");
+        G9_Af -> setAxisTitle(0,"Absorptance_front (%)");
         if(L1E2==1)
-            G9_A -> setAxisTitle(2,"wavelength (A)");
+            G9_Af -> setAxisTitle(2,"wavelength (A)");
         else
-            G9_A -> setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G9_A);
+            G9_Af -> setAxisTitle(2,"photon energy (eV)");
+        dataPlot->attach(G9_Af);
         if(iL1B2==2)
-            range_plot->attach(G9_A);
-        G9_A->setAxisScale(0,rxy[18][1],rxy[18][2],0);
-        G9_A->setAxisScale(2,WEmin,WEmax,0);
-        G9_A->insertLegend( new QwtLegend(), QwtPlot::RightLegend );
-        G9_A -> setAutoReplot();
-        G9_A->show();
+            range_plot->attach(G9_Af);
+        G9_Af->setAxisScale(0,rxy[18][1],rxy[18][2],0);
+        G9_Af->setAxisScale(2,WEmin,WEmax,0);
+        if(labelQwt.contains("layer"))
+            G9_Af->insertLegend( new QwtLegend(), QwtPlot::RightLegend );
+        //else if(G9_Af->legend()->)
+        //    G9_Af->legend()->setVisible(false);
+        G9_Af -> setAutoReplot();
+        G9_Af->show();
     }
     else if(ic==10){
         G10_tTR -> setAxisTitle(0,"Tau Rho Rho1 (%)");
@@ -8222,6 +8244,22 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
         G15_we2->setAxisScale(2,WEmin,WEmax,0);
         G15_we2->setAutoReplot();
         G15_we2->show();
+    }
+    else if(ic==16){
+        G16_Ab -> setAxisTitle(0,"Absorptance_back (%)");
+        if(L1E2==1)
+            G16_Ab -> setAxisTitle(2,"wavelength (A)");
+        else
+            G16_Ab -> setAxisTitle(2,"photon energy (eV)");
+        dataPlot->attach(G16_Ab);
+        if(iL1B2==2)
+            range_plot->attach(G16_Ab);
+        G16_Ab->setAxisScale(0,rxy[18][1],rxy[18][2],0);
+        G16_Ab->setAxisScale(2,WEmin,WEmax,0);
+        if(labelQwt.contains("layer"))
+            G16_Ab->insertLegend( new QwtLegend(), QwtPlot::RightLegend );
+        G16_Ab -> setAutoReplot();
+        G16_Ab->show();
     }
 }
 

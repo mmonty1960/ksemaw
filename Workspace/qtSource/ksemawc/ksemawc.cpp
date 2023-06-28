@@ -345,6 +345,7 @@ double MIS[18][202][3],ELI[9][202][3],pf[8][22],pm[201][6],par[61][6],CNK[17][4]
 double PIG=acos(-1.);
 double deg2rad=PIG/180.;
 double Nema,Kema,sqn,sqk,EpsiR,EpsiI;
+double Vservice[3];//for transporting
 double cDAW[7];//c[NMAX+1] with NMAX=6 use in DAWS function
 double w[6][7]={
     {0.,0.              ,0.             ,0.         ,0.         ,0.         ,0.},
@@ -421,6 +422,7 @@ int NINT(double x);
 void MATINV(int n, int np,double **as,double **b);
 void lubksb(int np,double **a,int n,int *indx,double *b);
 void ludcmp(int np,double **a,int n,int *indx,double d);
+void AbsLayInco(double atten, double Ra, double R1a, double Rb);
 
 static struct pointToFit2{
     int Nt;
@@ -1890,7 +1892,7 @@ void ksemawc::ReadSetting(QString filename){
     if(old0new1==0){
         QMessageBox msgBox;
         msgBox.setText("The project kind is old => k=extinction_coefficient=0");
-        msgBox.setInformativeText("Would you like to update to k=f(epsi1,epsi2)?");
+        msgBox.setInformativeText("Would you like to update to k evaluated from epsilon?");
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Cancel);
         int ret = msgBox.exec();
@@ -2357,6 +2359,12 @@ void ksemawc::SaveSetting(int iCall){
                         QString content=idToLineEdit["LEpm_"+QString::number(100+ii+(i-1)*5)+"_1"] -> text();
                         if(content!="unused")
                             pm[100+ii+(i-1)*5][1]=content.toDouble();
+                    }
+                    if(pm[100+1+(i-1)*5][1]==15 || pm[100+1+(i-1)*5][1]==16){
+                        if(pm[100+4+(i-1)*5][1]>pm[100+5+(i-1)*5][1]*0.45){
+                            pm[100+4+(i-1)*5][1]=pm[100+5+(i-1)*5][1]*0.45;
+                            idToLineEdit["LEpm_"+QString::number(100+4+(i-1)*5)+"_1"] -> setText(QString::number(pm[100+4+(i-1)*5][1]));
+                        }
                     }
                     j++;
                     //printf("pm[%d][1]: %f %f %f %f %f\n",100+2+(i-1)*5,pm[100+1+(i-1)*5][1],
@@ -5064,6 +5072,8 @@ void ksemawc::PlotME(){
         }
         ifirstWarning=-1;
     }
+    else if(DATO[1]!=0 && DATO[3]!=0)
+        PLOTline1bar2(2,iRD,0,9,0,Xp,Yp,ErrXp,ErrYp);
 
     if(DATO[1]>0 && DATO[5]>0){
         int iPlotA=0;
@@ -5089,6 +5099,8 @@ void ksemawc::PlotME(){
         }
         ifirstWarning=1;
     }
+    else if(DATO[1]!=0 && DATO[5]!=0)
+        PLOTline1bar2(2,iRD,0,16,0,Xp,Yp,ErrXp,ErrYp);
 
 
     // save to HD splined experimental measurements
@@ -5209,6 +5221,7 @@ void ksemawc::PlotNK(int iRD){
         ui->DP_RXY_27_4->setText(QString::number(rxy[27][4]));
     }
 }
+
 
 void ksemawc::Simula(){
     printf("->Simula\n");
@@ -5370,7 +5383,9 @@ void ksemawc::CalcMis(double mc[15][202]){
     int s1p2u3=ui->cB_PAR_35_2 ->currentIndex();
     s1p2u3++;
     int nwl=201;
-    double teta[6],wl,Xp[nwl],Yp[nwl],ErrXp[201]={0},ErrYp[201]={0},nn[nwl],kk[nwl],e1[nwl],e2[nwl],VNK[17][3],vot[6][3];
+    double teta[6],wl,Xp[nwl],Yp[nwl],ErrXp[nwl],ErrYp[nwl],nn[nwl],kk[nwl],e1[nwl],e2[nwl],VNK[17][3],vot[6][3];
+    fill_n(ErrXp, nwl, 0.);
+    fill_n(ErrYp, nwl, 0.);
     teta[1]=ui->dSB_PAR_6_1->value();
     teta[2]=ui->dSB_PAR_14_1->value();
     teta[3]=ui->dSB_PAR_15_1->value();
@@ -5464,14 +5479,14 @@ void ksemawc::CalcMis(double mc[15][202]){
                 PLOTline1bar2(1,0,iColor,8,201,Xp,Yp,ErrXp,ErrYp);
         }
     }
-    if(DATO[1]>0 && DATO[3]>0){
+    if(DATO[1]!=0 && DATO[3]!=0){
         for(int i=1;i<=201;i++){
             Yp[i-1]=(1.-mc[1][i]-mc[3][i])*100.;
         }
         labelQwt="A_front";
         PLOTline1bar2(1,0,iColor,9,201,Xp,Yp,ErrXp,ErrYp);
     }
-    if(DATO[1]>0 && DATO[5]>0){
+    if(DATO[1]!=0 && DATO[5]!=0){
         for(int i=1;i<=201;i++){
             Yp[i-1]=(1.-mc[1][i]-mc[5][i])*100.;
         }
@@ -5506,7 +5521,9 @@ void ksemawc::PlotAve(){
     //computing mean value SF VS theta
     QString line;
     int ipr;
-    double vot[6][3],vt[4][3],tet[92],tau[92],rho[92],rho1[92],ErrXp[92]={0},ErrYp[92]={0};
+    double vot[6][3],vt[4][3],tet[92],tau[92],rho[92],rho1[92],ErrXp[92],ErrYp[92];
+    fill_n(ErrXp, 92, 0.);
+    fill_n(ErrXp, 92, 0.);
     SaveSetting(-1);
     int s1p2u3=ui->cB_PAR_35_2 ->currentIndex();
     s1p2u3++;
@@ -5655,23 +5672,34 @@ void ksemawc::PlotAve(){
 }
 
 void ksemawc::PlotAbsEL(){
-    double wwl[202],y[202],ErrXp[202]={0},ErrYp[202]={0},vosi[6][3];
-    //long double E2prev[202];
-    //complex<long double> tauC,rhoC,rho1C,tauR,rhoR,rho1R;
+    double wwl[202],y[202],ErrXp[202],ErrYp[202],Trasm1[202],vosi[6][3];
+    fill_n(ErrXp, 202, 0.);
+    fill_n(ErrYp, 202, 0.);
+    fill_n(Trasm1, 202, 1.);
+    long double Ps[202][10],Pp[202][10];
     complex<long double> Bs[202][10],Cs[202][10],Bp[202][10],Cp[202][10];
+    complex<double> irup,irdw,irup2,irdw2,mups,mupp,mdws,mdwp,pq;
     SaveSetting(-1);
     int s1p2u3=NINT(par[35][2]);
-    printf("plot Abs at each layer of %d at theta=%f with polarization %d\n",NINT(par[51][2]),par[6][1],s1p2u3);
-    complex<double> irup=complex<double>(1.,0.);//aria
+    irup=complex<double>(1.,0.);//aria
     double teta=par[6][1]*deg2rad;
-    complex<double> pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
+    pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
     int icol=1;
+    int ivnkdw;
+    double VNK[17][3];
     int iLayer0=NINT(par[51][2]);
+    int iFirstCoe=1;
+    if(par[50+iLayer0][3]!=1){
+        iLayer0++;
+        ivnkdw=16;//output media for SF measurements
+    }
+    else
+        ivnkdw=NINT(par[50+iLayer0][1]);//nk last substrate layer
+    printf("plot Abs at each layer of %d at theta=%f with polarization %d\n\tiLayer0=%d ivnkdw=%d\n",NINT(par[51][2]),par[6][1],s1p2u3,iLayer0,ivnkdw);
+
     int iRD=1;
     double Amin=1000.;
     double Amax=-1000.;
-    //for(int i=1;i<=201;i++)
-    //    E2prev[i]=1.;//impinging E^2
 
     QString fname;
     for(int iLayer=1;iLayer<=iLayer0;iLayer++){
@@ -5693,53 +5721,114 @@ void ksemawc::PlotAbsEL(){
         for(int i=1;i<=201;i++){
             wwl[i]=MIS[7][i][1];
             par[7][1]=MIS[7][i][1];
-            if(iLayer<iLayer0){
+            COSVNK(VNK,i);
+            if(iLayer==1 && NINT(par[50+iLayer][3])==1){//the first layer is inchoerent
+                iFirstCoe=2;
+                int Ivnkup=10;//refractive index of input medium for SF measurements
+                int Ivnkdw=NINT(par[50+iLayer][1]);//refractive index of first layer
+                irup=complex<double>(VNK[Ivnkup][1],-VNK[Ivnkup][2]);
+                irup2=irup*irup;
+                irdw=complex<double>(VNK[Ivnkdw][1],-VNK[Ivnkdw][2]);
+                irdw2=irdw*irdw;
+                mups=sqrt(irup2-pq);
+                mupp=irup2/mups;
+                mdws=sqrt(irdw2-pq);
+                mdwp=irdw2/mdws;
+                double atten=exp(-4.*PIG*pm[iLayer][1]/wwl[i]*imag(-mdws));
+                double RaS=pow(abs((mups-mdws)/(mups+mdws)),2.);
+                double RaP=pow(abs((mupp-mdwp)/(mupp+mdwp)),2.);
+                //double TaS=1.-RaS;//T=1-R because A=0 at the interface
+                //double TaP=1.-RaP;
+                double R1aS=RaS;
+                double R1aP=RaP;
+                if(i==100){
+                    printf("The first layer is inchoerent with first interface:\n");
+                    printf("nUP=%f kUP=%f nDW=%f kDW=%f d=%f\n",
+                           VNK[Ivnkup][1],VNK[Ivnkup][2],VNK[Ivnkdw][1],VNK[Ivnkdw][2],pm[iLayer][1]);
+                    printf("atten=%f RaS=%f RaP=%f\n",atten,RaS,RaP);
+                    printf("2nd interface: call BUILDER: iFirstLayer=%d ncoe=%d\n",2,iLayer0-2);
+                }
+                BUILDER(i,wwl[i],1,2,iLayer0-2,pq,vosi);
+                double RbS=vosi[2][1];
+                double RbP=vosi[2][2];
+                if(i==100)
+                    printf("RbS=%f RbP=%f\n",RbS,RbP);
+                //double TbS=vosi[1][1];
+                //double TbP=vosi[1][2];
+                //double R1bS=vosi[3][1];
+                //double R1bP=vosi[3][2];
+                double Abso=0.,Trans=0.;
+                if(s1p2u3==1 || s1p2u3==3){
+                    AbsLayInco(atten,RaS,R1aS,RbS);
+                    Abso=Vservice[0];
+                    Trans=Vservice[1];
+                }
+                if(s1p2u3==2 || s1p2u3==3){
+                    AbsLayInco(atten,RaP,R1aP,RbP);
+                    Abso=Abso+Vservice[0];
+                    Trans=Trans+Vservice[1];
+                }
+                if(s1p2u3==3){
+                    Abso=Abso/2.;
+                    Trans=Trans/2.;
+                }
+                y[i]=Abso*100.;
+                Trasm1[i]=Trans;
+                if(i==100)
+                    printf("\tFirst inchoerent layer, results: Abso=%f Trans=%f\n",Abso,Trans);
+            }
+            else if(iLayer<iLayer0){
                 if(i==100)
                     printf("->call BUILDER: iFirstLayer=%d ncoe=%d\n",iLayer,iLayer0-iLayer);
-                BUILDER(i,MIS[7][i][1],1,iLayer,iLayer0-iLayer,pq,vosi);
+                BUILDER(i,wwl[i],1,iLayer,iLayer0-iLayer,pq,vosi);
                 Bs[i][iLayer]=freCoeff[4][0];
                 Cs[i][iLayer]=freCoeff[4][1];
                 Bp[i][iLayer]=freCoeff[5][0];
                 Cp[i][iLayer]=freCoeff[5][1];
-                if(iLayer==1){
-                    Bs[i][0]=complex<double>(vosi[2][1],0.);//Rs full stack
-                    Bp[i][0]=complex<double>(vosi[2][2],0.);
+                Ps[i][iLayer]=real(freCoeff[0][0]);
+                Pp[i][iLayer]=real(freCoeff[0][1]);
+                if(i==100)
+                    printf("Bs[%d][%d]=%f + %f*i\n",i,iLayer,real(freCoeff[4][0]),imag(freCoeff[4][0]));
+                if(iLayer==iFirstCoe){
+                    Bs[i][iFirstCoe-1]=complex<double>(vosi[2][1],0.);//Rs full stack
+                    Bp[i][iFirstCoe-1]=complex<double>(vosi[2][2],0.);
+                    if(i==100)
+                        printf("iLayer=iFirstCoe=%d -> Re{Bs[%d][%d]}=%Lf\n",iLayer,i,iFirstCoe-1,real(Bs[i][iFirstCoe-1]));
                 }
             }
-            else{
-                //complex irup=complex<double>(1.,0.);//aria
-                //double teta=0.;
-                //complex pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
-                //complex NQ=irup*irup;
-                int ivnkdw=NINT(par[50+iLayer0][1]);
-                double VNK[17][3];
-                COSVNK(VNK,i);
+            if(iLayer==iLayer0){
                 complex<double> irdw=complex<double>(VNK[ivnkdw][1],-VNK[ivnkdw][2]);
                 complex<double> NQ=irdw*irdw;
                 complex<double> MUS=sqrt(NQ-pq);
                 Bs[i][iLayer]=complex<double>(1.,0.);
                 Cs[i][iLayer]=MUS;
+                Ps[i][iLayer]=real(Bs[i][iLayer]*conj(Cs[i][iLayer]));//Poynting vector s-pol
                 Bp[i][iLayer]=complex<double>(1.,0.);
                 Cp[i][iLayer]=NQ/MUS;
+                Pp[i][iLayer]=real(Bp[i][iLayer]*conj(Cp[i][iLayer]));//Poynting vector p-pol
                 if(i==100)
-                    printf("->B & C computing\n");
+                    printf("iLayer=iLayer0=%d ->B & C computing with ivnkdw=%d\n",iLayer,ivnkdw);
             }
-            if(iLayer>1){
+            if(iLayer>iFirstCoe){
                 y[i]=0.;
                 if(s1p2u3==1 || s1p2u3==3)
-                    y[i]=(real(Bs[i][iLayer-1]*conj(Cs[i][iLayer-1]))-real(Bs[i][iLayer]*conj(Cs[i][iLayer])))/real(Bs[i][1]*conj(Cs[i][1]))*(1.-real(Bs[i][0]));
+                    y[i]=(Ps[i][iLayer-1]-Ps[i][iLayer])/Ps[i][iFirstCoe]*(1.-real(Bs[i][iFirstCoe-1]));
+                        //(real(Bs[i][iLayer-1]*conj(Cs[i][iLayer-1]))-real(Bs[i][iLayer]*conj(Cs[i][iLayer])))/real(Bs[i][iFirstCoe]*conj(Cs[i][iFirstCoe]))*(1.-real(Bs[i][iFirstCoe-1]));
                 if(s1p2u3==2 || s1p2u3==3)
-                    y[i]=y[i]+(real(Bp[i][iLayer-1]*conj(Cp[i][iLayer-1]))-real(Bp[i][iLayer]*conj(Cp[i][iLayer])))/real(Bp[i][1]*conj(Cp[i][1]))*(1.-real(Bp[i][0]));
+                    y[i]=y[i]+(Pp[i][iLayer-1]-Pp[i][iLayer])/Pp[i][iFirstCoe]*(1.-real(Bp[i][iFirstCoe-1]));
+                        //(real(Bp[i][iLayer-1]*conj(Cp[i][iLayer-1]))-real(Bp[i][iLayer]*conj(Cp[i][iLayer])))/real(Bp[i][iFirstCoe]*conj(Cp[iFirstCoe][1]))*(1.-real(Bp[i][iFirstCoe-1]));
                 if(s1p2u3==3)
                     y[i]=y[i]/2.;
                 out<<wwl[i]<<"\t"<<y[i]<<"\n";
-                y[i]=y[i]*100.;
+                y[i]=y[i]*100.*Trasm1[i];
                 Amin=min(Amin,y[i]);
                 Amax=max(Amax,y[i]);
+                if(i==100)
+                    printf("calc abs with iLayer=%d -> y[%d]=%f Trasm1[%d]=%f\n",iLayer,i,y[i],i,Trasm1[i]);
             }
         }
         file.close();
-        if(iLayer>1){
+        if(iLayer>iFirstCoe || (iLayer==1 && NINT(par[50+iLayer][3])==1)){
             labelQwt="layer_"+QString::number(icol);
             PLOTline1bar2(1,iRD,icol,9,201,wwl,y,ErrXp,ErrYp);
             if(iRD==1)
@@ -5749,7 +5838,7 @@ void ksemawc::PlotAbsEL(){
                 iColor=1;
         }
     }
-    par[51][2]=iLayer0;
+    //par[51][2]=iLayer0;
     ui->DP_RXY_18_3 -> setText(QString::number(Amin));
     ui->DP_RXY_18_4 -> setText(QString::number(Amax));
 }
@@ -7485,6 +7574,8 @@ void ksemawc::SPADA(){
     par[38][4]=par[4][2];
     par[21][1]=201;
     par[28][2]=201;
+    if(NINT(par[9][1])==1)
+        ui->checkBox_setPsoK -> setCheckState ( Qt::Checked );
 }
 
 
@@ -7664,13 +7755,33 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
         }
         double YFIN=(a*WL*WL+b*WL+c)*FACO;
         if(I>=7 && I<=15){
-            if(YFIN<.0 && ALARM==0){
-                if(IUVIR==1)
+            if(YFIN<.0 && ALARM==0 && NINT(par[9][1])!=1){
+                if(IUVIR==1){
+                    QMessageBox msgBox;
+                    msgBox.setText("n-file "+NANK[I-7].simplified()+"is <0 !!!\n Do you want impose n>=0?");
+                    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+                    msgBox.setDefaultButton(QMessageBox::Yes);
+                    int ret = msgBox.exec();
+                    switch (ret) {
+                    case QMessageBox::Yes:
+                        par[9][1]=1;
+                        break;
+                    }
                     printf("n-file %s is <0 !!!\n",NANK[I-7].simplified().toStdString().c_str());
-                else if(IUVIR==2)
+                }
+                else if(IUVIR==2){
+                    QMessageBox msgBox;
+                    msgBox.setText("k-file "+NANK[I-7].simplified()+"is <0 !!!\n Do you want impose k>=0?");
+                    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+                    msgBox.setDefaultButton(QMessageBox::Yes);
+                    int ret = msgBox.exec();
+                    switch (ret) {
+                    case QMessageBox::Yes:
+                        par[9][1]=1;
+                        break;
+                    }
                     printf("k-file %s is <0 !!!\n",NANK[I-7].simplified().toStdString().c_str());
-                if(NINT(par[9][1])==1)
-                    printf("... but k will be set >=0 !!!\n");
+                }
                 ALARM=1;
             }
             if(int(par[9][1])==1 && YFIN<.0)
@@ -8490,20 +8601,24 @@ void FDISP(int iopt,double eV){
             eprj=real(cmpxOut);
             epij=imag(cmpxOut);
         }
-		else if(ifu==15){// Direct gap Cody M1-M2 CP with K-K integral
+        else if(ifu==15){// Direct gap Cody M1-M2 CP with K-K integral
+            if(D>K*0.45)
+                D=K*0.45;
             long double E3=K+E0;
             eprj=ReCodyM1M2(E,C,E0,E3,D);
             epij=ImCodyM1M2(E,C,E0,E3,D);
         }
         else if(ifu==16){// Direct gap Tauc M1-M2 CP with K-K integral
+            if(D>K*0.45)
+                D=K*0.45;
             long double E3=K+E0;
             eprj=ReTaucM1M2(E,C,E0,E3,D);
             epij=ImTaucM1M2(E,C,E0,E3,D);
         }
         epr=epr+eprj;
         epi=epi+epij;
-        //if(eV>4.067 && eV<4.069)
-        //    printf("eprj=%Lf epij=%Lf\n",eprj,epij);
+//        if(eV>1.995 && eV<2.)
+//            printf("E=%f (eV) eprj=%Lf epij=%Lf\n",eV,eprj,epij);
     }
     EpsiR=epr;
     EpsiI=epi;
@@ -9041,7 +9156,7 @@ long double ReIndirTaucUrb(long double E,long double C,long double E0,long doubl
 }
 
 long double ImCodyM1M2(long double E,long double C,long double E0,long double E3,long double D){
-    //printf("->DirCodyM1M2 E=%Lf\n",E);
+    //printf("->DirCodyM1M2 E=%Lf C=%Lf E0=%Lf E3=%Lf D=%Lf E3-E0-D*2.=%Lf\n",E,C,E0,E3,D,E3-E0-D*2.);
     long double chi2,K1, EM, KCM1M2;
     K1=(E3-E0)*sqrt(E3-E0-D*2.)*sqrt(2.);
     EM=(E0+E3)/2.;
@@ -9056,6 +9171,7 @@ long double ImCodyM1M2(long double E,long double C,long double E0,long double E3
     else if (abs(E-EM)>=D) {
         chi2=chi2-K1*sqrt(abs(E-EM)-D);
     }
+    //printf("chi2=%Lf KCM1M2=%Lf\n",chi2,KCM1M2);
     chi2=chi2*C/KCM1M2;
     return(chi2);
 }
@@ -9101,6 +9217,8 @@ long double ReCodyM1M2(long double E,long double C,long double E0,long double E3
             }
             chi1=chi1+ImCodyM1M2(x,C,E0,E3,D)*x/(x*x-E*E);
         }
+//        if(E>1.998)
+//            printf("chi1=%Lf\n",chi1);
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
     }while(((chi1-chi1old)/chi1)>0.001 && nstep<401);
@@ -9354,7 +9472,7 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
 void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi[6][3]){
     int ivnk,NFA,iv[11][4],irougfa[11],irougms[11];
     double ds[11],gn[11],cn[11],gk[11],ck[11],ru[11],nmedio,kmedio,al[11],d[999],VNK[17][3],
-            dz,BpN,zz,ApN,ApK,BpK,CpK,CpN,Rs,R1s,Rp,R1p,Ts,Tp,As,Ap,ra;
+            dz,BpN,zz,ApN,ApK,BpK,CpK,CpN,Rs,R1s,Rp,R1p,Ts,Tp,As,Ap,ra,Ps,Pp;
     complex<double> ir[999],NQ,mus,mup,rhoS,rhopS,tauS,rhoP,rhopP,tauP,nq1,mus1,mup1,out[9][3],Bs,Cs,Bp,Cp;
 
 /* Subroutine for build-up the indicated coherent part of the multilayer and/or roughness
@@ -9367,8 +9485,6 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
     int imax=NINT(par[51][2]);// N. layers
     int nino=NINT(par[29][1]);//discretization inhomogeneity
     int N=NINT(par[28][1]);//   discretization integral for roughness
-    int nRoughTot=0;//number of rough layers
-    double dRoughTot=0;//total roughness thickness
     for(int i=1;i<=10;i++){
         ds[i]=pm[i][1];     // layer thickness
         al[i]=par[50+i][3]; // kind of layer
@@ -9380,8 +9496,6 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
         iv[i][1]=0;
         if(ru[i]>0. && i>=ifst && i<=imax){
             iv[i][1]=1;
-            nRoughTot++;
-            dRoughTot=dRoughTot+3.*ru[i];
         }
     }
 
@@ -9399,14 +9513,6 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
     // set index vector and refractive indices
     int ims=ifst;
     int nroug=0;
-    int NFAfakeLayer=1;
-    if(nRoughTot>0){//insert fake thin film with refractive index of input medium
-        NFA++;
-        d[NFA]=dRoughTot;
-        ir[NFA]=ir[NFA-1];
-        NFAfakeLayer=NFA;
-        //if(iwl==100) printf("->BUILDER\nnRoughtTot=%d => fake-layer@NFA=%d\n",nRoughTot,NFA);
-    }
     while(ims<=(ifst+ncoe-1) || ru[ims]>.0){
         //if(iwl==100) printf("while@ims=%d\n",ims);
 
@@ -9420,7 +9526,7 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
             ir[NFA]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
             d[NFA]=3.*ru[ims];//mean layer thichness
             ds[ims]=ds[ims]-3.*ru[ims];// net thichness of the following layer
-            //if(iwl==100) printf("found ru[%d]=%f => additional layer@NFA=%d\n",ims,ru[ims],NFA);
+            if(iwl==100) printf("found ru[%d]=%f => additional layer@NFA=%d\n",ims,ru[ims],NFA);
         }
         if(ds[ims]>.0){
             //** inhomogeneity
@@ -9478,7 +9584,7 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
                     ir[NFA-nino]=ir[NFA-nino+1];//nk for roughness
             }
             else if(NINT(al[ims])==2){// homogeneous layer
-//                if(iwl==100) printf("homogeneous layer\n");
+                if(iwl==100) printf("homogeneous layer\n");
                 NFA=NFA+1;
                 ivnk=NINT(par[50+ims][1]);
                 ir[NFA]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
@@ -9489,7 +9595,6 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
     }
     // substrate
     NFA=NFA+1;
-//    if(iwl==100) printf("substrate: ims=%d NFA=%d imax=%d\n",ims,NFA,imax);
     if(ru[ims-1]>.0 && NINT(al[ims-1])==1)
         ims=ims-1; //rough bulk
     if(ims<=imax)
@@ -9499,13 +9604,13 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
     }
     ir[NFA]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
     d[NFA]=0.;
+    if(iwl==100) printf("exit medium: ims=%d NFA=%d imax=%d\n",ims,NFA,imax);
 
-//    if(iwl==100){
-//        printf("nRoughTot=%d\n",nRoughTot);
-//        for(int i=1;i<=NFA;i++)
-//            printf("iNFA=%d n=%f k=%f d=%f\n",i,real(ir[i]),imag(ir[i]),d[i]);
-//        printf("nroug=%d\n",nroug);
-//    }
+    if(iwl==100){
+        for(int i=1;i<=NFA;i++)
+            printf("iNFA=%d n=%f k=%f d=%f\n",i,real(ir[i]),imag(ir[i]),d[i]);
+        printf("nroug=%d\n",nroug);
+    }
 
     // managment of roughness and Fresnel's coefficient computing
 
@@ -9523,6 +9628,8 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
     Tp=0.;
     As=0.;
     Ap=0.;
+    Ps=0.;
+    Pp=0.;
     Bs=complex<double>(.0,.0);
     Cs=complex<double>(.0,.0);
     Bp=complex<double>(.0,.0);
@@ -9555,17 +9662,15 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
 //                                                    printf("i%d=%d ",i,iv[i][2]);
 //                                                printf("\n");
 //                                            }
-                                            d[NFAfakeLayer]=dRoughTot;
                                             for(int i=1;i<=nroug;i++){
                                                 ilyru=irougms[i];
                                                 ra=pow(-1.,iv[ilyru][2])*dx[N][int(iv[ilyru][2]/2.+1)];
                                                 wtot=wtot*pow(w[N][int(iv[ilyru][2]/2.+1)],iv[ilyru][1]);
-                                                d[NFAfakeLayer]=d[NFAfakeLayer]+ra*ru[irougms[i]];
                                                 d[irougfa[i]]=(3.-ra)*ru[irougms[i]];
 //                                                if(iwl==100)
-//                                                    printf("ilyru=%d ru[%d]=%f d[%d]=%f d[%d]=%f ir[%d]=%f ir[%d]=%f\n",
-//                                                           ilyru,irougms[i],ru[irougms[i]],NFAfakeLayer,d[NFAfakeLayer],irougfa[i],d[irougfa[i]],
-//                                                                              NFAfakeLayer,real(ir[NFAfakeLayer]),irougfa[i],real(ir[irougfa[i]]));
+//                                                    printf("ilyru=%d ru[%d]=%f d[%d]=%f ir[%d]=%f\n",
+//                                                           ilyru,irougms[i],ru[irougms[i]],irougfa[i],d[irougfa[i]],
+//                                                                              irougfa[i],real(ir[irougfa[i]]));
                                                 ilyru++;
                                             }
                                             CALFRE(NFA,wl,pq,ir,d,out);
@@ -9587,6 +9692,8 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
                                             Cs=Cs+out[1][0]*wtot;
                                             Bp=Bp+out[2][0]*wtot;
                                             Cp=Cp+out[3][0]*wtot;
+                                            Ps=Ps+real(out[0][1])*wtot;
+                                            Pp=Pp+real(out[0][2])*wtot;
                                         }
                                     }
                                 }
@@ -9598,8 +9705,8 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
         }
     }
     //save Fresnell coefficients
-    freCoeff[0][0]=tauS;
-    freCoeff[0][1]=tauP;
+    freCoeff[0][0]=Ps;
+    freCoeff[0][1]=Pp;
     freCoeff[1][0]=rhoS;
     freCoeff[1][1]=rhoP;
     freCoeff[2][0]=rhopS;
@@ -9609,6 +9716,8 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
     freCoeff[4][1]=Cs;
     freCoeff[5][0]=Bp;
     freCoeff[5][1]=Cp;
+    freCoeff[0][0]=Ps;
+    freCoeff[0][1]=Pp;
 
     //save to VOSI
     if(NINT(par[54][2])==0){ //specular SF measurements
@@ -9687,7 +9796,7 @@ void CALFRE(int NFA,double wl,complex<double> pq,complex<double> IR[999],double 
     mus1=sqrt(nq1-pq);
     mup1=nq1/mus1;
 
-    //Fresnel's coefficinet and R R1 T A
+    //Fresnel's coefficient and R R1 T A
     //  polarization-s
     B=SC[1][1]+SC[1][2]*MUS;
     C=SC[2][1]+SC[2][2]*MUS;
@@ -9705,6 +9814,7 @@ void CALFRE(int NFA,double wl,complex<double> pq,complex<double> IR[999],double 
     double As=4.*real(mus1)*real(B*conj(C)-MUS)/pow(abs(deno),2.);
     out[0][0]=B;
     out[1][0]=C;
+    out[0][1]=real(B*conj(C));//Poynting vector s-pol
 
     //  polarization-p
     B=PC[1][1]+PC[1][2]*MUP;
@@ -9723,6 +9833,7 @@ void CALFRE(int NFA,double wl,complex<double> pq,complex<double> IR[999],double 
     double Ap=4.*real(mup1)*real(B*conj(C)-MUP)/pow(abs(deno),2.);
     out[2][0]=B;
     out[3][0]=C;
+    out[0][2]=real(B*conj(C));//Poynting vector p-pol
 
     // PSI & DELTA
     double PSI=atan(abs(rhoP/rhoS))/deg2rad;
@@ -9746,6 +9857,7 @@ void CALFRE(int NFA,double wl,complex<double> pq,complex<double> IR[999],double 
     out[7][2]=Ap;
     out[8][2]=DEL;
 }
+
 
 
 int SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp){
@@ -10607,5 +10719,15 @@ void ludcmp(int np,double **a,int n,int *indx,double d){
                 a[i][j]=a[i][j]*dum;
         }
     }//! Go back for the next column in the reduction.
+    return;
+}
+
+
+
+void AbsLayInco(double atten, double Ra, double R1a, double Rb){
+    //absorptance of a not coherent layer
+    double uguale=(1.-R1a*Rb*atten*atten);
+    Vservice[0]=(1.-Ra)*(1.-atten)*(1.+Rb*atten)/uguale;//Absorptance
+    Vservice[1]=(1.-Ra)*atten/uguale;//Transmittance at the entrance of the "b" interface
     return;
 }

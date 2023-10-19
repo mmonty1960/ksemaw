@@ -29,6 +29,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 */
 #ifndef KSEMAWC_H
 #define KSEMAWC_H
+#include <qwt_picker_machine.h>
 
 #include "ui_ksemawc.h"
 class QwtPlotZoomer;
@@ -55,6 +56,8 @@ private:
     void ReadSetting(QString);
     Ui::ksemawc *ui;
     QwtPlotPicker* m_picker;
+    QwtPickerClickPointMachine* picker_m;
+    QwtPlotPicker* d_picker;
 
 public:
     ksemawc(QWidget *parent=0);    
@@ -68,6 +71,7 @@ public Q_SLOTS:
      void SaveProject();
      void LoadFilenk();
      void ClrFnk();
+     void Clrfn();
      void SaveFnk();
      void SaveSetting(int iCall);
      void Setnk1();
@@ -219,7 +223,7 @@ public Q_SLOTS:
      void setRifMir();
      void SPADA();
      void selectNsol();
-     void Selected( const QPolygon polygon);
+     void drawPolygon(QPointF pos);
      void setKindOsc1();
      void setKindOsc2();
      void setKindOsc3();
@@ -242,6 +246,166 @@ public Q_SLOTS:
      void setKindOsc20();
      void setFontDia();
      void msgErrLoad(QString where, QString fnERR);
+ private Q_SLOTS:
+     void on_LEpm_102_1_textChanged(const QString &arg1);
+     void on_LEpm_103_1_textChanged(const QString &arg1);
+     void on_LEpm_104_1_textChanged(const QString &arg1);
+     void on_LEpm_105_1_textChanged(const QString &arg1);
+     void on_LEpm_107_1_textChanged(const QString &arg1);
+     void on_LEpm_108_1_textChanged(const QString &arg1);
+     void on_LEpm_109_1_textChanged(const QString &arg1);
+     void on_LEpm_110_1_textChanged(const QString &arg1);
+
+     void on_LEpm_112_1_textChanged(const QString &arg1);
+     void on_LEpm_113_1_textChanged(const QString &arg1);
+     void on_LEpm_114_1_textChanged(const QString &arg1);
+     void on_LEpm_115_1_textChanged(const QString &arg1);
+     void on_LEpm_117_1_textChanged(const QString &arg1);
+     void on_LEpm_118_1_textChanged(const QString &arg1);
+     void on_LEpm_119_1_textChanged(const QString &arg1);
+     void on_LEpm_120_1_textChanged(const QString &arg1);
+
+     void on_LEpm_122_1_textChanged(const QString &arg1);
+     void on_LEpm_123_1_textChanged(const QString &arg1);
+     void on_LEpm_124_1_textChanged(const QString &arg1);
+     void on_LEpm_125_1_textChanged(const QString &arg1);
+     void on_LEpm_127_1_textChanged(const QString &arg1);
+     void on_LEpm_128_1_textChanged(const QString &arg1);
+     void on_LEpm_129_1_textChanged(const QString &arg1);
+     void on_LEpm_130_1_textChanged(const QString &arg1);
+
+     void on_LEpm_132_1_textChanged(const QString &arg1);
+     void on_LEpm_133_1_textChanged(const QString &arg1);
+     void on_LEpm_134_1_textChanged(const QString &arg1);
+     void on_LEpm_135_1_textChanged(const QString &arg1);
+     void on_LEpm_137_1_textChanged(const QString &arg1);
+     void on_LEpm_138_1_textChanged(const QString &arg1);
+     void on_LEpm_139_1_textChanged(const QString &arg1);
+     void on_LEpm_140_1_textChanged(const QString &arg1);
+
+     void on_LEpm_142_1_textChanged(const QString &arg1);
+     void on_LEpm_143_1_textChanged(const QString &arg1);
+     void on_LEpm_144_1_textChanged(const QString &arg1);
+     void on_LEpm_145_1_textChanged(const QString &arg1);
+     void on_LEpm_147_1_textChanged(const QString &arg1);
+     void on_LEpm_148_1_textChanged(const QString &arg1);
+     void on_LEpm_149_1_textChanged(const QString &arg1);
+     void on_LEpm_150_1_textChanged(const QString &arg1);
+
+     void on_LEpm_152_1_textChanged(const QString &arg1);
+     void on_LEpm_153_1_textChanged(const QString &arg1);
+     void on_LEpm_154_1_textChanged(const QString &arg1);
+     void on_LEpm_155_1_textChanged(const QString &arg1);
+     void on_LEpm_157_1_textChanged(const QString &arg1);
+     void on_LEpm_158_1_textChanged(const QString &arg1);
+     void on_LEpm_159_1_textChanged(const QString &arg1);
+     void on_LEpm_160_1_textChanged(const QString &arg1);
+
+     void on_LEpm_162_1_textChanged(const QString &arg1);
+     void on_LEpm_163_1_textChanged(const QString &arg1);
+     void on_LEpm_164_1_textChanged(const QString &arg1);
+     void on_LEpm_165_1_textChanged(const QString &arg1);
+     void on_LEpm_167_1_textChanged(const QString &arg1);
+     void on_LEpm_168_1_textChanged(const QString &arg1);
+     void on_LEpm_169_1_textChanged(const QString &arg1);
+     void on_LEpm_170_1_textChanged(const QString &arg1);
+
+     void on_LEpm_172_1_textChanged(const QString &arg1);
+     void on_LEpm_173_1_textChanged(const QString &arg1);
+     void on_LEpm_174_1_textChanged(const QString &arg1);
+     void on_LEpm_175_1_textChanged(const QString &arg1);
+     void on_LEpm_177_1_textChanged(const QString &arg1);
+     void on_LEpm_178_1_textChanged(const QString &arg1);
+     void on_LEpm_179_1_textChanged(const QString &arg1);
+     void on_LEpm_180_1_textChanged(const QString &arg1);
+
+     void on_LEpm_182_1_textChanged(const QString &arg1);
+     void on_LEpm_183_1_textChanged(const QString &arg1);
+     void on_LEpm_184_1_textChanged(const QString &arg1);
+     void on_LEpm_185_1_textChanged(const QString &arg1);
+     void on_LEpm_187_1_textChanged(const QString &arg1);
+     void on_LEpm_188_1_textChanged(const QString &arg1);
+     void on_LEpm_189_1_textChanged(const QString &arg1);
+     void on_LEpm_190_1_textChanged(const QString &arg1);
+
+     void on_LEpm_192_1_textChanged(const QString &arg1);
+     void on_LEpm_193_1_textChanged(const QString &arg1);
+     void on_LEpm_194_1_textChanged(const QString &arg1);
+     void on_LEpm_195_1_textChanged(const QString &arg1);
+     void on_LEpm_197_1_textChanged(const QString &arg1);
+     void on_LEpm_198_1_textChanged(const QString &arg1);
+     void on_LEpm_199_1_textChanged(const QString &arg1);
+     void on_LEpm_200_1_textChanged(const QString &arg1);
+
+     void on_dSB_PM_1_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_2_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_3_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_4_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_5_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_6_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_7_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_8_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_9_1_valueChanged(const QString &arg1);
+
+     void on_dSB_PM_51_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_52_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_53_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_54_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_55_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_56_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_57_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_58_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_59_1_valueChanged(const QString &arg1);
+
+     void on_dSB_PM_11_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_12_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_13_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_14_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_15_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_16_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_17_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_18_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_19_1_valueChanged(const QString &arg1);
+
+     void on_dSB_PM_61_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_62_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_63_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_64_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_65_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_66_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_67_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_68_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_69_1_valueChanged(const QString &arg1);
+
+     void on_dSB_PM_21_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_22_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_23_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_24_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_25_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_26_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_27_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_28_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_29_1_valueChanged(const QString &arg1);
+
+     void on_dSB_PM_31_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_32_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_33_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_34_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_35_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_36_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_37_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_38_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_39_1_valueChanged(const QString &arg1);
+
+     void on_dSB_PM_41_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_42_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_43_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_44_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_45_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_46_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_47_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_48_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_49_1_valueChanged(const QString &arg1);
 };
 
 #endif

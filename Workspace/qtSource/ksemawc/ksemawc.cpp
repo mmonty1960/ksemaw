@@ -309,6 +309,9 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 #include <qwt_plot_intervalcurve.h>
 #include <qwt_interval_symbol.h>
 #include <QwtPickerMachine>
+#include <qwt_picker_machine.h>
+#include <qwt_picker.h>
+#include <qwt_plot_picker.h>
 #include <QwtPlotZoomer>
 #include <QPen>
 #include <QGraphicsPolygonItem>
@@ -328,6 +331,8 @@ QString fnproject,pathroot,fileStore,fStdSpect,fRefMir,fNKsim,fMisSim,filechi2;
 QString info,fnk[9],fnSample,fnTn,fnTp,fnRn,fnRp,fnR1,fnApds,fnE1,fnE2,fnE3,fnE4,fnFnk,ParFitLab[12],NANK[17];
 
 QwtPlot *G1_Tn, *G2_Tp, *G3_Rn, *G4_Rp, *G5_R1, *G6_Apds, *G7_D, *G8_P, *G9_Af, *G10_tTR, *G11_nk, *G12_wn, *G13_wk, *G14_we1, *G15_we2, *G16_Ab;
+QPolygon polygon;
+QPolygonF polygonF;
 QColor myColor[7]={Qt::black,Qt::blue,Qt::cyan,Qt::green,Qt::magenta,Qt::red,Qt::yellow};
 QString labelQwt;//label to use in absorptance plot
 int iColor=0;
@@ -437,7 +442,7 @@ ksemawc::ksemawc(QWidget *parent) :
     printf("              Program C++ kSEMAW\n\n");
     printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
     printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 2.3 21 September 2023\n\n");
+    printf("         version 2.4 19 October 2023\n\n");
     printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
     printf("          email: marco.montecchi@enea.it\n");
     printf("          Porting to Windows and advanced oscillators by\n");
@@ -471,6 +476,7 @@ ksemawc::ksemawc(QWidget *parent) :
     connect( ui->pBclearnk7,SIGNAL( clicked() ), this, SLOT(Clrnk7()));
     connect( ui->pBclearnk8,SIGNAL( clicked() ), this, SLOT(Clrnk8()));
     connect( ui->pBsetSample,SIGNAL( clicked() ), this, SLOT(callSetSample()));
+    connect( ui->pBclearFn,SIGNAL( clicked() ), this, SLOT(Clrfn()));
     connect( ui->lineEdit_sample,SIGNAL(textChanged(QString)),this, SLOT(listMeas(QString)));
     connect( ui->cBmis1,SIGNAL(currentIndexChanged(int)),this,SLOT(pwTn(int)));
     connect( ui->cBmis2,SIGNAL(currentIndexChanged(int)),this,SLOT(pwTp(int)));
@@ -557,15 +563,15 @@ ksemawc::ksemawc(QWidget *parent) :
     connect(ui->dSB_PAR_15_1,SIGNAL(valueChanged(double)),this,SLOT(AdjTheta()));
     connect(ui->dSB_PAR_16_1,SIGNAL(valueChanged(double)),this,SLOT(AdjTheta()));
     connect(ui->dSB_PAR_17_1,SIGNAL(valueChanged(double)),this,SLOT(AdjTheta()));
-    connect(ui->dSB_PM_1_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
-    connect(ui->dSB_PM_2_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
-    connect(ui->dSB_PM_3_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
-    connect(ui->dSB_PM_4_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
-    connect(ui->dSB_PM_5_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
-    connect(ui->dSB_PM_6_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
-    connect(ui->dSB_PM_7_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
-    connect(ui->dSB_PM_8_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
-    connect(ui->dSB_PM_9_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
+    connect(ui->dSB_PM_51_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
+    connect(ui->dSB_PM_52_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
+    connect(ui->dSB_PM_53_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
+    connect(ui->dSB_PM_54_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
+    connect(ui->dSB_PM_55_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
+    connect(ui->dSB_PM_56_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
+    connect(ui->dSB_PM_57_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
+    connect(ui->dSB_PM_58_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
+    connect(ui->dSB_PM_59_1,SIGNAL(valueChanged(double)),this,SLOT(AdjRoughMax()));
     connect(ui->comB_PAR_51_3,SIGNAL(currentIndexChanged(int)),this,SLOT(RefreshModel()));
     connect(ui->comB_PAR_52_3,SIGNAL(currentIndexChanged(int)),this,SLOT(RefreshModel()));
     connect(ui->comB_PAR_53_3,SIGNAL(currentIndexChanged(int)),this,SLOT(RefreshModel()));
@@ -1574,7 +1580,6 @@ ksemawc::ksemawc(QWidget *parent) :
 }
 
 
-
 void ksemawc::closeEvent ( QCloseEvent * event )
 {
    //save widget size
@@ -1684,13 +1689,16 @@ void ksemawc::ReadSetting(QString filename){
             Setnk(i);
         }
     }
-    line = stream.readLine();//nk-solutions
+    //nk-solutions
+    line = stream.readLine();
     NANK[9]=line.simplified();
     ui->lineEdit_Fnk->setText(NANK[9]+".nk");
     fnFnk=pathroot+line.simplified()+".nk";
-    line = stream.readLine();//path-file std spectrum
+    //standard spectrum for mean computing
+    line = stream.readLine();
     NANK[10]=line.simplified();
-    line = stream.readLine();//base-name of SF measurement
+    //base-name of SF measurement
+    line = stream.readLine();
     NANK[11]=line.simplified();
     ui->lineEdit_sample-> setText(NANK[11]);
     fnSample=pathroot+line.simplified();
@@ -1712,7 +1720,7 @@ void ksemawc::ReadSetting(QString filename){
     NANK[15]=line.simplified();
     fnE4=pathroot+line.simplified()+".el";
 
-    setSample();
+    //setSample();
     //RXY
     for(int i=1;i<=irx;i++){
         for(int j=1;j<=4;j++){
@@ -2147,11 +2155,21 @@ void ksemawc::AdjTheta(){
 
 
 void ksemawc::AdjRoughMax(){
-    double d;
+    double d,rgh,rghMax;
     for(int i=1;i<10;i++){
         int iKind=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] ->currentIndex();
         if(iKind>0){
             d=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] ->value();
+            rghMax=idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] -> maximum();
+            if(rghMax<d/3.)
+                idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] ->setMaximum(d/3.);
+            rgh=idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] -> value();
+            if(rgh>d/3.+0.05){
+                QMessageBox msgBox;
+                msgBox.setText("ATTENTION:the roughness of layer #"+QString::number(i)+" exceeds the limit 1/3*thickness, therefore it has been resized");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.exec();
+            }
             idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] ->setMaximum(d/3.);
         }
         else
@@ -2413,7 +2431,9 @@ void ksemawc::SaveSetting(int iCall){
         out << stringa << "\n";
     }
     stringa=ui->lineEdit_Fnk -> text();
-    stringa=stringa.section('.', 0, 1);
+    QString strS=stringa.simplified();
+    if(strS.contains(".nk"))
+        stringa=strS.section('.', 0, -2);
     NANK[9]=stringa;
     out << stringa << "\n";
     //media
@@ -2744,12 +2764,18 @@ void ksemawc::LoadFilenk(){
         return;
     }
     QTextStream stream ( &file );
-    QString line,line2;
+    QString line;
+    //display filename and save in NANK[9]
+    line=fnFnk.section(pathroot, 1, 1);
+    ui->lineEdit_Fnk -> setText(line);
+    if(line.contains(".nk"))
+        line=line.section('.', 0, -2);
+    NANK[9]=line;
+    //display info
     line = stream.readLine();
     ui->lineEdit_infoFnk -> setText(line.simplified());
-    line2=fnFnk.section(pathroot, 1, 1);
-    ui->lineEdit_Fnk -> setText(line2);
     printf("\tInfo: %s\n",(line.simplified()).toStdString().c_str());
+    //read Ndata
     line = stream.readLine();
     int N=line.toInt();
     printf("\tN. (L,n,k)= %d\n",N);
@@ -2762,6 +2788,7 @@ void ksemawc::LoadFilenk(){
     rxy[17][3]=1000.;
     rxy[17][4]=-1000.;
     SOL[1][1]=N;
+    //load data
     for(int L=2;L<=N+1;L++){
         line=stream.readLine();
         line=line.simplified();
@@ -2843,6 +2870,7 @@ void ksemawc::LoadFilenk(){
 void ksemawc::ClrFnk(){
     ui->lineEdit_Fnk -> setText("mate/aa999.9");
     ui->lineEdit_infoFnk ->setText("");
+    NANK[9]="mate/aa999.9";
 }
 
 
@@ -3084,6 +3112,36 @@ void ksemawc::mDwUp(int iLayer, int Dw1UpM1){
 }
 
 
+void ksemawc::Clrfn(){
+    occupyPF=2;
+    NANK[11]="mate/aa999";
+    ui->lineEdit_sample-> setText(NANK[11]);
+    fnSample=pathroot+NANK[11];
+    ifn=0;
+    for(int imis=1;imis<=13;imis++){
+        if(imis==8 || imis==10 || imis==12)
+            imis++;
+        idToComboBox["cBmis"+QString::number(imis)] -> clear();
+        idToCheckBox["checkB_mis"+QString::number(imis)+"_1"] -> setCheckState(Qt::Unchecked);
+        idToCheckBox["checkB_mis"+QString::number(imis)+"_3"] -> setCheckState(Qt::Unchecked);
+    }
+    ui->lineEdit_Tn->setText("");
+    ui->lineEdit_Tp->setText("");
+    ui->lineEdit_Rn->setText("");
+    ui->lineEdit_Rp->setText("");
+    ui->lineEdit_R1->setText("");
+    ui->lineEdit_Apds->setText("");
+    ui->lineEdit_E1->setText("");
+    ui->lineEdit_E2->setText("");
+    ui->lineEdit_E3->setText("");
+    ui->lineEdit_E4->setText("");
+    occupyPF=0;
+    SaveSetting(0);
+    MCRange();
+}
+
+
+
 void ksemawc::Clrnk(int ifile){
     fnk[ifile]="mate/aa999.9";
     idToLineEdit["lineEdit"+QString::number(ifile)] -> setText("mate/aa999.9");
@@ -3146,6 +3204,8 @@ void ksemawc::setSample(){
 }
 
 void ksemawc::listMeas(const QString &){
+    if(occupyPF==2)
+        return;
     if(fnSample.isEmpty())
         return;
     printf("->listMeas with fnSample= %s\n",fnSample.toStdString().c_str());
@@ -3200,6 +3260,8 @@ void ksemawc::listMeas(const QString &){
 }
 
 void ksemawc::pwTn(const int &){
+    if(fnSample.contains("mate/aa"))
+        return;
     double wmin=0.,wmax=0.;
     QString lab,info;
     lab=ui->cBmis1 -> currentText();
@@ -3218,6 +3280,8 @@ void ksemawc::pwTn(const int &){
 }
 
 void ksemawc::pwTp(const int &){
+    if(fnSample.contains("mate/aa"))
+        return;
     double wmin=0.,wmax=0.;
     QString lab,info;
     lab=ui->cBmis2 -> currentText();
@@ -3236,6 +3300,8 @@ void ksemawc::pwTp(const int &){
 }
 
 void ksemawc::pwRn(const int &){
+    if(fnSample.contains("mate/aa"))
+        return;
     double wmin=0.,wmax=0.;
     QString lab,info;
     lab=ui->cBmis3 -> currentText();
@@ -3254,6 +3320,8 @@ void ksemawc::pwRn(const int &){
 }
 
 void ksemawc::pwRp(const int &){
+    if(fnSample.contains("mate/aa"))
+        return;
     double wmin=0.,wmax=0.;
     QString lab,info;
     lab=ui->cBmis4 -> currentText();
@@ -3272,6 +3340,8 @@ void ksemawc::pwRp(const int &){
 }
 
 void ksemawc::pwR1(const int &){
+    if(fnSample.contains("mate/aa"))
+        return;
     double wmin=0.,wmax=0.;
     QString lab,info;
     lab=ui->cBmis5 -> currentText();
@@ -3290,6 +3360,8 @@ void ksemawc::pwR1(const int &){
 }
 
 void ksemawc::pwApds(const int &){
+    if(fnSample.contains("mate/aa"))
+        return;
     double wmin=0.,wmax=0.;
     QString lab,info;
     lab=ui->cBmis6 -> currentText();
@@ -3308,6 +3380,8 @@ void ksemawc::pwApds(const int &){
 }
 
 void ksemawc::pwE1(const int &){
+    if(fnSample.contains("mate/aa"))
+        return;
     int ntel=0,ndat=0,i,index;
     double teta=0;
     double wmin=0.,wmax=0.;
@@ -3346,6 +3420,8 @@ void ksemawc::pwE1(const int &){
 }
 
 void ksemawc::pwE2(const int &){
+    if(fnSample.contains("mate/aa"))
+        return;
     int ntel=0,ndat=0,i,index;
     double teta=0;
     double wmin=0.,wmax=0.;
@@ -3384,6 +3460,8 @@ void ksemawc::pwE2(const int &){
 }
 
 void ksemawc::pwE3(const int &){
+    if(fnSample.contains("mate/aa"))
+        return;
     int ntel=0,ndat=0,i,index;
     double teta=0;
     double wmin=0.,wmax=0.;
@@ -3422,6 +3500,8 @@ void ksemawc::pwE3(const int &){
 }
 
 void ksemawc::pwE4(const int &){
+    if(fnSample.contains("mate/aa"))
+        return;
     int ntel=0,ndat=0,i,index;
     double teta=0;
     double wmin=0.,wmax=0.;
@@ -4452,7 +4532,7 @@ void ksemawc::listOsc(){
 void ksemawc::rangeWL(){
     double Lmin=ui->dSB_PAR_4_1 -> value();
     double Lmax=ui->dSB_PAR_4_2 -> value();
-    ui->lineEdit_eVrange->setText("i.e. from "+QString::number(12400./Lmin)+"\tto\t"+QString::number(12400./Lmax)+" eV");
+    ui->lineEdit_eVrange->setText(QString::number(12400./Lmin,'g',4)+"<->"+QString::number(12400./Lmax,'g',4)+" eV");
     Qt::CheckState state;
     state = ui->checkBox_msgr -> checkState();
     if(state == Qt::Unchecked){
@@ -4602,6 +4682,7 @@ void ksemawc::tabChanged(){
     QMessageBox msgBox;
     int itab=ui->tabWidget -> currentIndex();
     printf("-> tabChanged:  itab=%d lastTab=%d\n",itab,lastTab);
+    AdjRoughMax();
     SaveSetting(lastTab);
     QString filepro=ui->lineEdit_P -> text();
     if(filepro.contains("mate/aa999") && itab!=5){
@@ -5179,6 +5260,7 @@ void ksemawc::PlotNK(int iRD){
 
 void ksemawc::Simula(){
     printf("->Simula\n");
+    AdjRoughMax();
     SaveSetting(-1);
     double mc[15][202];
     Qt::CheckState state,state1;
@@ -5447,14 +5529,14 @@ void ksemawc::CalcMis(double mc[15][202]){
         labelQwt="A_back";
         PLOTline1bar2(1,0,iColor,16,201,Xp,Yp,ErrXp,ErrYp);
     }
-    if(IXW[12]>0){
+    //if(IXW[12]>0){//plot nk
         PLOTline1bar2(1,0,iColor,12,201,Xp,nn,ErrXp,ErrYp);
         PLOTline1bar2(1,0,iColor,13,201,Xp,kk,ErrXp,ErrYp);
-        if(NINT(par[10][1])==1){
+        if(NINT(par[10][1])==1){//plot permittivity
             PLOTline1bar2(1,0,iColor,14,201,Xp,e1,ErrXp,ErrYp);
             PLOTline1bar2(1,0,iColor,15,201,Xp,e2,ErrXp,ErrYp);
         }
-    }
+    //}
     QFile file(fMisSim);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
         msgErrLoad("CalcMis-fMisSim",fMisSim);
@@ -6060,61 +6142,50 @@ void ksemawc::NumericalSearch(){
 }
 
 void ksemawc::selectNsol(){
-    iSelected=0;
+    polygonF.clear();
     QMessageBox msgBox;
-    msgBox.setText("Please delimit with a polygon the n-solutions to be deleted!\n\nLeft click to set a point; right click on the last one!\n");
+    msgBox.setText("Please delimit with a polygon the n-solutions to be deleted!\nLeft click to set a point; click on the first point to terminate!");
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.exec();
-    m_picker = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
+    picker_m = new QwtPickerClickPointMachine();
+    d_picker = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
         G12_wn->canvas() );
-    m_picker->setStateMachine( new QwtPickerPolygonMachine );
-    m_picker->setRubberBandPen( QColor( Qt::green ) );
-    m_picker->setRubberBand( QwtPicker::CrossRubberBand );
-    m_picker->setTrackerPen( QColor( Qt::black ) );
-    connect( m_picker, SIGNAL(selected(const QPolygon&)),
-        SLOT(Selected(const QPolygon)) );
+    d_picker->setStateMachine(picker_m);
+    connect(d_picker, SIGNAL(selected(QPointF)), this, SLOT(drawPolygon(QPointF)));
 }
 
-void ksemawc::Selected( QPolygon polygon){
-    if(iSelected>0)
+
+void ksemawc::drawPolygon(QPointF pos){
+    double x1,y1;
+    x1=pos.x();
+    y1=pos.y();
+    if(L1E2==2)
+        x1=12400./x1;
+    polygonF<<QPointF(x1,y1);
+    int Np=polygonF.count();
+    //printf("pt_%d: x=%f y=%f\n",Np,x1,y1);
+    if(Np<=1)
         return;
-    iSelected++;
-    using namespace QwtAxis;
-    int Np=polygon.count();
-    printf("polygon composed by %d points\n",Np);
-    float x1,y1;
-    QPoint pt1;
-    QPolygonF polygonF;
+    double x[Np],y[Np],ErrXp[Np],ErrYp[Np];
     for(int i=0;i<Np;i++){
-        pt1=polygon.point(i);
-        x1=pt1.x();
-        y1=pt1.y();
-        x1=G12_wn->invTransform( XBottom, x1);
-        if(L1E2==2)
-            x1=12400./x1;
-        y1=G12_wn->invTransform( YLeft, y1);
-        polygonF<<QPointF(x1,y1);
-        printf("pt_%d: x=%f y=%f\n",i,x1,y1);
+        x[i]=polygonF.at(i).x();
+        y[i]=polygonF.at(i).y();
+        printf("x[%d]=%f y[%d]=%f\n",i,x[i],i,y[i]);
     }
-    Np=polygonF.count();
-    if(Np<3){
-        QMessageBox msgBox;
-        msgBox.setText("Please select at least 3 NOT ALIGNED points!!!");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.exec();
+    PLOTline1bar2(1,0,1,12,Np,x,y,ErrXp,ErrYp);//n plot
+    double delta=pow((x[Np-1]-x[0])/(rxy[20][2]-rxy[20][1]),2.)+
+                   pow((y[Np-1]-y[0])/(rxy[16][2]-rxy[16][1]),2.);
+    if(sqrt(delta)>0.01)
         return;
-    }
     QPointF ptF;
     int nSol=NINT(SOL[1][1]);
     printf("nSol=%d\n",nSol);
     for(int i=2;i<=nSol+1;i++){
-        x1=SOL[i][1];
-        y1=SOL[i][2];
-        ptF.setX(x1);
-        ptF.setY(y1);
+        ptF.setX(SOL[i][1]);
+        ptF.setY(SOL[i][2]);
         if(polygonF.containsPoint(ptF,Qt::OddEvenFill)){
-            printf("i=%d wl=%f n=%f is contained! It will be canceled\n",i,x1,y1);
+            //printf("i=%d wl=%f n=%f is contained! It will be canceled\n",i,x1,y1);
             SOL[i][6]=0.;//to be canceled
         }
         else
@@ -6138,7 +6209,11 @@ void ksemawc::Selected( QPolygon polygon){
         SOL[I][6]=1;
     }
     printf("now the nk-solutions are %d\n",newN);
-    PlotNK(1);
+    PlotNK(1);//plot nk
+    //stop motor&picker
+    delete picker_m;
+    picker_m=nullptr;
+    d_picker->setEnabled(false);
 }
 
 
@@ -7000,7 +7075,7 @@ void ksemawc::SPADA(){
             EST[i]=ST2+ST1+DIS[i];
         }
     }
-    if(!NANK[9].contains("mate/aa999.9")){
+    if(!NANK[9].contains("mate/aa999")){
         printf("SPADA-> call LoadFilenk with file-solutions %s\n",NANK[9].toStdString().c_str());
         LoadFilenk();
     }
@@ -10792,3 +10867,167 @@ void ludcmp(int np,double **a,int n,int *indx,double d){
     return;
 }
 */
+
+
+//save oscillator parameters at any value change
+void ksemawc::on_LEpm_102_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_103_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_104_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_105_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_107_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_108_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_109_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_110_1_textChanged(const QString &arg1) {SaveSetting(2);}
+
+void ksemawc::on_LEpm_112_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_113_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_114_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_115_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_117_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_118_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_119_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_120_1_textChanged(const QString &arg1) {SaveSetting(2);}
+
+void ksemawc::on_LEpm_122_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_123_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_124_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_125_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_127_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_128_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_129_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_130_1_textChanged(const QString &arg1) {SaveSetting(2);}
+
+void ksemawc::on_LEpm_132_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_133_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_134_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_135_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_137_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_138_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_139_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_140_1_textChanged(const QString &arg1) {SaveSetting(2);}
+
+void ksemawc::on_LEpm_142_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_143_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_144_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_145_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_147_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_148_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_149_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_150_1_textChanged(const QString &arg1) {SaveSetting(2);}
+
+void ksemawc::on_LEpm_152_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_153_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_154_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_155_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_157_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_158_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_159_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_160_1_textChanged(const QString &arg1) {SaveSetting(2);}
+
+void ksemawc::on_LEpm_162_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_163_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_164_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_165_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_167_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_168_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_169_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_170_1_textChanged(const QString &arg1) {SaveSetting(2);}
+
+void ksemawc::on_LEpm_172_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_173_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_174_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_175_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_177_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_178_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_179_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_180_1_textChanged(const QString &arg1) {SaveSetting(2);}
+
+void ksemawc::on_LEpm_182_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_183_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_184_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_185_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_187_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_188_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_189_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_190_1_textChanged(const QString &arg1) {SaveSetting(2);}
+
+void ksemawc::on_LEpm_192_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_193_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_194_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_195_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_197_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_198_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_199_1_textChanged(const QString &arg1) {SaveSetting(2);}
+void ksemawc::on_LEpm_200_1_textChanged(const QString &arg1) {SaveSetting(2);}
+
+//save model parameters at any value change
+void ksemawc::on_dSB_PM_1_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_2_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_3_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_4_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_5_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_6_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_7_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_8_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_9_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+
+void ksemawc::on_dSB_PM_51_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_52_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_53_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_54_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_55_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_56_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_57_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_58_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_59_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+
+void ksemawc::on_dSB_PM_11_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_12_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_13_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_14_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_15_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_16_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_17_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_18_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_19_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+
+void ksemawc::on_dSB_PM_61_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_62_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_63_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_64_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_65_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_66_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_67_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_68_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_69_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+
+void ksemawc::on_dSB_PM_21_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_22_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_23_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_24_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_25_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_26_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_27_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_28_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_29_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+
+void ksemawc::on_dSB_PM_31_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_32_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_33_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_34_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_35_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_36_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_37_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_38_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_39_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+
+void ksemawc::on_dSB_PM_41_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_42_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_43_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_44_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_45_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_46_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_47_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_48_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_49_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+

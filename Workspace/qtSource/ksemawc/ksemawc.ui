@@ -11,7 +11,7 @@
     <x>0</x>
     <y>0</y>
     <width>1226</width>
-    <height>983</height>
+    <height>891</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -2635,6 +2635,26 @@
          </item>
          <item>
           <widget class="QLineEdit" name="lineEdit_eVrange"/>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_36">
+           <property name="text">
+            <string>N. Points</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="sB_PAR_28_2">
+           <property name="minimum">
+            <number>10</number>
+           </property>
+           <property name="maximum">
+            <number>999</number>
+           </property>
+           <property name="value">
+            <number>201</number>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QCheckBox" name="checkB_RXY_25_4">
@@ -13716,192 +13736,91 @@
            <property name="verticalSpacing">
             <number>2</number>
            </property>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_26">
+           <item row="3" column="4">
+            <widget class="QLineEdit" name="LEpar_38_3">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="text">
-              <string>Theta (°)</string>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
+             <property name="readOnly">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <widget class="QLabel" name="label_30">
+           <item row="2" column="4">
+            <widget class="QLineEdit" name="LEpar_37_3">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="minimumSize">
-              <size>
-               <width>60</width>
-               <height>0</height>
-              </size>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
              </property>
-             <property name="text">
-              <string>Enable</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
+             <property name="readOnly">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
-            <widget class="QLabel" name="label_27">
+           <item row="6" column="4">
+            <widget class="QLineEdit" name="LEpar_41_3">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="text">
-              <string>D/Err RMS</string>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
+             <property name="readOnly">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
-           <item row="0" column="3">
-            <widget class="QLabel" name="label_28">
+           <item row="14" column="3">
+            <widget class="QLineEdit" name="LEpar_49_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="text">
-              <string>&lt;Exp.&gt;</string>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
+             <property name="readOnly">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
-           <item row="0" column="4">
-            <widget class="QLabel" name="label_29">
+           <item row="6" column="2">
+            <widget class="QLineEdit" name="LEpar_41_1">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="text">
-              <string>&lt;Sim.&gt;</string>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
+             <property name="readOnly">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLineEdit" name="lineEdit_27">
+           <item row="14" column="0">
+            <widget class="QDoubleSpinBox" name="dSB_PAR_17_1tris">
              <property name="enabled">
               <bool>false</bool>
              </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>160</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="text">
-              <string>00.00</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QCheckBox" name="checkB_mis1_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>60</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>160</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Tnorm</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QLineEdit" name="LEpar_36_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
-            <widget class="QLineEdit" name="LEpar_36_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="4">
-            <widget class="QLineEdit" name="LEpar_36_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QDoubleSpinBox" name="dSB_PAR_6_1">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -13921,69 +13840,12 @@
               <double>90.000000000000000</double>
              </property>
              <property name="value">
-              <double>0.000000000000000</double>
+              <double>60.000000000000000</double>
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QCheckBox" name="checkB_mis2_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>60</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>160</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Tpol</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="2">
-            <widget class="QLineEdit" name="LEpar_37_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="3">
-            <widget class="QLineEdit" name="LEpar_37_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="4">
-            <widget class="QLineEdit" name="LEpar_37_3">
+           <item row="1" column="4">
+            <widget class="QLineEdit" name="LEpar_36_3">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -14023,33 +13885,24 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="1">
-            <widget class="QCheckBox" name="checkB_mis3_2">
+           <item row="0" column="2">
+            <widget class="QLabel" name="label_27">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>60</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>160</width>
-               <height>16777215</height>
-              </size>
              </property>
              <property name="text">
-              <string>Rnorm</string>
+              <string>D/Err RMS</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
-           <item row="3" column="2">
-            <widget class="QLineEdit" name="LEpar_38_1">
+           <item row="5" column="3">
+            <widget class="QLineEdit" name="LEpar_40_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -14061,66 +13914,6 @@
              </property>
              <property name="readOnly">
               <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="3">
-            <widget class="QLineEdit" name="LEpar_38_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="4">
-            <widget class="QLineEdit" name="LEpar_38_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QDoubleSpinBox" name="dSB_PAR_6_1bis">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>160</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="maximum">
-              <double>90.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>60.000000000000000</double>
              </property>
             </widget>
            </item>
@@ -14149,271 +13942,8 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="2">
-            <widget class="QLineEdit" name="LEpar_39_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="3">
-            <widget class="QLineEdit" name="LEpar_39_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="4">
-            <widget class="QLineEdit" name="LEpar_39_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QLineEdit" name="lineEdit_29">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>160</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="text">
-              <string>00.00</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="1">
-            <widget class="QCheckBox" name="checkB_mis5_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>60</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>160</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>R1norm</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="2">
-            <widget class="QLineEdit" name="LEpar_40_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="3">
-            <widget class="QLineEdit" name="LEpar_40_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="4">
-            <widget class="QLineEdit" name="LEpar_40_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLineEdit" name="lineEdit_30">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>160</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="text">
-              <string>00.00</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <widget class="QCheckBox" name="checkB_mis6_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>160</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Apds</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="2">
-            <widget class="QLineEdit" name="LEpar_41_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="3">
-            <widget class="QLineEdit" name="LEpar_41_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="4">
-            <widget class="QLineEdit" name="LEpar_41_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0">
-            <widget class="QDoubleSpinBox" name="dSB_PAR_14_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>160</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="maximum">
-              <double>90.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>60.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="1">
-            <widget class="QCheckBox" name="checkB_mis7_2">
+           <item row="10" column="1">
+            <widget class="QCheckBox" name="checkB_mis10_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -14427,55 +13957,7 @@
               </size>
              </property>
              <property name="text">
-              <string>DEL-1</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="2">
-            <widget class="QLineEdit" name="LEpar_42_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="3">
-            <widget class="QLineEdit" name="LEpar_42_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="4">
-            <widget class="QLineEdit" name="LEpar_42_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
+              <string>PSI-2</string>
              </property>
             </widget>
            </item>
@@ -14507,6 +13989,156 @@
              </property>
             </widget>
            </item>
+           <item row="6" column="3">
+            <widget class="QLineEdit" name="LEpar_41_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="3">
+            <widget class="QLineEdit" name="LEpar_45_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="14" column="1">
+            <widget class="QCheckBox" name="checkB_mis14_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>60</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>PSI-4</string>
+             </property>
+            </widget>
+           </item>
+           <item row="14" column="2">
+            <widget class="QLineEdit" name="LEpar_49_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="2">
+            <widget class="QLineEdit" name="LEpar_42_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="4">
+            <widget class="QLineEdit" name="LEpar_42_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QCheckBox" name="checkB_mis6_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>160</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Apds</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QLineEdit" name="LEpar_38_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="2">
+            <widget class="QLineEdit" name="LEpar_47_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
            <item row="8" column="1">
             <widget class="QCheckBox" name="checkB_mis8_2">
              <property name="sizePolicy">
@@ -14526,8 +14158,8 @@
              </property>
             </widget>
            </item>
-           <item row="8" column="2">
-            <widget class="QLineEdit" name="LEpar_43_1">
+           <item row="9" column="3">
+            <widget class="QLineEdit" name="LEpar_44_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -14542,8 +14174,49 @@
              </property>
             </widget>
            </item>
-           <item row="8" column="3">
-            <widget class="QLineEdit" name="LEpar_43_2">
+           <item row="0" column="3">
+            <widget class="QLabel" name="label_28">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>&lt;Exp.&gt;</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLineEdit" name="lineEdit_30">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>160</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="text">
+              <string>00.00</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLineEdit" name="LEpar_37_1">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -14558,8 +14231,49 @@
              </property>
             </widget>
            </item>
-           <item row="8" column="4">
-            <widget class="QLineEdit" name="LEpar_43_3">
+           <item row="14" column="4">
+            <widget class="QLineEdit" name="LEpar_49_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLineEdit" name="lineEdit_27">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>160</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="text">
+              <string>00.00</string>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="4">
+            <widget class="QLineEdit" name="LEpar_47_3">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -14599,8 +14313,24 @@
              </property>
             </widget>
            </item>
-           <item row="9" column="1">
-            <widget class="QCheckBox" name="checkB_mis9_2">
+           <item row="3" column="3">
+            <widget class="QLineEdit" name="LEpar_38_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QCheckBox" name="checkB_mis7_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -14614,63 +14344,12 @@
               </size>
              </property>
              <property name="text">
-              <string>DEL-2</string>
+              <string>DEL-1</string>
              </property>
             </widget>
            </item>
-           <item row="9" column="2">
-            <widget class="QLineEdit" name="LEpar_44_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="3">
-            <widget class="QLineEdit" name="LEpar_44_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="4">
-            <widget class="QLineEdit" name="LEpar_44_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="0">
-            <widget class="QDoubleSpinBox" name="dSB_PAR_15_1tris">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
+           <item row="13" column="0">
+            <widget class="QDoubleSpinBox" name="dSB_PAR_17_1">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -14694,75 +14373,8 @@
              </property>
             </widget>
            </item>
-           <item row="10" column="1">
-            <widget class="QCheckBox" name="checkB_mis10_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>60</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>PSI-2</string>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="2">
-            <widget class="QLineEdit" name="LEpar_45_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="3">
-            <widget class="QLineEdit" name="LEpar_45_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="4">
-            <widget class="QLineEdit" name="LEpar_45_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="11" column="0">
-            <widget class="QDoubleSpinBox" name="dSB_PAR_16_1">
+           <item row="7" column="0">
+            <widget class="QDoubleSpinBox" name="dSB_PAR_14_1">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -14786,8 +14398,49 @@
              </property>
             </widget>
            </item>
-           <item row="11" column="1">
-            <widget class="QCheckBox" name="checkB_mis11_2">
+           <item row="1" column="3">
+            <widget class="QLineEdit" name="LEpar_36_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QDoubleSpinBox" name="dSB_PAR_6_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>160</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="maximum">
+              <double>90.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QCheckBox" name="checkB_mis5_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -14800,13 +14453,19 @@
                <height>0</height>
               </size>
              </property>
+             <property name="maximumSize">
+              <size>
+               <width>160</width>
+               <height>16777215</height>
+              </size>
+             </property>
              <property name="text">
-              <string>DEL-3</string>
+              <string>R1norm</string>
              </property>
             </widget>
            </item>
-           <item row="11" column="2">
-            <widget class="QLineEdit" name="LEpar_46_1">
+           <item row="8" column="2">
+            <widget class="QLineEdit" name="LEpar_43_1">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -14853,8 +14512,40 @@
              </property>
             </widget>
            </item>
-           <item row="12" column="0">
-            <widget class="QDoubleSpinBox" name="dSB_PAR_16_1tris">
+           <item row="12" column="3">
+            <widget class="QLineEdit" name="LEpar_47_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="4">
+            <widget class="QLineEdit" name="LEpar_45_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QDoubleSpinBox" name="dSB_PAR_6_1bis">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -14881,6 +14572,88 @@
              </property>
             </widget>
            </item>
+           <item row="2" column="1">
+            <widget class="QCheckBox" name="checkB_mis2_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>60</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>160</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Tpol</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="4">
+            <widget class="QLineEdit" name="LEpar_40_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QCheckBox" name="checkB_mis1_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>60</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>160</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Tnorm</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QLabel" name="label_29">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>&lt;Sim.&gt;</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
            <item row="12" column="1">
             <widget class="QCheckBox" name="checkB_mis12_2">
              <property name="sizePolicy">
@@ -14900,100 +14673,8 @@
              </property>
             </widget>
            </item>
-           <item row="12" column="2">
-            <widget class="QLineEdit" name="LEpar_47_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="12" column="3">
-            <widget class="QLineEdit" name="LEpar_47_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="12" column="4">
-            <widget class="QLineEdit" name="LEpar_47_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="0">
-            <widget class="QDoubleSpinBox" name="dSB_PAR_17_1">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>160</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="locale">
-              <locale language="English" country="UnitedStates"/>
-             </property>
-             <property name="maximum">
-              <double>90.000000000000000</double>
-             </property>
-             <property name="value">
-              <double>60.000000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="1">
-            <widget class="QCheckBox" name="checkB_mis13_2">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>60</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>DEL-4</string>
-             </property>
-            </widget>
-           </item>
-           <item row="13" column="2">
-            <widget class="QLineEdit" name="LEpar_48_1">
+           <item row="8" column="4">
+            <widget class="QLineEdit" name="LEpar_43_3">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -15024,8 +14705,27 @@
              </property>
             </widget>
            </item>
-           <item row="13" column="4">
-            <widget class="QLineEdit" name="LEpar_48_3">
+           <item row="9" column="1">
+            <widget class="QCheckBox" name="checkB_mis9_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>60</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>DEL-2</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="4">
+            <widget class="QLineEdit" name="LEpar_39_3">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -15040,8 +14740,33 @@
              </property>
             </widget>
            </item>
-           <item row="14" column="0">
-            <widget class="QDoubleSpinBox" name="dSB_PAR_17_1tris">
+           <item row="3" column="1">
+            <widget class="QCheckBox" name="checkB_mis3_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>60</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>160</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Rnorm</string>
+             </property>
+            </widget>
+           </item>
+           <item row="12" column="0">
+            <widget class="QDoubleSpinBox" name="dSB_PAR_16_1tris">
              <property name="enabled">
               <bool>false</bool>
              </property>
@@ -15068,8 +14793,56 @@
              </property>
             </widget>
            </item>
-           <item row="14" column="1">
-            <widget class="QCheckBox" name="checkB_mis14_2">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_26">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Theta (°)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="2">
+            <widget class="QLineEdit" name="LEpar_44_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="2">
+            <widget class="QLineEdit" name="LEpar_45_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="1">
+            <widget class="QCheckBox" name="checkB_mis11_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -15083,12 +14856,12 @@
               </size>
              </property>
              <property name="text">
-              <string>PSI-4</string>
+              <string>DEL-3</string>
              </property>
             </widget>
            </item>
-           <item row="14" column="2">
-            <widget class="QLineEdit" name="LEpar_49_1">
+           <item row="9" column="4">
+            <widget class="QLineEdit" name="LEpar_44_3">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -15103,8 +14876,8 @@
              </property>
             </widget>
            </item>
-           <item row="14" column="3">
-            <widget class="QLineEdit" name="LEpar_49_2">
+           <item row="2" column="3">
+            <widget class="QLineEdit" name="LEpar_37_2">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -15119,8 +14892,255 @@
              </property>
             </widget>
            </item>
-           <item row="14" column="4">
-            <widget class="QLineEdit" name="LEpar_49_3">
+           <item row="7" column="3">
+            <widget class="QLineEdit" name="LEpar_42_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="1">
+            <widget class="QCheckBox" name="checkB_mis13_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>60</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>DEL-4</string>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="4">
+            <widget class="QLineEdit" name="LEpar_48_3">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLabel" name="label_30">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>60</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Enable</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="2">
+            <widget class="QLineEdit" name="LEpar_40_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="0">
+            <widget class="QDoubleSpinBox" name="dSB_PAR_16_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>160</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="maximum">
+              <double>90.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>60.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="2">
+            <widget class="QLineEdit" name="LEpar_48_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLineEdit" name="LEpar_36_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLineEdit" name="lineEdit_29">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>160</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="text">
+              <string>00.00</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="3">
+            <widget class="QLineEdit" name="LEpar_43_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0">
+            <widget class="QDoubleSpinBox" name="dSB_PAR_15_1tris">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>160</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="maximum">
+              <double>90.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>60.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QLineEdit" name="LEpar_39_1">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="3">
+            <widget class="QLineEdit" name="LEpar_39_2">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="locale">
+              <locale language="English" country="UnitedStates"/>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="11" column="2">
+            <widget class="QLineEdit" name="LEpar_46_1">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                <horstretch>0</horstretch>
@@ -15140,97 +15160,146 @@
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <widget class="QLabel" name="label_178">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+            <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,0">
+             <property name="spacing">
+              <number>6</number>
              </property>
-             <property name="font">
-              <font>
-               <pointsize>8</pointsize>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Average type</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboBox_average">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>230</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="currentIndex">
+             <property name="topMargin">
               <number>10</number>
              </property>
              <item>
-              <property name="text">
-               <string>Notch</string>
-              </property>
+              <widget class="QLabel" name="label_25">
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Polarization type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
              </item>
              <item>
-              <property name="text">
-               <string>VIS 10 wl</string>
-              </property>
+              <widget class="QComboBox" name="cB_PAR_35_2">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <item>
+                <property name="text">
+                 <string>s-polarized</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>p-polarized</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>unpolarized</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <property name="topMargin">
+              <number>10</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_178">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>8</pointsize>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Average type</string>
+               </property>
+              </widget>
              </item>
              <item>
-              <property name="text">
-               <string>VIS 30 wl</string>
-              </property>
+              <widget class="QComboBox" name="comboBox_average">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>230</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="currentIndex">
+                <number>10</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Notch</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>VIS 10 wl</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>VIS 30 wl</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>VIS D65</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>solar 10 wl</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>solar global radiation</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>solar direct normal radiation 100 wl</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>PWO scintillation</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>PWO scintillation * APD_iqe</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>direct-circumsolar radiation 441wl</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>direct-circumsolar ASTM G173-03</string>
+                </property>
+               </item>
+              </widget>
              </item>
-             <item>
-              <property name="text">
-               <string>VIS D65</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>solar 10 wl</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>solar global radiation</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>solar direct normal radiation 100 wl</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>PWO scintillation</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>PWO scintillation * APD_iqe</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>direct-circumsolar radiation 441wl</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>direct-circumsolar ASTM G173-03</string>
-              </property>
-             </item>
-            </widget>
+            </layout>
            </item>
            <item>
             <widget class="QLabel" name="label_188">
@@ -15393,31 +15462,6 @@
                <property name="text">
                 <string>Plot &lt;T&gt;,&lt;R&gt;,&lt;R1&gt; vs theta !</string>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="cB_PAR_35_2">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <item>
-                <property name="text">
-                 <string>s-polarized</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>p-polarized</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>unpolarized</string>
-                </property>
-               </item>
               </widget>
              </item>
             </layout>

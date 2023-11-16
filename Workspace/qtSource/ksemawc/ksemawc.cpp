@@ -190,9 +190,9 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C
 //C
 //C
-//C   MIS[17][201][2] matrix SF spectra and nk-data loaded as file-nk
+//C   MIS[18][1000][3] matrix SF spectra and nk-data loaded as file-nk
 //C      [i][j][k]
-//C       i=1: Tnormal     j=1,201 <-> Lambda   k=1 <-> value
+//C       i=1: Tnormal     j=1,1001 <-> Lambda   k=1 <-> value
 //C       i=2: Tpolarised                         2 <-> error
 //C       i=3: Rnormal
 //C       i=4: Rpolarised
@@ -204,9 +204,9 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C       i=16: n[k=1],k[k=2] IbridOne
 //C       i=17: enabling in data-fit
 //C
-//C   ELI[8][201][2] matrix ellipsometric spectra
+//C   ELI[8][1000][2] matrix ellipsometric spectra
 //C      [i][j][k]
-//C       i=1: DELTA_1   j=1,201 <-> Lambda   k=1 <-> value
+//C       i=1: DELTA_1   j=1,1001 <-> Lambda   k=1 <-> value
 //C       i=2: PSI_1                            2 <-> error
 //C      .. ..
 //C       i=7: DELTA_4
@@ -343,8 +343,10 @@ int ifirstcall=0;//used to initialize fit
 int ifirstWarning=0;//used to warn about T+R>1
 int jobtot=0;
 int nOpenGraph=3;
+int NeV; // number of interpolated points in Ev or lambda
 
-double MIS[18][202][3],ELI[9][202][3],pf[8][22],pm[201][6],par[61][6],CNK[17][4],rxy[31][5],SOL[1000][7],ARSE[501][3],Pot[201];
+double MIS[18][1000][3],ELI[9][1000][3],pf[8][22],pm[201][6],par[61][6],CNK[17][4],rxy[31][5],ARSE[501][3],Pot[201];
+double SOL[4000][7]; // solutions from the search algorithm
 double PIG=acos(-1.);
 double deg2rad=PIG/180.;
 double Nema,Kema,sqn,sqk,EpsiR,EpsiI;
@@ -378,7 +380,7 @@ void previewFile(QString filename, QString lab,QString& info,double& wmax,double
 int FPAR(void *p, int m, int n, const double *x, double *fvec, int iflag);
 void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int IUVIR);
 void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double *Yp,double *ErrXp,double *ErrYp);
-void CalcMis(double mc[15][202]);
+void CalcMis(double mc[15][1000]);
 void COSVNK(double VNK[17][3],int L);
 void SETVNK(int io,int J,double VNK[17][3],int L);
 void EMA(double N,double K,double NA,double KA,double FA);
@@ -410,7 +412,6 @@ long double ImIndirCodyUrb(long double E,long double C,long double E0,long doubl
 long double ReIndirCodyUrb(long double E,long double C,long double E0,long double E3,long double D);
 long double ImIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D);
 long double ReIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D);
-//complex<long double> IndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D);
 void ASSEMBLER(int iwl,double wl, int ikind,double teta,double vot[6][3]);
 void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi[6][3]);
 void CALFRE(int NFA,double wl,complex<double> pq,complex<double> IR[999],double d[999],complex<double> out[9][3]);
@@ -442,7 +443,7 @@ ksemawc::ksemawc(QWidget *parent) :
     printf("              Program C++ kSEMAW\n\n");
     printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
     printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 2.4 19 October 2023\n\n");
+    printf("         version 2.5 16 November 2023\n\n");
     printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
     printf("          email: marco.montecchi@enea.it\n");
     printf("          Porting to Windows and advanced oscillators by\n");
@@ -738,6 +739,8 @@ ksemawc::ksemawc(QWidget *parent) :
     par[21][3]=.001;  //n step
     par[22][3]=1.e-4; //k step
     par[28][1]=3.;    //N for computing <f(x)>
+    par[28][2]=201;   // number of interpolated points in Ev or lambda
+    NeV=par[28][2];
     par[29][1]=23.;   //N. sublayer used to model each inhomogeneous film
     // set the pointer to PM: PPM(17)
     par[34][5]=7.;    //7 parameters
@@ -1731,7 +1734,7 @@ void ksemawc::ReadSetting(QString filename){
                 rxy[i][j]=500.;
             if(i==24 && j==2 && rxy[i][j]< 10.)
                 rxy[i][j]=300;
-            if(i==24 && j==3 && (rxy[i][j]< 1 || rxy[i][j]> 201))
+            if(i==24 && j==3 && (rxy[i][j]< 1 || rxy[i][j]> 20))
                 rxy[i][j]=2.;
             if(idToLineEdit.contains("DP_RXY_"+QString::number(i)+"_"+QString::number(j)))
                 idToLineEdit["DP_RXY_"+QString::number(i)+"_"+QString::number(j)]
@@ -1937,6 +1940,7 @@ void ksemawc::ReadSetting(QString filename){
     int s1p2=NINT(par[27][2]);
     ui->cB_PAR_27_2 -> setCurrentIndex(s1p2-1);
     ui->sB_PAR_28_1 -> setValue(NINT(par[28][1]));
+    ui->sB_PAR_28_2 -> setValue(NINT(par[28][2]));
     ui->sB_PAR_29_1 -> setValue(NINT(par[29][1]));
     if(NINT(par[31][5])==0)
         ui->checkBox_logScale->setCheckState(Qt::Unchecked);
@@ -2644,6 +2648,8 @@ void ksemawc::SaveSetting(int iCall){
     par[27][2]=ui->cB_PAR_27_2 -> currentIndex();//S1P2
     par[27][2]++;
     par[28][1]=ui->sB_PAR_28_1 -> value();
+    par[28][2]=ui->sB_PAR_28_2 -> value();
+    NeV=par[28][2];
     par[29][1]=ui->sB_PAR_29_1 -> value();
     state=ui->checkBox_logScale -> checkState();
     if(state==Qt::Unchecked)
@@ -2780,7 +2786,7 @@ void ksemawc::LoadFilenk(){
     int N=line.toInt();
     printf("\tN. (L,n,k)= %d\n",N);
     if(N>999){
-        msgErrLoad("LoadFilenk","Ndata > 999, MAXIMUN limit");
+        msgErrLoad("LoadFilenk","Ndata > 999, MAXIMUM limit");
         return;
     }
     rxy[16][3]=1000.;
@@ -5029,7 +5035,7 @@ void ksemawc::PlotMENK(){
 
 
 void ksemawc::PlotME(){
-    int Ndata=201;
+    int Ndata=NeV;
     int iRD,iPSI=0,iDELTA=0;
     double Xp[Ndata],Yp[Ndata],ErrXp[Ndata],ErrYp[Ndata];
     SaveSetting(-1);
@@ -5171,7 +5177,7 @@ void ksemawc::PlotME(){
     stream1<<"eTn\teTp\teRn\teRp\teR1\teAPDS\teLETT\tk1\tk2\tk3\tk4\tk5\tk6\tk7\tk8\tk_ibri"<<"\n";
     stream2<<"DEL_1\tPSI_1\tDEL_2\tPSI_2\tDEL_3\tPSI_3\tDEL_4\tPSI_4"<<"\n";
     stream3<<"eDEL_1\tePSI_1\teDEL_2\tePSI_2\teDEL_3\tePSI_3\teDEL_4\tePSI_4"<<"\n";
-    for(int i=1;i<=201;i++){
+    for(int i=1;i<=NeV;i++){
         for(int j=1;j<=16;j++) stream0<<QString::number(MIS[j][i][1],'f',7)<<"\t";
         for(int j=1;j<=16;j++) stream1<<QString::number(MIS[j][i][2],'f',7)<<"\t";
         for(int j=1;j<=8;j++)  stream2<<QString::number(ELI[j][i][1],'f',7)<<"\t";
@@ -5262,7 +5268,7 @@ void ksemawc::Simula(){
     printf("->Simula\n");
     AdjRoughMax();
     SaveSetting(-1);
-    double mc[15][202];
+    double mc[15][1000];
     Qt::CheckState state,state1;
     state=ui->cBox_PAR_19_1 -> checkState();
     int iok=0;
@@ -5306,7 +5312,7 @@ void ksemawc::Simula(){
                 par[ic][4]=1.;
                 idToCheckBox["checkB_mis"+QString::number(ic)+"_3"] -> setEnabled(true);
                 printf("%s is enabled\n",("checkB_mis"+QString::number(ic)+"_3").toStdString().c_str());
-                for(int i=1;i<=201;i++){
+                for(int i=1;i<=NeV;i++){
                     if(ic<=6){
                         MIS[ic][i][1]=mc[ic][i];
                         double DL=MIS[7][i][2];
@@ -5358,7 +5364,7 @@ void ksemawc::Simula(){
             jjmin++;
         int jj=jjmin;
         int jjmax=jj;
-        while(wp[jj][1] >= MIS[7][1][1] && wp[jj][1] <= MIS[7][201][1] && jj<=ipr){
+        while(wp[jj][1] >= MIS[7][1][1] && wp[jj][1] <= MIS[7][NeV][1] && jj<=ipr){
             speso=speso+wp[jj][2];
             jjmax=jj;
             jj++;
@@ -5411,14 +5417,14 @@ void ksemawc::Simula(){
     }
 }
 
-void ksemawc::CalcMis(double mc[15][202]){
+void ksemawc::CalcMis(double mc[15][1000]){
     printf("->CalcMis\n");
     iColor++;
     if(iColor>=7)
         iColor=1;
     int s1p2u3=ui->cB_PAR_35_2 ->currentIndex();
     s1p2u3++;
-    int nwl=201;
+    int nwl=NeV;
     double teta[6],wl,Xp[nwl],Yp[nwl],ErrXp[nwl],ErrYp[nwl],nn[nwl],kk[nwl],e1[nwl],e2[nwl],VNK[17][3],vot[6][3];
     fill_n(ErrXp, nwl, 0.);
     fill_n(ErrYp, nwl, 0.);
@@ -5438,8 +5444,8 @@ void ksemawc::CalcMis(double mc[15][202]){
     }
     QTextStream streamNK(&fileNK);
     streamNK<<"nk-values of last simulation\n";
-    streamNK<<201<<"\n";
-    for(int i=1;i<=201;i++){
+    streamNK<<QString::number(NeV)<<"\n";
+    for(int i=1;i<=NeV;i++){
         wl=MIS[7][i][1];
         Xp[i-1]=wl;
         COSVNK(VNK,i);
@@ -5497,44 +5503,44 @@ void ksemawc::CalcMis(double mc[15][202]){
     for(int ic=1;ic<=14;ic++){
         double FM=0.;
         if(DATO[ic]!=0){
-            for(int i=1;i<=201;i++){
+            for(int i=1;i<=NeV;i++){
                 Yp[i-1]=mc[ic][i];
                 if(ic<=5)
                     Yp[i-1]=Yp[i-1]*100.;
                 if(ic<=6)
-                    FM=FM+pow((mc[ic][i]-MIS[ic][i][1])/MIS[ic][i][2],2.)/201.;
+                    FM=FM+pow((mc[ic][i]-MIS[ic][i][1])/MIS[ic][i][2],2.)/NeV;
                 else
-                    FM=FM+pow((mc[ic][i]-ELI[ic-6][i][1])/ELI[ic-6][i][2],2.)/201.;
+                    FM=FM+pow((mc[ic][i]-ELI[ic-6][i][1])/ELI[ic-6][i][2],2.)/NeV;
             }
             par[35+ic][1]=sqrt(FM);
             if(ic<=6)
-                PLOTline1bar2(1,0,iColor,ic,201,Xp,Yp,ErrXp,ErrYp);
+                PLOTline1bar2(1,0,iColor,ic,NeV,Xp,Yp,ErrXp,ErrYp);
             else if(ic==7 || ic==9 || ic==11 || ic==13)
-                PLOTline1bar2(1,0,iColor,7,201,Xp,Yp,ErrXp,ErrYp);
+                PLOTline1bar2(1,0,iColor,7,NeV,Xp,Yp,ErrXp,ErrYp);
             else if(ic==8 || ic==10 || ic==12 || ic==14)
-                PLOTline1bar2(1,0,iColor,8,201,Xp,Yp,ErrXp,ErrYp);
+                PLOTline1bar2(1,0,iColor,8,NeV,Xp,Yp,ErrXp,ErrYp);
         }
     }
     if(DATO[1]!=0 && DATO[3]!=0){
-        for(int i=1;i<=201;i++){
+        for(int i=1;i<=NeV;i++){
             Yp[i-1]=(1.-mc[1][i]-mc[3][i])*100.;
         }
         labelQwt="A_front";
-        PLOTline1bar2(1,0,iColor,9,201,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(1,0,iColor,9,NeV,Xp,Yp,ErrXp,ErrYp);
     }
     if(DATO[1]!=0 && DATO[5]!=0){
-        for(int i=1;i<=201;i++){
+        for(int i=1;i<=NeV;i++){
             Yp[i-1]=(1.-mc[1][i]-mc[5][i])*100.;
         }
         labelQwt="A_back";
-        PLOTline1bar2(1,0,iColor,16,201,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(1,0,iColor,16,NeV,Xp,Yp,ErrXp,ErrYp);
     }
     //if(IXW[12]>0){//plot nk
-        PLOTline1bar2(1,0,iColor,12,201,Xp,nn,ErrXp,ErrYp);
-        PLOTline1bar2(1,0,iColor,13,201,Xp,kk,ErrXp,ErrYp);
+        PLOTline1bar2(1,0,iColor,12,NeV,Xp,nn,ErrXp,ErrYp);
+        PLOTline1bar2(1,0,iColor,13,NeV,Xp,kk,ErrXp,ErrYp);
         if(NINT(par[10][1])==1){//plot permittivity
-            PLOTline1bar2(1,0,iColor,14,201,Xp,e1,ErrXp,ErrYp);
-            PLOTline1bar2(1,0,iColor,15,201,Xp,e2,ErrXp,ErrYp);
+            PLOTline1bar2(1,0,iColor,14,NeV,Xp,e1,ErrXp,ErrYp);
+            PLOTline1bar2(1,0,iColor,15,NeV,Xp,e2,ErrXp,ErrYp);
         }
     //}
     QFile file(fMisSim);
@@ -5544,7 +5550,7 @@ void ksemawc::CalcMis(double mc[15][202]){
     }
     QTextStream stream(&file);
     stream<<"wl\tTn\tTp\tRn\tRp\tR1\tApds\tDELTA\tPSI\n";
-    for(int i=1;i<=201;i++){
+    for(int i=1;i<=NeV;i++){
         stream<<MIS[7][i][1];
         for(int ii=1;ii<=14;ii++)
             stream<<"\t"<<mc[ii][i];
@@ -5616,7 +5622,7 @@ void ksemawc::PlotAve(){
                 if(wp[ii][1]<MIS[7][1][1] && I==1)
                     printf("Attention wl_mean = %f <WLmin!!!\n",wp[ii][1]);
             }
-            else if(wp[ii][1]>MIS[7][1][1] && wp[ii][1]<MIS[7][201][1]){
+            else if(wp[ii][1]>MIS[7][1][1] && wp[ii][1]<MIS[7][NeV][1]){
                 ij=1;
                 while(wp[ii][1]>MIS[7][ij][1])
                     ij++;
@@ -5624,10 +5630,10 @@ void ksemawc::PlotAve(){
                     ij--;
                 x=(wp[ii][1]-MIS[7][ij][1])/(MIS[7][ij+1][1]-MIS[7][ij][1]);
             }
-            else if(wp[ii][1]>=MIS[7][201][1]){
-                ij=200;
+            else if(wp[ii][1]>=MIS[7][NeV][1]){
+                ij=NeV-1;
                 x=1.;
-                if(wp[ii][1]>MIS[7][201][1] && I==1)
+                if(wp[ii][1]>MIS[7][NeV][1] && I==1)
                     printf("Attention wl_mean = %f >WLmax!!!!\n",wp[ii][1]);
             }
             for(int j=1;j<=2;j++){
@@ -5708,12 +5714,12 @@ void ksemawc::PlotAve(){
 }
 
 void ksemawc::PlotAbsEL(){
-    double wwl[202],y[202],ErrXp[202],ErrYp[202],Trasm1[202],vosi[6][3],denom;
-    fill_n(ErrXp, 202, 0.);
-    fill_n(ErrYp, 202, 0.);
-    fill_n(Trasm1, 202, 1.);
-    long double Ps[202][11],Pp[202][11];
-    complex<long double> Bs[202][11],Cs[202][11],Bp[202][11],Cp[202][11];
+    double wwl[1002],y[1002],ErrXp[1002],ErrYp[1002],Trasm1[1002],vosi[6][3],denom;
+    fill_n(ErrXp, 1002, 0.);
+    fill_n(ErrYp, 1002, 0.);
+    fill_n(Trasm1, 1002, 1.);
+    long double Ps[1002][11],Pp[1002][11];
+    complex<long double> Bs[1002][11],Cs[1002][11],Bp[1002][11],Cp[1002][11];
     complex<double> irup,irdw,irup2,irdw2,mups,mupp,mdws,mdwp,pq,ir[10], NQ, MUS, DELTA;
     int i,ii,m, icol,ivnkdw,ivnkup,iLayer, iLayer0,iFirstCoe,s1p2u3, LastLayer,ivnk;
     double VNK[17][3];
@@ -5721,17 +5727,17 @@ void ksemawc::PlotAbsEL(){
     SaveSetting(-1);
 
     s1p2u3=NINT(par[35][2]);
-    irup=complex<double>(1.,0.);//air refractive index for the input medium
     double teta=par[6][1]*deg2rad;
-    pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
     iFirstCoe=1;
     iLayer0=NINT(par[51][2])+1;//Nlayer+1
     ivnkdw=16;//output media for SF measurements
+    ivnkup=10;//refractive index of input medium for SF measurements
     printf("plot Abs at each layer of %d at theta=%f with polarization %d\n\t iLayer0=%d ivnkdw=%d\n",NINT(par[51][2]),par[6][1],s1p2u3,iLayer0,ivnkdw);
 
     int iRD=1;
     double Amin=1000.;
     double Amax=-1000.;
+
     if(NINT(par[51][3])==1){//the first layer is inchoerent
         iFirstCoe=2;
         // saving Abs to individual files
@@ -5744,15 +5750,16 @@ void ksemawc::PlotAbsEL(){
         }
         QTextStream out(&file);
         out<<"Lambda Absorptance Layer#"<<QString::number(1)<<"\n";
-        out<<201<<"\n";
-        for(i=1;i<=201;i++){
+        out<<QString::number(NeV)<<"\n";
+        for(i=1;i<=NeV;i++){
             wwl[i]=MIS[7][i][1];
             par[7][1]=MIS[7][i][1];
             COSVNK(VNK,i);
-            ivnkup=10;//refractive index of input medium for SF measurements
+//            printf("\t Incoherent ivnkup=%d nup=%f kup=%f\n",ivnkup, VNK[ivnkup][1],-VNK[ivnkup][2]);
             ivnkdw=NINT(par[51][1]);//refractive index of first layer
             irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
             irup2=irup*irup;
+            pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
             irdw=complex<double>(VNK[ivnkdw][1],-VNK[ivnkdw][2]);
             irdw2=irdw*irdw;
             mups=sqrt(irup2-pq);
@@ -5807,18 +5814,21 @@ void ksemawc::PlotAbsEL(){
         file.close();
         labelQwt="layer_"+QString::number(1);
         icol=1;
-        PLOTline1bar2(1,iRD,icol,9,201,wwl,y,ErrXp,ErrYp);
+        PLOTline1bar2(1,iRD,icol,9,NeV,wwl,y,ErrXp,ErrYp);
         if(iRD==1)
             iRD=0;
     }
 
     for(iLayer=iFirstCoe;iLayer<=iLayer0;iLayer++){
         printf("\nfor-loop with iLayer=%d\n",iLayer);
-        for(int i=1;i<=201;i++){
+        for(int i=1;i<=NeV;i++){
             wwl[i]=MIS[7][i][1];
             par[7][1]=MIS[7][i][1];
             ivnkdw=16;//output media for SF measurements
             COSVNK(VNK,i);
+            irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
+            pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
+
             for(ii=iFirstCoe;ii<=iLayer0-1;ii++){
                 ivnk=int(par[50+ii][1]);//index of the material to be assigned to the ii layer
                 ir[ii]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
@@ -5831,7 +5841,7 @@ void ksemawc::PlotAbsEL(){
                     MUS=sqrt(NQ-pq);
                     DELTA=2.*PIG*pm[j][1]*MUS/wwl[i];
                     if (abs(imag(DELTA))>200.) {
-//                        printf("fully absorbing layer=%d wl[%d]=%f d=%f A n=%f k=%f \n",j,i, wwl[i],pm[j][1], real(ir[j]), imag(ir[j]));
+                        printf("fully absorbing layer=%d wl[%d]=%f d=%f A n=%f k=%f \n",j,i, wwl[i],pm[j][1], real(ir[j]), imag(ir[j]));
                         LastLayer=j;
                         ivnkdw=NINT(par[50+j][1]);
                         for(m=j+1;m<=iLayer0;m++){
@@ -5890,9 +5900,9 @@ void ksemawc::PlotAbsEL(){
         QTextStream out(&file);
         if(iLayer>1){
             out<<"Lambda Absorptance Layer#"<<QString::number(iLayer-1)<<"\n";
-            out<<201<<"\n";
+            out<<QString::number(NeV)<<"\n";
         }
-        for(int i=1;i<=201;i++){
+        for(int i=1;i<=NeV;i++){
             wwl[i]=MIS[7][i][1];
             par[7][1]=MIS[7][i][1];
             COSVNK(VNK,i);
@@ -5919,7 +5929,7 @@ void ksemawc::PlotAbsEL(){
             labelQwt="layer_"+QString::number(iLayer-1);
             icol=iLayer-1;
             if(icol>=7) icol=icol-6;
-            PLOTline1bar2(1,iRD,icol,9,201,wwl,y,ErrXp,ErrYp);
+            PLOTline1bar2(1,iRD,icol,9,NeV,wwl,y,ErrXp,ErrYp);
             if(iRD==1)
                 iRD=0;
         }
@@ -5942,7 +5952,7 @@ void ksemawc::searchNK(){
     par[2][1]=rxy[17][1];
     par[2][2]=rxy[17][2];
 
-    int Ndat=0,iCol=0,Ndata=300;
+    int Ndat=0,iCol=0,Ndata=NeV*2;
     double Xp[Ndata],Yp[Ndata],ErrXp[Ndata],ErrYp[Ndata];
     int iChoiceWL=ui->comboBox_searchNK -> currentIndex();
     if(iChoiceWL==0)
@@ -5952,7 +5962,7 @@ void ksemawc::searchNK(){
     else if(iChoiceWL==2)
         par[7][1]=ui->dSB_PAR_4_2 -> value();
     int iWL=1;
-    while(MIS[7][iWL][1]<par[7][1] && iWL<201)
+    while(MIS[7][iWL][1]<par[7][1] && iWL<NeV)
         iWL++;
     par[7][1]=MIS[7][iWL][1];
     printf("->searchNK @ WL= %f\n",par[7][1]);
@@ -6032,7 +6042,7 @@ void ksemawc::NumericalSearch(){
     par[16][1]=ui->dSB_PAR_16_1->value();
     par[17][1]=ui->dSB_PAR_17_1->value();
     int IL1=1;
-    int IL2=201;
+    int IL2=NeV;
     int iSol=1;
     double Dn=(par[1][2]-par[1][1])/100.;
     k=par[2][1];
@@ -6061,7 +6071,7 @@ void ksemawc::NumericalSearch(){
 
         FMold=-1.;
         for(int i=0;i<101;i++){
-            if(NmisEnab==1){//k calculation with n=n_silmulation
+            if(NmisEnab==1){//k calculation with n=n_simulation
                 double VNK[17][3];
                 CNK[1][1]=par[35][4];//Fit option
                 COSVNK(VNK,IL);
@@ -6289,8 +6299,8 @@ void ksemawc::IbridKernel(QString rc){
     PanFitEnable();
     // data number
     printf("-> IbridKernel with rc=%s\n",rc.toStdString().c_str());
-    int mwl=201;//SF and ELI
-    int mwla=201;//enabled wavelengths
+    int mwl=NeV;//SF and ELI
+    int mwla=NeV;//enabled wavelengths
     int md=NINT(SOL[1][1]);//nk-data
     int mda=0;//enabled nk-data
     int ial=0;
@@ -6298,7 +6308,7 @@ void ksemawc::IbridKernel(QString rc){
     int ibridok,m=0,ifit;
     int Info=0;
     double wwl[mwl],kk[mwl],nn[mwl],e1[mwl],e2[mwl],vot[6][3],tn[mwl],tp[mwl],rn[mwl],rp[mwl],r1[mwl],ErrXp[mwl],ErrYp[mwl],
-            miss[6][202],elis[9][202],pst[nparmax+1][3],ncent[mwl],ndev[mwl],kcent[mwl],kdev[mwl],ps[201],psi[mwl],delta[mwl];
+            miss[6][NeV+1],elis[9][NeV+1],pst[nparmax+1][3],ncent[mwl],ndev[mwl],kcent[mwl],kdev[mwl],ps[NeV],psi[mwl],delta[mwl];
     double PsiMat[mwl][4],DelMat[mwl][4];
     double chi2ini=1.E+09,chi2min=1.E+09;//,fnorm;
     par[38][1]=1.e+20;
@@ -6324,7 +6334,7 @@ void ksemawc::IbridKernel(QString rc){
     printf("WLmin=%f WLmax=%f md=%d mda=%d\n",par[4][1],par[4][2],md,mda);
     par[38][3]=1.e+20;
     par[38][4]=0.;
-    for(int i=1;i<=201;i++){
+    for(int i=1;i<=NeV;i++){
             par[38][3]=min(par[38][3],MIS[7][i][1]);
             par[38][4]=max(par[38][4],MIS[7][i][1]);
     }
@@ -6367,7 +6377,7 @@ void ksemawc::IbridKernel(QString rc){
         if(ieon==1){
             jie=jie+1;
             if(jie>jiemax){//stop
-                for(int ii=1;ii<=201;ii++){
+                for(int ii=1;ii<=NeV;ii++){
                     for(int i=1;i<=5;i++)
                         MIS[i][ii][1]=miss[i][ii];//restore measured values
                     for(int i=1;i<=8;i++)
@@ -6382,7 +6392,7 @@ void ksemawc::IbridKernel(QString rc){
                     else
                         pm[ip][4]=0.;
                 }
-                for(int i=0;i<201;i++){
+                for(int i=0;i<NeV;i++){
                     //store central value of solution
                     nn[i]=ncent[i];
                     kk[i]=kcent[i];
@@ -6428,7 +6438,7 @@ void ksemawc::IbridKernel(QString rc){
             jie=0;
             if(nmisure>=1){
                 r="i";//IbridOne
-                for(int ii=1;ii<=201;ii++){
+                for(int ii=1;ii<=NeV;ii++){
                     for(int i=1;i<=5;i++)
                         miss[i][ii]=MIS[i][ii][1];//store measured values
                     for(int i=1;i<=8;i++)
@@ -6447,7 +6457,7 @@ void ksemawc::IbridKernel(QString rc){
                 if(DATO[i]==2){
                     int iespo=int((jie+1)/imisura);
                     printf("  measure= %d (-1)^%d= %d\n",i,iespo,int(pow(-1,iespo)));
-                    for(int ii=1;ii<=201;ii++)
+                    for(int ii=1;ii<=NeV;ii++)
                         MIS[i][ii][1]=miss[i][ii]+MIS[i][ii][2]*pow(-1.,iespo);
                     imisura++;
                 }
@@ -6456,7 +6466,7 @@ void ksemawc::IbridKernel(QString rc){
                 if(DATO[i]==2){
                     int iespo=int((jie+1)/imisura);
                     printf("  measure= %d (-1)^%d= %d\n",i,iespo,int(pow(-1,iespo)));
-                    for(int ii=1;ii<=201;ii++)
+                    for(int ii=1;ii<=NeV;ii++)
                         ELI[i-7][ii][1]=elis[i-1][ii]+ELI[i-7][ii][2]*pow(-1.,iespo);
                     imisura++;
                 }
@@ -6911,7 +6921,7 @@ void ksemawc::IbridKernel(QString rc){
             if(ieon==1){// save central value and RMS deviation
                 if(jie==0){
                     printf("***setting ncent & kcent and initialize ndev kdev****\n");
-                    for(int i=0;i<201;i++){
+                    for(int i=0;i<NeV;i++){
                         ncent[i]=nn[i];
                         ndev[i]=0.;
                         kcent[i]=kk[i];
@@ -6925,7 +6935,7 @@ void ksemawc::IbridKernel(QString rc){
                 }
                 else{
                     printf("***computing ndev & kdev****\n");
-                    for(int i=0;i<201;i++){
+                    for(int i=0;i<NeV;i++){
                         ndev[i]=ndev[i]+pow(ncent[i]-nn[i],2.)/jiemax;
                         kdev[i]=kdev[i]+pow(kcent[i]-kk[i],2.)/jiemax;
                     }
@@ -6953,12 +6963,12 @@ void ksemawc::IbridKernel(QString rc){
                 PLOTline1bar2(1,0,iColor,5,mwl,wwl,r1,ErrXp,ErrYp);//R1 plot
             for(int ieli=0;ieli<4;ieli++){
                 if(DATO[7+2*ieli]==2){
-                    for(int i=0;i<201;i++)
+                    for(int i=0;i<NeV;i++)
                         delta[i]=DelMat[i][ieli];
                     PLOTline1bar2(1,0,iColor,7,mwl,wwl,delta,ErrXp,ErrYp);//DELTA plot
                 }
                 if(DATO[8+2*ieli]==2){
-                    for(int i=0;i<201;i++)
+                    for(int i=0;i<NeV;i++)
                         psi[i]=PsiMat[i][ieli];
                     PLOTline1bar2(1,0,iColor,8,mwl,wwl,psi,ErrXp,ErrYp);//PSI plot
                 }
@@ -7044,7 +7054,7 @@ void ksemawc::SPADA(){
     // matrix initialization for measures and temporary solutions
     SOL[1][1]=0.;//none solution
     for(int I=1;I<=17;I++){
-        for(int J=1;J<=201;J++){
+        for(int J=1;J<=NeV;J++){
             MIS[I][J][1]=0.;
             if(I<=15)
                 MIS[I][J][2]=1.;
@@ -7053,7 +7063,7 @@ void ksemawc::SPADA(){
         }
     }
     for(int I=1;I<=8;I++){
-        for(int J=1;J<=201;J++){
+        for(int J=1;J<=NeV;J++){
             ELI[I][J][1]=0.;
             ELI[I][J][2]=1.;
         }
@@ -7095,11 +7105,11 @@ void ksemawc::SPADA(){
     dmax=par[4][2];
     int STEP=1;
     // set WL and baseline error
-    for(int L=1;L<=201;L++){
+    for(int L=1;L<=NeV;L++){
         if(SPA=="L")
-            MIS[7][L][1]=dmin+double(L-1)/200.*(dmax-dmin);
+            MIS[7][L][1]=dmin+double(L-1)/(NeV-1)*(dmax-dmin);
         else
-            MIS[7][L][1]=1./(1./dmin+double(L-1)/200.*(1./dmax-1./dmin));
+            MIS[7][L][1]=1./(1./dmin+double(L-1)/(NeV-1)*(1./dmax-1./dmin));
         MIS[6][L][1]=1.;//reflectance correction
         MIS[7][L][2]=instr[5];
         if(ER!="y"){
@@ -7656,8 +7666,8 @@ void ksemawc::SPADA(){
     }
     par[38][3]=par[4][1];
     par[38][4]=par[4][2];
-    par[21][1]=201;
-    par[28][2]=201;
+    par[21][1]=NeV;
+    par[28][2]=NeV;
     if(NINT(par[9][1])==1)
         ui->checkBox_setPsoK -> setCheckState ( Qt::Checked );
 }
@@ -7667,7 +7677,7 @@ void ksemawc::SPADA(){
 
 void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int IUVIR){
     //int iw=1;//verbose (0 silent, 1 verbose)
-    printf("CONVER: NDATI=%d N1=%d STEP=%d I=%d IUVIR=%d\n",NDATI,N1,STEP,I,IUVIR);
+    //printf("CONVER: NDATI=%d N1=%d STEP=%d I=%d IUVIR=%d\n",NDATI,N1,STEP,I,IUVIR);
     int ALARM=0;
     int ns[1000];
     double xs[500],ys[500];
@@ -7678,7 +7688,7 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
     for(int j=1;j<=20;j++){
         INSTR[j]=par[j][3];
     }
-    for(int H=1;H<=201;H++){
+    for(int H=1;H<=NeV;H++){
         WL=MIS[7][H][1];
         double FACO=1.;
         if((I==3 || I==4 || I==5) && IUVIR==1){
@@ -7691,7 +7701,7 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
             WLa=WL-(MIS[7][H][1]-MIS[7][H-1][1])/2.;
         else
             WLa=WL-(MIS[7][H+1][1]-MIS[7][H][1])/2.;
-        if(H<201)
+        if(H<NeV)
             WLb=WL+(MIS[7][H+1][1]-MIS[7][H][1])/2.;
         else
             WLb=WL+(MIS[7][H][1]-MIS[7][H-1][1])/2.;
@@ -7704,7 +7714,7 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
             printf("Data in [WLa , WLb]:\n");
         }
         int NPM=0;
-        int J=1;
+        int J=0;
         while(X[N]>=WLa && X[N]<=WLb && N<=NDATI && N>=1){
             NPM=NPM+1;
             ns[J]=N;
@@ -7722,17 +7732,17 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
             if(iw==1)
                 printf("... NPM= %d' < 3 -> set NPM=3\n",NPM);
             if(NPM>=1)
-                N=ns[1];
+                N=ns[0];
             else if(NPM==0){
                 NPM=1;
-                ns[1]=N;
+                ns[0]=N;
             }
             if(NPM==1 && N>1 && N<NDATI && X[N+STEP]>WLb)
                 N=N-STEP;
             while((N+STEP*2)<1 || (N+STEP*2)>NDATI)
                 N=N-STEP;
             NPM=3;
-            for(int j=1;j<=NPM;j++){
+            for(int j=0;j<NPM;j++){
                 ns[j]=N;
                 xs[j]=X[N];
                 ys[j]=Y[N];
@@ -7747,7 +7757,7 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
             while(X[N+STEP]<WL)
                 N=N+STEP;
             NPM=3;
-            for(int j=1;j<=NPM;j++){
+            for(int j=0;j<NPM;j++){
                 ns[j]=N;
                 xs[j]=X[N];
                 ys[j]=Y[N];
@@ -7760,7 +7770,7 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
         // check and cure ELLI meas jump
         if(I>=21){
             double OS=0.;
-            for(int J=1;J<=NPM-1;J++){
+            for(int J=0;J<NPM-1;J++){
                 if(abs(ys[J+1]-ys[J])>250.){
                     if(ys[J+1]-ys[J]<0.)
                         OS=360.;
@@ -7807,20 +7817,20 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
             a=p[0];
             if(iw==1){
                 printf("coeff of BF parabolic:\na= %f  b= %f  c= %f\n",a,b,c);
-                for(int iii=1;iii<=NPM;iii++)
+                for(int iii=0;iii<NPM;iii++)
                     cout<< xs[iii]<<"\t"<<ys[iii]<<"\n";
             }
         }
         else{//interpolation on 3 points
-            if(abs(xs[1]-xs[2])<.01 || abs(xs[2]-xs[3])<.01)
+            if(abs(xs[0]-xs[1])<.01 || abs(xs[1]-xs[2])<.01)
                 printf("ATTENTION: 2 data with same abscidssa %f %f %f\n!!!",
-                       xs[1],xs[2],xs[3]);
-            double XD1=xs[1];
-            double XD2=xs[2];
-            double XD3=xs[3];
-            double YD1=ys[1];
-            double YD2=ys[2];
-            double YD3=ys[3];
+                       xs[0],xs[1],xs[2]);
+            double XD1=xs[0];
+            double XD2=xs[1];
+            double XD3=xs[2];
+            double YD1=ys[0];
+            double YD2=ys[1];
+            double YD3=ys[2];
             double DETD=XD1*XD1*(XD2-XD3)-XD1*(XD2*XD2-XD3*XD3);
             DETD=DETD+XD2*XD2*XD3-XD3*XD3*XD2;
             a=YD1*(XD2-XD3)-XD1*(YD2-YD3);
@@ -7830,11 +7840,12 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
             c=XD1*XD1*(XD2*YD3-XD3*YD2);
             c=c-XD1*(XD2*XD2*YD3-XD3*XD3*YD2);
             c=(c+YD1*(XD2*XD2*XD3-XD3*XD3*XD2))/DETD;
-            if(iw==1){
-                printf("Coeff parabola per 3 points:\n");
+            if(iw==1 ){
+                printf("Coeff parabola at 3 points:\n");
                 printf("X: %f %f %f\n",XD1,XD2,XD3);
                 printf("Y: %f %f %f\n",YD1,YD2,YD3);
                 printf("a= %f  b= %f  c= %f\n",a,b,c);
+                printf("FACO=%f \n", FACO);
             }
         }
         double YFIN=(a*WL*WL+b*WL+c)*FACO;
@@ -8470,7 +8481,7 @@ void COSVNK(double VNK[17][3],int L){
         if(io>=0 && io<=17){
             SETVNK(io,J,VNK,L);
         }
-        else if(io>=0){
+        else if(io>17){
             int i1=NINT(CNK[J][1]/1000.);
             int i2=NINT((CNK[J][1]-i1*1000.)/10.);
             double f2=CNK[J][1]-i1*1000.-i2*10.;
@@ -8511,6 +8522,7 @@ void SETVNK(int io,int J,double VNK[17][3],int L){
         VNK[J][1]=VNK[1][1];
         VNK[J][2]=VNK[1][2];
     }
+//    if(L==193 && J==10) printf("L= %d n=%f k=%f io=%d\n",L,VNK[J][1],VNK[J][2],io);
 }
 
 
@@ -9429,9 +9441,10 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
     ivnkup=9+ikind;// entrance medium; it depends of the kind of measurement
     irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
     pq=pow(irup*sin(teta),2.);// (N_entrance*sin(teta))**2.
-//    if(iwl==100)
-//        printf("->ASSEMBLER theta=%f\nivnkup=%d n=%f k=%f\n",teta/deg2rad,ivnkup,VNK[ivnkup][1],VNK[ivnkup][2]);
-
+//    if(wl>12208. && wl<12210.){
+//        printf("pq=%f+i%f lambda=%f iwl=%d \n",real(pq), imag(pq), wl, iwl);
+//        printf("->ASSEMBLER theta=%f ivnkup=%d n=%f k=%f\n",teta/deg2rad,ivnkup,VNK[ivnkup][1],VNK[ivnkup][2]);
+//    }
     //*** multilayer parameters
     int Nlayer=NINT(par[51][2]);//Nlayer
 
@@ -9875,6 +9888,10 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
             NFA=I;
             break;
         }
+//        if(wl>11820. && wl<11850.){
+//            printf("pq=%f+i%f theta[%d]=%f k[%d]=%f k_enhanced[%d]=%f \n",real(pq), imag(pq), I,atan(sqrt(real(pq))/real(MUS))/deg2rad, I, imag(IR[I]),I, imag(MUS));
+//            printf("n*sin(theta)[%d]=%f+i%f \n",I,real(IR[I]*sin(acos(MUS/IR[I]))), imag(IR[I]*sin(acos(MUS/IR[I]))));
+//        }
     }
 
     //Computing the characteristic matrix and Fresnel's coefficients
@@ -9986,6 +10003,10 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
         out[4][2]=0.;
         out[7][2]=1.-Rp;
     }
+//            if(wl>12208. && wl<12210.){
+//                printf("pq=%f+i%f lambda=%f \n",real(pq), imag(pq), wl);
+//                printf("tauS=%f rhoS=%f rhopS=%f Ts=%f Rs=%f \n",tauS, rhoS,rhopS, Ts,Rs);
+//            }
 
 }
 
@@ -10241,7 +10262,7 @@ int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
     //***** Function to fit selected experimental measurements
     //****
     int ioptf=NINT(pm[100][1]);// set FIT#
-    int mwl=201;
+    int mwl=NeV;
     int s1p2=NINT(par[27][2]);
     double vot[6][3];
     double te=0.;
@@ -10346,7 +10367,7 @@ int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag){
     //***** Subroutine of IbridOne: computing k from T given n
     //****
     int ioptf=NINT(pm[100][1]);// set FIT#
-    int mwl=201;
+    int mwl=NeV;
     int s1p2=NINT(par[27][2]);
     double vot[6][3];
     double te=0.;

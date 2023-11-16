@@ -1,4 +1,4 @@
-# ksemawc_v2.5
+# ksemaw_v2.5
 kSEMAWc (Spectro-Ellipsometric Measurement Analysis Workbench) is a workspace for the analysis of Spectrophotometric (SP), Ellipsometric (ELI) and Photothermal Deflection Spectroscopy (PDS) measurements. The letter “k” indicates the use of the Qt libraries to generate the graphical user interface, typical of the desktop Linux KDE environment. The last letter “c” indicates the full software rewriting in C++;  considering this major improvement, the name was changed to kSEMAWc since version 1.0.0.
 
 Features: 
@@ -20,13 +20,13 @@ kSEMAWc generates 2D plots based on the Qwt library which is a graphics extensio
 
 Code source files, compiled Windows version, user manual as well as a sample of working directories populated with assorted files can be freely downloaded from
 
-\texttt{https://github.com/mmonty1960/ksemawc}
+\texttt{https://github.com/mmonty1960/ksemaw}
 
 kSEMAWc can be installed in different ways:  copying the 64bit Windows10 executable version folder or compiling the source files in Linux or Windows OS.
 
 The installation of the precompiled Windows executable simply consists in:
 
-• download the zipped file from https://github.com/mmonty1960/ksemawc
+• download the zipped file from https://github.com/mmonty1960/ksemaw
 
 • extract the folder Workspace to any position on the user hard disk
 

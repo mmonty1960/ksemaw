@@ -1,4 +1,4 @@
-# ksemawc_v2.4
+# ksemawc_v2.5
 kSEMAWc (Spectro-Ellipsometric Measurement Analysis Workbench) is a workspace for the analysis of Spectrophotometric (SP), Ellipsometric (ELI) and Photothermal Deflection Spectroscopy (PDS) measurements. The letter “k” indicates the use of the Qt libraries to generate the graphical user interface, typical of the desktop Linux KDE environment. The last letter “c” indicates the full software rewriting in C++;  considering this major improvement, the name was changed to kSEMAWc since version 1.0.0.
 
 Features: 

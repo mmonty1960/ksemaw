@@ -1926,8 +1926,8 @@ void ksemawc::ReadSetting(QString filename){
     ui->doubleSpinBox_valAENS->setValue(valA);
     int irif=NINT(par[10][3]);
     ui->comboB_PAR_10_3 -> setCurrentIndex(irif);
-    int iverboso=NINT(par[18][1]);
-    if(iverboso==1)
+    iw=NINT(par[18][1]);
+    if(iw==1)
         ui->checkB_par_18_1 -> setCheckState ( Qt::Checked );
     else
         ui->checkB_par_18_1 -> setCheckState ( Qt::Unchecked );
@@ -6485,7 +6485,7 @@ void ksemawc::IbridKernel(QString rc){
                     printf("-> launch IbridOne: compute k from Tp teta= %f deg  S1P2= %d\n",par[6][1],s1p2);
                     ibridok=1;
                 }
-                else if(DATO[1]!=2 && DATO[2]!=2 && NINT(par[32][2])==2){
+                else if(DATO[1]!=2 && DATO[2]!=2){
                     printf("-> launch IbridOne: k is set to = selmq_k\n");
                     ibridok=1;
                 }
@@ -6836,30 +6836,26 @@ void ksemawc::IbridKernel(QString rc){
                     if(r=="i" || r=="g"){//IbridOne, compute k with best-fit parameters
                         par[24][2]=i;
                         //MIS[16][i][1]=sqn;
-                        if(NINT(par[32][2])!=2){ //k is let free
-                            //computing k from T
-                            double Trasm=1.,dt,dlim,tol;
-                            if(NINT(par[50+NINT(par[53][2])][3])==1){
-                                if(DATO[1]>0) Trasm=MIS[1][i][1];
-                                if(DATO[2]>0) Trasm=MIS[2][i][1];
-                                double dinco=pm[NINT(par[53][2])][1];
-                                if(iw==3) printf("Trasm = %f\n",Trasm);
-                                dt=-0.1*wl/4./3.14/dinco*log(Trasm);
-                                dlim=1.e-10;
-                            }
-                            else{
-                                dt=0.001;//DELTA_k for thin film
-                                dlim=1.e-5;
-                            }
-                            tol=dt/1000.;
-                            CNK[1][3]=MIS[16][i][2];//<<<<<<<<<<<<<prima era commentata
-                            double k=CNK[1][3];
-                            FindRoot(&DELTAT,k,dt,dlim,tol);
-                            MIS[16][i][2]=CNK[1][3];
-                            //printf("wl=%f n=%f k=%f\n",wl,CNK[1][2],CNK[1][3]);
+                        double Trasm=1.,dt,dlim,tol;
+                        if(NINT(par[50+NINT(par[53][2])][3])==1){
+                            if(DATO[1]>0) Trasm=MIS[1][i][1];
+                            if(DATO[2]>0) Trasm=MIS[2][i][1];
+                            double dinco=pm[NINT(par[53][2])][1];
+                            dt=-0.1*wl/4./3.14/dinco*log(Trasm);
+                            dlim=1.e-10;
+                            if(iw>0)
+                                printf("Trasm = %f dt=%f\n",Trasm,dt);
                         }
-                        else
-                            MIS[16][i][2]=CNK[1][3];
+                        else{
+                            dt=0.001;//DELTA_k for thin film
+                            dlim=1.e-5;
+                        }
+                        tol=dt/1000.;
+                        //CNK[1][3]=MIS[16][i][2];//<<<<<<<<<<<<<prima era commentata
+                        double k=CNK[1][3];
+                        FindRoot(&DELTAT,k,dt,dlim,tol);
+                        MIS[16][i][2]=CNK[1][3];
+                        //printf("wl=%f n=%f k=%f\n",wl,CNK[1][2],CNK[1][3]);
                     }
                     else if(r=="f" || r=="fsem"){
                         MIS[16][i][1]=CNK[1][2];
@@ -10402,36 +10398,28 @@ int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag){
         FDISP(ioptf,ev);
         MIS[16][i][1]=sqn;
         CNK[1][2]=sqn;
-        if(NINT(par[32][2])==2){//set k = FDISP
-            MIS[16][i][2]=sqk;
-            CNK[1][3]=sqk;
+        CNK[1][3]=MIS[16][i][2];
+        // computing k from T
+        //DELTA_k
+        double Trasm=1.,dt,dlim,tol;;
+        if(NINT(par[50+NINT(par[53][2])][3])==1){//incoherent layer
+            if(DATO[1]>0) Trasm=MIS[1][i][1];
+            if(DATO[2]>0) Trasm=MIS[2][i][1];
+            double dinco=pm[NINT(par[53][2])][1];
+            if(iw==1) printf("Trasm = %f\n",Trasm);
+            dt=-0.1*wl/4./3.14/dinco*log(Trasm);
+            dlim=1.e-10;//dlim
         }
-        else{//initial value of k for IbridOne
-            CNK[1][3]=MIS[16][i][2];
+        else{
+            dt=0.001;
+            dlim=1.e-5;//dlim
         }
-        if(NINT(par[32][2])!=2){ //k free
-            // computing k from T
-            //DELTA_k
-            double Trasm=1.,dt,dlim,tol;;
-            if(NINT(par[50+NINT(par[53][2])][3])==1){//incoherent layer
-                if(DATO[1]>0) Trasm=MIS[1][i][1];
-                if(DATO[2]>0) Trasm=MIS[2][i][1];
-                double dinco=pm[NINT(par[53][2])][1];
-                if(iw==1) printf("Trasm = %f\n",Trasm);
-                dt=-0.1*wl/4./3.14/dinco*log(Trasm);
-                dlim=1.e-10;//dlim
-            }
-            else{
-                dt=0.001;
-                dlim=1.e-5;//dlim
-            }
-            tol=dt/1000.;//tol
-            double k=CNK[1][3];
-            FM=FindRoot(&DELTAT,k,dt,dlim,tol);
-            //printf("k_ini= %f dt=%f tol=%f k_fin=%f\n",k,dt,tol,CNK[1][3]);
-            //printf("FM= %f\n",FM);
-            MIS[16][i][2]=CNK[1][3];
-        }
+        tol=dt/1000.;//tol
+        double k=CNK[1][3];
+        FM=FindRoot(&DELTAT,k,dt,dlim,tol);
+        //printf("k_ini= %f dt=%f tol=%f k_fin=%f\n",k,dt,tol,CNK[1][3]);
+        //printf("FM= %f\n",FM);
+        MIS[16][i][2]=CNK[1][3];
         //computing R
         if(DATO[3]==2 || DATO[5]==2){
             ASSEMBLER(i,wl,1,0.,vot);

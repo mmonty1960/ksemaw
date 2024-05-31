@@ -284,7 +284,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 
 #include <QtGui>
 #include "ksemawc.h"
-#include <fstream>
+//#include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <qfile.h>
@@ -410,8 +410,8 @@ long double ReDirTaucUrb(long double E,long double C,long double E0,long double 
 long double ImDirTaucUrb(long double E,long double C,long double E0,long double E3,long double D);
 long double ImIndirCodyUrb(long double E,long double C,long double E0,long double E3,long double D);
 long double ReIndirCodyUrb(long double E,long double C,long double E0,long double E3,long double D);
-long double ImIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D);
-long double ReIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D);
+long double ImIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D,long double Ex,long double Ey,long double TUx,long double TUy, long double KTi);
+long double ReIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D,long double Ex,long double Ey,long double TUx,long double TUy, long double KTi);
 void ASSEMBLER(int iwl,double wl, int ikind,double teta,double vot[6][3]);
 void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi[6][3]);
 void CALFRE(int NFA,double wl,complex<double> pq,complex<double> IR[999],double d[999],complex<double> out[9][3]);
@@ -443,7 +443,7 @@ ksemawc::ksemawc(QWidget *parent) :
     printf("              Program C++ kSEMAW\n\n");
     printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
     printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 2.6 8 January 2024\n\n");
+    printf("         version 2.7 31 May 2024\n\n");
     printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
     printf("          email: marco.montecchi@enea.it\n");
     printf("          Porting to Windows and advanced oscillators by\n");
@@ -3204,9 +3204,11 @@ void ksemawc::setSample(){
                     pathroot,          //initial directory
                     "file-exp (*.tn *.tp *.rn *.rp *.r1 *.an *.el)"); //file extensions
     }
-    fnSample=fnSample.section('.', 0, 0);
+    fnSample=fnSample.section('.', 0, -3);
     line2=fnSample.section(pathroot, 1, 1);
     ui->lineEdit_sample -> setText(line2);
+    if(fnSample.isEmpty())
+        Clrfn();
 }
 
 void ksemawc::listMeas(const QString &){
@@ -3266,7 +3268,7 @@ void ksemawc::listMeas(const QString &){
 }
 
 void ksemawc::pwTn(const int &){
-    if(fnSample.contains("mate/aa"))
+    if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
     QString lab,info;
@@ -3286,7 +3288,7 @@ void ksemawc::pwTn(const int &){
 }
 
 void ksemawc::pwTp(const int &){
-    if(fnSample.contains("mate/aa"))
+    if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
     QString lab,info;
@@ -3306,7 +3308,7 @@ void ksemawc::pwTp(const int &){
 }
 
 void ksemawc::pwRn(const int &){
-    if(fnSample.contains("mate/aa"))
+    if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
     QString lab,info;
@@ -3326,7 +3328,7 @@ void ksemawc::pwRn(const int &){
 }
 
 void ksemawc::pwRp(const int &){
-    if(fnSample.contains("mate/aa"))
+    if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
     QString lab,info;
@@ -3346,7 +3348,7 @@ void ksemawc::pwRp(const int &){
 }
 
 void ksemawc::pwR1(const int &){
-    if(fnSample.contains("mate/aa"))
+    if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
     QString lab,info;
@@ -3366,7 +3368,7 @@ void ksemawc::pwR1(const int &){
 }
 
 void ksemawc::pwApds(const int &){
-    if(fnSample.contains("mate/aa"))
+    if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
     QString lab,info;
@@ -3386,7 +3388,7 @@ void ksemawc::pwApds(const int &){
 }
 
 void ksemawc::pwE1(const int &){
-    if(fnSample.contains("mate/aa"))
+    if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     int ntel=0,ndat=0,i,index;
     double teta=0;
@@ -3416,6 +3418,26 @@ void ksemawc::pwE1(const int &){
                 ui->WLmin7 -> setText(QString::number(wmin*10.));
                 ui->WLmax7 -> setText(QString::number(wmax*10.));
             }
+            int Npez=6;
+            if(info.contains("etcab"))
+                Npez=5;
+
+            QString line=stream.readLine();
+            line=stream.readLine();
+            line=line.simplified();
+            QStringList List;
+            List =line.split(" ");
+            int nV=List.count();
+            printf("found %d columns on %d expected\n",nV,Npez);
+            if(nV!=Npez){
+                QMessageBox msgBox;
+                msgBox.setText("Format ERROR in "+fnE1+":\nthe number of column mismatch the declared format "+info);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.exec();
+                fnE1="";
+                ui->lineEdit_E1 -> clear();
+                ui->cBmis7 -> clear();
+            }
             file.close();
         }
     }
@@ -3426,7 +3448,7 @@ void ksemawc::pwE1(const int &){
 }
 
 void ksemawc::pwE2(const int &){
-    if(fnSample.contains("mate/aa"))
+    if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     int ntel=0,ndat=0,i,index;
     double teta=0;
@@ -3456,6 +3478,26 @@ void ksemawc::pwE2(const int &){
                 ui->WLmin9 -> setText(QString::number(wmin*10.));
                 ui->WLmax9 -> setText(QString::number(wmax*10.));
             }
+            int Npez=6;
+            if(info.contains("etcab"))
+                Npez=5;
+
+            QString line=stream.readLine();
+            line=stream.readLine();
+            line=line.simplified();
+            QStringList List;
+            List =line.split(" ");
+            int nV=List.count();
+            printf("found %d columns on %d expected\n",nV,Npez);
+            if(nV!=Npez){
+                QMessageBox msgBox;
+                msgBox.setText("Format ERROR in "+fnE2+":\nthe number of column mismatch the declared format "+info);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.exec();
+                fnE2="";
+                ui->lineEdit_E2 -> clear();
+                ui->cBmis9 -> clear();
+            }
             file.close();
         }
     }
@@ -3466,7 +3508,7 @@ void ksemawc::pwE2(const int &){
 }
 
 void ksemawc::pwE3(const int &){
-    if(fnSample.contains("mate/aa"))
+    if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     int ntel=0,ndat=0,i,index;
     double teta=0;
@@ -3496,6 +3538,26 @@ void ksemawc::pwE3(const int &){
                 ui->WLmin11 -> setText(QString::number(wmin*10.));
                 ui->WLmax11 -> setText(QString::number(wmax*10.));
             }
+            int Npez=6;
+            if(info.contains("etcab"))
+                Npez=5;
+
+            QString line=stream.readLine();
+            line=stream.readLine();
+            line=line.simplified();
+            QStringList List;
+            List =line.split(" ");
+            int nV=List.count();
+            printf("found %d columns on %d expected\n",nV,Npez);
+            if(nV!=Npez){
+                QMessageBox msgBox;
+                msgBox.setText("Format ERROR in "+fnE3+":\nthe number of column mismatch the declared format "+info);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.exec();
+                fnE1="";
+                ui->lineEdit_E3 -> clear();
+                ui->cBmis11 -> clear();
+            }
             file.close();
         }
     }
@@ -3506,7 +3568,7 @@ void ksemawc::pwE3(const int &){
 }
 
 void ksemawc::pwE4(const int &){
-    if(fnSample.contains("mate/aa"))
+    if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     int ntel=0,ndat=0,i,index;
     double teta=0;
@@ -3536,6 +3598,26 @@ void ksemawc::pwE4(const int &){
                 ui->WLmin13 -> setText(QString::number(wmin*10.));
                 ui->WLmax13 -> setText(QString::number(wmax*10.));
             }
+            int Npez=6;
+            if(info.contains("etcab"))
+                Npez=5;
+
+            QString line=stream.readLine();
+            line=stream.readLine();
+            line=line.simplified();
+            QStringList List;
+            List =line.split(" ");
+            int nV=List.count();
+            printf("found %d columns on %d expected\n",nV,Npez);
+            if(nV!=Npez){
+                QMessageBox msgBox;
+                msgBox.setText("Format ERROR in "+fnE4+":\nthe number of column mismatch the declared format "+info);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.exec();
+                fnE1="";
+                ui->lineEdit_E4 -> clear();
+                ui->cBmis13 -> clear();
+            }
             file.close();
         }
     }
@@ -3551,7 +3633,7 @@ void ksemawc::pwSubE1(const int &){
     double wmin=0.,wmax=0.;
     QString line;
     index=ui->cBteE1 -> currentIndex();
-    if(index>=0 && !fnE1.contains("999.9")){
+    if(index>=0 && !fnE1.contains("999.9") && !fnSample.isEmpty()){
         QFile file(fnE1);
         if (!file.open (QIODevice::ReadOnly | QIODevice::Text)){
             msgErrLoad("pwSubE1",fnE1);
@@ -3583,7 +3665,7 @@ void ksemawc::pwSubE2(const int &){
     double wmin=0.,wmax=0.;
     QString line;
     index=ui->cBteE2 -> currentIndex();
-    if(index>=0 && !fnE2.contains("999.9")){
+    if(index>=0 && !fnE2.contains("999.9") && !fnSample.isEmpty()){
         QFile file(fnE2);
         if (!file.open (QIODevice::ReadOnly | QIODevice::Text)){
             msgErrLoad("pwSubE2",fnE2);
@@ -3615,7 +3697,7 @@ void ksemawc::pwSubE3(const int &){
     double wmin=0.,wmax=0.;
     QString line;
     index=ui->cBteE3 -> currentIndex();
-    if(index>=0 && !fnE3.contains("999.9")){
+    if(index>=0 && !fnE3.contains("999.9") && !fnSample.isEmpty()){
         QFile file(fnE3);
         if (!file.open (QIODevice::ReadOnly | QIODevice::Text)){
             msgErrLoad("pwSubE3",fnE3);
@@ -3647,7 +3729,7 @@ void ksemawc::pwSubE4(const int &){
     double wmin=0.,wmax=0.;
     QString line;
     index=ui->cBteE4 -> currentIndex();
-    if(index>=0 && !fnE4.contains("999.9")){
+    if(index>=0 && !fnE4.contains("999.9") && !fnSample.isEmpty()){
         QFile file(fnE4);
         if (!file.open (QIODevice::ReadOnly | QIODevice::Text)){
             msgErrLoad("pwSubE4",fnE4);
@@ -3691,6 +3773,10 @@ void ksemawc::MCRange(){
             printf("filenk-%d wlmin=%f wlmax=%f\n",ink,Lmin,Lmax);
     }
     for(int imis=1;imis<=14;imis++){
+        if(fnSample.isEmpty()){
+            for(int k=1;k<=3;k++)
+                idToCheckBox["checkB_mis"+QString::number(imis)+"_"+QString::number(k)] -> setCheckState(Qt::Unchecked);
+        }
         state1 = idToCheckBox["checkB_mis"+QString::number(imis)+"_1"] -> checkState();
         if( state1 == Qt::Checked ) {
             if(DATO[imis]==0) DATO[imis]=1;
@@ -5500,9 +5586,12 @@ void ksemawc::CalcMis(double mc[15][1000]){
         }
     }
     fileNK.close();
+    double SIMchi2=0.;
+    double nMIS=0.;
     for(int ic=1;ic<=14;ic++){
         double FM=0.;
         if(DATO[ic]!=0){
+            nMIS++;
             for(int i=1;i<=NeV;i++){
                 Yp[i-1]=mc[ic][i];
                 if(ic<=5)
@@ -5520,7 +5609,9 @@ void ksemawc::CalcMis(double mc[15][1000]){
             else if(ic==8 || ic==10 || ic==12 || ic==14)
                 PLOTline1bar2(1,0,iColor,8,NeV,Xp,Yp,ErrXp,ErrYp);
         }
+        SIMchi2=SIMchi2+FM;
     }
+    ui->lineEdit_SIMchi2->setText("chi2= "+QString::number(SIMchi2/nMIS));
     if(DATO[1]!=0 && DATO[3]!=0){
         for(int i=1;i<=NeV;i++){
             Yp[i-1]=(1.-mc[1][i]-mc[3][i])*100.;
@@ -8561,6 +8652,7 @@ void FDISP(int iopt,double eV){
     //printf("->FDISP @ E=%f\n",eV);
     double cln2=0.693147181;
     double sqrln2=0.832554611;
+    long double E3, Ex, Ey, W, KTi, r, Eb, Eh, El, derexp, derparab, TUx, TUy;
 
     // epsilon and nk by sum of oscillators
     int noscFT=NINT(pf[iopt][1]);
@@ -8591,7 +8683,7 @@ void FDISP(int iopt,double eV){
             long double x=(E0-E)/D;
             long double Kinho=pow((D/sqrln2),2.)/2*exp(-pow(E0*sqrln2/D,2.))+
                                 E0*D/sqrln2/2.*sqrt(PIG)*erfcl(-E0*sqrln2/D);
-            eprj=C/Kinho*DAWS(sqrln2*x);
+            eprj=C/Kinho*DAWS(sqrln2*x)*2./sqrt(PIG);
             epij=C/Kinho*exp(-cln2*x*x);//K was deleted
         }
         else if(ifu==4){
@@ -8650,11 +8742,57 @@ void FDISP(int iopt,double eV){
             long double E3=K+E0;
             eprj=ReIndirCodyUrb(E,C,E0,E3,D);
             epij=ImIndirCodyUrb(E,C,E0,E3,D);
+            // if(eV>3.8 && eV<4.)
+            //     printf("->ifu=10 E=%Lf C=%Lf E0=%Lf E3=%Lf D=%Lf,eprj=%Lf epij=%Lf\n",E,C,E0,E3,D,eprj,epij);
         }
         else if(ifu==11){// Indirect gap Tauc with Urbach tail and K-K integral
-            long double E3=K+E0;
-            eprj=ReIndirTaucUrb(E,C,E0,E3,D);
-            epij=ImIndirTaucUrb(E,C,E0,E3,D);
+            E3=K+E0;
+            W=E3-E0;
+            r=E0/W;
+            KTi=2.*(8.*r*r*log((4.*r+1.)/(4.*r)) + 8.*pow((r+1.),2.)*log((4.*r+4.)/(4.*r+3.))
+                               - (1.+8.*r*(r+1.))*log((4.*r+3.)/(4.*r+1.)) );
+            Ex=(E0+sqrt(E0*E0+E0*D*8.))/2.;
+            Ey=(E3+sqrt(E3*E3-E3*D*8.))/2.;
+            TUx=C*16./KTi/(W*W)/(Ex*Ex)*(Ex-E0)*(Ex-E0); //  if(E<=Ex) then chi2=TUx*exp((E-Ex)/D)
+            TUy=C*16./KTi/(W*W)/(Ey*Ey)*(Ey-E3)*(Ey-E3); //  if(E>=Ey) then chi2=TUy*exp(-(E-Ey)/D)
+            if(Ex>E0+W/4.){
+                Eh=Ex;
+                El=E0+W/4.;
+                for(int j=1;j<=13;j=j+1){
+                    Eb=(Eh+El)/2.;
+                    derexp=C/KTi/(Eb*Eb)*(-(Eb-E0-W/2.)*(Eb-E0-W/2.)*16./(W*W)+2.)/D;
+                    derparab=C/KTi/(Eb*Eb)*(32./W/W*(Eb-E0-W/2.)*((Eb-E0-W/2.)/Eb-1.)-4./Eb);
+                    //if(abs(E-3.)<0.01) printf("E=%Lf j=%d Eb=%Lf derexp=%Lf derparab=%Lf \n",E, j, Eb,derexp, derparab);
+                    if (derexp>derparab) {
+                        Eh=Eb;
+                    }
+                    else{
+                        El=Eb;
+                    }
+                }
+                Ex=Eb;
+                TUx=C/KTi/(Ex*Ex)*(-(Ex-E0-W/2.)*(Ex-E0-W/2.)*16./(W*W)+2.);
+            }
+            if(Ey<E0+W*3./4.){
+                Eh=E0+W*3./4.;
+                El=Ey;
+                for(int j=1;j<=13;j=j+1){
+                    Eb=(Eh+El)/2.;
+                    derexp=-C/KTi/(Eb*Eb)*(-(Eb-E0-W/2.)*(Eb-E0-W/2.)*16./(W*W)+2.)/D;
+                    derparab=C/KTi/(Eb*Eb)*(32./W/W*(Eb-E0-W/2.)*((Eb-E0-W/2.)/Eb-1.)-4./Eb);
+                    //if(abs(E-3.)<0.01) printf("E=%Lf j=%d Eb=%Lf derexp=%Lf derparab=%Lf \n",E, j, Eb,derexp, derparab);
+                    if (derexp<derparab) {
+                        El=Eb;
+                    }
+                    else{
+                        Eh=Eb;
+                    }
+                }
+                Ey=Eb;
+                TUy=C/KTi/(Ey*Ey)*(-(Ey-E0-W/2.)*(Ey-E0-W/2.)*16./(W*W)+2.);
+            }
+            eprj=ReIndirTaucUrb(E,C,E0,E3,D,Ex,Ey,TUx,TUy,KTi);
+            epij=ImIndirTaucUrb(E,C,E0,E3,D,Ex,Ey,TUx,TUy,KTi);
         }
         else if(ifu==12){// Direct gap Cody with Urbach tail and K-K integral
             long double E3=K+E0;
@@ -8725,8 +8863,8 @@ void FDISP(int iopt,double eV){
         }
         epr=epr+eprj;
         epi=epi+epij;
-//        if(eV>1.995 && eV<2.)
-//            printf("E=%f (eV) eprj=%Lf epij=%Lf\n",eV,eprj,epij);
+        if(isnan(eprj) || isnan(epij))
+            printf("->FDISP-ERROR: OscNumber=%d E(eV)=%f eprj=%Lf epij=%Lf\n",io-1,eV,eprj,epij);
     }
     EpsiR=epr;
     EpsiI=epi;
@@ -8745,7 +8883,6 @@ long double ICCODYRE(long double E,long double Ep,long double D){
     long double value=0.5/PIG*log(D*D+pow(E-Ep,2.));
     return(value);
 }
-
 
 long double I2CODYIM(long double E,long double E0,long double Ep,long double D){
     long double value=1./PIG*((D*D-pow(E-E0,2.))*atan2(E-Ep,D)+
@@ -8823,7 +8960,6 @@ long double DAWS(long double x){
     return(value);
 }
 
-
 long double ReFdirGap(long double E,long double E0,long double D,long double x){
     complex<long double> b(E-E0,0.);
     complex<long double> dc(D,0.);
@@ -8834,7 +8970,6 @@ long double ReFdirGap(long double E,long double E0,long double D,long double x){
                     (aim*dc-b)))-sqrt(b+aim*dc)*atanh(sqrt((dc*xc+b)/(aim*dc+b))));
     return(value);
 }
-
 
 long double aImFdirGap(long double E,long double E0,long double D,long double x){
     complex<long double> b(E-E0,0.);
@@ -9109,22 +9244,37 @@ long double ImIndirCodyUrb(long double E,long double C,long double E0,long doubl
     long double Ex, Ey, chi2, W, KCi;
     W=E3-E0;
     KCi=W*(E0+W*0.5);
-    Ex=E0+D*2.;
-    Ey=E3-D*2.;
-    if(E<=Ex){
-        chi2=C*16./KCi/(W*W)*(Ex-E0)*(Ex-E0)*exp((E-Ex)/D);
-    }
-    else if(E>Ex && E<=(E0+W/4.)){
-        chi2=C*16./KCi/(W*W)*(E-E0)*(E-E0);
-    }
-    else if(E>(E0+W/4.) && E<=(E0+W*3./4.)){
-        chi2=C/KCi*(-(E-E0-W/2.)*(E-E0-W/2.)*16./(W*W)+2.);
-    }
-    else if(E>(E0+W*3./4.) && E<Ey){
-        chi2=C*16./KCi/(W*W)*(E-E3)*(E-E3);
+    if(2.*D<=W/4.){
+        Ex=E0+D*2.;
+        Ey=E3-D*2.;
+        if(E<=Ex){
+            chi2=C*16./KCi/(W*W)*(Ex-E0)*(Ex-E0)*exp((E-Ex)/D);
+        }
+        else if(E>Ex && E<=(E0+W/4.)){
+            chi2=C*16./KCi/(W*W)*(E-E0)*(E-E0);
+        }
+        else if(E>(E0+W/4.) && E<=(E0+W*3./4.)){
+            chi2=C/KCi*(-(E-E0-W/2.)*(E-E0-W/2.)*16./(W*W)+2.);
+        }
+        else if(E>(E0+W*3./4.) && E<Ey){
+            chi2=C*16./KCi/(W*W)*(E-E3)*(E-E3);
+        }
+        else{
+            chi2=C*16./KCi/(W*W)*(Ey-E3)*(Ey-E3)*exp(-(E-Ey)/D);
+        }
     }
     else{
-        chi2=C*16./KCi/(W*W)*(Ey-E3)*(Ey-E3)*exp(-(E-Ey)/D);
+        Ex=E0+W/2.+D-sqrt(D*D+W*W/8.);
+        Ey=E0+W/2.-D+sqrt(D*D+W*W/8.);
+        if(E<=Ex){
+            chi2=C/KCi*(-(Ex-E0-W/2.)*(Ex-E0-W/2.)*16./(W*W)+2.)*exp((E-Ex)/D);
+        }
+        else if(E<=Ey){
+            chi2=C/KCi*(-(E-E0-W/2.)*(E-E0-W/2.)*16./(W*W)+2.);
+        }
+        else{
+            chi2=C/KCi*(-(Ey-E0-W/2.)*(Ey-E0-W/2.)*16./(W*W)+2.)*exp(-(E-Ey)/D);
+        }
     }
     return(chi2);
 }
@@ -9134,8 +9284,14 @@ long double ReIndirCodyUrb(long double E,long double C,long double E0,long doubl
     int n1=0,n2=0;
     W=E3-E0;
     KCi=W*(E0+W*0.5);
-    Ex=E0+D*2.;
-    Ey=E3-D*2.;
+    if(2.*D<=W/4.){
+        Ex=E0+D*2.;
+        Ey=E3-D*2.;
+    }
+    else{
+        Ex=E0+W/2.+D-sqrt(D*D+W*W/8.);
+        Ey=E0+W/2.-D+sqrt(D*D+W*W/8.);
+    }
     //Emin, Emax calculation so that alpha(Em)<1e-2 cm^-1
     Eminin=log(1.973e-7/(E0*C*16./KCi/(W*W)*(Ex-E0)*(Ex-E0)*exp(-Ex/D)))*D;
     Emaxin=-log(1.973e-7/(E3*C*16./KCi/(W*W)*(Ey-E3)*(Ey-E3)*exp(Ey/D)))*D;
@@ -9182,44 +9338,34 @@ long double ReIndirCodyUrb(long double E,long double C,long double E0,long doubl
     return(chi1);
 }
 
-long double ImIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D){
-    long double Ex, Ey, chi2, W, KTi, r;
+long double ImIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D,long double Ex,long double Ey,long double TUx,long double TUy, long double KTi){
+    long double chi2, W;
     W=E3-E0;
-    r=E0/W;
-    KTi=2.*(8.*r*r*log((4.*r+1.)/(4.*r)) + 8.*pow((r+1.),2.)*log((4.*r+4.)/(4.*r+3.))
-                       - (1.+8.*r*(r+1.))*log((4.*r+3.)/(4.*r+1.)) );
-    Ex=(E0+sqrt(E0*E0+E0*D*8.))/2.;
-    Ey=(E3+sqrt(E3*E3-E3*D*8.))/2.;
     if(E<=Ex){
-        chi2=C*16./KTi/(W*W)/(Ex*Ex)*(Ex-E0)*(Ex-E0)*exp((E-Ex)/D);
+        chi2=TUx*exp((E-Ex)/D);
     }
     else if(E>Ex && E<=(E0+W/4.)){
         chi2=C*16./KTi/(W*W)/(E*E)*(E-E0)*(E-E0);
+        //if(abs(E-3.)<0.005) printf("E=%Lf Ex=%Lf E0+W/4.=%Lf \n",E, Ex,E0+W/4.);
     }
-    else if(E>(E0+W/4.) && E<=(E0+W*3./4.)){
+    else if(E>max(Ex,(E0+W/4.)) && E<=min(Ey,(E0+W*3./4.))){
         chi2=C/KTi/(E*E)*(-(E-E0-W/2.)*(E-E0-W/2.)*16./(W*W)+2.);
     }
-    else if(E>(E0+W*3./4.) && E<E3){
+    else if(E>(E0+W*3./4.) && E<Ey){
         chi2=C*16./KTi/(W*W)/(E*E)*(E-E3)*(E-E3);
     }
     else{
-        chi2=C*16./KTi/(W*W)/(Ey*Ey)*(Ey-E3)*(Ey-E3)*exp(-(E-Ey)/D);
+        chi2=TUy*exp(-(E-Ey)/D);
     }
     return(chi2);
 }
 
-long double ReIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D){
-    long double Ex, Ey, chi1, chi1old, Eminin, Emaxin, Emin, Emax,W, KTi, r, de, x;
+long double ReIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D,long double Ex,long double Ey,long double TUx,long double TUy, long double KTi){
+    long double chi1, chi1old, Eminin, Emaxin, Emin, Emax, de, x;
     int n1=0,n2=0;
-    W=E3-E0;
-    r=E0/W;
-    KTi=2.*(8.*r*r*log((4.*r+1.)/(4.*r)) + 8.*pow((r+1.),2.)*log((4.*r+4.)/(4.*r+3.))
-                       - (1.+8.*r*(r+1.))*log((4.*r+3.)/(4.*r+1.)) );
-    Ex=(E0+sqrt(E0*E0+E0*D*8.))/2.;
-    Ey=(E3+sqrt(E3*E3-E3*D*8.))/2.;
     //Emin, Emax calculation so that alpha(Em)<1e-2 cm^-1
-    Eminin=log(1.973e-7/(E0*C*16./KTi/(W*W)*(Ex-E0)*(Ex-E0)*exp(-Ex/D)))*D;
-    Emaxin=-log(1.973e-7/(E3*C*16./KTi/(W*W)*(Ey-E3)*(Ey-E3)*exp(Ey/D)))*D;
+    Eminin=log(1.973e-7/(E0*TUx*exp(-Ex/D)))*D;
+    Emaxin=-log(1.973e-7/(E3*TUy*exp(Ey/D)))*D;
 
     // chi1 calculation by Kramers-Kronig integration
 
@@ -9255,7 +9401,7 @@ long double ReIndirTaucUrb(long double E,long double C,long double E0,long doubl
             else{
                 x=Emin+de*j;
             }
-            chi1=chi1+ImIndirTaucUrb(x,C,E0,E3,D)*x/(x*x-E*E);
+            chi1=chi1+ImIndirTaucUrb(x,C,E0,E3,D,Ex,Ey,TUx,TUy,KTi)*x/(x*x-E*E);
         }
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;

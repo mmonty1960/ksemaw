@@ -52,7 +52,7 @@
       <locale language="English" country="UnitedStates"/>
      </property>
      <property name="tabShape">
-      <enum>QTabWidget::Triangular</enum>
+      <enum>QTabWidget::TabShape::Rounded</enum>
      </property>
      <property name="currentIndex">
       <number>0</number>
@@ -114,7 +114,7 @@
          <item>
           <spacer name="horizontalSpacer_10">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1051,7 +1051,7 @@
        <item>
         <spacer name="verticalSpacer_12">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -1111,7 +1111,7 @@
          <item>
           <spacer name="horizontalSpacer_13">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1126,7 +1126,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <property name="sizeConstraint">
-          <enum>QLayout::SetNoConstraint</enum>
+          <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
          </property>
          <item>
           <widget class="QLabel" name="label_157">
@@ -1150,7 +1150,7 @@
          <item>
           <spacer name="horizontalSpacer_5">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1215,7 +1215,7 @@
          <item>
           <spacer name="horizontalSpacer_4">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1324,7 +1324,7 @@
          <item>
           <spacer name="horizontalSpacer_14">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -1907,7 +1907,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,0,0">
          <property name="sizeConstraint">
-          <enum>QLayout::SetNoConstraint</enum>
+          <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
          </property>
          <item>
           <widget class="QCheckBox" name="checkB_PAR_54_2">
@@ -1931,7 +1931,7 @@
          <item>
           <spacer name="horizontalSpacer_9">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -2074,7 +2074,7 @@
          <item>
           <spacer name="horizontalSpacer_11">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -2100,7 +2100,7 @@
          <item>
           <spacer name="horizontalSpacer_12">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -2536,7 +2536,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_20">
          <property name="sizeConstraint">
-          <enum>QLayout::SetNoConstraint</enum>
+          <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
          </property>
          <item>
           <widget class="QLabel" name="label_161">
@@ -2682,7 +2682,7 @@
          <item>
           <spacer name="horizontalSpacer_3">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -2755,9 +2755,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -2814,9 +2811,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>3</number>
            </property>
@@ -2847,9 +2841,6 @@
            </property>
            <property name="text">
             <string>d(mm-A)</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -2895,9 +2886,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>1</number>
            </property>
@@ -2920,9 +2908,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>1</number>
            </property>
@@ -2944,9 +2929,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -2985,9 +2967,6 @@
            <property name="text">
             <string>GRAD-n</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="2" column="4">
@@ -3003,9 +2982,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>1</number>
@@ -3029,9 +3005,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>1</number>
            </property>
@@ -3054,9 +3027,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>2</number>
            </property>
@@ -3078,9 +3048,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -3109,9 +3076,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -3163,9 +3127,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -3193,9 +3154,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -3311,9 +3269,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>2</number>
            </property>
@@ -3335,9 +3290,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -3367,9 +3319,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -3397,9 +3346,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -3429,9 +3375,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -3459,9 +3402,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -3564,9 +3504,6 @@
            <property name="text">
             <string>GRAD-k</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="2" column="6">
@@ -3582,9 +3519,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>3</number>
@@ -3672,9 +3606,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>2</number>
            </property>
@@ -3719,9 +3650,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>3</number>
            </property>
@@ -3753,9 +3681,6 @@
            <property name="text">
             <string>rough (A)</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="0" column="7">
@@ -3781,9 +3706,6 @@
            <property name="text">
             <string>CURV-n</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="1" column="6">
@@ -3799,9 +3721,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>3</number>
@@ -3906,9 +3825,6 @@
            <property name="text">
             <string>dGRAD-n/dE</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="3" column="0">
@@ -3981,9 +3897,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>3</number>
            </property>
@@ -4005,9 +3918,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -4045,9 +3955,6 @@
            </property>
            <property name="text">
             <string>material</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -4195,9 +4102,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -4226,9 +4130,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>3</number>
            </property>
@@ -4250,9 +4151,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -4410,9 +4308,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -4441,9 +4336,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -4471,9 +4363,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -4659,9 +4548,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>1</number>
            </property>
@@ -4683,9 +4569,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>2</number>
@@ -4717,9 +4600,6 @@
            </property>
            <property name="text">
             <string>type</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -4764,9 +4644,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -4818,9 +4695,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -4848,9 +4722,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -4880,9 +4751,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -4911,9 +4779,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -4941,9 +4806,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -5037,9 +4899,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>1</number>
            </property>
@@ -5090,9 +4949,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>1</number>
            </property>
@@ -5136,9 +4992,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -5193,9 +5046,6 @@
            <property name="text">
             <string>CURV-k</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="3" column="3">
@@ -5211,9 +5061,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>2</number>
@@ -5236,9 +5083,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -5289,9 +5133,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -5349,9 +5190,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>1</number>
            </property>
@@ -5373,9 +5211,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>3</number>
@@ -5465,9 +5300,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -5495,9 +5327,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>3</number>
@@ -5527,9 +5356,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>2</number>
            </property>
@@ -5552,9 +5378,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -5574,9 +5397,6 @@
            <property name="text">
             <string>Move</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="5" column="6">
@@ -5592,9 +5412,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>3</number>
@@ -5618,9 +5435,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>2</number>
            </property>
@@ -5642,9 +5456,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -5673,9 +5484,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -5730,9 +5538,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -5783,9 +5588,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>2</number>
            </property>
@@ -5807,9 +5609,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -5839,9 +5638,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>4</number>
            </property>
@@ -5870,9 +5666,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>2</number>
            </property>
@@ -5894,9 +5687,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -5926,9 +5716,6 @@
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="decimals">
             <number>1</number>
            </property>
@@ -5950,9 +5737,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -6003,9 +5787,6 @@
            </property>
            <property name="locale">
             <locale language="English" country="UnitedStates"/>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="decimals">
             <number>4</number>
@@ -6058,9 +5839,6 @@
              <height>16777215</height>
             </size>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="maximum">
             <number>9</number>
            </property>
@@ -6069,7 +5847,7 @@
          <item>
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -6095,7 +5873,7 @@
          <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -6126,9 +5904,6 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="value">
             <number>23</number>
            </property>
@@ -6150,7 +5925,7 @@
          <item>
           <spacer name="horizontalSpacer_81">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -6181,9 +5956,6 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
            <property name="minimum">
             <number>2</number>
            </property>
@@ -6198,7 +5970,7 @@
          <item>
           <spacer name="horizontalSpacer_7">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -6264,7 +6036,7 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_11" columnstretch="1,3,1,1,1,1,1,1">
          <property name="sizeConstraint">
-          <enum>QLayout::SetNoConstraint</enum>
+          <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
          </property>
          <item row="0" column="0">
           <widget class="QLabel" name="label_137">
@@ -6288,9 +6060,6 @@
            </property>
            <property name="text">
             <string>Material #1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -6418,9 +6187,6 @@
            </property>
            <property name="text">
             <string>Material #2</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -6734,9 +6500,6 @@
            <property name="text">
             <string>Material #3</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="2" column="1">
@@ -7039,9 +6802,6 @@
            </property>
            <property name="text">
             <string>Material #4</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -7346,9 +7106,6 @@
            <property name="text">
             <string>Material #5</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="4" column="1">
@@ -7651,9 +7408,6 @@
            </property>
            <property name="text">
             <string>Material #6</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -7958,9 +7712,6 @@
            <property name="text">
             <string>Material #7</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="6" column="1">
@@ -8263,9 +8014,6 @@
            </property>
            <property name="text">
             <string>Material #8</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -8570,9 +8318,6 @@
            <property name="text">
             <string>output SF</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="8" column="1">
@@ -8875,9 +8620,6 @@
            </property>
            <property name="text">
             <string>input SF</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -9182,9 +8924,6 @@
            <property name="text">
             <string>input PDS</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="10" column="1">
@@ -9487,9 +9226,6 @@
            </property>
            <property name="text">
             <string>input ELI-1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -9794,9 +9530,6 @@
            <property name="text">
             <string>input ELI-2</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="12" column="1">
@@ -10100,9 +9833,6 @@
            <property name="text">
             <string>input ELI-3</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="13" column="1">
@@ -10399,9 +10129,6 @@
            </property>
            <property name="text">
             <string>input ELI-4</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -10714,7 +10441,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_36">
          <property name="sizeConstraint">
-          <enum>QLayout::SetMinimumSize</enum>
+          <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
          </property>
          <item>
           <widget class="QComboBox" name="cB_cnk1a">
@@ -10887,7 +10614,7 @@
          <item>
           <spacer name="horizontalSpacer_6">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -11121,7 +10848,7 @@
          <item>
           <spacer name="horizontalSpacer_97">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -11176,9 +10903,22 @@
           </widget>
          </item>
          <item>
+          <spacer name="horizontalSpacer_15">
+           <property name="orientation">
+            <enum>Qt::Orientation::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <spacer name="horizontalSpacer_8">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Orientation::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
@@ -11193,7 +10933,7 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,0,0,0,0,0,0,0,0,0,0,0">
          <property name="sizeConstraint">
-          <enum>QLayout::SetNoConstraint</enum>
+          <enum>QLayout::SizeConstraint::SetDefaultConstraint</enum>
          </property>
          <item row="3" column="1">
           <widget class="QComboBox" name="cBpm_111_1">
@@ -11320,9 +11060,6 @@
            <property name="text">
             <string>D (eV)</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="3" column="2">
@@ -11416,7 +11153,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>19</string>
@@ -11438,7 +11175,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>10</string>
@@ -11631,7 +11368,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>12</string>
@@ -11672,7 +11409,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>4</string>
@@ -11694,7 +11431,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>1</string>
@@ -11754,7 +11491,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>17</string>
@@ -11871,7 +11608,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>16</string>
@@ -11969,7 +11706,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>8</string>
@@ -12010,7 +11747,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>15</string>
@@ -12032,7 +11769,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>6</string>
@@ -12164,9 +11901,6 @@
            <property name="text">
             <string>W (eV)</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="8" column="1">
@@ -12279,7 +12013,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>13</string>
@@ -12434,7 +12168,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>14</string>
@@ -12551,7 +12285,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>5</string>
@@ -12721,9 +12455,6 @@
            <property name="text">
             <string>C</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="6" column="7">
@@ -12870,9 +12601,6 @@
            <property name="text">
             <string> E0 (eV)</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="1" column="9">
@@ -12966,7 +12694,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>11</string>
@@ -13022,9 +12750,6 @@
            <property name="text">
             <string>W (eV)</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="9" column="8">
@@ -13056,9 +12781,6 @@
            </property>
            <property name="text">
             <string>C</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -13096,7 +12818,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>20</string>
@@ -13118,7 +12840,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>9</string>
@@ -13216,7 +12938,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>3</string>
@@ -13252,9 +12974,6 @@
            </property>
            <property name="text">
             <string>#Osc</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -13311,7 +13030,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>2</string>
@@ -13329,9 +13048,6 @@
            <property name="text">
             <string> E0 (eV)</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="0" column="10">
@@ -13344,9 +13060,6 @@
            </property>
            <property name="text">
             <string>D (eV)</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -13384,7 +13097,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>7</string>
@@ -13497,9 +13210,6 @@
            <property name="text">
             <string> type</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="3" column="7">
@@ -13536,7 +13246,7 @@
             </size>
            </property>
            <property name="layoutDirection">
-            <enum>Qt::RightToLeft</enum>
+            <enum>Qt::LayoutDirection::LeftToRight</enum>
            </property>
            <property name="text">
             <string>18</string>
@@ -13592,9 +13302,6 @@
            <property name="text">
             <string>#Osc</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="2" column="9">
@@ -13645,9 +13352,6 @@
            </property>
            <property name="text">
             <string> type</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -13895,9 +13599,6 @@
              </property>
              <property name="text">
               <string>D/Err RMS</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -14184,9 +13885,6 @@
              </property>
              <property name="text">
               <string>&lt;Exp.&gt;</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -14649,9 +14347,6 @@
              <property name="text">
               <string>&lt;Sim.&gt;</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
             </widget>
            </item>
            <item row="12" column="1">
@@ -14803,9 +14498,6 @@
              </property>
              <property name="text">
               <string>Theta (°)</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -14959,9 +14651,6 @@
              </property>
              <property name="text">
               <string>Enable</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -15348,6 +15037,9 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QLineEdit" name="lineEdit_SIMchi2"/>
+             </item>
             </layout>
            </item>
            <item>
@@ -15469,7 +15161,7 @@
            <item>
             <spacer name="verticalSpacer_6">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -15523,9 +15215,6 @@
                 <property name="text">
                  <string>Theta (°)</string>
                 </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
                </widget>
               </item>
               <item row="0" column="1">
@@ -15539,18 +15228,12 @@
                 <property name="text">
                  <string>Enable</string>
                 </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
                </widget>
               </item>
               <item row="0" column="2">
                <widget class="QLabel" name="label_52">
                 <property name="text">
                  <string>Theta (°)</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -15564,9 +15247,6 @@
                 </property>
                 <property name="text">
                  <string>Enable</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -15907,9 +15587,6 @@
                 <property name="text">
                  <string>idem</string>
                 </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
                </widget>
               </item>
               <item row="4" column="3">
@@ -15985,9 +15662,6 @@
                 </property>
                 <property name="text">
                  <string>idem</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
@@ -16065,9 +15739,6 @@
                 <property name="text">
                  <string>idem</string>
                 </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
                </widget>
               </item>
               <item row="6" column="3">
@@ -16144,9 +15815,6 @@
                 <property name="text">
                  <string>idem</string>
                 </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
                </widget>
               </item>
               <item row="7" column="3">
@@ -16185,9 +15853,6 @@
              </property>
              <property name="title">
               <string>Numerical search in n-k space</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_26">
               <item>
@@ -16267,19 +15932,6 @@
               </item>
              </layout>
             </widget>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_8">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
            </item>
            <item>
             <widget class="QGroupBox" name="groupBox_2">
@@ -16415,12 +16067,15 @@
        <item>
         <spacer name="verticalSpacer_9">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Policy::MinimumExpanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>40</height>
+           <width>40</width>
+           <height>600</height>
           </size>
          </property>
         </spacer>
@@ -16435,7 +16090,7 @@
        <item>
         <spacer name="verticalSpacer_11">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -16470,9 +16125,6 @@
            <property name="text">
             <string>Job number</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item>
@@ -16488,9 +16140,6 @@
              <width>16777215</width>
              <height>16777215</height>
             </size>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="readOnly">
             <bool>true</bool>
@@ -16517,9 +16166,6 @@
            <property name="text">
             <string>of</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item>
@@ -16538,9 +16184,6 @@
              <width>16777215</width>
              <height>16777215</height>
             </size>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
            </property>
            <property name="maximum">
             <number>1000</number>
@@ -16563,9 +16206,6 @@
            </property>
            <property name="text">
             <string>Chi^2</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -16607,9 +16247,6 @@
            </property>
            <property name="text">
             <string>----&gt;</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -16715,7 +16352,7 @@
        <item>
         <spacer name="verticalSpacer_5">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -16818,9 +16455,6 @@
                   <property name="text">
                    <string>N. parameters</string>
                   </property>
-                  <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                  </property>
                  </widget>
                 </item>
                 <item>
@@ -16830,9 +16464,6 @@
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -16851,9 +16482,6 @@
                   <property name="text">
                    <string>enabled</string>
                   </property>
-                  <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                  </property>
                  </widget>
                 </item>
                 <item>
@@ -16867,9 +16495,6 @@
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
-                  <property name="alignment">
-                   <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                  </property>
                  </widget>
                 </item>
                </layout>
@@ -16880,7 +16505,7 @@
            <item>
             <spacer name="verticalSpacer">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -16918,7 +16543,7 @@
            <item>
             <spacer name="verticalSpacer_2">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -17036,7 +16661,7 @@
            <item>
             <spacer name="verticalSpacer_7">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -17203,9 +16828,6 @@
              <property name="text">
               <string>enabled</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
             </widget>
            </item>
            <item row="0" column="1">
@@ -17218,9 +16840,6 @@
              </property>
              <property name="text">
               <string>parameter</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -17235,9 +16854,6 @@
              <property name="text">
               <string>value</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
             </widget>
            </item>
            <item row="0" column="3">
@@ -17250,9 +16866,6 @@
              </property>
              <property name="text">
               <string>Error (99%)</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -17267,9 +16880,6 @@
              <property name="text">
               <string>global correlation</string>
              </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
             </widget>
            </item>
            <item row="1" column="0">
@@ -17281,7 +16891,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>1</string>
@@ -17387,7 +16997,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>2</string>
@@ -17469,7 +17079,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>3</string>
@@ -17530,7 +17140,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>4</string>
@@ -17612,7 +17222,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>5</string>
@@ -17694,7 +17304,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>6</string>
@@ -17776,7 +17386,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>7</string>
@@ -17858,7 +17468,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>8</string>
@@ -17940,7 +17550,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>9</string>
@@ -18022,7 +17632,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>10</string>
@@ -18104,7 +17714,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>11</string>
@@ -18186,7 +17796,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>12</string>
@@ -18268,7 +17878,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>13</string>
@@ -18350,7 +17960,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>14</string>
@@ -18432,7 +18042,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>15</string>
@@ -18514,7 +18124,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>16</string>
@@ -18583,7 +18193,7 @@
               </sizepolicy>
              </property>
              <property name="layoutDirection">
-              <enum>Qt::RightToLeft</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>17</string>
@@ -18679,7 +18289,7 @@
        <item>
         <spacer name="verticalSpacer_4">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -18747,9 +18357,6 @@
            <property name="text">
             <string>X</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="1" column="1">
@@ -18762,9 +18369,6 @@
            </property>
            <property name="text">
             <string>Xmin</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -18779,9 +18383,6 @@
            <property name="text">
             <string>Xmax</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="1" column="3">
@@ -18794,9 +18395,6 @@
            </property>
            <property name="text">
             <string>VALmin</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -18811,9 +18409,6 @@
            <property name="text">
             <string>VALmax</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="1" column="5">
@@ -18827,9 +18422,6 @@
            <property name="text">
             <string>units</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="2" column="0">
@@ -18842,9 +18434,6 @@
            </property>
            <property name="text">
             <string>wl</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -18941,9 +18530,6 @@
            <property name="text">
             <string>Angstrom</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="3" column="0">
@@ -18956,9 +18542,6 @@
            </property>
            <property name="text">
             <string>d</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -19055,9 +18638,6 @@
            <property name="text">
             <string>Angstrom</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="4" column="0">
@@ -19070,9 +18650,6 @@
            </property>
            <property name="text">
             <string>Theta</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -19169,9 +18746,6 @@
            <property name="text">
             <string>deg</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="5" column="0">
@@ -19204,9 +18778,6 @@
            <property name="text">
             <string>Y</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="6" column="1">
@@ -19219,9 +18790,6 @@
            </property>
            <property name="text">
             <string>Ymin</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -19236,9 +18804,6 @@
            <property name="text">
             <string>Ymax</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="6" column="3">
@@ -19251,9 +18816,6 @@
            </property>
            <property name="text">
             <string>VALmin</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -19268,9 +18830,6 @@
            <property name="text">
             <string>VALmax</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="6" column="5">
@@ -19284,9 +18843,6 @@
            <property name="text">
             <string>units</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="7" column="0">
@@ -19299,9 +18855,6 @@
            </property>
            <property name="text">
             <string>Tn</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -19398,9 +18951,6 @@
            <property name="text">
             <string>%</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="8" column="0">
@@ -19413,9 +18963,6 @@
            </property>
            <property name="text">
             <string>Tp</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -19512,9 +19059,6 @@
            <property name="text">
             <string>%</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="9" column="0">
@@ -19527,9 +19071,6 @@
            </property>
            <property name="text">
             <string>Rn</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -19626,9 +19167,6 @@
            <property name="text">
             <string>%</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="10" column="0">
@@ -19641,9 +19179,6 @@
            </property>
            <property name="text">
             <string>Rp</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -19740,9 +19275,6 @@
            <property name="text">
             <string>%</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="11" column="0">
@@ -19755,9 +19287,6 @@
            </property>
            <property name="text">
             <string>R1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -19854,9 +19383,6 @@
            <property name="text">
             <string>%</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="12" column="0">
@@ -19869,9 +19395,6 @@
            </property>
            <property name="text">
             <string>Apds</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -19968,9 +19491,6 @@
            <property name="text">
             <string>%</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="13" column="0">
@@ -19983,9 +19503,6 @@
            </property>
            <property name="text">
             <string>A_front=1-Tn-Rn</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -20082,9 +19599,6 @@
            <property name="text">
             <string>%</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="14" column="0">
@@ -20097,9 +19611,6 @@
            </property>
            <property name="text">
             <string>A_back=1-Tn-R1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -20196,9 +19707,6 @@
            <property name="text">
             <string>%</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="15" column="0">
@@ -20211,9 +19719,6 @@
            </property>
            <property name="text">
             <string>Tau, Rho, Rho1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -20310,9 +19815,6 @@
            <property name="text">
             <string>%</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="16" column="0">
@@ -20325,9 +19827,6 @@
            </property>
            <property name="text">
             <string>DELTA-1</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -20447,9 +19946,6 @@
            <property name="text">
             <string>PSI-1</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="17" column="1">
@@ -20545,9 +20041,6 @@
            <property name="text">
             <string>idem</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="18" column="0">
@@ -20560,9 +20053,6 @@
            </property>
            <property name="text">
             <string>DELTA-2</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -20659,9 +20149,6 @@
            <property name="text">
             <string>idem</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="19" column="0">
@@ -20674,9 +20161,6 @@
            </property>
            <property name="text">
             <string>PSI-2</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -20773,9 +20257,6 @@
            <property name="text">
             <string>idem</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="20" column="0">
@@ -20788,9 +20269,6 @@
            </property>
            <property name="text">
             <string>DELTA-3</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -20887,9 +20365,6 @@
            <property name="text">
             <string>idem</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="21" column="0">
@@ -20902,9 +20377,6 @@
            </property>
            <property name="text">
             <string>PSI-3</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -21001,9 +20473,6 @@
            <property name="text">
             <string>idem</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="22" column="0">
@@ -21016,9 +20485,6 @@
            </property>
            <property name="text">
             <string>DELTA-4</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -21115,9 +20581,6 @@
            <property name="text">
             <string>idem</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="23" column="0">
@@ -21130,9 +20593,6 @@
            </property>
            <property name="text">
             <string>PSI-4</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -21229,9 +20689,6 @@
            <property name="text">
             <string>idem</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="24" column="0">
@@ -21244,9 +20701,6 @@
            </property>
            <property name="text">
             <string>n</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -21343,9 +20797,6 @@
            <property name="text">
             <string>/</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="25" column="0">
@@ -21358,9 +20809,6 @@
            </property>
            <property name="text">
             <string>k</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -21470,9 +20918,6 @@
            <property name="text">
             <string>eps1</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="26" column="1">
@@ -21568,9 +21013,6 @@
            <property name="text">
             <string>/</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="27" column="0">
@@ -21583,9 +21025,6 @@
            </property>
            <property name="text">
             <string>eps2</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -21682,9 +21121,6 @@
            <property name="text">
             <string>/</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="28" column="0">
@@ -21697,9 +21133,6 @@
            </property>
            <property name="text">
             <string>graph</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -21796,9 +21229,6 @@
            <property name="text">
             <string>/</string>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
           </widget>
          </item>
          <item row="29" column="0">
@@ -21823,7 +21253,10 @@
    <item>
     <spacer name="verticalSpacer_10">
      <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Policy::Expanding</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -21888,7 +21321,7 @@
      <item row="0" column="2">
       <widget class="QLineEdit" name="lineEdit_P">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -22021,7 +21454,7 @@
      <item row="1" column="2">
       <widget class="QLineEdit" name="lineEdit_Fnk">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
+        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>

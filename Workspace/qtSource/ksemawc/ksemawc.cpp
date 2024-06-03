@@ -443,7 +443,7 @@ ksemawc::ksemawc(QWidget *parent) :
     printf("              Program C++ kSEMAW\n\n");
     printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
     printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 2.7 31 May 2024\n\n");
+    printf("         version 2.7 2 June 2024\n\n");
     printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
     printf("          email: marco.montecchi@enea.it\n");
     printf("          Porting to Windows and advanced oscillators by\n");
@@ -8759,7 +8759,7 @@ void FDISP(int iopt,double eV){
                 Eh=Ex;
                 El=E0+W/4.;
                 for(int j=1;j<=13;j=j+1){
-                    Eb=(Eh+El)/2.;
+                    Eb=(Eh+El)/2.; //bisection to find the energy for joining exponential and Tauc on th low energy side
                     derexp=C/KTi/(Eb*Eb)*(-(Eb-E0-W/2.)*(Eb-E0-W/2.)*16./(W*W)+2.)/D;
                     derparab=C/KTi/(Eb*Eb)*(32./W/W*(Eb-E0-W/2.)*((Eb-E0-W/2.)/Eb-1.)-4./Eb);
                     //if(abs(E-3.)<0.01) printf("E=%Lf j=%d Eb=%Lf derexp=%Lf derparab=%Lf \n",E, j, Eb,derexp, derparab);
@@ -8777,7 +8777,7 @@ void FDISP(int iopt,double eV){
                 Eh=E0+W*3./4.;
                 El=Ey;
                 for(int j=1;j<=13;j=j+1){
-                    Eb=(Eh+El)/2.;
+                    Eb=(Eh+El)/2.; //bisection to find the energy for joining exponential and Tauc on th high energy side
                     derexp=-C/KTi/(Eb*Eb)*(-(Eb-E0-W/2.)*(Eb-E0-W/2.)*16./(W*W)+2.)/D;
                     derparab=C/KTi/(Eb*Eb)*(32./W/W*(Eb-E0-W/2.)*((Eb-E0-W/2.)/Eb-1.)-4./Eb);
                     //if(abs(E-3.)<0.01) printf("E=%Lf j=%d Eb=%Lf derexp=%Lf derparab=%Lf \n",E, j, Eb,derexp, derparab);
@@ -9109,7 +9109,7 @@ long double ReDirCodyUrb(long double E,long double C,long double E0,long double 
         }
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(((chi1-chi1old)/chi1)>0.001 && nstep<401);							 
+    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
     return(chi1);
 }
 
@@ -9195,12 +9195,16 @@ long double ReDirTaucUrb(long double E,long double C,long double E0,long double 
 //   Ey=real(aim*(s1-s2)*r32-(s1+s2)/due-a2/3.); unphysical root
 //   Ey=real(-aim*(s1-s2)*r32-(s1+s2)/due-a2/3.); unphysical root
 
+
     // chi1 calculation by Kramers-Kronig integration
 
     int nstep=50;
     //Emin, Emax calculation so that alpha(Em)<1e-2 cm^-1
     Eminin=log(1.973e-7/(E0*C/KTd/(Ex*Ex)*sqrt((Ex-E0)*(E3-Ex))*exp(-Ex/D)))*D;
     Emaxin=-log(1.973e-7/(E3*C/KTd/(Ey*Ey)*sqrt((Ey-E0)*(E3-Ey))*exp(Ey/D)))*D;
+    //if(E>4.067 && E<4.069)
+    //    printf("Ex=%Lf Ey=%Lf Eminin=%Lf Emaxin=%Lf \n",Ex,Ey, Eminin, Emaxin);
+
     chi1=0.;
     do{
         chi1old=chi1;
@@ -9236,7 +9240,8 @@ long double ReDirTaucUrb(long double E,long double C,long double E0,long double 
         }
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(((chi1-chi1old)/chi1)>0.001 && nstep<401);
+    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
+    //if(E>3.8 && E<4.) printf("E=%Lf chi1=%Lf chi1old=%Lf nstep=%d \n",E,chi1,chi1old, nstep);
     return(chi1);
 }
 
@@ -9334,7 +9339,7 @@ long double ReIndirCodyUrb(long double E,long double C,long double E0,long doubl
         }
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(((chi1-chi1old)/chi1)>0.001 && nstep<401);
+    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
     return(chi1);
 }
 
@@ -9405,7 +9410,7 @@ long double ReIndirTaucUrb(long double E,long double C,long double E0,long doubl
         }
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(((chi1-chi1old)/chi1)>0.001 && nstep<401);
+    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
     return(chi1);
 }
 
@@ -9475,7 +9480,7 @@ long double ReCodyM1M2(long double E,long double C,long double E0,long double E3
 //            printf("chi1=%Lf\n",chi1);
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(((chi1-chi1old)/chi1)>0.001 && nstep<401);
+    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
     return(chi1);
 }
 
@@ -9540,7 +9545,7 @@ long double ReTaucM1M2(long double E,long double C,long double E0,long double E3
         }
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(((chi1-chi1old)/chi1)>0.001 && nstep<401);
+    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
     return(chi1);
 }
 

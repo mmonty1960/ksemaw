@@ -30,12 +30,17 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 #include <QApplication>
 #include "ksemawc.h"
 
+#include<QStyleFactory>
+#include <QFileDialog>
+#include <qtextstream.h>
+
 using namespace std;
  
 int main(int argc, char *argv[])
 {
 // avvio GUI ksemawc
     QApplication app(argc, argv);
+    app.setStyle(QStyleFactory::create("Fusion"));
     ksemawc wid;
     wid.show();
     return app.exec();

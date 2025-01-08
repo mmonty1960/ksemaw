@@ -14,26 +14,26 @@ TARGET = ksemawc
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH += .
+
 win32 {
-QT += core gui
+    QT += core gui
     include( .\QWT_win.pri )
     CONFIG+= c++11 gui console
-#	INCLUDEPATH += . c:\Qwt-6.2.0\src c:\Programmi\Tools\mingw810_64\cminpack-1.3.8
-        INCLUDEPATH += C:\gsl-2.7\include C:\gsl-2.7\include\gsl
+	INCLUDEPATH += C:\gsl-2.7\include C:\gsl-2.7\include\gsl
     LIBS += -L"C:/gsl-2.7/bin" -lgsl-25
     LIBS += -L"C:/Program Files/Tools/mingw810_64/cminpack-1.3.8/build" -lcminpack
 }
 
 unix {
     CONFIG += link_pkgconfig
-    PKGCONFIG += cminpack cblas blas qwt gsl
+    PKGCONFIG += cminpack cblas blas qwt
 }
-INCLUDEPATH += .
 
 # Input
-HEADERS += ksemawc.h
+HEADERS += ksemawc.h 
 FORMS += ksemawc.ui
-SOURCES += ksemawc.cpp main.cpp
+SOURCES += ksemawc.cpp main.cpp 
 
 target.path=.\
 INSTALLS += target

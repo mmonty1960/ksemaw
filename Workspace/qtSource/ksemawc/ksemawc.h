@@ -118,10 +118,12 @@ public Q_SLOTS:
      void pwRp (const int &);
      void pwR1 (const int &);
      void pwApds (const int &);
+     void pwEj(int j);
      void pwE1 (const int &);
      void pwE2 (const int &);
      void pwE3 (const int &);
      void pwE4 (const int &);
+     void pwSubEj(int j);
      void pwSubE1 (const int &);
      void pwSubE2 (const int &);
      void pwSubE3 (const int &);
@@ -141,18 +143,18 @@ public Q_SLOTS:
      void PlotME();
      void PlotNK(int iRD);
      void Simula();
-     void CalcMis(double mc[15][202]);
+     void CalcMis(double mc[15][1000]);
      void PlotAve();
+     void PlotTexturized();
      void searchNK();
      void RefTrackG();
      void NumericalSearch();
-     void RefIbridG();
      void FitN();
      void FitNK();
      void FitE1E2();
      void FitSelExpMeas();
      void IbridPlotFit();
-     void IbridPlotIbrid();
+     //void IbridPlotIbrid();
      void IbridFit();
      void IbridOne();
      void IbridOneStore();
@@ -246,6 +248,8 @@ public Q_SLOTS:
      void setKindOsc20();
      void setFontDia();
      void msgErrLoad(QString where, QString fnERR);
+     void setRangeEli();
+     void readRangeEli();
  private Q_SLOTS:
      void on_LEpm_102_1_textChanged(const QString &arg1);
      void on_LEpm_103_1_textChanged(const QString &arg1);

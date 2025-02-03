@@ -457,7 +457,7 @@ ksemawc::ksemawc(QWidget *parent) :
     printf("              Program C++ kSEMAW\n\n");
     printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
     printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 3.0 8 January 2025\n\n");
+    printf("         version 3.1 22 January 2025\n\n");
     printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
     printf("          email: marco.montecchi@enea.it\n");
     printf("          Porting to Windows and advanced oscillators by\n");
@@ -2206,6 +2206,9 @@ void ksemawc::ReadSetting(QString filename){
         int ip=NINT(ppm[i]);
         if(ip>100)
             pm[ip][1]=abs(pm[ip][1]);
+        idToLineEdit["DPparFitV_"+QString::number(i)] -> setEnabled(true);
+        idToLineEdit["DPparFitErr_"+QString::number(i)] -> setEnabled(true);
+        idToLineEdit["DPparFitGC_"+QString::number(i)] -> setEnabled(true);
         idToLineEdit["DPparFitV_"+QString::number(i)] -> setText(QString::number(pm[ip][1]));
         if( state == Qt::Checked ){
             idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(pm[ip][4]));
@@ -2216,7 +2219,11 @@ void ksemawc::ReadSetting(QString filename){
             idToLineEdit["DPparFitGC_"+QString::number(i)] -> setText(QString::number(0));
         }
     }
-
+    for(int i=npp+1;i<=17;i++){
+        idToLineEdit["DPparFitV_"+QString::number(i)] -> setEnabled(false);
+        idToLineEdit["DPparFitErr_"+QString::number(i)] -> setEnabled(false);
+        idToLineEdit["DPparFitGC_"+QString::number(i)] -> setEnabled(false);
+    }
     i0=NINT(pm[100][1]);
     //printf("i0= %d\n",i0);
     ui->cB_cnk1a -> setCurrentIndex(i0);//fit option
@@ -2482,38 +2489,7 @@ void ksemawc::SaveSetting(int iCall){
 //        }
     }
     else if(itab==2){//Simulation TAB
-        int ioptFit=ui->cB_cnk1a -> currentIndex();
-        if(ioptFit>0 && ioptFit<8){
-            printf("-> SaveOsc pf[%d,i]\n",ioptFit);
-            for(int i=1;i<=21;i++) pf[ioptFit][i]=0.;
-            int j=2;
-            Qt::CheckState state;
-            for(int i=1;i<=20;i++){
-                state=idToCheckBox["cBosc_"+QString::number(i)]-> checkState();
-                if( state == Qt::Checked ) {
-                    pf[ioptFit][j]=i;
-                    pm[100+1+(i-1)*5][1]=idToComboBox["cBpm_"+QString::number(100+1+(i-1)*5)+"_1"] -> currentIndex();
-                    pm[100+1+(i-1)*5][1]++;
-                    for(int ii=2;ii<6;ii++){
-                        QString content=idToLineEdit["LEpm_"+QString::number(100+ii+(i-1)*5)+"_1"] -> text();
-                        if(content!="unused")
-                            pm[100+ii+(i-1)*5][1]=content.toDouble();
-                    }
-                    if(pm[100+1+(i-1)*5][1]==15 || pm[100+1+(i-1)*5][1]==16){
-                        if(pm[100+4+(i-1)*5][1]>pm[100+5+(i-1)*5][1]*0.45){
-                            pm[100+4+(i-1)*5][1]=pm[100+5+(i-1)*5][1]*0.45;
-                            idToLineEdit["LEpm_"+QString::number(100+4+(i-1)*5)+"_1"] -> setText(QString::number(pm[100+4+(i-1)*5][1]));
-                        }
-                    }
-                    j++;
-                    //printf("pm[%d][1]: %f %f %f %f %f\n",100+2+(i-1)*5,pm[100+1+(i-1)*5][1],
-                    //        pm[100+2+(i-1)*5][1],pm[100+3+(i-1)*5][1],
-                    //        pm[100+4+(i-1)*5][1],pm[100+5+(i-1)*5][1]);
-                }
-            }
-            pm[71][1]=ui->dSB_PM_1_1->value();
-            pf[ioptFit][1]=j-2;
-        }
+        setTabSim();
     }
     else if(itab==3){//Data Analysis
         for(int i=1;i<=14;i++){
@@ -4912,6 +4888,8 @@ void ksemawc::tabChanged(){
         SPADA();//load measurements, file-nk and solution-nk
         occupyPF=0;
     }
+    if(lastTab==3)//Analysis
+        setTabSim();
     if(itab==1)//model
         SetModel(nlayer);
     if((itab==1 || itab==2) && lastTab==4)//model & simula
@@ -4924,6 +4902,43 @@ void ksemawc::tabChanged(){
     if(itab==4) //range
         setRangeEli();
     lastTab=itab;
+}
+
+
+void ksemawc::setTabSim(){
+    printf("-> setTabSim\n");
+    int ioptFit=ui->cB_cnk1a -> currentIndex();
+    if(ioptFit>0 && ioptFit<8){
+        printf("-> SaveOsc pf[%d,i]\n",ioptFit);
+        for(int i=1;i<=21;i++) pf[ioptFit][i]=0.;
+        int j=2;
+        Qt::CheckState state;
+        for(int i=1;i<=20;i++){
+            state=idToCheckBox["cBosc_"+QString::number(i)]-> checkState();
+            if( state == Qt::Checked ) {
+                pf[ioptFit][j]=i;
+                pm[100+1+(i-1)*5][1]=idToComboBox["cBpm_"+QString::number(100+1+(i-1)*5)+"_1"] -> currentIndex();
+                pm[100+1+(i-1)*5][1]++;
+                for(int ii=2;ii<6;ii++){
+                    QString content=idToLineEdit["LEpm_"+QString::number(100+ii+(i-1)*5)+"_1"] -> text();
+                    if(content!="unused")
+                        pm[100+ii+(i-1)*5][1]=content.toDouble();
+                }
+                if(pm[100+1+(i-1)*5][1]==15 || pm[100+1+(i-1)*5][1]==16){
+                    if(pm[100+4+(i-1)*5][1]>pm[100+5+(i-1)*5][1]*0.45){
+                        pm[100+4+(i-1)*5][1]=pm[100+5+(i-1)*5][1]*0.45;
+                        idToLineEdit["LEpm_"+QString::number(100+4+(i-1)*5)+"_1"] -> setText(QString::number(pm[100+4+(i-1)*5][1]));
+                    }
+                }
+                j++;
+                //printf("pm[%d][1]: %f %f %f %f %f\n",100+2+(i-1)*5,pm[100+1+(i-1)*5][1],
+                //        pm[100+2+(i-1)*5][1],pm[100+3+(i-1)*5][1],
+                //        pm[100+4+(i-1)*5][1],pm[100+5+(i-1)*5][1]);
+            }
+        }
+        pm[71][1]=ui->dSB_PM_1_1->value();
+        pf[ioptFit][1]=j-2;
+    }
 }
 
 
@@ -5017,10 +5032,16 @@ void ksemawc::refreshFitPar(){
             Jcombo=idToComboBox["cBParFit_"+QString::number(j)] -> findText(Lparametro);
             if(Jcombo>=0) idToComboBox["cBParFit_"+QString::number(j)] -> setCurrentIndex(Jcombo);
             idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pm[ip][1]));
-            if(ivp==0)
+            idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(true);
+            if(ivp==0){
                 idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
+                idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(false);
+                idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
+            }
             else{
                 idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Checked );
+                idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(true);
+                idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(true);
                 n_fresh++;
                 idToLineEdit["DPparFitErr_"+QString::number(j)] -> setText(QString::number(pm[ip][4]));
                 idToLineEdit["DPparFitGC_"+QString::number(j)] -> setText(QString::number(pm[ip][5]));
@@ -5031,8 +5052,10 @@ void ksemawc::refreshFitPar(){
             //    if( state == Qt::Checked ) n_fresh++;
             //}
         }
-        else
+        else{
             idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
+            idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(false);
+        }
     }
     nPar=n_fresh;
     ui->sB_PAR_35_5 -> setValue(nPar);
@@ -5058,8 +5081,18 @@ void ksemawc::PanFitEnable(){
             printf("\t apply PanFitEnable\n");
             for(int j=1;j<=17;j++){
                 if(j<=npp){
+                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(true);
+                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(true);
                     state=idToCheckBox["chBeParFit_"+QString::number(j)]-> checkState();
-                    if( state == Qt::Checked ) n_fresh++;
+                    if( state == Qt::Checked ){
+                        n_fresh++;
+                        idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(true);
+                        idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(true);
+                    }
+                    else{
+                        idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(false);
+                        idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
+                    }
                     Lj=idToComboBox["cBParFit_"+QString::number(j)] -> currentText();
                     ip=0;
                     if(Lj.at(0)=='L'){
@@ -5100,8 +5133,13 @@ void ksemawc::PanFitEnable(){
                     }
                     //     printf("j=%d ip=%d pm[%d][1]=%f pm[%d][2]=%f pm[%d][3]=%f\n",j,ip,ip,pm[ip][1],ip,pm[ip][2],n_fresh,pm[n_fresh][3]);
                 }
-                else
+                else{
                     idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
+                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(false);
+                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(false);
+                    idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(false);
+                    idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
+                }
             }
             nPar=n_fresh;
             ui->sB_PAR_35_5 -> setValue(nPar);
@@ -5127,11 +5165,13 @@ void ksemawc::PanFitPar(){
             printf("\tStart PanFitPar: nppNew=%d npp=%d\n",nppNew,npp);
             if(nppNew > npp){
                 for(int j=npp+1;j<=nppNew;j++){
+                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(true);
                     idToComboBox["cBParFit_"+QString::number(j)] -> clear();
                     idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
                     idToLineEdit["DPparFitV_"+QString::number(j)]-> clear();
                     idToLineEdit["DPparFitErr_"+QString::number(j)]-> clear();
                     idToLineEdit["DPparFitGC_"+QString::number(j)]-> clear();
+                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(true);
                 }
                 for(int i=1;i<=nlayer;i++){
                     icoherent=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
@@ -5187,12 +5227,16 @@ void ksemawc::PanFitPar(){
             }
             else{
                 for(int j=nppNew+1;j<=npp;j++){
+                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(false);
                     idToComboBox["cBParFit_"+QString::number(j)] -> clear();
                     idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
                     idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
                     idToLineEdit["DPparFitV_"+QString::number(j)] -> setText("");
                     idToLineEdit["DPparFitErr_"+QString::number(j)] -> clear();
                     idToLineEdit["DPparFitGC_"+QString::number(j)] -> clear();
+                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(false);
+                    idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(false);
+                    idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
                 }
             }
             //   printf("End PanFitPar\n");
@@ -7304,7 +7348,7 @@ void ksemawc::IbridKernel(QString rc){
             int jobview=jobtot;
             QString fileStorecurrent=fileStore;
             fileStore=pathroot+"temp/semaw"+QString::number(jobtot)+".Spj";
-            SaveSetting(4);
+            SaveSetting(3);
             fileStore=fileStorecurrent;
             CNK[1][1]=0;//because it was modified along the saving
             ui->sB_PAR_8_1->setValue(jobtot);

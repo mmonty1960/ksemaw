@@ -131,6 +131,7 @@ public Q_SLOTS:
      void MCRange ();
      void listOsc();
      void tabChanged();
+     void setTabSim();
      void PanFitEnable();
      void PanFitPar();
      void PanFitChoice();

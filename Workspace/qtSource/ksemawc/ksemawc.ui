@@ -17350,6 +17350,9 @@
               </item>
               <item row="16" column="4">
                <widget class="QLineEdit" name="DPparFitGC_16">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17408,6 +17411,9 @@
               </item>
               <item row="14" column="0">
                <widget class="QCheckBox" name="chBeParFit_14">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17445,6 +17451,9 @@
               </item>
               <item row="16" column="2">
                <widget class="QLineEdit" name="DPparFitV_16">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17458,6 +17467,9 @@
               </item>
               <item row="12" column="0">
                <widget class="QCheckBox" name="chBeParFit_12">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17474,6 +17486,9 @@
               </item>
               <item row="5" column="2">
                <widget class="QLineEdit" name="DPparFitV_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17487,6 +17502,9 @@
               </item>
               <item row="13" column="3">
                <widget class="QLineEdit" name="DPparFitErr_13">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17503,6 +17521,9 @@
               </item>
               <item row="13" column="4">
                <widget class="QLineEdit" name="DPparFitGC_13">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17519,6 +17540,9 @@
               </item>
               <item row="5" column="4">
                <widget class="QLineEdit" name="DPparFitGC_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17535,6 +17559,9 @@
               </item>
               <item row="17" column="0">
                <widget class="QCheckBox" name="chBeParFit_17">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17551,6 +17578,9 @@
               </item>
               <item row="13" column="0">
                <widget class="QCheckBox" name="chBeParFit_13">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17567,6 +17597,9 @@
               </item>
               <item row="12" column="2">
                <widget class="QLineEdit" name="DPparFitV_12">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17580,6 +17613,9 @@
               </item>
               <item row="12" column="3">
                <widget class="QLineEdit" name="DPparFitErr_12">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17617,6 +17653,9 @@
               </item>
               <item row="10" column="2">
                <widget class="QLineEdit" name="DPparFitV_10">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17630,6 +17669,9 @@
               </item>
               <item row="5" column="0">
                <widget class="QCheckBox" name="chBeParFit_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17659,6 +17701,9 @@
               </item>
               <item row="9" column="2">
                <widget class="QLineEdit" name="DPparFitV_9">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17672,6 +17717,9 @@
               </item>
               <item row="17" column="4">
                <widget class="QLineEdit" name="DPparFitGC_17">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17688,6 +17736,9 @@
               </item>
               <item row="1" column="4">
                <widget class="QLineEdit" name="DPparFitGC_1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17704,6 +17755,9 @@
               </item>
               <item row="17" column="2">
                <widget class="QLineEdit" name="DPparFitV_17">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17717,6 +17771,9 @@
               </item>
               <item row="8" column="2">
                <widget class="QLineEdit" name="DPparFitV_8">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17730,6 +17787,9 @@
               </item>
               <item row="12" column="4">
                <widget class="QLineEdit" name="DPparFitGC_12">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17746,6 +17806,9 @@
               </item>
               <item row="17" column="3">
                <widget class="QLineEdit" name="DPparFitErr_17">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17783,6 +17846,9 @@
               </item>
               <item row="2" column="2">
                <widget class="QLineEdit" name="DPparFitV_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17833,6 +17899,9 @@
               </item>
               <item row="7" column="3">
                <widget class="QLineEdit" name="DPparFitErr_7">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17870,6 +17939,9 @@
               </item>
               <item row="8" column="4">
                <widget class="QLineEdit" name="DPparFitGC_8">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17886,6 +17958,9 @@
               </item>
               <item row="8" column="3">
                <widget class="QLineEdit" name="DPparFitErr_8">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17915,6 +17990,9 @@
               </item>
               <item row="11" column="2">
                <widget class="QLineEdit" name="DPparFitV_11">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17928,6 +18006,9 @@
               </item>
               <item row="13" column="2">
                <widget class="QLineEdit" name="DPparFitV_13">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17941,6 +18022,9 @@
               </item>
               <item row="9" column="3">
                <widget class="QLineEdit" name="DPparFitErr_9">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17957,6 +18041,9 @@
               </item>
               <item row="14" column="3">
                <widget class="QLineEdit" name="DPparFitErr_14">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -17973,6 +18060,9 @@
               </item>
               <item row="7" column="2">
                <widget class="QLineEdit" name="DPparFitV_7">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -18007,6 +18097,9 @@
               </item>
               <item row="4" column="2">
                <widget class="QLineEdit" name="DPparFitV_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18033,6 +18126,9 @@
               </item>
               <item row="1" column="0">
                <widget class="QCheckBox" name="chBeParFit_1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18049,6 +18145,9 @@
               </item>
               <item row="10" column="0">
                <widget class="QCheckBox" name="chBeParFit_10">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18065,6 +18164,9 @@
               </item>
               <item row="3" column="4">
                <widget class="QLineEdit" name="DPparFitGC_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18081,6 +18183,9 @@
               </item>
               <item row="2" column="0">
                <widget class="QCheckBox" name="chBeParFit_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18139,6 +18244,9 @@
               </item>
               <item row="4" column="0">
                <widget class="QCheckBox" name="chBeParFit_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18155,6 +18263,9 @@
               </item>
               <item row="15" column="2">
                <widget class="QLineEdit" name="DPparFitV_15">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18168,6 +18279,9 @@
               </item>
               <item row="16" column="3">
                <widget class="QLineEdit" name="DPparFitErr_16">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18184,6 +18298,9 @@
               </item>
               <item row="9" column="4">
                <widget class="QLineEdit" name="DPparFitGC_9">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18200,6 +18317,9 @@
               </item>
               <item row="2" column="4">
                <widget class="QLineEdit" name="DPparFitGC_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18216,6 +18336,9 @@
               </item>
               <item row="11" column="0">
                <widget class="QCheckBox" name="chBeParFit_11">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18232,6 +18355,9 @@
               </item>
               <item row="1" column="2">
                <widget class="QLineEdit" name="DPparFitV_1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18248,6 +18374,9 @@
               </item>
               <item row="7" column="4">
                <widget class="QLineEdit" name="DPparFitGC_7">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18264,6 +18393,9 @@
               </item>
               <item row="10" column="3">
                <widget class="QLineEdit" name="DPparFitErr_10">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18280,6 +18412,9 @@
               </item>
               <item row="15" column="3">
                <widget class="QLineEdit" name="DPparFitErr_15">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18380,6 +18515,9 @@
               </item>
               <item row="9" column="0">
                <widget class="QCheckBox" name="chBeParFit_9">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18396,6 +18534,9 @@
               </item>
               <item row="14" column="4">
                <widget class="QLineEdit" name="DPparFitGC_14">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18412,6 +18553,9 @@
               </item>
               <item row="5" column="3">
                <widget class="QLineEdit" name="DPparFitErr_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18428,6 +18572,9 @@
               </item>
               <item row="6" column="0">
                <widget class="QCheckBox" name="chBeParFit_6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18444,6 +18591,9 @@
               </item>
               <item row="1" column="3">
                <widget class="QLineEdit" name="DPparFitErr_1">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18460,6 +18610,9 @@
               </item>
               <item row="8" column="0">
                <widget class="QCheckBox" name="chBeParFit_8">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18476,6 +18629,9 @@
               </item>
               <item row="3" column="0">
                <widget class="QCheckBox" name="chBeParFit_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18492,6 +18648,9 @@
               </item>
               <item row="6" column="3">
                <widget class="QLineEdit" name="DPparFitErr_6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18508,6 +18667,9 @@
               </item>
               <item row="15" column="4">
                <widget class="QLineEdit" name="DPparFitGC_15">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18524,6 +18686,9 @@
               </item>
               <item row="4" column="3">
                <widget class="QLineEdit" name="DPparFitErr_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18574,6 +18739,9 @@
               </item>
               <item row="14" column="2">
                <widget class="QLineEdit" name="DPparFitV_14">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18587,6 +18755,9 @@
               </item>
               <item row="6" column="4">
                <widget class="QLineEdit" name="DPparFitGC_6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18603,6 +18774,9 @@
               </item>
               <item row="10" column="4">
                <widget class="QLineEdit" name="DPparFitGC_10">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18640,6 +18814,9 @@
               </item>
               <item row="15" column="0">
                <widget class="QCheckBox" name="chBeParFit_15">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18656,6 +18833,9 @@
               </item>
               <item row="16" column="0">
                <widget class="QCheckBox" name="chBeParFit_16">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18672,6 +18852,9 @@
               </item>
               <item row="11" column="3">
                <widget class="QLineEdit" name="DPparFitErr_11">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18688,6 +18871,9 @@
               </item>
               <item row="7" column="0">
                <widget class="QCheckBox" name="chBeParFit_7">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18704,6 +18890,9 @@
               </item>
               <item row="6" column="2">
                <widget class="QLineEdit" name="DPparFitV_6">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18717,6 +18906,9 @@
               </item>
               <item row="2" column="3">
                <widget class="QLineEdit" name="DPparFitErr_2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18733,6 +18925,9 @@
               </item>
               <item row="4" column="4">
                <widget class="QLineEdit" name="DPparFitGC_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18749,6 +18944,9 @@
               </item>
               <item row="3" column="2">
                <widget class="QLineEdit" name="DPparFitV_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18762,6 +18960,9 @@
               </item>
               <item row="11" column="4">
                <widget class="QLineEdit" name="DPparFitGC_11">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>
@@ -18778,6 +18979,9 @@
               </item>
               <item row="3" column="3">
                <widget class="QLineEdit" name="DPparFitErr_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
                   <horstretch>0</horstretch>

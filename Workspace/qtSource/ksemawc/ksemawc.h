@@ -155,12 +155,13 @@ public Q_SLOTS:
      void FitE1E2();
      void FitSelExpMeas();
      void IbridPlotFit();
-     //void IbridPlotIbrid();
      void IbridFit();
      void IbridOne();
+     void setStop();
      void IbridOneStore();
      void IbridKernel(QString r);
      void ClearTempIbri();
+     void StoreFitSet();
      void GoBest();
      void GoPrevious();
      void GoNext();
@@ -361,6 +362,16 @@ public Q_SLOTS:
      void on_dSB_PM_57_1_valueChanged(const QString &arg1);
      void on_dSB_PM_58_1_valueChanged(const QString &arg1);
      void on_dSB_PM_59_1_valueChanged(const QString &arg1);
+
+     void on_dSB_PM_91_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_92_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_93_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_94_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_95_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_96_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_97_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_98_1_valueChanged(const QString &arg1);
+     void on_dSB_PM_99_1_valueChanged(const QString &arg1);
 
      void on_dSB_PM_11_1_valueChanged(const QString &arg1);
      void on_dSB_PM_12_1_valueChanged(const QString &arg1);

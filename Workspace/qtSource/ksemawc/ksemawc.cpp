@@ -38,8 +38,8 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C      [4][1],[4][2]........LAMBDAmin,LAMBDAmax of loaded data-file
 //C      [5][1],[5][2]........ /  ,  /
 //C      [6][1],[6][2]........TETA,  /
-//C      [7][1],[7][2]........LAMBDA, /
-//C      [8][1],[8][2]........ / ,    /
+//C      [7][1],[7][2]........ /  ,  /
+//C      [8][1],[8][2]........ / ,   /
 //C      [9][1],[9][2]........if 1 k>=0, if 1 nk_sim->temp from scratch
 //C     [10][1],[10][2].......if 1 plot eps1 eps2 , if 1 no 3-points limit in ELI resampling
 //C     [11][1],[11][2].......attenuation coeff. of k by Fit#N , /
@@ -56,8 +56,8 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C     [22][1],[22][2].......mr[0=>R absolute, 1=> R*Rrif] , Nmis enabled
 //C     [23][1],[23][2].......1 to load SF files, 1 to load ELI files  (0 no files to load)
 //C     [24][1],[24][2].......IUVIR,index-lambda
-//C     [25][1],[25][2]....... /, /
-//C     [26][1],[26][2]....... / ,/
+//C     [25][1],[25][2]....... / , /
+//C     [26][1],[26][2]....... / , /
 //C     [27][1],[27][2].......chi2_initial ,S1P2
 //C     [28][1] .............N discretization for computing <f[x]>
 //C            [28][2].......mwl [Ntotal wl]
@@ -84,7 +84,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C       [ 1-20][3]    INSTR[20] [see below]
 //C       [21-22][3]    Delta_n , Delta_k [numerical increment]
 //C        [ 1-14][4]   DATO[1-14]
-//C        [21-26][4]   /
+//C        [21-35][4]   selected number of a given measurement; as an example in baseName.v2.tn is 2
 //C            [31][5]  log scale of k-plot [0->linear 1->logarithmic]
 //C            [32][5]  0->fit_n   1->fit_nk   2->fit epsi1 and epsi2
 //C            [33][5]  Delta & Psi units [0-> Delta(deg) Psi(deg) 1-> cos(Delta) tan (Psi)
@@ -173,7 +173,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //c  61-69 slope_Dn/<n> in 1/eV
 //c  71-85 f-EMA
 //c  86-89 ThetaEli_1, ThetaEli_2,ThetaEli_3,ThetaEli_4
-//c  91-99 /
+//c  91-99 nonunifornity of thickness (%)
 //c 100  Fit# used in data-fit [1,2 ...,7]
 //c 101  fdisp#1
 //c 102  C1
@@ -220,10 +220,10 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C   NANK[12,.,15]: nome "mate/aa999" ELI spectra
 //C   NANK[16]     : nome "mate/aa999.9" ksemaw project
 //C
-//C   CNK[17][4]
+//C   CNK[17][7]
 //C   CNK[J][K]: managment matrix of VNK[J][H]
 //C       J=1    <-> VNK[1][1 o 2]    = n,k working
-//C       J=2..8 <-> VNK[3..8][1 o 2] = n,k known
+//C       J=2..8 <-> VNK[2..8][1 o 2] = n,k known
 //C       J=10   <-> VNK[10][1 o 2]   = n,k input medium Tnormal,..,R1_normal
 //C       J=11   <-> VNK[11][1 o 2]   = n,k input medium PDS
 //C       J=12   <-> VNK[12][1 o 2]   = n,k input medium PSI,DELTA #1
@@ -231,10 +231,10 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C       J=14   <-> VNK[14][1 o 2]   = n,k input medium PSI,DELTA #3
 //C       J=15   <-> VNK[15][1 o 2]   = n,k input medium PSI,DELTA #
 //C       J=16   <-> VNK[9][1 o 2]    = n,k output medium Tnormal,..,R1_normal
-//C    CNK[J][1]=17      =>  n,k  unknown
-//C    CNK[J][1]=0       =>  n,k cte  n=CNK[J][2]  k=CNK[J][3]
-//C    CNK[J][1]=1..5    =>  n,k by  Fit#
-//C    CNK[J][1]=8..15   =>  n,k by file-nk loaded in MIS[K][L][NK]
+//C    CNK[J][1 and 4]=17      =>  n,k  unknown
+//C    CNK[J][1 and 4]=0       =>  n,k cte  n=CNK[J][2 and 5]  k=CNK[J][3 and 6]
+//C    CNK[J][1 and 4]=1..5    =>  n,k by  Fit#
+//C    CNK[J][1 and 4]=8..15   =>  n,k by file-nk loaded in MIS[K][L][NK]
 //C
 //C
 //C    rxy[30][4]: managment matrix of plots
@@ -259,7 +259,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C       J=17 <-> k
 //C       J=18 <-> A_front=1-Tn-Rn
 //C       J=19 <-> cos(Delta)
-//C       J=20 <-> Lambda [Angstrom]
+//C       J=20 <-> Lambda [nm]
 //C       J=21 <-> Teta [deg]
 //C       J=22 <-> tan(Psi)
 //C       J=23 <-> Tau,Rho,Rho1
@@ -275,9 +275,9 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C              rxy[J][4]  = Vmax, maximum value of J matter
 //C         int(rxy[25][1]) = index of matter plotted along X axes
 //C         int(rxy[25][2]) = index of matter plotted along Y axes
-//C         int(rxy[25][3]) = 1 => Angstrom
+//C         int(rxy[25][3]) = 1 => nm
 //C         int(rxy[25][3]) = 2 => eV
-//C         int(rxy[25][4]) = 1 => Angstrom step
+//C         int(rxy[25][4]) = 1 => nm step
 //C         int(rxy[25][4]) = 2 => eV step
 //C
 //C    ARSE[500][2] service array
@@ -326,8 +326,9 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 #include <gsl/gsl_specfunc.h>
 
 
+
 //global variables
-QString fnproject,pathroot,fileStore,fileStore0,fStdSpect,fRefMir,fNKsim,fMisSim,filechi2,lastAction;
+QString fnproject,pathroot,fileStore,fileStore0,fStdSpect,fRefMir,fNKsim,fMisSim,filechi2,lastAction,fileStoreSpjName;
 QString info,fnk[9],fnSample,fnTn,fnTp,fnRn,fnRp,fnR1,fnApds,fnE1,fnE2,fnE3,fnE4,fnFnk,ParFitLab[14],NANK[17];
 
 QwtPlot *G1_Tn, *G2_Tp, *G3_Rn, *G4_Rp, *G5_R1, *G6_Apds, *G7_D, *G8_P, *G9_Af, *G10_tTR, *G11_nk, *G12_wn, *G13_wk, *G14_we1, *G15_we2, *G16_Ab;
@@ -346,14 +347,17 @@ int nOpenGraph=3;
 int NeV; // number of interpolated points in Ev or lambda
 int iDelCon=0;
 int Nperiod=0;
+int iNewSample=0;
+int iwl2print=100;//index of WL at which print when it is due
 
-double MIS[18][1000][3],ELI[9][1000][3],pf[8][22],pm[201][6],par[61][6],CNK[17][4],rxy[31][5],ARSE[501][3],Pot[201];
+double MIS[18][1000][3],ELI[9][1000][3],pf[8][22],pm[201][6],par[61][6],CNK[17][7],rxy[31][5],ARSE[501][3];
 double SOL[4000][7]; // solutions from the search algorithm
 double PIG=acos(-1.);
 double deg2rad=PIG/180.;
-double Dperiod=360.;//period of DELTA
+double Dperiod=180.;//period of DELTA
 double Nema,Kema,sqn,sqk,EpsiR,EpsiI;
 double Vservice[3];//for transporting
+double ABSmax=20.;//max value of abs(imag(DELTA)), beyond the layer is considered as exit medium
 double cDAW[7];//c[NMAX+1] with NMAX=6 use in DAWS function
 double w[6][7]={
     {0.,0.              ,0.             ,0.         ,0.         ,0.         ,0.},
@@ -389,13 +393,15 @@ complex<double> freCoeff[6][2];// Fresnell coefficient
 //                     Bs           Cs
 //                     Bp           Cp
 
+bool iStop=false;
+
 //invoked functions
 void previewFile(QString filename, QString lab,QString& info,double& wmax,double& wmin);
 int FPAR(void *p, int m, int n, const double *x, double *fvec, int iflag);
 void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int IUVIR);
 void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double *Yp,double *ErrXp,double *ErrYp);
 void COSVNK(double VNK[17][3],int L);
-void SETVNK(int io,int J,double VNK[17][3],int L);
+void SETVNK(int io,int J,double VNK[17][3],int L,int Kcte);
 void EMA(double N,double K,double NA,double KA,double FA);
 void FDISP(int iopt,double eV);
 long double I2CODYRE(long double E,long double E0,long double Ep,long double D);
@@ -425,8 +431,8 @@ long double ImIndirCodyUrb(long double E,long double C,long double E0,long doubl
 long double ReIndirCodyUrb(long double E,long double C,long double E0,long double E3,long double D);
 long double ImIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D,long double Ex,long double Ey,long double TUx,long double TUy, long double KTi);
 long double ReIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D,long double Ex,long double Ey,long double TUx,long double TUy, long double KTi);
-void ASSEMBLER(int iwl,double wl, int ikind,double teta,double vot[6][3]);
-void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi[6][3]);
+void ASSEMBLER(int iwl, int ikind,double teta,double vot[6][3]);
+void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi[6][3]);
 void CALFRE(int NFA,double wl,complex<double> pq,complex<double> IR[999],double d[999],complex<double> out[9][3]);
 int SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp);
 double FMER(double k);
@@ -457,7 +463,7 @@ ksemawc::ksemawc(QWidget *parent) :
     printf("              Program C++ kSEMAW\n\n");
     printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
     printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 3.1 22 January 2025\n\n");
+    printf("         version 3.2 5 Dicember 2025\n\n");
     printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
     printf("          email: marco.montecchi@enea.it\n");
     printf("          Porting to Windows and advanced oscillators by\n");
@@ -535,6 +541,21 @@ ksemawc::ksemawc(QWidget *parent) :
     connect(ui->cB_cnk13a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat13()));
     connect(ui->cB_cnk14a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat14()));
     connect(ui->cB_cnk15a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat15()));
+    connect(ui->cB_cnk1b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA1()));
+    connect(ui->cB_cnk2b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA2()));
+    connect(ui->cB_cnk3b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA3()));
+    connect(ui->cB_cnk4b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA4()));
+    connect(ui->cB_cnk5b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA5()));
+    connect(ui->cB_cnk6b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA6()));
+    connect(ui->cB_cnk7b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA7()));
+    connect(ui->cB_cnk8b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA8()));
+    connect(ui->cB_cnk9b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA9()));
+    connect(ui->cB_cnk10b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA10()));
+    connect(ui->cB_cnk11b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA11()));
+    connect(ui->cB_cnk12b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA12()));
+    connect(ui->cB_cnk13b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA13()));
+    connect(ui->cB_cnk14b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA14()));
+    connect(ui->cB_cnk15b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA15()));
     connect(ui->cB_EMA_1,SIGNAL(stateChanged(int)),this, SLOT(setEMA1()));
     connect(ui->cB_EMA_2,SIGNAL(stateChanged(int)),this, SLOT(setEMA2()));
     connect(ui->cB_EMA_3,SIGNAL(stateChanged(int)),this, SLOT(setEMA3()));
@@ -649,6 +670,8 @@ ksemawc::ksemawc(QWidget *parent) :
     connect(ui->pushButton_FitSelExpMeas,SIGNAL(clicked()), this, SLOT(FitSelExpMeas()));
     connect(ui->pushButton_IbridOne,SIGNAL(clicked()), this, SLOT(IbridOne()));
     connect(ui->pushButton_IbridOneErrStore,SIGNAL(clicked()), this, SLOT(IbridOneStore()));
+    connect(ui->pushButton_stop,SIGNAL(clicked()), this, SLOT(setStop()));
+    connect(ui->pushButton_store,SIGNAL(clicked()), this,SLOT(StoreFitSet()));
     connect(ui->pushButton_BackToBestSituation,SIGNAL(clicked()), this,SLOT(GoBest()));
     connect(ui->pushButton_previous,SIGNAL(clicked()), this,SLOT(GoPrevious()));
     connect(ui->pushButton_next,SIGNAL(clicked()), this,SLOT(GoNext()));
@@ -727,6 +750,7 @@ ksemawc::ksemawc(QWidget *parent) :
     fStdSpect=pathroot+"qtSource/ksemawc/standardSpectra.txt";
     fileStore=pathroot+"temp/defau.1.Spj";
     fileStore0=pathroot+"temp/defau.0.Spj";
+    fileStoreSpjName=pathroot+"temp/SpjName.txt";
     fNKsim=pathroot+"expo/NKsim.dat";
     fMisSim=pathroot+"expo/MisSim.dat";
     filechi2=pathroot+"temp/ksemawc.log";
@@ -760,8 +784,8 @@ ksemawc::ksemawc(QWidget *parent) :
     par[1][3]= 1.;    //capture effiency of reflection from 1st face
     par[2][3]= 1.;    //capture effiency of reflection from 2nd face
     par[3][3]=.0022;  //drift baseline of spectrophotometer
-    par[4][1]=2000.;  //wavelength MIN (Angstrom)
-    par[4][2]=30000.; //wavelength MAX (Angstrom)
+    par[4][1]=200.;  //wavelength MIN (nm)
+    par[4][2]=3000.; //wavelength MAX (nm)
     par[4][3]=.005;   //relative error of reference mirror reflectance
     par[5][3]=.0005;  //reading error
     par[6][3]=1.0;    // ... depending on wavelengh
@@ -788,6 +812,9 @@ ksemawc::ksemawc(QWidget *parent) :
         CNK[i][1]=.0;//option "constant nk"
         CNK[i][2]=1.;//n value
         CNK[i][3]=.0;//k value
+        CNK[i][4]=-1.;//option "constant nk"
+        CNK[i][5]=1.;//n value
+        CNK[i][6]=.0;//k value
     }
     // initialization of model parameters pm
     for(int i=1;i<=200;i++){
@@ -849,10 +876,10 @@ ksemawc::ksemawc(QWidget *parent) :
     rxy[19][2]=1.0;
     rxy[19][3]=.0;
     rxy[19][4]=.0;
-    rxy[20][1]=2000.; //wlmin
-    rxy[20][2]=30000.;//wlmax
-    rxy[20][3]=2000.; //wlmin
-    rxy[20][4]=30000.;//wlmax
+    rxy[20][1]=200.; //wlmin (nm)
+    rxy[20][2]=3000.;//wlmax
+    rxy[20][3]=200.; //wlmin
+    rxy[20][4]=3000.;//wlmax
     rxy[21][1]=0.;  //theta_inc min
     rxy[21][2]=90.; //theta_inc max
     rxy[21][3]=.0;  //theta_inc min
@@ -878,6 +905,7 @@ ksemawc::ksemawc(QWidget *parent) :
         rxy[i][3]=0.;
         rxy[i][4]=10.;
     }
+    ui->sB_iwl2print->setValue(iwl2print);
 
     idToComboBox["cBParFit_1"] = ui->cBParFit_1;
     idToComboBox["cBParFit_2"] = ui->cBParFit_2;
@@ -1221,7 +1249,7 @@ ksemawc::ksemawc(QWidget *parent) :
     idToLineEdit["DP_RXY_24_1"]=ui->DP_RXY_24_1;
     idToLineEdit["DP_RXY_24_2"]=ui->DP_RXY_24_2;
     idToLineEdit["DP_RXY_24_3"]=ui->DP_RXY_24_3;
-    idToLineEdit["DP_RXY_24_4"]=ui->DP_RXY_24_4;
+    //  idToLineEdit["DP_RXY_24_4"]=ui->DP_RXY_24_4;
     //  idToLineEdit["DP_RXY_25_1"]=ui->DP_RXY_25_1;
     //  idToLineEdit["DP_RXY_25_2"]=ui->DP_RXY_25_2;
     //  idToLineEdit["DP_RXY_25_3"]=ui->DP_RXY_25_3;
@@ -1236,34 +1264,64 @@ ksemawc::ksemawc(QWidget *parent) :
     idToLineEdit["DP_RXY_27_4"]=ui->DP_RXY_27_4;
     idToLineEdit["LEcnk1_2"]=ui->LEcnk1_2;
     idToLineEdit["LEcnk1_3"]=ui->LEcnk1_3;
+    idToLineEdit["LEcnk1_5"]=ui->LEcnk1_5;
+    idToLineEdit["LEcnk1_6"]=ui->LEcnk1_6;
     idToLineEdit["LEcnk2_2"]=ui->LEcnk2_2;
     idToLineEdit["LEcnk2_3"]=ui->LEcnk2_3;
+    idToLineEdit["LEcnk2_5"]=ui->LEcnk2_5;
+    idToLineEdit["LEcnk2_6"]=ui->LEcnk2_6;
     idToLineEdit["LEcnk3_2"]=ui->LEcnk3_2;
     idToLineEdit["LEcnk3_3"]=ui->LEcnk3_3;
+    idToLineEdit["LEcnk3_5"]=ui->LEcnk3_5;
+    idToLineEdit["LEcnk3_6"]=ui->LEcnk3_6;
     idToLineEdit["LEcnk4_2"]=ui->LEcnk4_2;
     idToLineEdit["LEcnk4_3"]=ui->LEcnk4_3;
+    idToLineEdit["LEcnk4_5"]=ui->LEcnk4_5;
+    idToLineEdit["LEcnk4_6"]=ui->LEcnk4_6;
     idToLineEdit["LEcnk5_2"]=ui->LEcnk5_2;
     idToLineEdit["LEcnk5_3"]=ui->LEcnk5_3;
+    idToLineEdit["LEcnk5_5"]=ui->LEcnk5_5;
+    idToLineEdit["LEcnk5_6"]=ui->LEcnk5_6;
     idToLineEdit["LEcnk6_2"]=ui->LEcnk6_2;
     idToLineEdit["LEcnk6_3"]=ui->LEcnk6_3;
+    idToLineEdit["LEcnk6_5"]=ui->LEcnk6_5;
+    idToLineEdit["LEcnk6_6"]=ui->LEcnk6_6;
     idToLineEdit["LEcnk7_2"]=ui->LEcnk7_2;
     idToLineEdit["LEcnk7_3"]=ui->LEcnk7_3;
+    idToLineEdit["LEcnk7_5"]=ui->LEcnk7_5;
+    idToLineEdit["LEcnk7_6"]=ui->LEcnk7_6;
     idToLineEdit["LEcnk8_2"]=ui->LEcnk8_2;
     idToLineEdit["LEcnk8_3"]=ui->LEcnk8_3;
+    idToLineEdit["LEcnk8_5"]=ui->LEcnk8_5;
+    idToLineEdit["LEcnk8_6"]=ui->LEcnk8_6;
     idToLineEdit["LEcnk9_2"]=ui->LEcnk9_2;
     idToLineEdit["LEcnk9_3"]=ui->LEcnk9_3;
+    idToLineEdit["LEcnk9_5"]=ui->LEcnk9_5;
+    idToLineEdit["LEcnk9_6"]=ui->LEcnk9_6;
     idToLineEdit["LEcnk10_2"]=ui->LEcnk10_2;
     idToLineEdit["LEcnk10_3"]=ui->LEcnk10_3;
+    idToLineEdit["LEcnk10_5"]=ui->LEcnk10_5;
+    idToLineEdit["LEcnk10_6"]=ui->LEcnk10_6;
     idToLineEdit["LEcnk11_2"]=ui->LEcnk11_2;
     idToLineEdit["LEcnk11_3"]=ui->LEcnk11_3;
+    idToLineEdit["LEcnk11_5"]=ui->LEcnk11_5;
+    idToLineEdit["LEcnk11_6"]=ui->LEcnk11_6;
     idToLineEdit["LEcnk12_2"]=ui->LEcnk12_2;
     idToLineEdit["LEcnk12_3"]=ui->LEcnk12_3;
+    idToLineEdit["LEcnk12_5"]=ui->LEcnk12_5;
+    idToLineEdit["LEcnk12_6"]=ui->LEcnk12_6;
     idToLineEdit["LEcnk13_2"]=ui->LEcnk13_2;
     idToLineEdit["LEcnk13_3"]=ui->LEcnk13_3;
+    idToLineEdit["LEcnk13_5"]=ui->LEcnk13_5;
+    idToLineEdit["LEcnk13_6"]=ui->LEcnk13_6;
     idToLineEdit["LEcnk14_2"]=ui->LEcnk14_2;
     idToLineEdit["LEcnk14_3"]=ui->LEcnk14_3;
+    idToLineEdit["LEcnk14_5"]=ui->LEcnk14_5;
+    idToLineEdit["LEcnk14_6"]=ui->LEcnk14_6;
     idToLineEdit["LEcnk15_2"]=ui->LEcnk15_2;
     idToLineEdit["LEcnk15_3"]=ui->LEcnk15_3;
+    idToLineEdit["LEcnk15_5"]=ui->LEcnk15_5;
+    idToLineEdit["LEcnk15_6"]=ui->LEcnk15_6;
     idToLineEdit["LEpm_102_1"]=ui->LEpm_102_1;
     idToLineEdit["LEpm_103_1"]=ui->LEpm_103_1;
     idToLineEdit["LEpm_104_1"]=ui->LEpm_104_1;
@@ -1520,12 +1578,23 @@ ksemawc::ksemawc(QWidget *parent) :
     idToDoubleSpinBox["dSB_PM_87_1"]=ui->dSB_PM_87_1;
     idToDoubleSpinBox["dSB_PM_88_1"]=ui->dSB_PM_88_1;
     idToDoubleSpinBox["dSB_PM_89_1"]=ui->dSB_PM_89_1;
+    idToDoubleSpinBox["dSB_PM_91_1"]=ui->dSB_PM_91_1;
+    idToDoubleSpinBox["dSB_PM_92_1"]=ui->dSB_PM_92_1;
+    idToDoubleSpinBox["dSB_PM_93_1"]=ui->dSB_PM_93_1;
+    idToDoubleSpinBox["dSB_PM_94_1"]=ui->dSB_PM_94_1;
+    idToDoubleSpinBox["dSB_PM_95_1"]=ui->dSB_PM_95_1;
+    idToDoubleSpinBox["dSB_PM_96_1"]=ui->dSB_PM_96_1;
+    idToDoubleSpinBox["dSB_PM_97_1"]=ui->dSB_PM_97_1;
+    idToDoubleSpinBox["dSB_PM_98_1"]=ui->dSB_PM_98_1;
+    idToDoubleSpinBox["dSB_PM_99_1"]=ui->dSB_PM_99_1;
 
     for(int i=1;i<=25;i++){//setting values in GUI
         for(int j=1;j<=4;j++){
             if(idToLineEdit.contains("DP_RXY_"+QString::number(i)+"_"+QString::number(j)))
                 idToLineEdit["DP_RXY_"+QString::number(i)+"_"+QString::number(j)]
                         -> setText(QString::number(rxy[i][j]));
+            if(i==24&&j==3)
+                j++;
         }
     }
     for(int i=1;i<=16;i++)
@@ -1555,47 +1624,49 @@ ksemawc::ksemawc(QWidget *parent) :
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->setCurrentIndex(-1);
     }
 
+
+    QString line;
     //Refrence mirror list
     QFile file0(fRefMir);
-    if (!file0.open (QIODevice::ReadOnly | QIODevice::Text))
-        return;
-    QTextStream stream ( &file0 );
-    QString line;
-    int iB103=0;
-    ui -> comboB_PAR_10_3-> clear();
-    ui -> comboB_PAR_10_3->addItem("none");
-    do{
-        iB103++;
-        line = stream.readLine();
-        ui -> comboB_PAR_10_3->addItem(line);
-        line = stream.readLine();
-        printf("-> RefMir #%d -> %s\n",iB103,line.toStdString().c_str());
-    }while(!stream.atEnd());
-    file0.close();
+    if (file0.open (QIODevice::ReadOnly | QIODevice::Text)){
+        QTextStream stream ( &file0 );
+        int iB103=0;
+        ui -> comboB_PAR_10_3-> clear();
+        ui -> comboB_PAR_10_3->addItem("none");
+        do{
+            iB103++;
+            line = stream.readLine();
+            ui -> comboB_PAR_10_3->addItem(line);
+            line = stream.readLine();
+            printf("-> RefMir #%d -> %s\n",iB103,line.toStdString().c_str());
+        }while(!stream.atEnd());
+        file0.close();
+    }
 
     //standard spectra for mean value
     QFile file1(fStdSpect);
-    if (!file1.open (QIODevice::ReadOnly | QIODevice::Text))
-        return;
-    QTextStream stream1 ( &file1 );
-    ui->comboBox_average -> clear();
-    int iStdS=0;
-    do{
-        line = stream1.readLine();
-        ui->comboBox_average -> addItem(line);
-        printf("-> StdSpectrum #%d: %s",iStdS,line.toStdString().c_str());
-        line = stream1.readLine();
-        printf(" -> %s\n",line.toStdString().c_str());
-        iStdS++;
-    }while(!stream1.atEnd());
-    file1.close();
+    if (file1.open (QIODevice::ReadOnly | QIODevice::Text)){
+        QTextStream stream1 ( &file1 );
+        ui->comboBox_average -> clear();
+        int iStdS=0;
+        do{
+            line = stream1.readLine();
+            ui->comboBox_average -> addItem(line);
+            printf("-> StdSpectrum #%d: %s",iStdS,line.toStdString().c_str());
+            line = stream1.readLine();
+            printf(" -> %s\n",line.toStdString().c_str());
+            iStdS++;
+        }while(!stream1.atEnd());
+        file1.close();
+    }
 
+    ParFitLab[0]="_dNonUni";
     ParFitLab[1]="_d";
     ParFitLab[2]="_Dn/<n>";
     ParFitLab[3]="_(nav/<n>-1)";
     ParFitLab[4]="_Dk/<k>";
     ParFitLab[5]="_(kav/<k>-1)";
-    ParFitLab[6]="_sigma_roughness";
+    ParFitLab[6]="_sigma_rough";
     ParFitLab[7]="_slope_Dn";
     ParFitLab[8]="_C";
     ParFitLab[9]="_E";
@@ -1640,11 +1711,24 @@ ksemawc::ksemawc(QWidget *parent) :
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::No);
     int ret = msgBox.exec();
+    QString SpjName;
+    QFile file(fileStoreSpjName);
     switch (ret) {
     case QMessageBox::Yes:
-        ReadSetting(fileStore0);
-        ui->lineEdit_P-> setText("mate/aa999.9");
-        ui->lineEdit_infoP-> setText("The last session has been loaded. Now please set the project name!");
+        //Load Project name
+        if(file.open(QIODevice::ReadOnly | QIODevice::Text)){
+            QTextStream stream (&file);
+            SpjName=stream.readLine();
+            file.close();
+        }
+        if(SpjName.contains("mate/aa999.9")||SpjName.isEmpty()){
+            ReadSetting(fileStore0);
+            ui->lineEdit_infoP-> setText("The last session has been loaded. Now please set the project name!");
+        }
+        else{
+            ReadSetting(pathroot+SpjName);
+            ui->lineEdit_P -> setText(SpjName);
+        }
         break;
     case QMessageBox::No:
         break;
@@ -1655,6 +1739,15 @@ ksemawc::ksemawc(QWidget *parent) :
 
 void ksemawc::closeEvent ( QCloseEvent * event )
 {
+    //save Project name
+    QString fileSpjName=ui->lineEdit_P -> text();
+    QFile file(fileStoreSpjName);
+    QTextStream stream (&file);
+    if(file.open(QIODevice::WriteOnly | QIODevice::Text)){
+        stream << fileSpjName << "\n";
+        file.close();
+    }
+
     //save project in default
     QString command;
     int ierr;
@@ -1724,7 +1817,6 @@ void ksemawc::setFontDia(){
 
 
 void ksemawc::LoadProject(){
-    occupyPF=10;
     printf("-> LoadProject\n");
     fnproject = QFileDialog::getOpenFileName(
                 this,
@@ -1734,10 +1826,48 @@ void ksemawc::LoadProject(){
     // printf("fnprojet=%s\n",fnproject.toStdString().c_str());
     if(fnproject.isEmpty())
         return;
-    pm[86][1]=0.;//thetaEli reset
+
+    occupyPF=10;
+    ui->tabWidget -> setCurrentIndex(0);
+    //thetaEli reset
+    pm[86][1]=0.;
     pm[87][1]=0.;
     pm[88][1]=0.;
     pm[89][1]=0.;
+    // reset of pm - model parameters
+    for(int i=1;i<=200;i++){
+        for(int j=1;j<=5;j++){
+            pm[i][j]=0.;
+        }
+    }
+    //reset oscillator list
+    ui->sB_PAR_34_5 -> setValue(0);
+    for(int k=1;k<=20;k++){
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setCurrentIndex(-1);
+        idToLineEdit["LEpm_"+QString::number(100+2+(k-1)*5)+"_1"] -> clear();
+        idToLineEdit["LEpm_"+QString::number(100+3+(k-1)*5)+"_1"] -> clear();
+        idToLineEdit["LEpm_"+QString::number(100+4+(k-1)*5)+"_1"] -> clear();
+        idToLineEdit["LEpm_"+QString::number(100+5+(k-1)*5)+"_1"] -> clear();
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setEnabled(false);
+        idToLineEdit["LEpm_"+QString::number(100+2+(k-1)*5)+"_1"] -> setEnabled(false);
+        idToLineEdit["LEpm_"+QString::number(100+3+(k-1)*5)+"_1"] -> setEnabled(false);
+        idToLineEdit["LEpm_"+QString::number(100+4+(k-1)*5)+"_1"] -> setEnabled(false);
+        idToLineEdit["LEpm_"+QString::number(100+5+(k-1)*5)+"_1"] -> setEnabled(false);
+    }
+    //reset panel fit
+    for(int j=1;j<=17;j++){
+        idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(false);
+        idToComboBox["cBParFit_"+QString::number(j)] -> clear();
+        idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
+        idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
+        idToLineEdit["DPparFitV_"+QString::number(j)] -> clear();//setText("");
+        idToLineEdit["DPparFitErr_"+QString::number(j)] -> clear();
+        idToLineEdit["DPparFitGC_"+QString::number(j)] -> clear();
+        idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(false);
+        idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(false);
+        idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
+    }
+
     ReadSetting(fnproject);
     SPADA();//load file-nk & measurements
     SaveSetting(-1);
@@ -1760,6 +1890,7 @@ void ksemawc::ReadSetting(QString filename){
     cout<<"date: "<<as.toStdString()<<"\n";
     QDateTime tLim(QDate(2022, 1, 1), QTime(0, 00, 0));
     QDateTime tLim2(QDate(2023, 4, 11), QTime(0, 00, 0));
+    QDateTime tLim3(QDate(2025, 10, 25), QTime(0, 00, 0));
     int old0new1=0;
     if(dtTm<tLim)
         printf("The project is older than January 2022\n");
@@ -1770,6 +1901,11 @@ void ksemawc::ReadSetting(QString filename){
     else{
         printf("The project version is up-to-date\n");
         old0new1=2;
+    }
+    double a2nm=1.;
+    if(dtTm<tLim3){
+        a2nm=0.1;
+        printf("The projet is older than 25 October 2025 wl and thickness will be converted in nm!!!\n");
     }
     QFile file(filename);
     if (!file.open (QIODevice::ReadOnly | QIODevice::Text)){
@@ -1801,6 +1937,7 @@ void ksemawc::ReadSetting(QString filename){
             Setnk(i);
         }
     }
+
     //nk-solutions
     line = stream.readLine();
     NANK[9]=line.simplified();
@@ -1832,12 +1969,19 @@ void ksemawc::ReadSetting(QString filename){
     NANK[15]=line.simplified();
     fnE4=pathroot+line.simplified()+".el";
 
+    QString pezzo;
     //setSample();
+
     //RXY
     int DP0cosDtanP1=ui->comboBox_DeltaPsiScale->currentIndex();
     for(int i=1;i<=irx;i++){
+        line = stream.readLine();
+        line=line.simplified();
+        QStringList List0;
+        List0 =line.split(" ");
         for(int j=1;j<=4;j++){
-            stream>> rxy[i][j];
+            pezzo=List0.at(j-1).toLocal8Bit().constData();
+            rxy[i][j]=pezzo.toDouble();
             if(i==6 && j==2 && rxy[i][j]<=0.)
                 rxy[i][j]=1.;
             if(i==24 && j==1 && rxy[i][j]< 10.)
@@ -1857,6 +2001,8 @@ void ksemawc::ReadSetting(QString filename){
             }
         }
     }
+    rxy[20][1]=rxy[20][1]*a2nm;//WLmin in nm
+    rxy[20][2]=rxy[20][2]*a2nm;//Wlmax in nm
     if(NINT(rxy[25][3])==1)
         ui->checkB_RXY_25_3 -> setCheckState ( Qt::Unchecked );
     else
@@ -1865,22 +2011,47 @@ void ksemawc::ReadSetting(QString filename){
         ui->checkB_RXY_25_4 -> setCheckState ( Qt::Unchecked );
     else
         ui->checkB_RXY_25_4 -> setCheckState ( Qt::Checked );
+
     //CNK
-    int i0=0,i1=0,i2=0;
-    double f2=0.;
     for(int i=1;i<=15;i++){
-        for(int j=1;j<=3;j++){
-            stream>> CNK[i][j];
+        line = stream.readLine();
+        // printf("line: %s\n",line.toStdString().c_str());
+        // fflush(stdout);
+        line=line.simplified();
+        QStringList List0;
+        List0 =line.split(" ");
+        int nV=List0.count();
+        //printf("nV=%d\n",nV);
+        fflush(stdout);
+        for(int j=1;j<=nV;j++){
+            pezzo=List0.at(j-1).toLocal8Bit().constData();
+            CNK[i][j]=pezzo.toDouble();
+            //printf("CNK[%d][%d]=%f\n",i,j,CNK[i][j]);
+            //fflush(stdout);
+        }
+        if(nV==3){
+            if(CNK[i][1]<=17){
+                CNK[i][4]=-1.;
+            }
+            else{
+                int i1=NINT(CNK[i][1]/1000.);
+                int i2=NINT((CNK[i][1]-i1*1000.)/10.);
+                CNK[i][1]=i1;
+                CNK[i][4]=i2;
+            }
+            //printf("-> CNK[%d][1]=%f CNK[%d][4]=%f\n",i,CNK[i][1],i,CNK[i][4]);
+            //fflush(stdout);
         }
     }
-    for(int i=1;i<=3;i++)
-        CNK[16][i]=CNK[9][i];// exit medium for SF measurements
+
     //PAR
     for(int i=1;i<=60;i++){
         for(int j=1;j<=5;j++){
             stream>> par[i][j];
         }
     }
+    par[4][1]=par[4][1]*a2nm;//WLmin in nm
+    par[4][2]=par[4][2]*a2nm;//WLmax in nm
     int nItem=0;
     if(!fnE1.contains("mate/aa999")){
         line2=fnE1.section('.', 1, 1);
@@ -1964,6 +2135,7 @@ void ksemawc::ReadSetting(QString filename){
         }
         if(i==7 || i==9 || i==11 || i==13){//if(JJ>=7)//set angle and Psi checkBox
             Jitem=idToComboBox["cBteE"+QString::number(JJ-6)] -> findText(QString::number(par[13+JJ-6][1]),Qt::MatchExactly);
+            //printf("i=%d JJ=%d Jitem=%d\n",i,JJ,Jitem);
             if(Jitem>=0) idToComboBox["cBteE"+QString::number(JJ-6)] ->setCurrentIndex(Jitem);
             i++;
             if(NINT(par[i][4])==-1){
@@ -2109,12 +2281,19 @@ void ksemawc::ReadSetting(QString filename){
 
     for(int i=1;i<=npp;i++)
         ppm[i]=NINT(par[35+i][5]);
+
     //PM
     for(int i=1;i<=200;i++){
         for(int j=1;j<=5;j++){
             stream>> pm[i][j];
         }
         //printf("pm[%d][1-5]: %f %f %f %f %f\n",i,pm[i][1],pm[i][2],pm[i][3],pm[i][4],pm[i][5]);
+    }
+    if(a2nm<1.){//Angstrom -> nm
+        for(int i=1;i<=9;i++){
+            pm[i][1]=pm[i][1]*a2nm;//thickness
+            pm[50+i][1]=pm[50+i][1]*a2nm;//roughness
+        }
     }
     //printf("\tReadSetting: pm[100][1]= %f\n",pm[100][1]);
     if(old0new1<2){//renormalization of oscillator coeff for old project
@@ -2176,29 +2355,45 @@ void ksemawc::ReadSetting(QString filename){
     }
     file.close();
     //inserimento valori cnk
+    double f2=0.;
     for(int i=1;i<=15;i++){
-        i0=NINT(CNK[i][1]);
-        if(i0 >=0 && i0<=17){
-            idToComboBox["cB_cnk"+QString::number(i)+"a"] -> setCurrentIndex(i0);
-            idToCheckBox["cB_EMA_"+QString::number(i)] -> setCheckState ( Qt::Unchecked );
+        idToComboBox["cB_cnk"+QString::number(i)+"a"] -> setCurrentIndex(NINT(CNK[i][1]));
+        if(NINT(CNK[i][1])==0){
+            idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setEnabled(true);
+            idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> setEnabled(true);
+            idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setText(QString::number(CNK[i][2]));
+            idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> setText(QString::number(CNK[i][3]));
         }
         else{
-            i1=NINT(CNK[i][1]/1000.);
-            i2=NINT((CNK[i][1]-i1*1000.)/10.);
-            f2=CNK[i][1]-i1*1000.-i2*10.;
-            pm[70+i][1]=f2;
-            idToComboBox["cB_cnk"+QString::number(i)+"a"] -> setCurrentIndex(i1);
-            idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setCurrentIndex(i2);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(70+i)+"_1"] ->setValue(f2);
-            idToCheckBox["cB_EMA_"+QString::number(i)] -> setCheckState ( Qt::Checked );
-            if(i2==0 && i==1){
-                ui->LEcnk1_4 -> setText(QString::number(CNK[1][2]));
-                ui->LEcnk1_5 -> setText(QString::number(CNK[1][3]));
-            }
-            //printf("EMA: %d + %d at %f%%\n",i1,i2,f2);
+            idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setEnabled(false);
+            idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> setEnabled(false);
         }
-        idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setText(QString::number(CNK[i][2]));
-        idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> setText(QString::number(CNK[i][3]));
+        if(CNK[i][4]<0.){
+            idToCheckBox["cB_EMA_"+QString::number(i)] -> setCheckState ( Qt::Unchecked );
+            idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setCurrentIndex(-1);
+            idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setEnabled(false);
+            idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> setEnabled(false);
+            idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> setEnabled(false);
+            idToDoubleSpinBox["dSB_PM_"+QString::number(70+i)+"_1"] -> setEnabled(false);
+        }
+        else{
+            idToCheckBox["cB_EMA_"+QString::number(i)] -> setCheckState ( Qt::Checked );
+            idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setEnabled(true);
+            idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setCurrentIndex(NINT(CNK[i][4]));
+            if(NINT(CNK[i][4])==0){
+                idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> setEnabled(true);
+                idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> setEnabled(true);
+                idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> setText(QString::number(CNK[i][5]));
+                idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> setText(QString::number(CNK[i][6]));
+            }
+            else{
+                idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> setEnabled(false);
+                idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> setEnabled(false);
+            }
+            f2=pm[70+i][1];
+            idToDoubleSpinBox["dSB_PM_"+QString::number(70+i)+"_1"] -> setEnabled(true);
+            idToDoubleSpinBox["dSB_PM_"+QString::number(70+i)+"_1"] -> setValue(f2);
+        }
     }
     //aggiornamento valori PanFit
     for(int i=1;i<=npp;i++){
@@ -2224,9 +2419,8 @@ void ksemawc::ReadSetting(QString filename){
         idToLineEdit["DPparFitErr_"+QString::number(i)] -> setEnabled(false);
         idToLineEdit["DPparFitGC_"+QString::number(i)] -> setEnabled(false);
     }
-    i0=NINT(pm[100][1]);
     //printf("i0= %d\n",i0);
-    ui->cB_cnk1a -> setCurrentIndex(i0);//fit option
+    ui->cB_cnk1a -> setCurrentIndex(NINT(pm[100][1]));//fit option
     ui->sB_PAR_51_2 -> setValue(nlayer);
     occupyPF=0;
 
@@ -2291,25 +2485,19 @@ void ksemawc::AdjTheta(){
 
 
 void ksemawc::AdjRoughMax(){
-    double d,rgh,rghMax;
+    double d,dUP,rgh,rghMax;
     for(int i=1;i<10;i++){
         int iKind=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] ->currentIndex();
         if(iKind>0){
             d=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] ->value();
-            rghMax=idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] -> maximum();
-            if(rghMax<d/3.)
-                idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] ->setMaximum(d/3.);
-            rgh=idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] -> value();
-            if(rgh>d/3.+0.05){
-                QMessageBox msgBox;
-                msgBox.setText("ATTENTION:the roughness of layer #"+QString::number(i)+" exceeds the limit 1/3*thickness, therefore it has been resized");
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.exec();
-            }
-            idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] ->setMaximum(d/3.);
+            dUP=d;
+            if(i>1)
+               dUP=idToDoubleSpinBox["dSB_PM_"+QString::number(i-1)+"_1"] ->value();
+            rghMax=min(d/3.,dUP/3.);
+            idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] ->setMaximum(rghMax);
         }
         else
-            idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] ->setMaximum(1000.);
+            idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] ->setMaximum(100.);
     }
 }
 
@@ -2427,6 +2615,7 @@ void ksemawc::SaveSetting(int iCall){
         itab=ui->tabWidget -> currentIndex();
     else
         itab=iCall;
+    printf("itab=%d\n",itab);
     if(itab==1){//Model TAB
         state=ui->checkBox_setPsoK -> checkState ();
         if( state == Qt::Checked )
@@ -2439,22 +2628,17 @@ void ksemawc::SaveSetting(int iCall){
                 par[50+i][1]++;
                 par[50+i][3]=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
                 par[50+i][3]++;
+                pm[i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> value();
                 pm[50+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> value();
+                pm[90+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> value();
                 if(NINT(par[50+i][3])==1){
-                    pm[i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> value();
-                    pm[i][1]=pm[i][1]/1.E-7;
-                } else if(NINT(par[50+i][3])==2){
-                    pm[i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> value();
+                    pm[i][1]=pm[i][1]/1.E-6;//mm->nm
                 } else if(NINT(par[50+i][3])==3){
-                    pm[i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> value();
                     pm[10+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> value();
                     pm[20+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> value();
                     pm[30+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> value();
                     pm[40+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> value();
                     pm[60+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> value();
-                } else if(NINT(par[50+i][3])==4 || NINT(par[50+i][3])==5){
-                    pm[i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> value();
-                    pm[10+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> value();
                 }
             }
         }
@@ -2464,7 +2648,8 @@ void ksemawc::SaveSetting(int iCall){
         for(int i=1;i<=npp;i++){
             state=idToCheckBox["chBeParFit_"+QString::number(i)]-> checkState();
             int ip=NINT(ppm[i]);
-            if(ip>100)
+            //printf("npp=%d i=%d ip=%d\n",npp,i,ip);
+            if(ip>100 && ip <=200)
                 pm[ip][1]=abs(pm[ip][1]);
             idToLineEdit["DPparFitV_"+QString::number(i)] -> setText(QString::number(pm[ip][1]));
             if( state == Qt::Checked ){
@@ -2518,26 +2703,39 @@ void ksemawc::SaveSetting(int iCall){
                     n1=n1*10;
                     n1=n1+((Lj.at(2)).digitValue());
                 }
-                n2=0;
+                n2=-1;
                 ip=0;
                 do{
                     n2++;
                 } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive));
-                if(1<=n2 && n2<=7)
+                if(n2==0)
+                    ip=90+n1;//dnonuni
+                else if(1<=n2 && n2<=7)//film parameters
                     ip=10*(n2-1)+n1;
-                else if(8<=n2 && n2<=11)
+                else if(8<=n2 && n2<=11)//oscillator parameters
                     ip=100+(n1-1)*5+(n2-7)+1;
-                else if(n2==12)
+                else if(n2==12)//fEMA
                     ip=70+Lj.at(5).digitValue();
-                else if(n2==13)
+                else if(n2==13)//Theta
                     ip=85+Lj.at(6).digitValue();
 
                 ppm[j]=ip;
                 Valore=idToLineEdit["DPparFitV_"+QString::number(j)] -> text();
                 pm[ip][1]=Valore.toDouble();
+
+                //check value
+                if((ip>0 && ip<10) || (ip>50 && ip<60) || ip>100)//thickness or roughness or oscillator
+                    if(pm[ip][1]<.0)
+                        pm[ip][1]=0.;
+                if((ip>=71 && ip<=85) || (ip>=91 && ip<=99)){//fEMA or d_nonuni
+                    if(pm[ip][1]<.0)
+                        pm[ip][1]=0.;
+                    if(pm[ip][1]>1.)
+                        pm[ip][1]=1.;
+                }
+                idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pm[ip][1]));//eventually correct the value
+
                 printf("\tSavePanFit:  j=%d n1=%d n2=%d ip=%d pm[%d][1]=%f\n",j,n1,n2,ip,ip,pm[ip][1]);
-                if(ip>100)
-                    pm[ip][1]=abs(pm[ip][1]);
                 if( state == Qt::Unchecked ){
                     pm[ip][2]=0;
                     n--;
@@ -2568,7 +2766,7 @@ void ksemawc::SaveSetting(int iCall){
         SetModel(nlayer);
         listOsc();
     }
-    int ci,i0,i1,i2;
+    int ci;
     double f2;
     QFile file(fileStore);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
@@ -2693,31 +2891,15 @@ void ksemawc::SaveSetting(int iCall){
     }
     //CNK
     for(int i=1;i<=15;i++){
-        state=idToCheckBox["cB_EMA_"+QString::number(i)] -> checkState();
-        if(state==Qt::Unchecked){
-            i0=idToComboBox["cB_cnk"+QString::number(i)+"a"] -> currentIndex();
-            CNK[i][1]=i0;
-        }
-        else{
-            i1=idToComboBox["cB_cnk"+QString::number(i)+"a"] -> currentIndex();
-            i2=idToComboBox["cB_cnk"+QString::number(i)+"b"] -> currentIndex();
-            f2=idToDoubleSpinBox["dSB_PM_"+QString::number(70+i)+"_1"] -> value();
-            pm[70+i][1]=f2;
-            CNK[i][1]=i1*1000.+i2*10.+f2;
-        }
-        svalue=idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> text();
-        CNK[i][2]=svalue.toDouble();
-        svalue=idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> text();
-        CNK[i][3]=svalue.toDouble();
-        if(state==Qt::Checked && i==1 && i2==0){//changed in Checked on October 27 2022
-            svalue=ui->LEcnk1_4 -> text();
-            CNK[1][2]=svalue.toDouble();
-            svalue=ui->LEcnk1_5 -> text();
-            CNK[1][3]=svalue.toDouble();
-        }
+        CNK[i][1]=idToComboBox["cB_cnk"+QString::number(i)+"a"] -> currentIndex();
+        CNK[i][2]=idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> text().toDouble();
+        CNK[i][3]=idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> text().toDouble();
+        CNK[i][4]=idToComboBox["cB_cnk"+QString::number(i)+"b"] -> currentIndex();
+        CNK[i][5]=idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> text().toDouble();
+        CNK[i][6]=idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> text().toDouble();
+        f2=idToDoubleSpinBox["dSB_PM_"+QString::number(70+i)+"_1"] -> value();
+        pm[70+i][1]=f2;
     }
-    for(int i=1;i<=3;i++)
-        CNK[16][i]=CNK[9][i];
     //PAR
     //  setting measurements
     par[22][2]=0.;//reset enabled measures
@@ -2759,7 +2941,8 @@ void ksemawc::SaveSetting(int iCall){
         if(i<=6 && state==Qt::Checked){
             if(lab.at(0).toLatin1() == 'i') par[24][1]=2.0;//SF IR
         }
-        par[20+JJ][4]=lab.at(1).digitValue();
+        par[20+JJ][4]=(lab.at(1)).digitValue();// in Qt6 digitValue() deve essere sostituito da unicode()
+        //printf("Savesetting JJ=%d (lab.at(1)).digitValue()= %f\n",JJ,par[20+JJ][4]);
         if(JJ>=7){
             i++;
             state1=idToCheckBox["checkB_mis"+QString::number(i)+"_2"] -> checkState ();
@@ -2901,7 +3084,7 @@ void ksemawc::SaveSetting(int iCall){
     }
     //save cnk
     for(int i=1;i<=15;i++){
-        for(int j=1;j<=3;j++){
+        for(int j=1;j<=6;j++){
             out << QString::number(CNK[i][j],'g',7) << "\t";
         }
         out << "\n";
@@ -2962,7 +3145,7 @@ void ksemawc::LoadFilenk(){
         return;
     }
     QTextStream stream ( &file );
-    QString line;
+    QString line,pezzo;
     //display filename and save in NANK[9]
     line=fnFnk.section(pathroot, 1, 1);
     ui->lineEdit_Fnk -> setText(line);
@@ -2975,8 +3158,15 @@ void ksemawc::LoadFilenk(){
     printf("\tInfo: %s\n",(line.simplified()).toStdString().c_str());
     //read Ndata
     line = stream.readLine();
-    int N=line.toInt();
-    printf("\tN. (L,n,k)= %d\n",N);
+    line=line.simplified();
+    QStringList List0;
+    List0 =line.split(" ");
+    pezzo=List0.at(0).toLocal8Bit().constData();
+    int N=pezzo.toInt();
+    double a2nm=0.1;
+    if(line.contains("nm"))
+        a2nm=1.;
+    printf("\tN. (L,n,k)= %d a2nm=%f\n",N,a2nm);
     if(N>999){
         msgErrLoad("LoadFilenk","Ndata > 999, MAXIMUM limit");
         return;
@@ -3014,6 +3204,7 @@ void ksemawc::LoadFilenk(){
         for(int kk=1;kk<=nV;kk++)
             SOL[L][kk]=List.at(kk-1).toDouble();
         //stream>>SOL[L][1]>>SOL[L][2]>>SOL[L][3]>>SOL[L][4]>>SOL[L][5];
+        SOL[L][1]=SOL[L][1]*a2nm;
         //rxy[20][3]=min(rxy[20][3],SOL[L][1]);
         //rxy[20][4]=max(rxy[20][4],SOL[L][1]);
         rxy[16][3]=min(rxy[16][3],SOL[L][2]-SOL[L][4]);
@@ -3117,7 +3308,7 @@ void ksemawc::SaveFnk(){
         QMessageBox msgBox;
         msgBox.setText("The file already exist!");
         msgBox.setInformativeText("Do you want to save anyway?");
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Cancel);
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::Save);
         int ret = msgBox.exec();
         switch (ret) {
@@ -3125,7 +3316,7 @@ void ksemawc::SaveFnk(){
             // Save was clicked
             iok=1;
             break;
-        case QMessageBox::Cancel:
+        case QMessageBox::No:
             // Cancel was clicked
             iok=0;
             file.close();
@@ -3136,7 +3327,7 @@ void ksemawc::SaveFnk(){
         //line=ui->lineEdit_infoFnk -> text();
         QTextStream stream (&file);
         stream<<line<<"\n";
-        stream<<N<<"\n";
+        stream<<N<<" nm"<<"\n";
         for(int L=2;L<=N+1;L++)
             stream<<SOL[L][1]<<"\t"<<SOL[L][2]<<"\t"<<SOL[L][3]<<"\t"<<SOL[L][4]<<"\t"<<SOL[L][5]<<"\n";
         file.close();
@@ -3145,7 +3336,6 @@ void ksemawc::SaveFnk(){
 
 
 void ksemawc::Setnk(int ifile){
-    printf("->Setnk(%d) with fnk[%d]=%s\n\n",ifile,ifile,fnk[ifile].toStdString().c_str());
     //if(ifn==0){
     if(fnk[ifile].contains("mate/aa999") || fnk[ifile].isEmpty()){
         fnk[ifile]=QFileDialog::getOpenFileName(
@@ -3159,14 +3349,18 @@ void ksemawc::Setnk(int ifile){
         msgErrLoad("Setn",fnk[ifile]);
         return;
     }
+    printf("->Setnk(%d) with fnk[%d]=%s\n\n",ifile,ifile,fnk[ifile].toStdString().c_str());
     double val1,val2;
     QTextStream stream ( &file );
-    QString line,line2;
-    line = stream.readLine();
+    QString line,line2,pezzo;
+    line = stream.readLine();//info line
     idToLineEdit["lineEdit_infoNK_"+QString::number(ifile)] -> setText(line.simplified());
     line2=fnk[ifile].section(pathroot, 1, 1);
     idToLineEdit["lineEdit"+QString::number(ifile)] -> setText(line2.section('.', 0, -2));//setText(line2.section('.', 0, 1))
-    line = stream.readLine();
+    line = stream.readLine();//Ndat & "nm" for new file.nk
+    double a2nm=0.1;
+    if(line.contains("nm"))
+        a2nm=1.;
     line = stream.readLine();
     line=line.simplified();
     val1=line.section(' ', 0, 0).toDouble();
@@ -3177,6 +3371,8 @@ void ksemawc::Setnk(int ifile){
     } while (!line2.isNull());
     line=line.simplified();
     val2=line.section(' ', 0, 0).toDouble();
+    val1=val1*a2nm;
+    val2=val2*a2nm;
     if(val1<val2){
         idToLineEdit["WLminNK"+QString::number(ifile)] -> setText(QString::number(NINT(val1)));
         idToLineEdit["WLmaxNK"+QString::number(ifile)] -> setText(QString::number(NINT(val2)));
@@ -3309,6 +3505,12 @@ void ksemawc::mDwUp(int iLayer, int Dw1UpM1){
     par[50+iLayer][3]=par[50+iLayer+Dw1UpM1][3];
     par[50+iLayer+Dw1UpM1][1]=tmp1;
     par[50+iLayer+Dw1UpM1][3]=tmp3;
+    tmp1=par[90+iLayer][1];
+    tmp3=par[90+iLayer][3];
+    par[90+iLayer][1]=par[90+iLayer+Dw1UpM1][1];
+    par[90+iLayer][3]=par[90+iLayer+Dw1UpM1][3];
+    par[90+iLayer+Dw1UpM1][1]=tmp1;
+    par[90+iLayer+Dw1UpM1][3]=tmp3;
     for(int j=0;j<=6;j++){
         for(int k=1;k<=5;k++){
             double tmp=pm[10*j+iLayer][k];
@@ -3395,6 +3597,7 @@ void ksemawc::Clrnk8(){
 }
 
 void ksemawc::callSetSample(){
+    iNewSample=1;
     ifn=0;
     setSample();
 }
@@ -3470,6 +3673,24 @@ void ksemawc::listMeas(const QString &){
             file.close();
         }
     }
+    if(iNewSample==1){
+        //assign incremental theta if same measurement
+        for(int j=2;j<=4;j++){
+            int nELIpre=idToComboBox["cBmis"+QString::number(5+2*(j-1))]->currentIndex();
+            int nEli=idToComboBox["cBmis"+QString::number(5+2*j)]->currentIndex();
+            printf("iNewSample=%d nELIpre=%d nEli=%d\n",iNewSample,nELIpre,nEli);
+            if(nELIpre>=0 && nEli==nELIpre){
+                int nTheta=idToComboBox["cBteE"+QString::number(j)] -> count();
+                int iThetaPre=idToComboBox["cBteE"+QString::number(j-1)] -> currentIndex();
+                int iTheta=idToComboBox["cBteE"+QString::number(j)] -> currentIndex();
+                printf("\tnTheta=%d iThetaPre=%d iTheta=%d\n",nTheta,iThetaPre,iTheta);
+                if(iTheta<=iThetaPre && iThetaPre<nTheta-1)
+                    idToComboBox["cBteE"+QString::number(j)] -> setCurrentIndex(iThetaPre+1);
+            }
+        }
+        iNewSample=0;
+    }
+
     occupyPF--;
 }
 
@@ -3489,7 +3710,7 @@ void ksemawc::pwTn(const int &){
         ui->WLmax1 -> setText(QString::number(wmax));
     }
     else{
-        ui-> WLmin1 -> setText("");
+        ui->WLmin1 -> setText("");
         ui->WLmax1 -> setText("");
     }
     MCRange();
@@ -3512,6 +3733,11 @@ void ksemawc::pwTp(const int &){
         ui->WLmin2 -> setText("");
         ui->WLmax2 -> setText("");
     }
+    ui->dSB_PAR_6_1 -> setValue(par[6][1]);
+    ui->dSB_PAR_6_1bis -> setValue(par[6][1]);
+    ui->dSB_PAR_6_1tris -> setValue(par[6][1]);
+    int s1p2=NINT(par[27][2]);
+    ui->cB_PAR_27_2 -> setCurrentIndex(s1p2-1);
     MCRange();
 }
 
@@ -3752,6 +3978,9 @@ void ksemawc::pwEj(int j){
         else if(j==4)
             fnE4="";
         idToComboBox["cBmis"+QString::number(5+2*j)]-> clear();
+        idToLineEdit["lineEdit_E"+QString::number(j)]-> clear();
+        idToLineEdit["WLmin"+QString::number(5+2*j)] -> setText("");
+        idToLineEdit["WLmax"+QString::number(5+2*j)] -> setText("");
     }
 }
 
@@ -3786,8 +4015,8 @@ void ksemawc::pwSubEj(int j){
         pm[85+j][1]=theta;
         double wmin=EliTab[j][index][2];
         double wmax=EliTab[j][index][3];
-        idToLineEdit["WLmin"+QString::number(5+2*j)]-> setText(QString::number(wmin*10.));
-        idToLineEdit["WLmax"+QString::number(5+2*j)]-> setText(QString::number(wmax*10.));
+        idToLineEdit["WLmin"+QString::number(5+2*j)]-> setText(QString::number(wmin));
+        idToLineEdit["WLmax"+QString::number(5+2*j)]-> setText(QString::number(wmax));
     }
     else{
         idToLineEdit["WLmin"+QString::number(5+2*j)] -> setText("");
@@ -3815,7 +4044,7 @@ void ksemawc::pwSubE4(const int &){
 void ksemawc::MCRange(){
     //setting the maximum common wavelenght range
     if(occupyPF!=0) return;
-    printf("-> MCrange (occupyPF=%d)\n",occupyPF);
+    //printf("-> MCrange (occupyPF=%d)\n",occupyPF);
     double Lmin=0.,Lmax=1.E+20,vmin,vmax;
     QString str;
     Qt::CheckState state1;
@@ -3878,10 +4107,14 @@ void ksemawc::MCRange(){
     }
      printf("\tLmin=%f Lmax=%f\n",Lmin,Lmax);
     if(Lmin>0. && Lmax<1.E+20){
+        Qt::CheckState state;
+        state = ui->checkBox_msgr -> checkState();
         ui->dSB_PAR_4_1 -> setValue(Lmin);
         ui->dSB_PAR_4_2 -> setValue(Lmax);
-        //ui->DP_RXY_20_1 -> setText(QString::number(Lmin));
-        //ui->DP_RXY_20_2 -> setText(QString::number(Lmax));
+        if(state == Qt::Unchecked){
+            ui->DP_RXY_20_1 -> setText(QString::number(Lmin));
+            ui->DP_RXY_20_2 -> setText(QString::number(Lmax));
+        }
         ui->DP_RXY_20_3 -> setText(QString::number(Lmin));
         ui->DP_RXY_20_4 -> setText(QString::number(Lmax));
     }
@@ -3908,7 +4141,7 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
     printf("->previewFile %s occupyPF=%d lab=%s\n",filename.toStdString().c_str(),occupyPF,lab.toStdString().c_str());
     int i,ndati,ilinrim;
     double ridelta,dini,dfin,dmin,dmax,val;
-    QString line,line0;
+    QString line,line0,pezzo;
     QFile file(filename);
     if (!file.open (QIODevice::ReadOnly | QIODevice::Text)){
         QMessageBox msgBox;
@@ -3936,8 +4169,6 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
             stream >> ridelta;
             stream >> ndati;
             wmin=wmax+ridelta*(ndati-1);
-            wmax=wmax*10.;
-            wmin=wmin*10.;
                  printf("file Perkin Elmer L900 - L950 \n");
                  printf(" ridelta=%f ndati=%d wmin= %f wmax= %f \n",ridelta,ndati,wmin,wmax);
         }
@@ -3955,8 +4186,42 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
                 wmin=dfin;
                 wmax=dini;
             }
-            wmax=wmax*10.;
-            wmin=wmin*10.;
+        }
+        else if(line0.contains("RTmethod[")){
+            // file Transmittance by VASE
+            line = stream.readLine();
+            line = stream.readLine();
+            int iL0E1=0;
+            if(line.contains("eV"))
+                iL0E1=1;
+            line = stream.readLine();
+            line=line.simplified();
+            QStringList List;
+            List=line.split(" ");
+            pezzo=List.at(0).toLocal8Bit().constData();
+            par[27][2]=1.;
+            if(pezzo.contains("pT"))
+                par[27][2]=2.;
+            pezzo=List.at(1).toLocal8Bit().constData();
+            dini=pezzo.toDouble();
+            pezzo=List.at(2).toLocal8Bit().constData();//theta
+            par[6][1]=pezzo.toDouble();
+            printf("\tTheta_Tp=%f\n",par[6][1]);
+            do{
+                line = stream.readLine();
+            }while(!stream.atEnd());
+            line=line.simplified();
+            List=line.split(" ");
+            pezzo=List.at(1).toLocal8Bit().constData();
+            dfin=pezzo.toDouble();
+            if(iL0E1==0){
+                wmin=dini;
+                wmax=dfin;
+            }
+            else{
+                wmin=1240./dini;
+                wmax=1240./dfin;
+            }
         }
         else if(line0.contains("##XYUNITS= W")){
             // file Lambda9 or old FTIR Perkin Elmer
@@ -3964,12 +4229,12 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
             stream >> line >> dmin >> line >> val;
             //    printf("old fashion file dmin= %f dmax= %f \n",dmin,dmax);
             if(lab.contains("v")){
-                wmin=dmin*10.;
-                wmax=dmax*10.;
+                wmin=dmin;
+                wmax=dmax;
             }
             else{
-                wmin=(1.E+8)/dmax;
-                wmax=(1.E+8)/dmin;
+                wmin=(1.E+7)/dmax;
+                wmax=(1.E+7)/dmin;
             }
         }
         else{
@@ -3979,24 +4244,24 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
                 for(i=0;i<8;i++) line = stream.readLine();
                 stream >> line >> dmin;
                 stream >> line >> dmax;
-                wmin=dmin*10.;
-                wmax=dmax*10.;
+                wmin=dmin;
+                wmax=dmax;
             }
             else if(line0.contains("##DATA TYPE= UV")){
                 //file Lambda19 Perkin Elmer
                 for(i=0;i<11;i++) line = stream.readLine();
                 stream >> line >> dmax;
                 stream >> line >> dmin;
-                wmin=dmin*10.;
-                wmax=dmax*10.;
+                wmin=dmin;
+                wmax=dmax;
             }
             else if(line0.contains("##DATA TYPE= IN")){
                 //file FTIR new type
                 for(i=0;i<14;i++) line = stream.readLine();
                 stream >> line >> dmin;
                 stream >> line >> dmax;
-                wmin=(1.E+8)/dmin;
-                wmax=(1.E+8)/dmax;
+                wmin=(1.E+7)/dmin;
+                wmax=(1.E+7)/dmax;
             }
         }
     }
@@ -4006,16 +4271,17 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
 void ksemawc::SetModel(const int &){
     int itab=ui->tabWidget -> currentIndex();
     if(occupyPF!=0 && itab!=3) return;
-    printf("-> SetModel\n");
     occupyPF=1;
     int nlayerOld=nlayer;
     nlayer=ui->sB_PAR_51_2 -> value();
     int Dnl=nlayer-nlayerOld;
+    printf("-> SetModel with Dnl=%d\n",Dnl);
     if(Dnl>0){
         for(int i=0;i<nlayerOld;i++){
             par[50+nlayer-i][1]=par[50+nlayerOld-i][1];
             par[50+nlayer-i][3]=par[50+nlayerOld-i][3];
-            for(int j=0;j<=6;j++){
+            for(int j=0;j<=7;j++){
+                if(j==7) j=9;
                 for(int k=1;k<=5;k++)
                     pm[10*j+nlayer-i][k]=pm[10*j+nlayerOld-i][k];
             }
@@ -4025,7 +4291,8 @@ void ksemawc::SetModel(const int &){
         for(int i=1;i<=nlayer;i++){
             par[50+i][1]=par[50+i-Dnl][1];
             par[50+i][3]=par[50+i-Dnl][3];
-            for(int j=0;j<=6;j++){
+            for(int j=0;j<=7;j++){
+                if(j==7) j=9;
                 for(int k=1;k<=5;k++)
                     pm[10*j+i][k]=pm[10*j+i-Dnl][k];
             }
@@ -4091,7 +4358,7 @@ void ksemawc::SetModel(const int &){
             idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> setCurrentIndex(NINT(par[50+i][3])-1);
             if(NINT(par[50+i][3])==1){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setValue(pm[i][1]*1.E-7);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setValue(pm[i][1]*1.E-6);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
@@ -4099,6 +4366,7 @@ void ksemawc::SetModel(const int &){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
             } else if(NINT(par[50+i][3])==2){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setValue(pm[i][1]);
@@ -4109,6 +4377,8 @@ void ksemawc::SetModel(const int &){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
             } else if(NINT(par[50+i][3])==3){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(true);
@@ -4117,6 +4387,7 @@ void ksemawc::SetModel(const int &){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(true);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setValue(pm[i][1]);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setValue(pm[10+i][1]);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setValue(pm[20+i][1]);
@@ -4124,17 +4395,7 @@ void ksemawc::SetModel(const int &){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setValue(pm[40+i][1]);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setValue(pm[60+i][1]);
-            }else if(NINT(par[50+i][3])==4 || NINT(par[50+i][3])==5){
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setValue(pm[i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setValue(pm[10+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
             }
         } else{
             idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> setEnabled(false);
@@ -4146,6 +4407,7 @@ void ksemawc::SetModel(const int &){
             idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
             idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(false);
             idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
+            idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
         }
     }
     //refresh f2 values
@@ -4166,13 +4428,14 @@ void ksemawc::RefreshModel(){
                 par[50+i][1]++;
                 if(NINT(par[50+i][3])==1){
                     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
-                    //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]*1.E-7);
+                    //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]*1.E-6);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
+                    idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
                     //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[50+i][1]);
                 } else if(NINT(par[50+i][3])==2){
                     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
@@ -4184,6 +4447,8 @@ void ksemawc::RefreshModel(){
                     idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
+                    idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
+                    idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
                 } else if(NINT(par[50+i][3])==3){
                     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(true);
@@ -4192,6 +4457,7 @@ void ksemawc::RefreshModel(){
                     idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(true);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(true);
+                    idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
                     //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setValue(pm[10+i][1]);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setValue(pm[20+i][1]);
@@ -4199,17 +4465,7 @@ void ksemawc::RefreshModel(){
                     idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setValue(pm[40+i][1]);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
                     idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setValue(pm[60+i][1]);
-                }else if(NINT(par[50+i][3])==4 || NINT(par[50+i][3])==5){
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
-                    //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setValue(pm[10+i][1]);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
+                    idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
                 }
             } else{
                 idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> setEnabled(false);
@@ -4221,6 +4477,7 @@ void ksemawc::RefreshModel(){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(false);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
             }
         }
     }
@@ -4278,16 +4535,10 @@ void ksemawc::setMat(int nM){
     int curI=idToComboBox["cB_cnk"+QString::number(nM)+"a"] -> currentIndex();
     idToLineEdit["LEcnk"+QString::number(nM)+"_2"] -> setEnabled(curI==0);
     idToLineEdit["LEcnk"+QString::number(nM)+"_3"] -> setEnabled(curI==0);
-    if(idToComboBox["cB_cnk1b"]->isEnabled() && curI==0){
-        idToComboBox["cB_cnk1b"]->setEnabled(false);
-        ui->LEcnk1_4 -> setEnabled(false);
-        ui->LEcnk1_5 -> setEnabled(false);
-        ui->cB_EMA_1 -> setCheckState ( Qt::Unchecked );
-    }
-    if(idToComboBox["cB_cnk1b"]->isEnabled()){
+    if(idToComboBox["cB_cnk"+QString::number(nM)+"b"]->isEnabled()){
         int curI2=idToComboBox["cB_cnk1b"] ->currentIndex();
-        ui->LEcnk1_4 -> setEnabled(curI2==0 && curI>0);
-        ui->LEcnk1_5 -> setEnabled(curI2==0 && curI>0);
+        idToLineEdit["LEcnk"+QString::number(nM)+"_5"] -> setEnabled(curI2==0);
+        idToLineEdit["LEcnk"+QString::number(nM)+"_6"] -> setEnabled(curI2==0);
     }
 }
 
@@ -4342,11 +4593,11 @@ void ksemawc::setEMA(int nM){
     printf("->setEMA called by checkBox %d\n",nM);
     idToComboBox["cB_cnk"+QString::number(nM)+"b"] -> setEnabled(state==Qt::Checked);
     idToDoubleSpinBox["dSB_PM_"+QString::number(70+nM)+"_1"] -> setEnabled(state==Qt::Checked);
-    if(nM==1){
-        int curI=idToComboBox["cB_cnk1b"] ->currentIndex();
-        ui->LEcnk1_4 -> setEnabled(curI==0 && state==Qt::Checked);
-        ui->LEcnk1_5 -> setEnabled(curI==0 && state==Qt::Checked);
-    }
+    if(state!=Qt::Checked)
+        idToComboBox["cB_cnk"+QString::number(nM)+"b"] ->setCurrentIndex(-1);
+    int curI=idToComboBox["cB_cnk"+QString::number(nM)+"b"] ->currentIndex();
+    idToLineEdit["LEcnk"+QString::number(nM)+"_5"] -> setEnabled(curI==0 && state==Qt::Checked);
+    idToLineEdit["LEcnk"+QString::number(nM)+"_6"] -> setEnabled(curI==0 && state==Qt::Checked);
 }
 
 void ksemawc::setKindOsc1(){
@@ -4694,7 +4945,7 @@ void ksemawc::listOsc(){
 void ksemawc::rangeWL(){
     double Lmin=ui->dSB_PAR_4_1 -> value();
     double Lmax=ui->dSB_PAR_4_2 -> value();
-    ui->lineEdit_eVrange->setText(QString::number(12400./Lmin,'g',4)+"<->"+QString::number(12400./Lmax,'g',4)+" eV");
+    ui->lineEdit_eVrange->setText(QString::number(1240./Lmin,'g',4)+"<->"+QString::number(1240./Lmax,'g',4)+" eV");
     Qt::CheckState state;
     state = ui->checkBox_msgr -> checkState();
     if(state == Qt::Unchecked){
@@ -4727,7 +4978,7 @@ void ksemawc::saveNKsim(){
         QMessageBox msgBox;
         msgBox.setText("The file already exist!");
         msgBox.setInformativeText("Do you want to save anyway?");
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Cancel);
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::Save);
         int ret = msgBox.exec();
         switch (ret) {
@@ -4735,7 +4986,7 @@ void ksemawc::saveNKsim(){
             // Save was clicked
             iok=1;
             break;
-        case QMessageBox::Cancel:
+        case QMessageBox::No:
             // Cancel was clicked
             iok=0;
             printf("as you requested file was not saved!\n");
@@ -4792,7 +5043,7 @@ void ksemawc::saveSim(){
         QMessageBox msgBox;
         msgBox.setText("The file already exist!");
         msgBox.setInformativeText("Do you want to save anyway?");
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Cancel);
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::Save);
         int ret = msgBox.exec();
         switch (ret) {
@@ -4800,7 +5051,7 @@ void ksemawc::saveSim(){
             // Save was clicked
             iok=1;
             break;
-        case QMessageBox::Cancel:
+        case QMessageBox::No:
             // Cancel was clicked
             iok=0;
             printf("as you requested file was not saved!\n");
@@ -4870,15 +5121,15 @@ void ksemawc::tabChanged(){
                 QMessageBox msgBox;
                 msgBox.setText("None experimental measurements is enabled to be load!");
                 msgBox.setInformativeText("Do you want to enable some now?");
-                msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-                msgBox.setDefaultButton(QMessageBox::Ok);
+                msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+                msgBox.setDefaultButton(QMessageBox::Yes);
                 int ret = msgBox.exec();
                 switch (ret) {
-                case QMessageBox::Ok:
+                case QMessageBox::Yes:
                     ui->tabWidget -> setCurrentIndex(0);
                     return;
                     break;
-                case QMessageBox::Cancel:
+                case QMessageBox::No:
                     printf("None experimental measurements is loaded!\n");
                     break;
                 }
@@ -4896,11 +5147,23 @@ void ksemawc::tabChanged(){
         PlotMENK();
     if(itab==3){ //data analysis
         refreshFitPar();
+        if(ifirstcall==0 && jobtot==0)
+            StoreFitSet();
         if(lastTab==4)
             RefTrackG();
+        printf("ifirstcall=%d\n",ifirstcall);
+        if(ifirstcall==0){
+            ui->lineEdit_chi2Best->setText("1.E+09");
+            ui->spinBox_jobBest->setValue(0);
+        }
     }
-    if(itab==4) //range
+    if(itab==4){ //range
         setRangeEli();
+        ui->sB_iwl2print->setMaximum(NeV);
+    }
+    if(lastTab==4)
+        iwl2print=ui->sB_iwl2print->value();
+
     lastTab=itab;
 }
 
@@ -4946,6 +5209,7 @@ void ksemawc::refreshFitPar(){
     int icoherent,klim,ivp,n_fresh,iDecine,ilayer,iosc,Jcombo,ip;
     occupyPF=1;
     printf("-> refreshFitPar\n");
+    fflush(stdout);
     npp=ui->sB_PAR_34_5 -> value();
     n_fresh=0;
     QString Lj,Lparametro;
@@ -4959,14 +5223,14 @@ void ksemawc::refreshFitPar(){
         if(icoherent==0)
             klim=-1;
         else if(icoherent==1)
-            klim=1;
+            klim=2;
         else if(icoherent==2)
             klim=7;
         else if(icoherent == 3 || icoherent == 4)
             klim=2;
         for(int j=1;j<=npp;j++){
             idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[6]);//roughness is always included
-            for(int k=1;k<=klim;k++){
+            for(int k=0;k<=klim;k++){
                 if(k!=6)
                     idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[k]);
             }
@@ -5011,9 +5275,11 @@ void ksemawc::refreshFitPar(){
             //if(lastTab != itab){
             ivp=NINT(pm[ppm[j]][2]);
             ip=ppm[j];
-            if(ip<=59){
+            if(ip<=69 || (ip>=91 && ip<=99)){
                 iDecine=int(double(ip)/10.);
                 ilayer=ip-iDecine*10;
+                if(iDecine==9)
+                    iDecine=-1;
                 Lparametro="L"+QString::number(ilayer)+ParFitLab[iDecine+1];
                 //      printf("j=%d ip=%d iDecine=%d ilayer=%d Lparametro=%s\n",j,ip,iDecine,ilayer,(Lparametro.toStdString()).c_str());
             }
@@ -5046,11 +5312,7 @@ void ksemawc::refreshFitPar(){
                 idToLineEdit["DPparFitErr_"+QString::number(j)] -> setText(QString::number(pm[ip][4]));
                 idToLineEdit["DPparFitGC_"+QString::number(j)] -> setText(QString::number(pm[ip][5]));
             }
-            //}
-            //else{
-            //    state=idToCheckBox["chBeParFit_"+QString::number(j)]-> checkState();
-            //    if( state == Qt::Checked ) n_fresh++;
-            //}
+            printf("j=% ip=%d pm[%d][1]=%f\n",j,ip,ip,pm[ip][1]);
         }
         else{
             idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
@@ -5066,11 +5328,12 @@ void ksemawc::refreshFitPar(){
 
 
 void ksemawc::PanFitEnable(){
-    printf("-> PanFitEnable\n");
     int n_fresh,n1,n2,ip;
     int itab=ui->tabWidget -> currentIndex();
 
     if(occupyPF==0){
+        printf("-> PanFitEnable with itab=%d\n",itab);
+        fflush(stdout);
         occupyPF=1;
         npp=ui->sB_PAR_34_5 -> value();
         n_fresh=0;
@@ -5078,7 +5341,8 @@ void ksemawc::PanFitEnable(){
         //state = Qt::Checked;
         QString Lj,Valore;
         if(itab==3 && itab==lastTab){
-            printf("\t apply PanFitEnable\n");
+            printf("\t apply PanFitEnable with npp=%d\n",npp);
+            fflush(stdout);
             for(int j=1;j<=17;j++){
                 if(j<=npp){
                     idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(true);
@@ -5097,11 +5361,14 @@ void ksemawc::PanFitEnable(){
                     ip=0;
                     if(Lj.at(0)=='L'){
                         n1=(Lj.at(1)).digitValue();
-                        n2=0;
+                        n2=-1;
                         do{
                             n2++;
                         } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<7);
-                        ip=10*(n2-1)+n1;
+                        if(n2==0)
+                            ip=90+n1;
+                        else
+                            ip=10*(n2-1)+n1;
                     }
                     else if(Lj.at(0)=='f'){
                         ip=70+Lj.at(5).digitValue();
@@ -5143,7 +5410,7 @@ void ksemawc::PanFitEnable(){
             }
             nPar=n_fresh;
             ui->sB_PAR_35_5 -> setValue(nPar);
-            //   printf("END PanFitEnable\n");
+//            printf("END PanFitEnable\n");
         }
         occupyPF=0;
     }
@@ -5176,17 +5443,15 @@ void ksemawc::PanFitPar(){
                 for(int i=1;i<=nlayer;i++){
                     icoherent=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
                     Lj="L"+QString::number(i);
-                    if(icoherent==0)
+                    if(icoherent==0) //bulk
                         klim=-1;
-                    else if(icoherent==1)
-                        klim=1;
-                    else if(icoherent==2)
-                        klim=7;
-                    else if(icoherent==3 || icoherent==4)
+                    else if(icoherent==1) //film homo
                         klim=2;
+                    else if(icoherent==2) //film inhomo
+                        klim=7;
                     for(int j=npp+1;j<=nppNew;j++){
                         idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[6]);//roughness is always included
-                        for(int k=1;k<=klim;k++){
+                        for(int k=0;k<=klim;k++){
                             if(k!=6)
                                 idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[k]);
                         }
@@ -5231,7 +5496,7 @@ void ksemawc::PanFitPar(){
                     idToComboBox["cBParFit_"+QString::number(j)] -> clear();
                     idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
                     idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
-                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setText("");
+                    idToLineEdit["DPparFitV_"+QString::number(j)] -> clear();//setText("");
                     idToLineEdit["DPparFitErr_"+QString::number(j)] -> clear();
                     idToLineEdit["DPparFitGC_"+QString::number(j)] -> clear();
                     idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(false);
@@ -5272,12 +5537,14 @@ void ksemawc::PanFitChoice(){
                         n1=n1*10;
                         n1=n1+((Lj.at(2)).digitValue());
                     }
-                    n2=0;
+                    n2=-1;
                     ip=0;
                     do{
                         n2++;
                     } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<=12);
-                    if(1<=n2 && n2<=7)
+                    if(n2==0)
+                        ip=90+n1;
+                    else if(1<=n2 && n2<=7)
                         ip=10*(n2-1)+n1;
                     else if(8<=n2 && n2<=11)
                         ip=100+(n1-1)*5+(n2-7)+1;
@@ -5456,7 +5723,7 @@ void ksemawc::PlotME(){
     }
     QTextStream stream3 (&file3);
 
-    stream0<<"Tn\tTp\tRn\tRp\tR1\tAPDS\twl(A)\tn1\tn2\tn3\tn4\tn5\tn6\tn7\tn8\tn_ibri"<<"\n";
+    stream0<<"Tn\tTp\tRn\tRp\tR1\tAPDS\twl(nm)\tn1\tn2\tn3\tn4\tn5\tn6\tn7\tn8\tn_ibri"<<"\n";
     stream1<<"eTn\teTp\teRn\teRp\teR1\teAPDS\teLETT\tk1\tk2\tk3\tk4\tk5\tk6\tk7\tk8\tk_ibri"<<"\n";
     stream2<<"DEL_1\tPSI_1\tDEL_2\tPSI_2\tDEL_3\tPSI_3\tDEL_4\tPSI_4"<<"\n";
     stream3<<"eDEL_1\tePSI_1\teDEL_2\tePSI_2\teDEL_3\tePSI_3\teDEL_4\tePSI_4"<<"\n";
@@ -5620,7 +5887,7 @@ void ksemawc::Simula(){
         if(state1==Qt::Checked && DATO[ic]>0)
             idToLineEdit["LEpar_"+QString::number(35+ic)+"_1"] -> setText(QString::number(par[35+ic][1]));
         else
-            idToLineEdit["LEpar_"+QString::number(35+ic)+"_1"] -> setText("NA");
+            idToLineEdit["LEpar_"+QString::number(35+ic)+"_1"] -> clear();
     }
     ui->cBox_PAR_19_1 -> setCheckState(Qt::Unchecked);
 
@@ -5635,15 +5902,26 @@ void ksemawc::Simula(){
     }
     else{
         int ipr;
-        QString line;
+        QString line,pezzo;
         QTextStream stream (&file);
-        line = stream.readLine();
+        line = stream.readLine();//info line
         cout << line.toStdString()<<"\n";
-        stream>>ipr;
-        printf("Ndat= %d\n",ipr);
+        line = stream.readLine();//Ndat & "nm" for new file
+        line=line.simplified();
+        QStringList List0;
+        List0 =line.split(" ");
+        pezzo=List0.at(0).toLocal8Bit().constData();
+        ipr=pezzo.toInt();
+        double a2nm=0.1;
+        if(line.contains("nm"))
+            a2nm=1.;
+        printf("Ndat= %d a2nm=%f\n",ipr,a2nm);
         double wp[ipr+1][3];
-        for(int i=1;i<=ipr;i++)
+        for(int i=1;i<=ipr;i++){
             stream>>wp[i][1]>>wp[i][2];
+            wp[i][1]=wp[i][1]*a2nm;
+            //printf("\t %f %f\n",wp[i][1],wp[i][2]);
+        }
         file.close();
         //weight
         double speso=0.;
@@ -5669,16 +5947,18 @@ void ksemawc::Simula(){
         // mean @theta
         for(int ii=jjmin;ii<=jjmax;ii++){
             int ij=1;
-            while(wp[ii][1]>MIS[7][ij][1] && ij<=200)
+            while(wp[ii][1]>MIS[7][ij][1] && ij<=NINT(par[28][2])-1)
                 ij++;
             if(ij>1) ij--;
             double x=(wp[ii][1]-MIS[7][ij][1])/(MIS[7][ij+1][1]-MIS[7][ij][1]);
+            //printf("x=%f wp[%d][1]=%f MIS[7][%d][1]=%f\n",x,ii,wp[ii][1],ij,MIS[7][ij][1]);
             for(int j=1;j<=2;j++){
                 int ik=ij+j-1;
                 if(j==1){
                     for(int iv1=1;iv1<=6;iv1++){
                         val[iv1][1]=MIS[iv1][ik][1]*(1.-x);
                         val[iv1][2]=mc[iv1][ik]*(1.-x);
+                        //if(iv1==3) printf("mc[3][%d]=%f x=%f\n",ik,mc[iv1][ik],x);
                     }
                 }
                 else{
@@ -5691,6 +5971,7 @@ void ksemawc::Simula(){
             for(int j=1;j<=6;j++){
                 av[j]=av[j]+val[j][1]*wp[ii][2]/speso;
                 avs[j]=avs[j]+val[j][2]*wp[ii][2]/speso;
+                //if(j==3) printf("val[3][2]=%f\n",val[j][2]);
             }
         }
         for(int i=1;i<=6;i++){
@@ -5732,7 +6013,7 @@ void ksemawc::CalcMis(double mc[15][1000]){
     if(state==Qt::Checked)
         iDelCon=1;
     for(int k=1;k<6;k++){
-        //printf("teta[%d]=%f\n",k,teta[k]);
+        printf("teta[%d]=%f\n",k,teta[k]);
         teta[k]=teta[k]*deg2rad;
     }
     QFile fileNK(fNKsim);
@@ -5742,7 +6023,7 @@ void ksemawc::CalcMis(double mc[15][1000]){
     }
     QTextStream streamNK(&fileNK);
     streamNK<<"nk-values of last simulation\n";
-    streamNK<<QString::number(NeV)<<"\n";
+    streamNK<<QString::number(NeV)<<" nm\n";
     for(int i=1;i<=NeV;i++){
         wl=MIS[7][i][1];
         Xp[i-1]=wl;
@@ -5752,9 +6033,8 @@ void ksemawc::CalcMis(double mc[15][1000]){
         e1[i-1]=VNK[1][1]*VNK[1][1]-VNK[1][2]*VNK[1][2];
         e2[i-1]=2.*VNK[1][1]*VNK[1][2];
         streamNK<<wl<<"\t"<<VNK[1][1]<<"\t"<<VNK[1][2]<<"\t"<<VNK[1][1]*0.001<<"\t"<<VNK[1][2]*0.001<<"\n";
-        par[7][1]=wl;
         if(DATO[1]!=0 || DATO[3]!=0 || DATO[5]!=0){
-            ASSEMBLER(i,wl,1,0.,vot);
+            ASSEMBLER(i,1,0.,vot);
             mc[1][i]=vot[1][1];
             mc[3][i]=vot[2][1];
             mc[5][i]=vot[3][1];
@@ -5765,7 +6045,7 @@ void ksemawc::CalcMis(double mc[15][1000]){
             mc[5][i]=.0;
         }
         if(DATO[2]!=0 || DATO[4]!=0){
-            ASSEMBLER(i,wl,1,teta[1],vot);
+            ASSEMBLER(i,1,teta[1],vot);
             if(s1p2u3<3){
                 mc[2][i]=vot[1][s1p2u3];
                 mc[4][i]=vot[2][s1p2u3];
@@ -5780,14 +6060,14 @@ void ksemawc::CalcMis(double mc[15][1000]){
             mc[4][i]=.0;
         }
         if(DATO[6]!=0){
-            ASSEMBLER(i,wl,2,0.,vot);
+            ASSEMBLER(i,2,0.,vot);
             mc[6][i]=vot[4][1];
         }
         else
             mc[6][i]=.0;
         for(int j=1;j<=4;j++){
             if(DATO[7+2*(j-1)]!=0 || DATO[8+2*(j-1)]!=0){
-                ASSEMBLER(i,wl,2+j,teta[j+1],vot);
+                ASSEMBLER(i,2+j,teta[j+1],vot);
                 del=vot[5][2];//Delta
                 if(iDelCon==1){
                     if(i==1){
@@ -5796,7 +6076,7 @@ void ksemawc::CalcMis(double mc[15][1000]){
                     del=del-Dperiod*NINT((del-delOld[j-1])/Dperiod);
                     delOld[j-1]=del;
                 }
-                mc[7+2*(j-1)][i]=del;//Delta
+                mc[7+2*(j-1)][i]=del;//+Dperiod*N180offset;//Delta
                 mc[8+2*(j-1)][i]=vot[5][1];//Psi
             }
             else{
@@ -5823,9 +6103,9 @@ void ksemawc::CalcMis(double mc[15][1000]){
                 else{
                     Nperiod=0;
                     if(ic==7 || ic==9 || ic==11 || ic==13)
-                        Nperiod=NINT((mc[ic][i]-ELI[ic-6][i][1])/360.);
-                    FM=FM+pow((mc[ic][i]-ELI[ic-6][i][1]-Nperiod*360.)/ELI[ic-6][i][2],2.)/NeV;
-                    Yp[i-1]=Yp[i-1]-Nperiod*360.;
+                        Nperiod=NINT((mc[ic][i]-ELI[ic-6][i][1])/Dperiod);
+                    FM=FM+pow((mc[ic][i]-ELI[ic-6][i][1]-Nperiod*Dperiod)/ELI[ic-6][i][2],2.)/NeV;
+                    Yp[i-1]=Yp[i-1]-Nperiod*Dperiod;
                 }
             }
             par[35+ic][1]=sqrt(FM);
@@ -5880,7 +6160,7 @@ void ksemawc::CalcMis(double mc[15][1000]){
 
 void ksemawc::PlotAve(){
     //computing mean value SF VS theta
-    QString line;
+    QString line,pezzo;
     int ipr;
     double vot[6][3],vt[4][3],tet[92],tau[92],rho[92],rho1[92],ErrXp[92],ErrYp[92];
     fill_n(ErrXp, 92, 0.);
@@ -5897,14 +6177,23 @@ void ksemawc::PlotAve(){
         return;
     }
     QTextStream stream(&file);
-    line=stream.readLine();
+    line=stream.readLine();//info line
     cout<<line.toStdString()<<"\n";
-    stream>>ipr;
+    line=stream.readLine();
+    line=line.simplified();
+    QStringList List;
+    List=line.split(" ");
+    pezzo=List.at(0).toLocal8Bit().constData();
+    ipr=pezzo.toInt();
+    double wl2nm=1.;
+    if(line.contains("nm"))
+        wl2nm=0.1;
     printf("Ndati= %d\n",ipr);
     double wp[ipr+1][3];
     double speso=0.;
     for(int i=1;i<=ipr;i++){
         stream>>wp[i][1]>>wp[i][2];
+        wp[i][1]=wl2nm*wp[i][1];
         cout<< wp[i][1] <<"\t"<< wp[i][2]<<"\n";
         speso=speso+wp[i][2];
     }
@@ -5957,9 +6246,8 @@ void ksemawc::PlotAve(){
             }
             for(int j=1;j<=2;j++){
                 int ik=ij+j-1;
-                par[7][1]=MIS[7][ik][1];
                 if(teta<90.)
-                    ASSEMBLER(ik,MIS[7][ik][1],1,tetar,vot);
+                    ASSEMBLER(ik,1,tetar,vot);
                 else{
                     vot[1][1]=.0;
                     vot[1][2]=.0;
@@ -6033,183 +6321,221 @@ void ksemawc::PlotAve(){
 }
 
 void ksemawc::PlotAbsEL(){
-    double wwl[1002],y[1002],ErrXp[1002],ErrYp[1002],Trasm1[1002],vosi[6][3],denom;
+    int LastMediumAtWl[1002];
+    double wwl[1002],x[1002],y[1002],ErrXp[1002],ErrYp[1002],Trasm1[1002],vosi[6][3],denom,ABS[1002][10];
     fill_n(ErrXp, 1002, 0.);
     fill_n(ErrYp, 1002, 0.);
     fill_n(Trasm1, 1002, 1.);
     long double Ps[1002][11],Pp[1002][11];
     complex<long double> Bs[1002][11],Cs[1002][11],Bp[1002][11],Cp[1002][11];
     complex<double> irup,irdw,irup2,irdw2,mups,mupp,mdws,mdwp,pq,ir[10], NQ, MUS, DELTA;
-    int i,ii,m, icol,ivnkdw,ivnkup,iLayer, iLayer0,iFirstCoe,s1p2u3, LastLayer,ivnk;
+    int icol,ivnkdw,ivnkup,s1p2u3, LastMedium,ivnk;
     double VNK[17][3];
-    QString fname;
     SaveSetting(-1);
 
     s1p2u3=NINT(par[35][2]);
     double teta=par[6][1]*deg2rad;
-    iFirstCoe=1;
-    iLayer0=NINT(par[51][2])+1;//Nlayer+1
-    ivnkdw=16;//output media for SF measurements
+    int iFirstCoe=1;
+    int Nlayers=NINT(par[51][2]);
+    ivnkdw=9;//output media for SF measurements
     ivnkup=10;//refractive index of input medium for SF measurements
-    printf("plot Abs at each layer of %d at theta=%f with polarization %d\n\t iLayer0=%d ivnkdw=%d\n",NINT(par[51][2]),par[6][1],s1p2u3,iLayer0,ivnkdw);
+    int iRD=1;//redraw the Absorptance plot
 
-    int iRD=1;
-    double Amin=1000.;
-    double Amax=-1000.;
+    printf("plot Abs at each layer of %d at theta=%f with polarization %d\n\t Nlayers=%d ivnkdw=%d\n",NINT(par[51][2]),par[6][1],s1p2u3,Nlayers,ivnkdw);
 
-    if(NINT(par[51][3])==1){//the first layer is inchoerent
-        iFirstCoe=2;
-        // saving Abs to individual files
-        fname=pathroot+"expo/Abs#"+QString::number(1)+".dat";
-        QFile file(fname);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
-            msgErrLoad("PlotAbsEL",fname);
-            printf("Error opening %s\n",fname.toStdString().c_str());
-            return;
-        }
-        QTextStream out(&file);
-        out<<"Lambda Absorptance Layer#"<<QString::number(1)<<"\n";
-        out<<QString::number(NeV)<<"\n";
-        for(i=1;i<=NeV;i++){
-            wwl[i]=MIS[7][i][1];
-            par[7][1]=MIS[7][i][1];
-            COSVNK(VNK,i);
-//            printf("\t Incoherent ivnkup=%d nup=%f kup=%f\n",ivnkup, VNK[ivnkup][1],-VNK[ivnkup][2]);
-            ivnkdw=NINT(par[51][1]);//refractive index of first layer
-            irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
-            irup2=irup*irup;
-            pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
-            irdw=complex<double>(VNK[ivnkdw][1],-VNK[ivnkdw][2]);
-            irdw2=irdw*irdw;
-            mups=sqrt(irup2-pq);
-            mupp=irup2/mups;
-            mdws=sqrt(irdw2-pq);
-            mdwp=irdw2/mdws;
-            double atten=exp(-4.*PIG*pm[1][1]/wwl[i]*imag(-mdws));
-            double RaS=pow(abs((mups-mdws)/(mups+mdws)),2.);
-            double RaP=pow(abs((mupp-mdwp)/(mupp+mdwp)),2.);
-            //double TaS=1.-RaS;//T=1-R because A=0 at the interface
-            //double TaP=1.-RaP;
-            //double R1aS=RaS;
-            //double R1aP=RaP;
-            if(i==100){
-                printf("The first layer is inchoerent with first interface:\n");
-                printf("nUP=%f kUP=%f nDW=%f kDW=%f d=%f\n",
-                       VNK[ivnkup][1],VNK[ivnkup][2],VNK[ivnkdw][1],VNK[ivnkdw][2],pm[1][1]);
-                printf("atten=%f RaS=%f RaP=%f\n",atten,RaS,RaP);
-                printf("2nd interface: call BUILDER: iFirstLayer=%d ncoe=%d\n",2,iLayer0-2);
-            }
-            BUILDER(i,wwl[i],1,2,iLayer0-2,pq,vosi);
-            double RbS=vosi[2][1];
-            double RbP=vosi[2][2];
-            if(i==120) printf("RbS=%f RbP=%f\n",RbS,RbP);
-            //double TbS=vosi[1][1];
-            //double TbP=vosi[1][2];
-            //double R1bS=vosi[3][1];
-            //double R1bP=vosi[3][2];
-            double Abso=0.,Trans=0.;
-            if(s1p2u3==1 || s1p2u3==3){
-                denom=(1.-RaS*RbS*atten*atten);
-                Abso=(1.-RaS)*(1.-atten)*(1.+RbS*atten)/denom;
-                Trans=(1.-RaS)*atten/denom;//Transmittance at the entrance of the "b" interface
-            }
-            if(s1p2u3==2 || s1p2u3==3){
-                denom=(1.-RaP*RbP*atten*atten);
-                Abso=Abso+(1.-RaP)*(1.-atten)*(1.+RbP*atten)/denom;
-                Trans=Trans+(1.-RaP)*atten/denom;//Transmittance at the entrance of the "b" interface
-            }
-            if(s1p2u3==3){
-                Abso=Abso/2.;
-                Trans=Trans/2.;
-            }
-            y[i]=Abso*100.;
-            out<<wwl[i]<<"\t"<<y[i]<<"\n";
-            Amin=min(Amin,y[i]);
-            Amax=max(Amax,y[i]);
-            Trasm1[i]=Trans;
-//            if(i==120)
-//                printf("\tFirst inchoerent layer, results: Abso=%f Trans=%f\n",Abso,Trans);
-        }
-        file.close();
-        labelQwt="layer_"+QString::number(1);
-        icol=1;
-        PLOTline1bar2(1,iRD,icol,9,NeV,wwl,y,ErrXp,ErrYp);
-        if(iRD==1)
-            iRD=0;
+    //set wwl array
+    for(int i=1;i<=NeV;i++){
+        wwl[i]=MIS[7][i][1];
+        for(int j=1;j<=Nlayers;j++)
+            ABS[i][j]=-1.1;
     }
 
-    for(iLayer=iFirstCoe;iLayer<=iLayer0;iLayer++){
-        printf("\nfor-loop with iLayer=%d\n",iLayer);
-        for(int i=1;i<=NeV;i++){
-            wwl[i]=MIS[7][i][1];
-            par[7][1]=MIS[7][i][1];
-            ivnkdw=16;//output media for SF measurements
-            COSVNK(VNK,i);
-            irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
-            pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
-
-            for(ii=iFirstCoe;ii<=iLayer0-1;ii++){
-                ivnk=int(par[50+ii][1]);//index of the material to be assigned to the ii layer
-                ir[ii]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
+    //verify LastMedium at each wl
+    for(int i=1;i<=NeV;i++){
+        COSVNK(VNK,i);
+        irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
+        irup2=irup*irup;
+        pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
+        LastMediumAtWl[i]=Nlayers+1;//i.e. the medium after the last layer
+        for(int j=1;j<=Nlayers;j++){
+            int iWorn=0;
+            if(NINT(par[50+j][3])==1 && j>1)
+                iWorn=1;
+            ivnk=int(par[50+j][1]);//index of the material to be assigned to the ii layer
+            ir[j]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
+            NQ=ir[j]*ir[j];
+            MUS=sqrt(NQ-pq);
+            DELTA=2.*PIG*pm[j][1]*MUS/wwl[i];
+            //printf("iwl=%d iLayer=%d ds=%f abs(real/DELTA))=%f abs(imag(DELTA))=%f\n",i,j,pm[j][1],abs(real(DELTA)),abs(imag(DELTA)));
+            if(abs(imag(DELTA))>ABSmax) {
+                //if(i==iwl2print)
+                    //printf("fully absorbing layer=%d wl[%d]=%f d=%f nm n=%f k=%f \n",j,i, wwl[i],pm[j][1], real(ir[j]), imag(ir[j]));
+                LastMediumAtWl[i]=j;
+                break;
             }
+            if(iWorn==1 && LastMediumAtWl[j]!=j){
+                QMessageBox msgBox;
+                msgBox.setText("ATTENTION!!!");
+                msgBox.setInformativeText("The procedure is not valid for the actual layer model and it will be aborted!");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setDefaultButton(QMessageBox::Ok);
+                msgBox.exec();
+                return;
+            }
+        }
+        if(i==iwl2print) printf("LastMediumAtWl[%d]=%d\n",i,LastMediumAtWl[i]);
+    }
 
-            LastLayer=iLayer0;
-            //check if a layer absorbs completely the light. In that case this layer becomes the exit medium
-                for(int j=iFirstCoe;j<=iLayer0-1;j++){
-                    NQ=ir[j]*ir[j];
-                    MUS=sqrt(NQ-pq);
-                    DELTA=2.*PIG*pm[j][1]*MUS/wwl[i];
-                    if (abs(imag(DELTA))>200.) {
-                        printf("fully absorbing layer=%d wl[%d]=%f d=%f A n=%f k=%f \n",j,i, wwl[i],pm[j][1], real(ir[j]), imag(ir[j]));
-                        LastLayer=j;
-                        ivnkdw=NINT(par[50+j][1]);
-                        for(m=j+1;m<=iLayer0;m++){
-                            Ps[i][m]=0.;
-                            Pp[i][m]=0.;
+    //computing at each wavelength
+    for(int i=1;i<=NeV;i++){
+        //refractive indices @ wl
+        COSVNK(VNK,i);
+
+        //set last medium
+        ivnkdw=9;
+        LastMedium=LastMediumAtWl[i];
+        if(LastMedium<Nlayers+1){
+            ivnkdw=NINT(par[50+LastMedium][1]);
+            for(int m=LastMedium+1;m<=Nlayers+1;m++){
+                Ps[i][m]=0.;
+                Pp[i][m]=0.;
+            }
+        }
+        //loop on the layers
+        for(int iLayer=1;iLayer<=LastMedium;iLayer++){
+            if(i==iwl2print){
+                printf("\n|PlotAbsEL@wl=%f> for-loop with iLayer=%d<=%d\n",MIS[7][iwl2print][1],iLayer,LastMedium);
+            }
+            if(iLayer==1 && (NINT(par[51][3])==1 || LastMedium==1)){//the first layer is inchoerent or completely absorbing
+                irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
+                pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
+                if(i==iwl2print)
+                    printf("\t Incoherent ivnkup=%d nup=%f kup=%f\n",ivnkup, VNK[ivnkup][1],-VNK[ivnkup][2]);
+                ivnkdw=NINT(par[51][1]);//refractive index of first layer
+                irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
+                irup2=irup*irup;
+                pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
+                irdw=complex<double>(VNK[ivnkdw][1],-VNK[ivnkdw][2]);
+                irdw2=irdw*irdw;
+                mups=sqrt(irup2-pq);
+                mupp=irup2/mups;
+                mdws=sqrt(irdw2-pq);
+                mdwp=irdw2/mdws;
+                double atten=exp(-4.*PIG*pm[1][1]/wwl[i]*imag(-mdws));
+                double RaS=pow(abs((mups-mdws)/(mups+mdws)),2.);
+                double RaP=pow(abs((mupp-mdwp)/(mupp+mdwp)),2.);
+                //double TaS=1.-RaS;//T=1-R because A=0 at the interface
+                //double TaP=1.-RaP;
+                //double R1aS=RaS;
+                //double R1aP=RaP;
+                if(i==iwl2print){
+                    printf("The first layer is inchoerent with first interface:\n");
+                    printf("nUP=%f kUP=%f nDW=%f kDW=%f d=%f\n",
+                           VNK[ivnkup][1],VNK[ivnkup][2],VNK[ivnkdw][1],VNK[ivnkdw][2],pm[1][1]);
+                    printf("atten=%f RaS=%f RaP=%f\n",atten,RaS,RaP);
+                    printf("2nd interface: call BUILDER: iFirstLayer=%d ncoe=%d\n",2,Nlayers-1);
+                }
+                BUILDER(i,1,2,Nlayers-1,pq,vosi);
+                double RbS=vosi[2][1];
+                double RbP=vosi[2][2];
+                if(i==iwl2print) printf("RbS=%f RbP=%f\n",RbS,RbP);
+                //double TbS=vosi[1][1];
+                //double TbP=vosi[1][2];
+                //double R1bS=vosi[3][1];
+                //double R1bP=vosi[3][2];
+                double Abso=0.,Trans=0.;
+                if(s1p2u3==1 || s1p2u3==3){
+                    denom=(1.-RaS*RbS*atten*atten);
+                    Abso=(1.-RaS)*(1.-atten)*(1.+RbS*atten)/denom;
+                    Trans=(1.-RaS)*atten/denom;//Transmittance at the entrance of the "b" interface
+                }
+                if(s1p2u3==2 || s1p2u3==3){
+                    denom=(1.-RaP*RbP*atten*atten);
+                    Abso=Abso+(1.-RaP)*(1.-atten)*(1.+RbP*atten)/denom;
+                    Trans=Trans+(1.-RaP)*atten/denom;//Transmittance at the entrance of the "b" interface
+                }
+                if(s1p2u3==3){
+                    Abso=Abso/2.;
+                    Trans=Trans/2.;
+                }
+                ABS[i][1]=Abso*100.;
+                Trasm1[i]=Trans;
+                iFirstCoe=2;
+                // if(i==iwl2print)
+                //     printf("\tFirst inchoerent layer, results: Abso=%f Trans=%f\n",Abso,Trans);
+
+            }
+            else{//thin layer
+                if(iLayer<LastMedium){
+                    if(i==iwl2print)
+                        printf("->call BUILDER: iFirstLayer=%d ncoe=%d\n",iLayer,LastMedium-iLayer);
+                    BUILDER(i,1,iLayer,LastMedium-iLayer,pq,vosi);
+                    Bs[i][iLayer]=freCoeff[4][0];
+                    Cs[i][iLayer]=freCoeff[4][1];
+                    Bp[i][iLayer]=freCoeff[5][0];
+                    Cp[i][iLayer]=freCoeff[5][1];
+                    Ps[i][iLayer]=real(freCoeff[0][0]);
+                    Pp[i][iLayer]=real(freCoeff[0][1]);
+                    if(i==iwl2print)
+                        printf("|PlotAbsEL> Bs[%d][%d]=%f + %f*i\n",i,iLayer,real(freCoeff[4][0]),imag(freCoeff[4][0]));
+                    if(iLayer==iFirstCoe){
+                        Bs[i][iFirstCoe-1]=complex<double>(vosi[2][1],0.);//Rs full stack
+                        Bp[i][iFirstCoe-1]=complex<double>(vosi[2][2],0.);
+                        if(i==iwl2print){
+                            printf("\tiLayer=iFirstCoe=%d -> Re{Bs[%d][%d]}=%Lf\n",iLayer,i,iFirstCoe-1,real(Bs[i][iFirstCoe-1]));
+                            printf("\t\tPs[%d][%d]=%Lf \n",i,iLayer,Ps[i][iLayer]);
                         }
-                        break;
                     }
                 }
-            if(iLayer<LastLayer){
-                if(i==120)
-                    printf("->call BUILDER: iFirstLayer=%d ncoe=%d\n",iLayer,LastLayer-iLayer);
-                BUILDER(i,wwl[i],1,iLayer,LastLayer-iLayer,pq,vosi);
-                Bs[i][iLayer]=freCoeff[4][0];
-                Cs[i][iLayer]=freCoeff[4][1];
-                Bp[i][iLayer]=freCoeff[5][0];
-                Cp[i][iLayer]=freCoeff[5][1];
-                Ps[i][iLayer]=real(freCoeff[0][0]);
-                Pp[i][iLayer]=real(freCoeff[0][1]);
-                if(i==120)
-                    printf("Bs[%d][%d]=%f + %f*i\n",i,iLayer,real(freCoeff[4][0]),imag(freCoeff[4][0]));
-                if(iLayer==iFirstCoe){
-                    Bs[i][iFirstCoe-1]=complex<double>(vosi[2][1],0.);//Rs full stack
-                    Bp[i][iFirstCoe-1]=complex<double>(vosi[2][2],0.);
-//                    if(i==120)
-//                       printf("iLayer=iFirstCoe=%d -> Re{Bs[%d][%d]}=%Lf\n",iLayer,i,iFirstCoe-1,real(Bs[i][iFirstCoe-1]));
-//                    printf("iLayer=iFirstCoe=%d -> Ps[%d][%d]=%Lf \n",iLayer,i,iLayer,Ps[i][iLayer]);
+                if(iLayer==LastMedium){
+                    irdw=complex<double>(VNK[ivnkdw][1],-VNK[ivnkdw][2]);
+                    NQ=irdw*irdw;
+                    MUS=sqrt(NQ-pq);
+                    Bs[i][iLayer]=complex<double>(1.,0.);
+                    Cs[i][iLayer]=MUS;
+                    Ps[i][iLayer]=real(Bs[i][iLayer]*conj(Cs[i][iLayer]));//Poynting vector s-pol
+                    Bp[i][iLayer]=complex<double>(1.,0.);
+                    Cp[i][iLayer]=NQ/MUS;
+                    Pp[i][iLayer]=real(Bp[i][iLayer]*conj(Cp[i][iLayer]));//Poynting vector p-pol
+                    if(i==iwl2print){
+                        printf("|PlotAbsEL> iLayer=LastMedium=%d ->B & C computing with ivnkdw=%d irdw=%f + %f*i\n",iLayer,ivnkdw,real(irdw),imag(irdw));
+                        printf("                  -> Ps[%d][%d]=%Lf \n",i,iLayer,Ps[i][iLayer]);
+                    }
                 }
             }
-            if(iLayer==LastLayer){
-                irdw=complex<double>(VNK[ivnkdw][1],-VNK[ivnkdw][2]);
-                NQ=irdw*irdw;
-                MUS=sqrt(NQ-pq);
-                Bs[i][iLayer]=complex<double>(1.,0.);
-                Cs[i][iLayer]=MUS;
-                Ps[i][iLayer]=real(Bs[i][iLayer]*conj(Cs[i][iLayer]));//Poynting vector s-pol
-                Bp[i][iLayer]=complex<double>(1.,0.);
-                Cp[i][iLayer]=NQ/MUS;
-                Pp[i][iLayer]=real(Bp[i][iLayer]*conj(Cp[i][iLayer]));//Poynting vector p-pol
-                if(i==120)
-                    printf("iLayer=iLayer0=%d ->B & C computing with ivnkdw=%d\n",iLayer,ivnkdw);
-            }
-//            printf("iLayer=%d -> Re{Bs[%d][%d]}=%Lf\n",iLayer,i,iFirstCoe-1,real(Bs[i][iFirstCoe-1]));
         }
     }
 
-    for(int iLayer=iFirstCoe+1;iLayer<=iLayer0;iLayer++){
+    //Absorptance computing for thin layers
+    for(int i=1;i<=NeV;i++){
+        for(int iLayer=1;iLayer<=min(LastMediumAtWl[i],Nlayers);iLayer++){
+            if(ABS[i][iLayer]<-1. && iLayer<=LastMediumAtWl[i]){//absorptance must be computed
+                if(LastMediumAtWl[i]<iLayer)
+                    break;
+                ABS[i][iLayer]=0.;
+                if(s1p2u3==1 || s1p2u3==3)
+                    ABS[i][iLayer]=(Ps[i][iLayer]-Ps[i][iLayer+1])/Ps[i][iFirstCoe]*(1.-real(Bs[i][iFirstCoe-1]));
+                if(s1p2u3==2 || s1p2u3==3)
+                    ABS[i][iLayer]=ABS[i][iLayer]+(Pp[i][iLayer]-Pp[i][iLayer+1])/Pp[i][iFirstCoe]*(1.-real(Bp[i][iFirstCoe-1]));
+                if(s1p2u3==3)
+                    ABS[i][iLayer]=ABS[i][iLayer]/2.;
+                ABS[i][iLayer]=ABS[i][iLayer]*100.*Trasm1[i];
+                if(ABS[i][iLayer]<0.) ABS[i][iLayer]=0.;
+                if(i==iwl2print){
+                    printf("Layer=%d ASB[%d]=%f  \nPs[%d]=%Le \nPs[%d]=%Le \nPs[%d]=%Le \nRfront=real(Bs[%d])=%Lf \n",
+                           iLayer,i, ABS[i][iLayer],iLayer,Ps[i][iLayer],iLayer+1,Ps[i][iLayer+1],iFirstCoe,Ps[i][iFirstCoe],iFirstCoe-1,real(Bs[i][iFirstCoe-1]));
+                }
+            }
+            //if(i==iwl2print)printf("calc abs with iLayer=%d -> ABS[%d]=%f \n",iLayer-1,i,ABS[i][iLayer]);
+        }
+    }
+
+    //plot & save
+    double Amin=1000.;
+    double Amax=-1000.;
+    for(int j=1;j<=Nlayers;j++){
         // saving Abs to individual files
-        fname=pathroot+"expo/Abs#"+QString::number(iLayer-1)+".dat";
+        QString fname=pathroot+"expo/Abs#"+QString::number(j)+".dat";
         QFile file(fname);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
             msgErrLoad("PlotAbsEL",fname);
@@ -6217,44 +6543,29 @@ void ksemawc::PlotAbsEL(){
             return;
         }
         QTextStream out(&file);
-        if(iLayer>1){
-            out<<"Lambda Absorptance Layer#"<<QString::number(iLayer-1)<<"\n";
-            out<<QString::number(NeV)<<"\n";
-        }
+        out<<"Lambda Absorptance Layer#"<<QString::number(j)<<"\n";
+        out<<QString::number(NeV)<<"\n";
+        int Np=0;
         for(int i=1;i<=NeV;i++){
-            wwl[i]=MIS[7][i][1];
-            par[7][1]=MIS[7][i][1];
-            COSVNK(VNK,i);
-            y[i]=0.;
-            if(s1p2u3==1 || s1p2u3==3)
-                y[i]=(Ps[i][iLayer-1]-Ps[i][iLayer])/Ps[i][iFirstCoe]*(1.-real(Bs[i][iFirstCoe-1]));
-                    //(real(Bs[i][iLayer-1]*conj(Cs[i][iLayer-1]))-real(Bs[i][iLayer]*conj(Cs[i][iLayer])))/real(Bs[i][iFirstCoe]*conj(Cs[i][iFirstCoe]))*(1.-real(Bs[i][iFirstCoe-1]));
-            if(s1p2u3==2 || s1p2u3==3)
-                y[i]=y[i]+(Pp[i][iLayer-1]-Pp[i][iLayer])/Pp[i][iFirstCoe]*(1.-real(Bp[i][iFirstCoe-1]));
-                    //(real(Bp[i][iLayer-1]*conj(Cp[i][iLayer-1]))-real(Bp[i][iLayer]*conj(Cp[i][iLayer])))/real(Bp[i][iFirstCoe]*conj(Cp[iFirstCoe][1]))*(1.-real(Bp[i][iFirstCoe-1]));
-            if(s1p2u3==3)
-                y[i]=y[i]/2.;
-            y[i]=y[i]*100.*Trasm1[i];
-//            if (iLayer==3){
-//                printf("Layer=%d y[%d]=%f  Ps[1]=%Le Ps[2]=%Le Refl=%Lf \n", iLayer-1,i, y[i],Ps[i][iLayer-1],Ps[i][iLayer],real(Bs[i][iFirstCoe-1]));
-//            }
-            out<<wwl[i]<<"\t"<<y[i]<<"\n";
-            Amin=min(Amin,y[i]);
-            Amax=max(Amax,y[i]);
-            if(i==100)printf("calc abs with iLayer=%d -> y[%d]=%f \n",iLayer-1,i,y[i]);
+            if(ABS[i][j]>-1.){
+                x[Np]=wwl[i];
+                y[Np]=ABS[i][j];
+                Amin=min(Amin,ABS[i][j]);
+                Amax=max(Amax,ABS[i][j]);
+                out<<x[Np]<<"\t"<<y[Np]<<"\n";
+                Np++;
+            }
         }
         file.close();
-        if(iLayer>iFirstCoe || (iLayer==1 && NINT(par[50+iLayer][3])==1)){
-            labelQwt="layer_"+QString::number(iLayer-1);
-            icol=iLayer-1;
+        if(Np>0){
+            labelQwt="layer_"+QString::number(j);
+            icol=j-1;
             if(icol>=7) icol=icol-6;
-            PLOTline1bar2(1,iRD,icol,9,NeV,wwl,y,ErrXp,ErrYp);
+            PLOTline1bar2(1,iRD,icol,9,Np,x,y,ErrXp,ErrYp);
             if(iRD==1)
                 iRD=0;
         }
     }
-
-    //par[51][2]=iLayer0;
     ui->DP_RXY_18_3 -> setText(QString::number(Amin));
     ui->DP_RXY_18_4 -> setText(QString::number(Amax));
 }
@@ -6275,13 +6586,12 @@ void ksemawc::PlotTexturized(){
         wl=MIS[7][i][1];
         Xp[i-1]=wl;
         COSVNK(VNK,i);
-        par[7][1]=wl;
-        ASSEMBLER(i,wl,1,theta1*deg2rad,vot);
+        ASSEMBLER(i,1,theta1*deg2rad,vot);
         double T1s=vot[1][1];
         double T1p=vot[1][2];
         double R1s=vot[2][1];
         double R1p=vot[2][2];
-        ASSEMBLER(i,wl,1,theta2*deg2rad,vot);
+        ASSEMBLER(i,1,theta2*deg2rad,vot);
         double T2s=vot[1][1];
         double T2p=vot[1][2];
         double R2s=vot[2][1];
@@ -6312,19 +6622,19 @@ void ksemawc::searchNK(){
     par[2][2]=rxy[17][2];
 
     int Ndat=0,iCol=0,Ndata=NeV*2;
-    double Xp[Ndata],Yp[Ndata],ErrXp[Ndata],ErrYp[Ndata];
+    double Xp[Ndata],Yp[Ndata],ErrXp[Ndata],ErrYp[Ndata],WL;
     int iChoiceWL=ui->comboBox_searchNK -> currentIndex();
     if(iChoiceWL==0)
-        par[7][1]=ui->dSB_WLsearchNK -> value();
+        WL=ui->dSB_WLsearchNK -> value();
     else if(iChoiceWL==1)
-        par[7][1]=ui->dSB_PAR_4_1 -> value();
-    else if(iChoiceWL==2)
-        par[7][1]=ui->dSB_PAR_4_2 -> value();
+        WL=ui->dSB_PAR_4_1 -> value();
+    else
+        WL=ui->dSB_PAR_4_2 -> value();
     int iWL=1;
-    while(MIS[7][iWL][1]<par[7][1] && iWL<NeV)
+    while(MIS[7][iWL][1]<WL && iWL<NeV)
         iWL++;
-    par[7][1]=MIS[7][iWL][1];
-    printf("->searchNK @ WL= %f\n",par[7][1]);
+    WL=MIS[7][iWL][1];
+    printf("->searchNK @ WL= %f\n",WL);
     SaveSetting(-1);
     CNK[1][1]=0.;//nk unknown
     PLOTline1bar2(1,1,iCol,11,0,Xp,Yp,ErrXp,ErrYp);//erase plot
@@ -6362,6 +6672,7 @@ void ksemawc::RefTrackG(){
 void ksemawc::NumericalSearch(){
     SaveSetting(-1);
     lastAction="NumSearch";
+    iStop=false;
     int NmisEnab=NINT(par[22][2]);
     printf("Exhaustive numerical n-search in wl-n space with N.meas=%d\n",NmisEnab);
     ui->progressBar_ENS->setValue(0);
@@ -6370,20 +6681,41 @@ void ksemawc::NumericalSearch(){
     int irm=0;
     if(state==Qt::Checked)
         irm=1;
-    QMessageBox msgBox;
+    int calN1K2NK3=3;
     if(NmisEnab==0){
+        QMessageBox msgBox;
         msgBox.setText("No measurements is enabled!!!\nPlease select one or more!");
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.exec();
         return;
     }
     else if(NmisEnab==1){
-        msgBox.setText("Only 1 measure is enabled!!!"
-                       "\nOnly k will be calculated while n=n_simulation!");
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.exec();
+        QMessageBox msgBox(QMessageBox::Question,
+                            "Only 1 measure is enabled!!!",  // Window title
+                            "Set the unknow to be computed:", // Message
+                            QMessageBox::NoButton, // Initially no standard button
+                            nullptr); // Widget
+        QPushButton *nButton = msgBox.addButton("n", QMessageBox::AcceptRole);
+        QPushButton *kButton = msgBox.addButton("k", QMessageBox::YesRole);
+        QPushButton *abortButton = msgBox.addButton("Abort", QMessageBox::RejectRole);
+        int result = msgBox.exec();
+        printf("results=%d\n",result);
+        QAbstractButton *clickedButton = msgBox.clickedButton();
+        if(clickedButton == nButton){
+            calN1K2NK3=1;
+        }
+        else if(clickedButton == kButton){
+            calN1K2NK3=2;
+        }
+        else if (clickedButton == abortButton){
+            return;
+        }
+        else{
+            return;
+        }
     }
     else if(NmisEnab>2){
+        QMessageBox msgBox;
         msgBox.setText("Please enable only 2 measures!");
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.exec();
@@ -6413,7 +6745,6 @@ void ksemawc::NumericalSearch(){
         ui->progressBar_ENS->update();
         par[24][2]=IL;
         double lam=MIS[7][IL][1];
-        par[7][1]=lam;
         double Trasm=1.,dt,dlim,tol;
         if(NINT(par[50+NINT(par[53][2])][3])==1){
             if(DATO[1]>0) Trasm=MIS[1][IL][1];
@@ -6431,7 +6762,26 @@ void ksemawc::NumericalSearch(){
 
         FMold=-1.;
         for(int i=0;i<101;i++){
-            if(NmisEnab==1){//k calculation with n=n_simulation
+            n=par[1][1]+i*Dn;
+            if(calN1K2NK3==3){//searching nk mathematical solutions
+                CNK[1][2]=n;
+                CNK[1][3]=k;
+                double dt=0.001*fabs(rxy[17][2]-rxy[17][1]);
+                FM=FindRoot(&FMER,k,dt,dlim,tol);
+                k=CNK[1][3];
+                //printf("n=%f k=%f FM=%f FMold=%f dFMold=%f\n",n,k,FM,FMold,dFMold);
+            }
+            else if(calN1K2NK3==1){//n calculation with k=k_simulation
+                double VNK[17][3];
+                CNK[1][1]=par[35][4];//Fit option
+                COSVNK(VNK,IL);
+                k=VNK[1][2];
+                CNK[1][1]=0;//nk are unknown
+                CNK[1][2]=n;
+                CNK[1][3]=k;
+                FM=FMER(k);
+            }
+            else if(calN1K2NK3==2){//k calculation with n=n_simulation
                 double VNK[17][3];
                 CNK[1][1]=par[35][4];//Fit option
                 COSVNK(VNK,IL);
@@ -6457,45 +6807,41 @@ void ksemawc::NumericalSearch(){
                 SOL[iSol][6]=1.;//enable data
                 i=101;
             }
-            else{//searching nk mathematical solutions
-                n=par[1][1]+i*Dn;
-                CNK[1][2]=n;
-                CNK[1][3]=k;
-                double dt=0.001*fabs(rxy[17][2]-rxy[17][1]);
-                FM=FindRoot(&FMER,k,dt,dlim,tol);
-                k=CNK[1][3];
-                //printf("n=%f k=%f FM=%f FMold=%f dFMold=%f\n",n,k,FM,FMold,dFMold);
-                if((FMold>1.||i==0) && FM<=1.){
-                    iSol++;
-                    nMin=n;
-                    kMin=k;
-                    kMax=k;
-                }
-                else if(i>0 && FMold<=1. && FM<=1.){
-                    kMin=min(kMin,k);
-                    kMax=max(kMax,k);
-                }
-                else if(i>0 && FMold<=1. && FM>1.){
-                    SOL[iSol][1]=lam;
-                    SOL[iSol][2]=(nMin+n)/2.;
-                    SOL[iSol][4]=(n-nMin)/2.;
-                    SOL[iSol][3]=(kMin+kMax)/2.;
-                    SOL[iSol][5]=(kMax-kMin)/2.;
-                    SOL[iSol][6]=1.;//enable data
-                    //printf("sol-nk: %f %f %f %f %f\n",SOL[iSol][1],SOL[iSol][2],SOL[iSol][3],SOL[iSol][4],SOL[iSol][5]);
-                }
-                else if(irm==1&& dFMold<0. && (FM-FMold)>0. && FM>1. && FMold>1.){//found a minimum
-                    iSol++;
-                    SOL[iSol][1]=lam;
-                    SOL[iSol][2]=n;
-                    SOL[iSol][3]=k;
-                    SOL[iSol][4]=n*0.0001;
-                    SOL[iSol][5]=k*0.0001;
-                    SOL[iSol][6]=1.;//enable data
-                    //printf("Found relative minimum -> add solution-point @ lam=%f\n",lam);
-                }
-                dFMold=FM-FMold;
-                FMold=FM;
+            if((FMold>1.||i==0) && FM<=1.){
+                iSol++;
+                nMin=n;
+                kMin=k;
+                kMax=k;
+            }
+            else if(i>0 && FMold<=1. && FM<=1.){
+                kMin=min(kMin,k);
+                kMax=max(kMax,k);
+            }
+            else if(i>0 && FMold<=1. && FM>1.){
+                SOL[iSol][1]=lam;
+                SOL[iSol][2]=(nMin+n)/2.;
+                SOL[iSol][4]=(n-nMin)/2.;
+                SOL[iSol][3]=(kMin+kMax)/2.;
+                SOL[iSol][5]=(kMax-kMin)/2.;
+                SOL[iSol][6]=1.;//enable data
+                //printf("sol-nk: %f %f %f %f %f\n",SOL[iSol][1],SOL[iSol][2],SOL[iSol][3],SOL[iSol][4],SOL[iSol][5]);
+            }
+            else if(irm==1&& dFMold<0. && (FM-FMold)>0. && FM>1. && FMold>1.){//found a minimum
+                iSol++;
+                SOL[iSol][1]=lam;
+                SOL[iSol][2]=n;
+                SOL[iSol][3]=k;
+                SOL[iSol][4]=n*0.0001;
+                SOL[iSol][5]=k*0.0001;
+                SOL[iSol][6]=1.;//enable data
+                //printf("Found relative minimum -> add solution-point @ lam=%f\n",lam);
+            }
+            dFMold=FM-FMold;
+            FMold=FM;
+            QCoreApplication::processEvents();
+            if(iStop){
+                printf("The exhaustive computing was stopped as requested by the user!\n");
+                return;
             }
         }
     }
@@ -6531,7 +6877,7 @@ void ksemawc::drawPolygon(QPointF pos){
     x1=pos.x();
     y1=pos.y();
     if(L1E2==2)
-        x1=12400./x1;
+        x1=1240./x1;
     polygonF<<QPointF(x1,y1);
     int Np=polygonF.count();
     //printf("pt_%d: x=%f y=%f\n",Np,x1,y1);
@@ -6622,7 +6968,7 @@ void ksemawc::FitE1E2(){
 
 void ksemawc::FitSelExpMeas(){
     lastAction="FitExpMeas";
-    SaveSetting(-1);
+    SaveSetting(3);
     par[32][5]=3.;//Fit Selected Experimental Measurement in IbridOne
     IbridKernel("fsem");
 }
@@ -6636,24 +6982,30 @@ void ksemawc::IbridFit(){
             idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
     }
     PanFitEnable();
-    SaveSetting(-1);
+    SaveSetting(3);
     IbridKernel("f");
 }
 
 void ksemawc::IbridOne(){
     lastAction="IbridOne";
-    SaveSetting(-1);
+    SaveSetting(3);
     IbridKernel("i");
 }
 
 void ksemawc::IbridOneStore(){
     lastAction="IbridOne";
-    SaveSetting(-1);
+    SaveSetting(3);
     IbridKernel("M");
 }
 
 void ksemawc::ClearTempIbri(){
     SOL[1][1]=0.;
+}
+
+void ksemawc::setStop(){
+    iStop=true;
+    printf("-> setStop: iStop= true\n");
+    fflush(stdout);
 }
 
 void ksemawc::IbridKernel(QString rc){
@@ -6671,7 +7023,7 @@ void ksemawc::IbridKernel(QString rc){
     double wwl[mwl],kk[mwl],nn[mwl],e1[mwl],e2[mwl],vot[6][3],tn[mwl],tp[mwl],rn[mwl],rp[mwl],r1[mwl],ErrXp[mwl],ErrYp[mwl],
             miss[6][NeV+1],elis[9][NeV+1],pst[nparmax+1][3],ncent[mwl],ndev[mwl],kcent[mwl],kdev[mwl],ps[NeV],psi[mwl],delta[mwl];
     double PsiMat[mwl][4],DelMat[mwl][4];
-    double chi2ini=1.E+09,chi2min=1.E+09;//,fnorm;
+    double chi2ini=1.E+09;
     par[38][1]=1.e+20;
     par[38][2]=0.;
     for(int i=2;i<=md+1;i++){
@@ -6709,9 +7061,7 @@ void ksemawc::IbridKernel(QString rc){
         p[i-1]=pm[ipm][1];
         //printf("%d ipm=%d p[%d]=%f pm[%d][2]=%f\n",i,ipm,i,p[i-1],ipm,pm[ipm][2]);
     }
-    if(ifirstcall==0){// initialization at first call
-        for(int i=1;i<=200;i++)
-            Pot[i]=pm[i][1];
+    if(ifirstcall==0){// IbridKernel has been called
         ifirstcall++;
     }
     // initialization
@@ -6836,6 +7186,7 @@ void ksemawc::IbridKernel(QString rc){
 
         if(r=="f" || r=="fsem" || r=="i"){
             // launch fit or ibridOne
+            iStop=false;
             if(r=="i"){//set IbridOne computing
                 ibridok=0;
                 if(DATO[1]==2){
@@ -6847,8 +7198,14 @@ void ksemawc::IbridKernel(QString rc){
                     ibridok=1;
                 }
                 else if(DATO[1]!=2 && DATO[2]!=2){
-                    printf("-> launch IbridOne: k is set to = selmq_k\n");
-                    ibridok=1;
+                    printf("-> ABORT IbridOne because transmittance is not enabled\n");
+                    ibridok=-100;
+                    r=" ";//abort
+                    QMessageBox msgBox;
+                    msgBox.setText("IbridOne aborted because transmittance is not enabled\n");
+                    msgBox.setStandardButtons(QMessageBox::Ok);
+                    msgBox.exec();
+                    return;
                 }
                 if(DATO[3]==2){
                     printf("\tfit of Rn\n");
@@ -6879,8 +7236,13 @@ void ksemawc::IbridKernel(QString rc){
                     ibridok++;
                 }
                 if(ibridok<2){
-                    printf("Attention: IbridOne need R&T or R&k_imposed!\nIbridOne aborted");
+                    printf("IbridOne aborted because needs T&R or T&DELTA-PSI!\n");
                     r=" ";//abort
+                    QMessageBox msgBox;
+                    msgBox.setText("IbridOne aborted because needs T&R or T&DELTA-PSI!");
+                    msgBox.setStandardButtons(QMessageBox::Ok);
+                    msgBox.exec();
+                    return;
                 }
                 else{
                     m=(ibridok-1)*mwla;
@@ -7016,8 +7378,16 @@ void ksemawc::IbridKernel(QString rc){
             for(int i=1;i<=n;i++){
                 int ip=NINT(pm[i][3]);
                 pm[ip][1]=p[i-1];
-                if(ip>100)
-                    pm[ip][1]=abs(pm[ip][1]);
+                //check value
+                if((ip>0 && ip<10) || (ip>50 && ip<60) || ip>100)//thickness or roughness or oscillator
+                    if(pm[ip][1]<.0)
+                        pm[ip][1]=0.;
+                if((ip>=71 && ip<=85) || (ip>=91 && ip<=99)){//fEMA or d_nonuni
+                    if(pm[ip][1]<.0)
+                        pm[ip][1]=0.;
+                    if(pm[ip][1]>1.)
+                        pm[ip][1]=1.;
+                }
                 pm[ip][4]=.0;
                 printf("\tp[%d]=pm[%d][1]=%.9g\n",i-1,ip,p[i-1]);
             }
@@ -7055,11 +7425,6 @@ void ksemawc::IbridKernel(QString rc){
                     printf("Info=7: tol is too small. no further improvement in the approximate solution x is possible\n");
                 printf("*************************************************\n");
                 ifit=0;
-                if(chi2fin<chi2min){//save PM
-                    for(int i=1;i<=200;i++)
-                        Pot[i]=pm[i][1];
-                    chi2min=chi2fin;
-                }
             }
 
             if(m>0 && ieon==0){
@@ -7080,8 +7445,6 @@ void ksemawc::IbridKernel(QString rc){
                 for(int i=1;i<=200;i++)//return to best fit
                     pm[i][1]=ps[i];
                 for(int i=1;i<=n;i++){
-                    if(NINT(pm[i][3])>100 && pm[NINT(pm[i][3])][1]<0.)
-                        pm[NINT(pm[i][3])][1]=-pm[NINT(pm[i][3])][1];//oscillator parameters must be non negative
                     p[i-1]=pm[NINT(pm[i][3])][1];
                 }
 
@@ -7145,8 +7508,16 @@ void ksemawc::IbridKernel(QString rc){
                 for(int i=1;i<=npp;i++){
                     state=idToCheckBox["chBeParFit_"+QString::number(i)]-> checkState();
                     int ip=NINT(ppm[i]);
-                    if(ip>100)
-                        pm[ip][1]=abs(pm[ip][1]);
+                    //check value
+                    if((ip>0 && ip<10) || (ip>50 && ip<60) || ip>100)//thickness or roughness or oscillator
+                        if(pm[ip][1]<.0)
+                            pm[ip][1]=0.;
+                    if((ip>=71 && ip<=85) || (ip>=91 && ip<=99)){//fEMA or d_nonuni
+                        if(pm[ip][1]<.0)
+                            pm[ip][1]=0.;
+                        if(pm[ip][1]>1.)
+                            pm[ip][1]=1.;
+                    }
                     idToLineEdit["DPparFitV_"+QString::number(i)] -> setText(QString::number(pm[ip][1]));
                     if( state == Qt::Checked ){
                         idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(pm[ip][4]));
@@ -7186,8 +7557,7 @@ void ksemawc::IbridKernel(QString rc){
             for(int i=1;i<=mwl;i++){
                 par[24][2]=i;//iWL
                 double wl=MIS[7][i][1];
-                double eV=12400./wl;
-                par[7][1]=wl;
+                double eV=1240./wl;
                 if(r=="f" || r=="fsem" || r=="i" || r=="g"){
                     FDISP(ioptf,eV);
                     CNK[1][2]=sqn;
@@ -7195,7 +7565,7 @@ void ksemawc::IbridKernel(QString rc){
                     MIS[16][i][1]=sqn;
                     if(r=="i" || r=="g"){//IbridOne, compute k with best-fit parameters
                         par[24][2]=i;
-                        //MIS[16][i][1]=sqn;
+                        MIS[16][i][1]=sqn;
                         double Trasm=1.,dt,dlim,tol;
                         if(NINT(par[50+NINT(par[53][2])][3])==1){
                             if(DATO[1]>0) Trasm=MIS[1][i][1];
@@ -7244,7 +7614,7 @@ void ksemawc::IbridKernel(QString rc){
                 ErrYp[i-1]=0.;
                 //computing Tn Rn R1
                 if(DATO[1]==2 || DATO[3]==2 || DATO[5]==2){
-                    ASSEMBLER(i,wl,1,0.,vot);
+                    ASSEMBLER(i,1,0.,vot);
                     tn[i-1]=vot[1][s1p2]*100.;
                     rn[i-1]=vot[2][s1p2]*100.;
                     r1[i-1]=vot[3][s1p2]*100.;
@@ -7257,7 +7627,7 @@ void ksemawc::IbridKernel(QString rc){
                 }
                 if(DATO[2]==2 || DATO[4]==2){
                     te=par[6][1]*deg2rad;
-                    ASSEMBLER(i,wl,1,te,vot);
+                    ASSEMBLER(i,1,te,vot);
                     tp[i-1]=vot[1][s1p2]*100.;
                     rp[i-1]=vot[2][s1p2]*100.;
                     if(DATO[2]==2)
@@ -7267,8 +7637,8 @@ void ksemawc::IbridKernel(QString rc){
                 }
                 for(int ieli=0;ieli<4;ieli++){
                     if(DATO[7+2*ieli]==2 ||DATO[8+2*ieli]==2){
-                        te=par[14+ieli][1]*deg2rad;
-                        ASSEMBLER(i,wl,1,te,vot);
+                        te=pm[86+ieli][1]*deg2rad;;//par[14+ieli][1]*deg2rad;
+                        ASSEMBLER(i,1,te,vot);
                         del=vot[5][2];//Delta
                         if(iDelCon==1){
                             if(i==1){
@@ -7283,6 +7653,10 @@ void ksemawc::IbridKernel(QString rc){
                             delDiff[ieli]=delDiff[ieli]+(del-ELI[1+2*ieli][i][1])/mwl;
                     }
                 }
+            }
+            for(int ieli=0;ieli<4;ieli++){
+                if(DATO[7+2*ieli]>0)
+                    printf("|IbridKernel> delDiff[%d]=%f\n",ieli,delDiff[ieli]);
             }
             if(ieon==1){// save central value and RMS deviation
                 if(jie==0){
@@ -7329,9 +7703,9 @@ void ksemawc::IbridKernel(QString rc){
                 PLOTline1bar2(1,0,iColor,5,mwl,wwl,r1,ErrXp,ErrYp);//R1 plot
             for(int ieli=0;ieli<4;ieli++){
                 if(DATO[7+2*ieli]==2){
-                    Nperiod=NINT(delDiff[ieli]/360.);
+                    Nperiod=NINT(delDiff[ieli]/Dperiod);
                     for(int i=0;i<NeV;i++)
-                        delta[i]=DelMat[i][ieli]-Nperiod*360.;
+                        delta[i]=DelMat[i][ieli]-Nperiod*Dperiod;
                     PLOTline1bar2(1,0,iColor,7,mwl,wwl,delta,ErrXp,ErrYp);//DELTA plot
                 }
                 if(DATO[8+2*ieli]==2){
@@ -7342,17 +7716,14 @@ void ksemawc::IbridKernel(QString rc){
             }
         }
 
-        //save Job# in /temp
+        //save Job# in /temp and set njobBest
         if(ieon==2 || (ieon==0 && (r=="f" || r=="i" || r=="fsem"))){
-            jobtot++;
-            int jobview=jobtot;
-            QString fileStorecurrent=fileStore;
-            fileStore=pathroot+"temp/semaw"+QString::number(jobtot)+".Spj";
-            SaveSetting(3);
-            fileStore=fileStorecurrent;
-            CNK[1][1]=0;//because it was modified along the saving
-            ui->sB_PAR_8_1->setValue(jobtot);
-            ui->sB_PAR_8_2->setValue(jobview);
+            StoreFitSet();
+            double chi2Best= ui->lineEdit_chi2Best->text().toDouble();
+            if(chi2fin<chi2Best){
+                ui->lineEdit_chi2Best->setText(QString::number(chi2fin));
+                ui->spinBox_jobBest->setValue(jobtot);
+            }
         }
 
         if(ieon==0)
@@ -7365,52 +7736,64 @@ void ksemawc::IbridKernel(QString rc){
 }
 
 
+void ksemawc::StoreFitSet(){
+    jobtot++;
+    QString fileStorecurrent=fileStore;
+    fileStore=pathroot+"temp/semaw"+QString::number(jobtot)+".Spj";
+    SaveSetting(3);
+    fileStore=fileStorecurrent;
+    CNK[1][1]=0;//because it was modified along the saving
+    ui->sB_PAR_8_1->setValue(jobtot);
+    ui->sB_PAR_8_2->setValue(jobtot);
+}
+
+
 void ksemawc::GoBest(){
-    for(int i=1;i<=200;i++)
-        pm[i][1]=Pot[i];
-    //aggiornamento valori PanFit
-    Qt::CheckState state;
-    printf("->Back2best npp=%d\n",npp);
-    for(int i=1;i<=npp;i++){
-        state=idToCheckBox["chBeParFit_"+QString::number(i)]-> checkState();
-        int ip=NINT(ppm[i]);
-        if(ip>100)
-            pm[ip][1]=abs(pm[ip][1]);
-        idToLineEdit["DPparFitV_"+QString::number(i)] -> setText(QString::number(pm[ip][1]));
-        if( state == Qt::Checked ){
-            idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(pm[ip][4]));
-            idToLineEdit["DPparFitGC_"+QString::number(i)] -> setText(QString::number(pm[ip][5]));
-        }
-        else{
-            idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(0));
-            idToLineEdit["DPparFitGC_"+QString::number(i)] -> setText(QString::number(0));
-        }
-    }
+    int jobBest=ui->spinBox_jobBest->value();
+    if(jobBest==0)
+        return;
+    QString SpjName=ui->lineEdit_P -> text();
+    QString infoFnk=ui->lineEdit_infoFnk-> text();
+    QString ftmp=pathroot+"temp/semaw"+QString::number(jobBest)+".Spj";
+    occupyPF=10;
+    ReadSetting(ftmp);
+    ui->sB_PAR_8_2->setValue(jobBest);
+    ui->sB_PAR_8_1->setValue(jobtot);
+    ui->lineEdit_P -> setText(SpjName);
+    ui->lineEdit_infoFnk-> setText(infoFnk);
 }
 
 void ksemawc::GoPrevious(){
     int jobview=ui->sB_PAR_8_2->value();
-    //int jobtot=ui->sB_PAR_8_1->value();
+    int jobtot=ui->sB_PAR_8_1->value();
     if(jobview<=1)
         return;
+    QString SpjName=ui->lineEdit_P -> text();
+    QString infoFnk=ui->lineEdit_infoFnk-> text();
     jobview--;
     QString ftmp=pathroot+"temp/semaw"+QString::number(jobview)+".Spj";
     occupyPF=10;
     ReadSetting(ftmp);
-    //ui->sB_PAR_8_1->setValue(jobtot);
+    ui->sB_PAR_8_1->setValue(jobtot);
     ui->sB_PAR_8_2->setValue(jobview);
+    ui->lineEdit_P -> setText(SpjName);
+    ui->lineEdit_infoFnk-> setText(infoFnk);
 }
 
 void ksemawc::GoNext(){
     int jobview=ui->sB_PAR_8_2->value();
-    //int jobtot=ui->sB_PAR_8_1->value();
+    int jobtot=ui->sB_PAR_8_1->value();
     if(jobview>=jobtot)
         return;
+    QString SpjName=ui->lineEdit_P -> text();
+    QString infoFnk=ui->lineEdit_infoFnk-> text();
     jobview++;
     QString ftmp=pathroot+"temp/semaw"+QString::number(jobview)+".Spj";
     ReadSetting(ftmp);
-    //ui->sB_PAR_8_1->setValue(jobtot);
+    ui->sB_PAR_8_1->setValue(jobtot);
     ui->sB_PAR_8_2->setValue(jobview);
+    ui->lineEdit_P -> setText(SpjName);
+    ui->lineEdit_infoFnk-> setText(infoFnk);
 }
 
 
@@ -7419,7 +7802,7 @@ void ksemawc::SPADA(){
     int N,MR,Ndati,ilinrim,NANG;
     double instr[21],X[12000],Y[12000],Z[12000],EPR[3][12000][3],
             wmin,wmax,dmin,dmax,Div,rstep,DLAM;
-    QString ST1,ST2,DIS[7],EST[8],ER,SPA,SAL,fnam,line,line2,line3;
+    QString ST1,ST2,DIS[7],EST[8],ER,SPA,SAL,fnam,line,line2,line3,pezzo;
     // matrix initialization for measures and temporary solutions
     SOL[1][1]=0.;//none solution
     for(int I=1;I<=17;I++){
@@ -7486,10 +7869,10 @@ void ksemawc::SPADA(){
         MIS[7][L][2]=instr[5];
         if(ER!="y"){
             if(IUVIR==1){
-                if(MIS[7][L][1]>1849. && MIS[7][L][1]<8608.1)
-                    MIS[7][L][2]=.0005+.838951/(1+pow((MIS[7][L][1]-1835.)/7.,2.))+.0026/(1.+pow((MIS[7][L][1]-8700.)/250.,4.));
-                if(MIS[7][L][1]>31000 && MIS[7][L][1]<32001.)
-                    MIS[7][L][2]=-4.66E-04+.00476/(1+pow((MIS[7][L][1]-35000.)/2000.,2.));
+                if(MIS[7][L][1]>184.9 && MIS[7][L][1]<860.81)
+                    MIS[7][L][2]=.0005+.838951/(1+pow((MIS[7][L][1]-183.5)/0.7,2.))+.0026/(1.+pow((MIS[7][L][1]-870.)/25.,4.));
+                if(MIS[7][L][1]>3100. && MIS[7][L][1]<3200.1)
+                    MIS[7][L][2]=-4.66E-04+.00476/(1+pow((MIS[7][L][1]-3500.)/200.,2.));
             }
             if(MIS[7][L][2]<instr[5]) MIS[7][L][2]=instr[5];
         }
@@ -7507,10 +7890,17 @@ void ksemawc::SPADA(){
                 continue;
             }
             QTextStream stream (&file);
-            line = stream.readLine();
-            line = stream.readLine();
-            Ndati=line.toInt();
+            line = stream.readLine();//info first line
+            line = stream.readLine();//Ndat and "nm" if new file.nk
+            line=line.simplified();
+            QStringList List0;
+            List0=line.split(" ");
+            pezzo=List0.at(0).toLocal8Bit().constData();
+            Ndati=pezzo.toInt();
             printf("\tNdata= %d\n",Ndati);
+            double A2nm=0.1;
+            if(line.contains("nm"))
+                A2nm=1;
             if(Ndati>12000){
                 QMessageBox msgBox;
                 msgBox.setText("ATTENTION: please reduce your data number below 12000!!!\n");
@@ -7544,6 +7934,7 @@ void ksemawc::SPADA(){
                     }
                 }
                 X[J]=List.at(0).toDouble();//wl
+                X[J]=X[J]*A2nm;
                 Y[J]=List.at(1).toDouble();//n
                 Z[J]=List.at(2).toDouble();//k
                 //cout << X[J]<<"\t"<<Y[J]<<"\t"<<Z[J]<<"\n";
@@ -7690,6 +8081,35 @@ void ksemawc::SPADA(){
                         }
                         Div=100.;
                     }
+                }
+                else if(line2.contains("RTmethod[")){
+                    // file Transmittance by VASE
+                    printf("\ttype VASE transmittance\n");
+                    line = stream.readLine();
+                    line = stream.readLine();
+                    int iL0E1=0;
+                    if(line.contains("eV"))
+                        iL0E1=1;
+                    QStringList List;
+                    int j=0;
+                    do{
+                        j++;
+                        line = stream.readLine();
+                        line=line.simplified();
+                        List=line.split(" ");
+                        pezzo=List.at(1).toLocal8Bit().constData();
+                        X[j]=pezzo.toDouble();
+                        if(iL0E1==1)
+                            X[j]=1240./X[j];
+                        pezzo=List.at(3).toLocal8Bit().constData();
+                        Y[j]=pezzo.toDouble();
+                        //printf("\t X[%d]=%f Y[%d]=%f\n",j,X[j],j,Y[j]);
+                    }while(!stream.atEnd());
+                    Ndati=j;
+                    printf("\tNdat=%d\n",Ndati);
+                    Div=1.;
+                    STEP=1;
+                    N=1;
                 }
                 else if(line2.contains("##XYUNITS= W")){//Lamba9 or old FTIR
                     printf("\ttype: Lambda9 or old FTIR\n");
@@ -7919,8 +8339,7 @@ void ksemawc::SPADA(){
                     return;
                 }
                 for(int L=1;L<=Ndati;L++){
-                    if(IUVIR==2) X[L]=1./X[L]*1.E7;
-                    X[L]=X[L]*10.;
+                    if(IUVIR==2) X[L]=1./X[L]*1.E7;//cm^-1 -> nm
                     Y[L]=Y[L]/Div;
                 }
                 if(i==0){
@@ -8065,7 +8484,7 @@ void ksemawc::SPADA(){
                         if(abs(TE-theta2load)<=1.){
                             //cout<<TE<<"\t"<<LAM<<"\t"<<DE<<"\t"<<PS<<"\t"<<DDE<<"\t"<<DPS<<"\n";
                             NDEL=NDEL+1;
-                            X[NDEL]=LAM*10.;
+                            X[NDEL]=LAM;
                             EPR[1][NDEL][1]=DE;
                             EPR[1][NDEL][2]=DDE;
                             EPR[2][NDEL][1]=PS;
@@ -8106,7 +8525,8 @@ void ksemawc::SPADA(){
 
 void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int IUVIR){
     //int iw=1;//verbose (0 silent, 1 verbose)
-    //printf("CONVER: NDATI=%d N1=%d STEP=%d I=%d IUVIR=%d\n",NDATI,N1,STEP,I,IUVIR);
+    iw=NINT(par[18][1]);
+    printf("CONVER: NDATI=%d N1=%d STEP=%d I=%d IUVIR=%d\n",NDATI,N1,STEP,I,IUVIR);
     int ALARM=0;
     int ns[1000];
     double xs[500],ys[500];
@@ -8284,7 +8704,7 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
             if(YFIN<.0 && ALARM==0 && NINT(par[9][1])!=1){
                 if(IUVIR==1){
                     QMessageBox msgBox;
-                    msgBox.setText("n-file "+NANK[I-7].simplified()+"is <0 !!!\n Do you want impose n>=0?");
+                    msgBox.setText("n-file "+NANK[I-7].simplified()+" is <0 !!!\n Do you want impose n>=0?");
                     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
                     msgBox.setDefaultButton(QMessageBox::Yes);
                     int ret = msgBox.exec();
@@ -8297,7 +8717,7 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
                 }
                 else if(IUVIR==2){
                     QMessageBox msgBox;
-                    msgBox.setText("k-file "+NANK[I-7].simplified()+"is <0 !!!\n Do you want impose k>=0?");
+                    msgBox.setText("k-file "+NANK[I-7].simplified()+" is <0 !!!\n Do you want impose k>=0?");
                     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
                     msgBox.setDefaultButton(QMessageBox::Yes);
                     int ret = msgBox.exec();
@@ -8646,10 +9066,10 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     }
     double WEmin=rxy[20][1],WEmax=rxy[20][2];
     if(L1E2==2 && ic!=10 && ic!=11){
-        WEmin=12400./WEmin;
-        WEmax=12400./WEmax;
+        WEmin=1240./WEmin;
+        WEmax=1240./WEmax;
         for(int i=0;i<Ndata;i++)
-            Px[i]=12400./Px[i];
+            Px[i]=1240./Px[i];
     }
     QwtPlotCurve *dataPlot=new QwtPlotCurve(labelQwt);
     //QwtPlotCurve *dataPlot=new QwtPlotCurve("Layer_"+QString::number(iCol));
@@ -8670,8 +9090,8 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
             range[i] = QwtIntervalSample(Px[i],Py[i]-ErrYp[i],Py[i]+ErrYp[i]);
         }
         QwtIntervalSymbol *errorbar = new QwtIntervalSymbol(QwtIntervalSymbol::Bar);
-        errorbar->setPen(QPen(myColor[iColor], 1));
-        errorbar->setWidth(0);
+        errorbar->setPen(QPen(myColor[iColor], wT));
+        errorbar->setWidth(wT);
         range_plot->setSamples(range);
         range_plot->setSymbol(errorbar);
         range_plot->setStyle(QwtPlotIntervalCurve::NoCurve);
@@ -8679,7 +9099,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     if(ic==1){
         G1_Tn -> setAxisTitle(0,"Tnormal (%)");
         if(L1E2==1)
-            G1_Tn -> setAxisTitle(2,"wavelength (A)");
+            G1_Tn -> setAxisTitle(2,"wavelength (nm)");
         else
             G1_Tn -> setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G1_Tn);
@@ -8694,7 +9114,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     else if(ic==2){
         G2_Tp -> setAxisTitle(0,"Tpolarised (%)");
         if(L1E2==1)
-            G2_Tp -> setAxisTitle(2,"wavelength (A)");
+            G2_Tp -> setAxisTitle(2,"wavelength (nm)");
         else
             G2_Tp -> setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G2_Tp);
@@ -8708,7 +9128,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     else if(ic==3){
         G3_Rn -> setAxisTitle(0,"Rnormal (%)");
         if(L1E2==1)
-            G3_Rn -> setAxisTitle(2,"wavelength (A)");
+            G3_Rn -> setAxisTitle(2,"wavelength (nm)");
         else
             G3_Rn -> setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G3_Rn);
@@ -8722,7 +9142,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     else if(ic==4){
         G4_Rp -> setAxisTitle(0,"Rpolarized (%)");
         if(L1E2==1)
-            G4_Rp -> setAxisTitle(2,"wavelength (A)");
+            G4_Rp -> setAxisTitle(2,"wavelength (nm)");
         else
             G4_Rp -> setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G4_Rp);
@@ -8736,7 +9156,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     else if(ic==5){
         G5_R1 -> setAxisTitle(0,"R1normal (%)");
         if(L1E2==1)
-            G5_R1 -> setAxisTitle(2,"wavelength (A)");
+            G5_R1 -> setAxisTitle(2,"wavelength (nm)");
         else
             G5_R1 -> setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G5_R1);
@@ -8750,7 +9170,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     else if(ic==6){
         G6_Apds -> setAxisTitle(0,"Apds");
         if(L1E2==1)
-            G6_Apds -> setAxisTitle(2,"wavelength (A)");
+            G6_Apds -> setAxisTitle(2,"wavelength (nm)");
         else
             G6_Apds -> setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G6_Apds);
@@ -8767,7 +9187,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
         else
             G7_D -> setAxisTitle(0,"cos(Delta)");
         if(L1E2==1)
-            G7_D -> setAxisTitle(2,"wavelength (A)");
+            G7_D -> setAxisTitle(2,"wavelength (nm)");
         else
             G7_D -> setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G7_D);
@@ -8787,7 +9207,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
         else
             G8_P -> setAxisTitle(0,"tan(Psi)");
         if(L1E2==1)
-            G8_P -> setAxisTitle(2,"wavelength (A)");
+            G8_P -> setAxisTitle(2,"wavelength (nm)");
         else
             G8_P -> setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G8_P);
@@ -8804,7 +9224,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     else if(ic==9){
         G9_Af -> setAxisTitle(0,"Absorptance_front (%)");
         if(L1E2==1)
-            G9_Af -> setAxisTitle(2,"wavelength (A)");
+            G9_Af -> setAxisTitle(2,"wavelength (nm)");
         else
             G9_Af -> setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G9_Af);
@@ -8844,7 +9264,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     else if(ic==12){
         G12_wn->setAxisTitle(0,"n");
         if(L1E2==1)
-            G12_wn->setAxisTitle(2,"wavelength (A)");
+            G12_wn->setAxisTitle(2,"wavelength (nm)");
         else
             G12_wn->setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G12_wn);
@@ -8861,7 +9281,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
         else
             G13_wk->setAxisTitle(0,"log10(k)");
         if(L1E2==1)
-            G13_wk->setAxisTitle(2,"wavelength (A)");
+            G13_wk->setAxisTitle(2,"wavelength (nm)");
         else
             G13_wk->setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G13_wk);
@@ -8875,7 +9295,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     else if(ic==14){
         G14_we1->setAxisTitle(0,"eps1");
         if(L1E2==1)
-            G14_we1->setAxisTitle(2,"wavelength (A)");
+            G14_we1->setAxisTitle(2,"wavelength (nm)");
         else
             G14_we1->setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G14_we1);
@@ -8889,7 +9309,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     else if(ic==15){
         G15_we2->setAxisTitle(0,"eps2");
         if(L1E2==1)
-            G15_we2->setAxisTitle(2,"wavelength (A)");
+            G15_we2->setAxisTitle(2,"wavelength (nm)");
         else
             G15_we2->setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G15_we2);
@@ -8903,7 +9323,7 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
     else if(ic==16){
         G16_Ab -> setAxisTitle(0,"Absorptance_back (%)");
         if(L1E2==1)
-            G16_Ab -> setAxisTitle(2,"wavelength (A)");
+            G16_Ab -> setAxisTitle(2,"wavelength (nm)");
         else
             G16_Ab -> setAxisTitle(2,"photon energy (eV)");
         dataPlot->attach(G16_Ab);
@@ -8925,23 +9345,16 @@ void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double
 void COSVNK(double VNK[17][3],int L){
     // L = index of wavelenght
     //printf("->COSVNK iWL=%d\n",L);
+    double f2;
     for(int J=1;J<=16;J++){
-        int io=NINT(CNK[J][1]);
-        if(io>=0 && io<=17){
-            SETVNK(io,J,VNK,L);
-        }
-        else if(io>17){
-            int i1=NINT(CNK[J][1]/1000.);
-            int i2=NINT((CNK[J][1]-i1*1000.)/10.);
-            double f2;
-            if(J<16)
-                f2=pm[70+J][1];
-            else
-                f2=CNK[J][1]-i1*1000.-i2*10.;
-            SETVNK(i1,J,VNK,L);
+        int i1=NINT(CNK[J][1]);
+        SETVNK(i1,J,VNK,L,2);
+        int i2=NINT(CNK[J][4]);
+        if(i2>=0){
+            f2=pm[70+J][1];
             double n1=VNK[J][1];
             double k1=VNK[J][2];
-            SETVNK(i2,J,VNK,L);
+            SETVNK(i2,J,VNK,L,5);
             double n2=VNK[J][1];
             double k2=VNK[J][2];
             EMA(n1,k1,n2,k2,f2);
@@ -8952,17 +9365,17 @@ void COSVNK(double VNK[17][3],int L){
 }
 
 
-void SETVNK(int io,int J,double VNK[17][3],int L){
+void SETVNK(int io,int J,double VNK[17][3],int L,int Kcte){
     // L = index of wavelenght
     // set VNK(J,1) and VNK(J,2) given CNK(J,k)
-    //printf("-> SETVNK @ iWL=%d CNK[%d][1]=%d\n",L,J,io);
+    //if(L==iwl2print) printf("-> SETVNK @ iWL=%d CNK[%d][1]=%d CNK[%d][4]=%f\n",L,J,io,J,CNK[J][4]);
     if(io==0){
-        VNK[J][1]=CNK[J][2];
-        VNK[J][2]=CNK[J][3];
+        VNK[J][1]=CNK[J][Kcte];
+        VNK[J][2]=CNK[J][Kcte+1];
     }
     else if(io>=1 && io<=7){ // 1-7 Fit options
         double WL=MIS[7][L][1];
-        double ev=12400./WL;
+        double ev=1240./WL;
         FDISP(io,ev);
         VNK[J][1]=sqn;
         VNK[J][2]=sqk;
@@ -8975,7 +9388,7 @@ void SETVNK(int io,int J,double VNK[17][3],int L){
         VNK[J][1]=VNK[1][1];
         VNK[J][2]=VNK[1][2];
     }
-//    if(L==193 && J==10) printf("L= %d n=%f k=%f io=%d\n",L,VNK[J][1],VNK[J][2],io);
+    //if(L==iwl2print) printf("L= %d n=%f k=%f io=%d\n",L,VNK[J][1],VNK[J][2],io);
 }
 
 
@@ -9915,7 +10328,7 @@ long double ReTaucM1M2(long double E,long double C,long double E0,long double E3
     return(chi1);
 }
 
-void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
+void ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
     int ivnkdw,ivnkup;
     double VNK[17][3],vosi[6][3];
     double alfa=1.;
@@ -9939,7 +10352,8 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
           3    R1s   R1p
           4    Apds  /
           5    PSI   DELTA
-*/
+*/    
+    double wl=MIS[7][iwl][1];//wavelength
 
     //vot inizialization
     vot[1][1]=1.;
@@ -9954,10 +10368,10 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
     ivnkup=9+ikind;// entrance medium; it depends of the kind of measurement
     irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
     pq=pow(irup*sin(teta),2.);// (N_entrance*sin(teta))**2.
-//    if(wl>12208. && wl<12210.){
-//        printf("pq=%f+i%f lambda=%f iwl=%d \n",real(pq), imag(pq), wl, iwl);
-//        printf("->ASSEMBLER theta=%f ivnkup=%d n=%f k=%f\n",teta/deg2rad,ivnkup,VNK[ivnkup][1],VNK[ivnkup][2]);
-//    }
+    // if(wl==iwl2print){
+    //     printf("pq=%f+i%f lambda=%f iwl=%d \n",real(pq), imag(pq), wl, iwl);
+    //     printf("->ASSEMBLER theta=%f ivnkup=%d n=%f k=%f\n",teta/deg2rad,ivnkup,VNK[ivnkup][1],VNK[ivnkup][2]);
+    // }
     //*** multilayer parameters
     int Nlayer=NINT(par[51][2]);//Nlayer
 
@@ -9965,8 +10379,8 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
     int i=1;
     while(i<=Nlayer+1){
         int ncoe=0;
-//        if(iwl==100)
-//            printf("while loop with i=%d of %d interfaces\n",i,Nlayer+1);
+        // if(iwl==iwl2print)
+        //     printf("|ASS> while loop with i=%d of %d interfaces\n",i,Nlayer+1);
         //*** computing R T at i interface
         if(NINT(par[50+i][3])>1 || pm[50+i][1]>.0){//film or roughness
             int ifst=i;
@@ -9976,26 +10390,28 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
                 while(ifst+ncoe<=Nlayer && NINT(par[50+ifst+ncoe][3])>1){//multilayer
                     ncoe=ncoe+1;
                 }
-                BUILDER(iwl,wl,ikind,ifst,ncoe,pq,vosi);
+                BUILDER(iwl,ikind,ifst,ncoe,pq,vosi);
                 //save the physical parameters affering to the single interface
                 vot[4][1]=vosi[4][1];// save Apds
                 vot[5][1]=vosi[5][1];// save PSI
                 vot[5][2]=vosi[5][2];// salva DELTA
-//                if(iwl==100){
-//                    printf("found N=%d film \n",ncoe);
-//                    printf("\t vosi[1][1]=%f vosi[2][1]=%f vosi[3][1]=%f\n",vosi[1][1],vosi[2][1],vosi[3][1]);
-//                }
+                // if(iwl==iwl2print){
+                //     printf("|ASS> found N=%d film \n",ncoe);
+                //     printf("\t vosi[1][1]=%f vosi[2][1]=%f vosi[3][1]=%f\n",vosi[1][1],vosi[2][1],vosi[3][1]);
+                // }
             }
 
             //bulk with roughness
             else if(pm[50+i][1]>.0){ //rough bulk!
-                BUILDER(iwl,wl,ikind,ifst,ncoe,pq,vosi);//pq was theta
+                // if(iwl==iwl2print)
+                //     printf("|ASS> Found rough bulk @i=%d\n",i);
+                ncoe=1;//need to use builder
+                BUILDER(iwl,ikind,ifst,ncoe,pq,vosi);//pq was theta
                 //save the physical parameters affering to the single interface
                 vot[4][1]=vosi[4][1];// Apds
                 vot[5][1]=vosi[5][1];// PSI
                 vot[5][2]=vosi[5][2];// DELTA
-//                if(iwl==100)
-//                    printf("Found rough bulk @i=%d\n",i);
+                ncoe=0;//reset
             }
         }
 
@@ -10008,7 +10424,7 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
             if(i<=Nlayer)
                 ivnkdw=NINT(par[50+i][1]);
             else //the next medium is the exit one for SF
-                ivnkdw=16;
+                ivnkdw=9;//16
             irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
             irup2=irup*irup;
             irdw=complex<double>(VNK[ivnkdw][1],-VNK[ivnkdw][2]);
@@ -10017,14 +10433,14 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
             mupp=irup2/mups;
             mdws=sqrt(irdw2-pq);
             mdwp=irdw2/mdws;
-//            if(iwl==100){
-//                printf("Ideal interface\n\t ivnkup=%d n=%f k=%f\n",ivnkup,VNK[ivnkup][1],VNK[ivnkup][2]);
-//                printf("\t ivnkdw=%d n=%f k=%f\n",ivnkdw,VNK[ivnkdw][1],VNK[ivnkdw][2]);
-//            }
+            // if(iwl==iwl2print){
+            //     printf("|ASS> Ideal interface\n\t ivnkup=%d n=%f k=%f\n",ivnkup,VNK[ivnkup][1],VNK[ivnkup][2]);
+            //     printf("\t ivnkdw=%d n=%f k=%f\n",ivnkdw,VNK[ivnkdw][1],VNK[ivnkdw][2]);
+            // }
             //symmetric coating on back surface
             if(i==Nlayer+1 && NINT(par[50+i-1][3])==1 && NINT(par[52][2])==1){ //symmetric multistrate on the rear face last layer
-//                if(iwl==100)
-//                    printf("found symmetric coating on back surface\n");
+                // if(iwl==iwl2print)
+                //     printf("|ASS> found symmetric coating on back surface\n");
                 for(int ii=1;ii<=2;ii++){
                     vosi[1][ii]=vot[1][ii];
                     vosi[2][ii]=vot[3][ii];
@@ -10032,8 +10448,8 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
                 }
             }
             else{
-//                if(iwl==100)
-//                    printf("ideal interface between two media\n");
+                // if(iwl==iwl2print)
+                //     printf("|ASS> ideal interface between two media\n");
                 //vosi[1][1]=4.*real(mups)*real(mdws)/pow(abs(mups+mdws),2.);//requires transparent in out media
                 //vosi[1][2]=4.*real(mupp)*real(mdwp)/pow(abs(mupp+mdwp),2.);
                 vosi[2][1]=pow(abs((mups-mdws)/(mups+mdws)),2.);
@@ -10048,9 +10464,9 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
                     //*** PSI e DELTA
                     rr=((mupp-mdwp)/(mupp+mdwp))/((mups-mdws)/(mups+mdws));
                     vot[5][1]=atan(abs(rr))/deg2rad;//PSI
-                    vot[5][2]=atan2(-imag(rr),-real(rr))/deg2rad;//DELTA
-                    //if(iwl==100)
-                    //    printf("This is the first interface -> DELTA=%f PSI=%f\n",vot[5][2],vot[5][1]);
+                    vot[5][2]=arg(rr)/deg2rad;//DELTA
+                    // if(iwl==iwl2print)
+                    //     printf("|ASS> This is the first interface -> DELTA=%f PSI=%f\n",vot[5][2],vot[5][1]);
                 }
             }
         }
@@ -10066,11 +10482,11 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
             mups=sqrt(irup2-pq);
             alfa=exp(-4.*PIG*pm[i-1][1]/wl*imag(-mups));
         }
-//        if(iwl==1){
-//            printf("alfa=%f\n",alfa);
-//            printf("combining vosi[1][1]=%f vosi[2][1]=%f vosi[3][1]=%f with previous interface\n \tvot[1][1]=%f vot[2][1]=%f vot[3][1]=%f ...\n",
-//                          vosi[1][1],vosi[2][1],vosi[3][1],vot[1][1],vot[2][1],vot[3][1]);
-//        }
+        // if(iwl==iwl2print){
+        //     printf("|ASS> alfa=%f\n",alfa);
+        //     printf("|ASS> combining vosi[1][1]=%f vosi[2][1]=%f vosi[3][1]=%f with previous interface\n \tvot[1][1]=%f vot[2][1]=%f vot[3][1]=%f ...\n",
+        //            vosi[1][1],vosi[2][1],vosi[3][1],vot[1][1],vot[2][1],vot[3][1]);
+        // }
         double uguales=alfa/(1.-vot[3][1]*vosi[2][1]*alfa*alfa);
         double ugualep=alfa/(1.-vot[3][2]*vosi[2][2]*alfa*alfa);
         double ts=vot[1][1]*vosi[1][1]*uguales;
@@ -10085,9 +10501,9 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
         vot[2][2]=rp;
         vot[3][1]=r1s;
         vot[3][2]=r1p;
-//        if(iwl==1){
-//            printf("..... ts= %f rs=%f r1s=%f\n",ts,rs,r1s);
-//        }
+        // if(iwl==iwl2print){
+        //     printf("|ASS> ..... ts= %f rs=%f r1s=%f\n",ts,rs,r1s);
+        // }
         i=i+ncoe+1;
         fflush(stdout);
     }
@@ -10095,39 +10511,44 @@ void ASSEMBLER(int iwl, double wl, int ikind, double teta, double vot[6][3]){
 
 
 
-void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi[6][3]){
-    int ivnk,NFA,iv[11][4],irougfa[11],irougms[11];
-    double ds[11],gn[11],cn[11],gk[11],ck[11],ru[11],nmedio,kmedio,al[11],d[999],VNK[17][3],
-            dz,BpN,zz,ApN,ApK,BpK,CpK,CpN,Rs,R1s,Rp,R1p,Ts,Tp,As,Ap,ra,Ps,Pp;
-    complex<double> ir[999],NQ,mus,mup,rhoS,rhopS,tauS,rhoP,rhopP,tauP,nq1,mus1,mup1,out[9][3],Bs,Cs,Bp,Cp;
+void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi[6][3]){
+    int ivnk,NFA,iv[10]={},irougfa[11],irougms[11],iv2[10]={};
+    int nu[10][3];
+    //           [ i][0]=Nlayer with thickness nonuniform
+    //           [ i][1]=NFAmin
+    //           [ i][1]=NFAmax
+    double ds[10],gn[10],cn[10],gk[10],ck[10],ru[10],nmedio,kmedio,al[10],d[999],VNK[17][3],
+            dz,BpN,zz,ApN,ApK,BpK,CpK,CpN,Rs,R1s,Rp,R1p,Ts,Tp,As,Ap,ra,Ps,Pp,dsnu[10],DELTA,PSI;
+    complex<double> ir[999],NQ,mus,mup,rhoS,rhopS,tauS,rhoP,rhopP,tauP,nq1,mus1,mup1,out[10][3],Bs,Cs,Bp,Cp,denoS,denoP;
 
-/* Subroutine for build-up the indicated coherent part of the multilayer and/or roughness
-   iv(10,3) vector to enable and indexing
-     (k,1) : 0 (flat interface), 1 (rough interface)
-     (k,2) : ik index of the term of summation on the different thicknesses for rough layers
-*/
+    // Subroutine for build-up the indicated coherent part of the multilayer and/or roughness
+    double wl=MIS[7][iwl][1];//wavelength
 
-    //parameters
+    //if(iwl==iwl2print)
+    //    printf("->Start BUILDER with ifst=%d ncoe=%d \n",ifst,ncoe);
+
+    //layer parameters
     int imax=NINT(par[51][2]);// N. layers
     int nino=NINT(par[29][1]);//discretization inhomogeneity
-    int N=NINT(par[28][1]);//   discretization integral for roughness
-    for(int i=1;i<=10;i++){  //perchè fino a 10 e non fino a 9?
+    int N=NINT(par[28][1]);//   discretization roughness
+    for(int i=1;i<=9;i++){  //9 is N_layer max
         ds[i]=pm[i][1];     // layer thickness
         al[i]=par[50+i][3]; // kind of layer
-        gn[i]=pm[10+i][1]+12400./wl*pm[60+i][1]; //Dn/<n>
+        gn[i]=pm[10+i][1]+1240./wl*pm[60+i][1]; //Dn/<n>
         cn[i]=pm[20+i][1];   //curv_n
         gk[i]=pm[30+i][1];   //Dk/<k>
         ck[i]=pm[40+i][1];   //curv_k
         ru[i]=pm[50+i][1];   //roughness
-        iv[i][1]=0;
-        if(ru[i]>0. && i>=ifst && i<=ifst+ncoe-1){
-            iv[i][1]=1;
+        dsnu[i]=pm[90+i][1]; //nonuniform thickness = (d_max-d_min)/(d_max+d_min)
+        if(ru[i]>0.){//reduce the thickness of the layers which interface is rough for 3*sigma
+            ds[i]=ds[i]-3.*ru[i];
+            if(i>1)
+                ds[i-1]=ds[i-1]-3.*ru[i];
         }
     }
 
-    //*** refractive indices
+    //refractive indices
     COSVNK(VNK,iwl);
-
     int ivnk1=9+ikind;
     ir[1]=complex<double>(VNK[ivnk1][1],-VNK[ivnk1][2]);
     d[1]=0.;
@@ -10136,62 +10557,41 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
         ir[1]=complex<double>(VNK[ivnk1][1],-VNK[ivnk1][2]);
     }
     NFA=1;
+    //if(iwl==iwl2print)printf("\tiNFA=%d n=%f k=%f d=%f\n",1,real(ir[1]),imag(ir[1]),d[1]);
 
     // set index vector and refractive indices
     int ims=ifst;
     int nroug=0;
-//    while(ims<=(ifst+ncoe-1) || ru[ims]>.0){ //qui sta un problema: perchè continuare se ru[5]>0?
-    while(ims<=(ifst+ncoe-1) ){
-        //if(iwl==100) printf("while@ims=%d\n",ims);
-
+    int Nnouni=0;
+    int iDWroug=0;
+    while(ims<=(ifst+ncoe-1) || (ims==ifst+ncoe && ru[ims]>0. && iDWroug==0)){
+        if(ds[ims]<0.00001){
+            if(iwl==iwl2print) printf("Skip layer %d because has zero thickness\n",ims);
+            ims++;
+            continue;
+        }
         // roughness
-        if(ru[ims]>0.){// add layer for roughness
-            nroug=nroug+1;
-            NFA=NFA+1;
+        if(ru[ims]>0.01){// add double layer for roughness
+            nroug=nroug+1;//one more rough-interface
+            NFA++;
+            ir[NFA]=ir[NFA-1];// same refractive index of the previous fase
+            d[NFA]=3.*ru[ims];//first half rough layer
+            NFA++;
             irougfa[nroug]=NFA;//NFA assigned to the new layer
             irougms[nroug]=ims;//index of the concerning model-layer
             ivnk=int(par[50+ims][1]);//to assign the complex refractive index
             ir[NFA]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
-            d[NFA]=3.*ru[ims];//mean layer thickness
-            ds[ims]=ds[ims]-3.*ru[ims];// net thickness of the following layer
-            if(iwl==100) printf("found ru[%d]=%f => additional layer@NFA=%d\n",ims,ru[ims],NFA);
+            d[NFA]=3.*ru[ims];//second half rough thickness
+            //if(iwl==iwl2print) printf("|BUILD> found ru[%d]=%e => additional double layer:\n NFA=%d d[%d]=%f\n NFA=%d d[%d]=%f\n",
+            //                    ims,ru[ims],NFA-1,NFA-1,d[NFA-1],NFA,NFA,d[NFA]);
+            if(ims==ifst+ncoe){
+                iDWroug++;
+                continue;
+            }
         }
-        if(ds[ims]>.0){
-            //** inhomogeneity
-            if(NINT(al[ims])==5){ // inhomogeneous exp _/
-                //if(iwl==100) printf("inhomogeneous exp UP\n");
-                ivnk=NINT(par[50+ims][1]);
-                nmedio=VNK[ivnk][1];
-                kmedio=VNK[ivnk][2];
-                dz=1./real(nino);
-                BpN=gn[ims]*nmedio;
-                for(int i=1;i<=nino;i++){
-                    NFA=NFA+1;
-                    zz=1.+dz/2.-real(i)*dz;
-                    ir[NFA]=complex<double>(nmedio+BpN*exp(-3.*(1.-zz)),-kmedio);
-                    d[NFA]=dz*ds[ims];
-                }
-                if(ru[ims]>0.)
-                    ir[NFA-nino]=ir[NFA-nino+1];//nk for roughness
-            }
-            else if(NINT(al[ims])==4){ // inhomogeneous exp \_
-                //if(iwl==100) printf("inhomogeneous exp DW\n");
-                ivnk=NINT(par[50+ims][1]);
-                nmedio=VNK[ivnk][1];
-                kmedio=VNK[ivnk][2];
-                dz=1./real(nino);
-                BpN=gn[ims]*nmedio;
-                for(int i=1;i<=nino;i++){
-                    NFA=NFA+1;
-                    zz=1.+dz/2.-real(i)*dz;
-                    ir[NFA]=complex<double>(nmedio+BpN*exp(-3.*zz),-kmedio);
-                    d[NFA]=dz*ds[ims];
-                }
-                if(ru[ims]>0.)
-                    ir[NFA-nino]=ir[NFA-nino+1]; //nk for roughness
-            }
-            else if(NINT(al[ims])==3){ //inomogeneous layer
-                //if(iwl==100) printf("inhomogeneous layer\n");
+        if(ds[ims]>0.00001){
+            if(NINT(al[ims])==3){ //inomogeneous layer
+                //if(iwl==iwl2print) printf("|BUILD> inhomogeneous layer\n");
                 ivnk=NINT(par[50+ims][1]);
                 nmedio=VNK[ivnk][1];
                 kmedio=VNK[ivnk][2];
@@ -10208,185 +10608,229 @@ void BUILDER(int iwl,double wl,int ikind,int ifst,int ncoe, complex<double> pq,d
                     ir[NFA]=complex<double>(ApN*zz*zz+BpN*zz+CpN,-(ApK*zz*zz+BpK*zz+CpK));
                     d[NFA]=dz*ds[ims];
                 }
-                if(ru[ims]>0.)
+                if(ru[ims]>0.)//roughness
                     ir[NFA-nino]=ir[NFA-nino+1];//nk for roughness
+                if(dsnu[ims]>0.){//nonuniform thickness
+                    Nnouni++;
+                    nu[Nnouni][0]=ims;//N layer
+                    nu[Nnouni][2]=NFA;//NFA_max
+                    nu[Nnouni][1]=NFA-nino+1;//NFA_min
+                    //if(iwl==iwl2print) printf("|BUILD> found d-nonuniform @ Nlayer=%d dsnu[%d]=%f NFA_min=%d NFA_max=%d\n",ims,ims,dsnu[ims],nu[Nnouni][1],nu[Nnouni][2]);
+                }
             }
             else if(NINT(al[ims])==2){// homogeneous layer
-                //if(iwl==100) printf("homogeneous layer\n");
+                //if(iwl==iwl2print) printf("|BUILD> homogeneous layer\n");
                 NFA=NFA+1;
                 ivnk=NINT(par[50+ims][1]);
                 ir[NFA]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
                 d[NFA]=ds[ims];
-            }
-        }
-        ims=ims+1;
-    }
-    // substrate
-    NFA=NFA+1;
-//    if(iwl==30) printf("ifst=%d ncoe=%d ims=%d NFA=%d \n", ifst, ncoe, ims, NFA);
-//    if(ru[ims-1]>.0 && NINT(al[ims-1])==1) //al[]=1 means bulk [not coherent]
-//        ims=ims-1;
-    if(ims<=imax){
-        ivnk=NINT(par[50+ims][1]);
-        iv[ims][1]=0; //no roughness in the exit medium
-    }
-    else{ //without substrate
-        ivnk=16;
-    }
-    ir[NFA]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
-    d[NFA]=0.;
-//    if(iwl==30) printf("exit medium: ims=%d NFA=%d imax=%d\n",ims,NFA,imax);
-
-//    if(iwl==30){
-//        for(int i=1;i<=NFA;i++)
-//            printf("iNFA=%d n=%f k=%f d=%f\n",i,real(ir[i]),imag(ir[i]),d[i]);
-//        printf("nroug=%d\n",nroug);
-//    }
-
-    // managment of roughness and Fresnel's coefficient computing
-
-    rhoS=complex<double>(.0,.0);
-    rhopS=complex<double>(.0,.0);
-    tauS=complex<double>(.0,.0);
-    rhoP=complex<double>(.0,.0);
-    rhopP=complex<double>(.0,.0);
-    tauP=complex<double>(.0,.0);
-    Rs=0.;
-    R1s=0.;
-    Rp=0.;
-    R1p=0.;
-    Ts=0.;
-    Tp=0.;
-    As=0.;
-    Ap=0.;
-    Ps=0.;
-    Pp=0.;
-    Bs=complex<double>(.0,.0);
-    Cs=complex<double>(.0,.0);
-    Bp=complex<double>(.0,.0);
-    Cp=complex<double>(.0,.0);
-
-    for(int i1=1;i1<=(2*N*iv[1][1]+1);i1++){
-        for(int i2=1;i2<=(2*N*iv[2][1]+1);i2++){
-            for(int i3=1;i3<=(2*N*iv[3][1]+1);i3++){
-                for(int i4=1;i4<=(2*N*iv[4][1]+1);i4++){
-                    for(int i5=1;i5<=(2*N*iv[5][1]+1);i5++){
-                        for(int i6=1;i6<=(2*N*iv[6][1]+1);i6++){
-                            for(int i7=1;i7<=(2*N*iv[7][1]+1);i7++){
-                                for(int i8=1;i8<=(2*N*iv[8][1]+1);i8++){
-                                    for(int i9=1;i9<=(2*N*iv[9][1]+1);i9++){
-                                        for(int i10=1;i10<=(2*N*iv[10][1]+1);i10++){
-                                            iv[1][2]=i1;
-                                            iv[2][2]=i2;
-                                            iv[3][2]=i3;
-                                            iv[4][2]=i4;
-                                            iv[5][2]=i5;
-                                            iv[6][2]=i6;
-                                            iv[7][2]=i7;
-                                            iv[8][2]=i8;
-                                            iv[9][2]=i9;
-                                            iv[10][2]=i10;
-                                            int ilyru=1;
-                                            double wtot=1.;
-//                                            if(iwl==100){
-//                                                for(int i=1;i<=10;i++)
-//                                                    printf("i%d=%d ",i,iv[i][2]);
-//                                                printf("\n");
-//                                            }
-                                            for(int i=1;i<=nroug;i++){
-                                                ilyru=irougms[i];
-                                                ra=pow(-1.,iv[ilyru][2])*dx[N][int(iv[ilyru][2]/2.+1)];
-                                                wtot=wtot*pow(w[N][int(iv[ilyru][2]/2.+1)],iv[ilyru][1]);
-                                                d[irougfa[i]]=(3.-ra)*ru[irougms[i]];
-//                                                if(iwl==100)
-//                                                    printf("ilyru=%d ru[%d]=%f d[%d]=%f ir[%d]=%f\n",
-//                                                           ilyru,irougms[i],ru[irougms[i]],irougfa[i],d[irougfa[i]],
-//                                                                              irougfa[i],real(ir[irougfa[i]]));
-                                                ilyru++;
-                                            }
-                                         //   if(iwl==30) printf("for loop roughness: call CALFRE wtot=%f \n", wtot);
-                                            CALFRE(NFA,wl,pq,ir,d,out);
-                                            tauS=tauS+out[1][1]*wtot;
-                                            rhoS=rhoS+out[2][1]*wtot;
-                                            rhopS=rhopS+out[3][1]*wtot;
-                                            Ts=Ts+real(out[4][1])*wtot;
-                                            Rs=Rs+real(out[5][1])*wtot;
-                                            R1s=R1s+real(out[6][1])*wtot;
-                                            As=As+real(out[7][1])*wtot;
-                                            tauP=tauP+out[1][2]*wtot;
-                                            rhoP=rhoP+out[2][2]*wtot;
-                                            rhopP=rhopP+out[3][2]*wtot;
-                                            Tp=Tp+real(out[4][2])*wtot;
-                                            Rp=Rp+real(out[5][2])*wtot;
-                                            R1p=R1p+real(out[6][2])*wtot;
-                                            Ap=Ap+real(out[7][2])*wtot;
-                                            Bs=Bs+out[0][0]*wtot;
-                                            Cs=Cs+out[1][0]*wtot;
-                                            Bp=Bp+out[2][0]*wtot;
-                                            Cp=Cp+out[3][0]*wtot;
-                                            Ps=Ps+real(out[0][1])*wtot;
-                                            Pp=Pp+real(out[0][2])*wtot;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                //if(iwl==iwl2print)printf("CNK[ivnk][1]=%f\n",CNK[ivnk][1]);
+                //if(iwl==iwl2print)printf("\tNFA=%d ivnk=%d n=%f k=%f d=%f par[50+%d][1]=%f\n ",NFA,ivnk,real(ir[NFA]),imag(ir[NFA]),d[NFA],ims,par[50+ims][1]);
+                if(dsnu[ims]>0.){//nonuniform thickness
+                    Nnouni++;
+                    nu[Nnouni][0]=ims;//N layer
+                    nu[Nnouni][2]=NFA;//NFA_max
+                    nu[Nnouni][1]=NFA;//NFA_min
+                    //if(iwl==iwl2print) printf("|BUILD> found d-nonuniform @ Nlayer=%d dsnu[%d]=%f NFA_min=%d NFA_max=%d\n",ims,ims,dsnu[ims],nu[Nnouni][1],nu[Nnouni][2]);
                 }
             }
         }
+        ims++;
     }
-    //save Fresnell coefficients
-    freCoeff[0][0]=Ps;//Poynting s-pol
-    freCoeff[0][1]=Pp;//Poynting p-pol
-    freCoeff[1][0]=rhoS;
-    freCoeff[1][1]=rhoP;
-    freCoeff[2][0]=rhopS;
-    freCoeff[2][1]=rhopP;
-    freCoeff[3][0]=ir[NFA];
-    freCoeff[4][0]=Bs;
-    freCoeff[4][1]=Cs;
-    freCoeff[5][0]=Bp;
-    freCoeff[5][1]=Cp;
+    // substrate
+    NFA=NFA+1;
+    //if(iwl==iwl2print) printf("|BUILD> ifst=%d ncoe=%d ims=%d imax=%d NFA=%d \n", ifst, ncoe, ims, imax, NFA);
+    if(ims<=imax)
+        ivnk=NINT(par[50+ims][1]);
+    else if(imax==1 && NINT(al[1])==1)
+        ivnk=NINT(par[50+imax][1]);
+    else{ //without substrate
+        ivnk=9;//16
+    }
+    ir[NFA]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
+    d[NFA]=0.;
+    // if(iwl==iwl2print){
+    //     printf("|BUILDER> exit medium: ims=%d NFA=%d imax=%d\n",ims,NFA,imax);
+    //     for(int i=1;i<=NFA;i++)
+    //         printf("\tiNFA=%d n=%f k=%f d=%f\n",i,real(ir[i]),imag(ir[i]),d[i]);
+    //     printf("|BUILD> nroug=%d\n",nroug);
+    // }
 
-    //save to VOSI
-    if(NINT(par[54][2])==0){ //specular SF measurements
-        NQ=ir[NFA]*ir[NFA];
-        mus=sqrt(NQ-pq);
-        mup=NQ/mus;
-        nq1=ir[1]*ir[1];
-        mus1=sqrt(nq1-pq);
-        mup1=nq1/mus1;
-        vosi[1][1]=real(mus)/real(mus1)*pow(abs(tauS),2.);
-        vosi[1][2]=real(mup)/real(mup1)*pow(abs(tauP),2.);
-        vosi[2][1]=pow(abs(rhoS),2.);
-        vosi[2][2]=pow(abs(rhoP),2.);
-        vosi[3][1]=pow(abs(rhopS),2.);
-        vosi[3][2]=pow(abs(rhopP),2.);
+    //VOSI & freCoeff initialization for d-nonuniform averaging
+    for(int i=0;i<6;i++){
+        for(int k=0;k<3;k++){
+            vosi[i][k]=0.;
+            if(k<2)
+                freCoeff[i][k]=complex<double>(0.,0.);
+        }
     }
-    else{ // hemispherical SF measurements
-        vosi[1][1]=Ts;
-        vosi[1][2]=Tp;
-        vosi[2][1]=Rs;
-        vosi[2][2]=Rp;
-        vosi[3][1]=R1s;
-        vosi[3][2]=R1p;
+    int M=2*N+1;//effective discretization of rough-layer thickness & Niteration for d-nonuniform
+    int Nit2=pow(M,Nnouni);
+    double Dit2=double(Nit2);
+    for(int it2=0;it2<Nit2;it2++){//iteration over combinations of d-nonuniform
+        for(int Jnu=0;Jnu<Nnouni;Jnu++){
+            if(Jnu+1<Nnouni)
+                iv2[Jnu]=int(it2/pow(M,Nnouni-Jnu-1));
+            else{
+                if(it2>0)
+                    iv2[Jnu]++;
+            }
+            if(iv2[Jnu]+1>M)
+                iv2[Jnu]=iv[Jnu]-M*int(iv2[Jnu]/M);
+            int NFAmin=nu[Jnu+1][1];
+            int NFAmax=nu[Jnu+1][2];
+            double Dd=1./double(NFAmax-NFAmin+1);
+            for(int NFAi=NFAmin;NFAi<=NFAmax;NFAi++){
+                d[NFAi]=ds[nu[Jnu+1][0]]*Dd*(1.+dsnu[nu[Jnu+1][0]]*(iv2[Jnu]-N)/N);
+                //if(iwl==iwl2print) printf("|BUILD> indexLoop d-nonuni it2=%d iv2[%d]=%d NFAmin=%d NFAmax=%d NFAi=%d d[%d]=%f\n",it2,Jnu,iv2[Jnu],NFAmin,NFAmax,NFAi,NFAi,d[NFAi]);
+            }
+        }
+        // managment of roughness and Fresnel's coefficient computing
+        rhoS=complex<double>(.0,.0);
+        rhopS=complex<double>(.0,.0);
+        tauS=complex<double>(.0,.0);
+        rhoP=complex<double>(.0,.0);
+        rhopP=complex<double>(.0,.0);
+        tauP=complex<double>(.0,.0);
+        Rs=0.;
+        R1s=0.;
+        Rp=0.;
+        R1p=0.;
+        Ts=0.;
+        Tp=0.;
+        As=0.;
+        Ap=0.;
+        Ps=0.;
+        Pp=0.;
+        Bs=complex<double>(.0,.0);
+        Cs=complex<double>(.0,.0);
+        Bp=complex<double>(.0,.0);
+        Cp=complex<double>(.0,.0);
+        denoS=complex<double>(.0,.0);
+        denoP=complex<double>(.0,.0);
+        DELTA=0.;
+        PSI=0.;
+
+        for(int it=0;it<pow(M,nroug);it++){//iteration over roughness combinations
+            double wtot=1.;
+            for(int j=0;j<nroug;j++){//index assignation to each rough layer and each nonuniform thickness
+                if(j+1<nroug)
+                    iv[j]=int(it/pow(M,nroug-j-1));
+                else{
+                    if(it>0)
+                        iv[j]++;
+                }
+                if(iv[j]+1>M)
+                    iv[j]=iv[j]-M*int(iv[j]/M);
+                //printf("iv[%d]=%d ",j,iv[j]);
+                ra=pow(-1.,iv[j])*dx[N][int((iv[j]+1)/2.+1)];//normalized thickness variation
+                wtot=wtot*w[N][int((iv[j]+1)/2.+1)];         //cumulative weight
+                d[irougfa[j+1]-1]=(3.+ra)*ru[irougms[j+1]];   //thickness first half rough layer
+                d[irougfa[j+1]]=(3.-ra)*ru[irougms[j+1]];//thickness seconf half rough layer
+                // if(iwl==iwl2print) {
+                //     printf("|BUILD> indexLoop rough it=%d j=%d iv[%d]=%d d[%d]=%f d[%d]=%f wtot=%f\n",
+                //            it,j,j,iv[j],irougfa[j+1]-1,d[irougfa[j+1]-1],irougfa[j+1],d[irougfa[j+1]],wtot);
+                //     //iw=1;
+                // }
+            }
+            // if(iwl==iwl2print){
+            //     printf("callCALFRE with wl=%f pq=%f +%f*i\n",wl,real(pq),imag(pq));
+            //     for(int k=1;k<=NFA;k++)
+            //         printf("callCALFRE iNFA=%d n=%f k=%f d=%f\n",k,real(ir[k]),imag(ir[k]),d[k]);
+            // }
+            CALFRE(NFA,wl,pq,ir,d,out);
+            // if(iwl==iwl2print){
+            //     for(int k=0;k<=7;k++)
+            //         printf("   out[%d][1]=%f + %f*i\n",k,real(out[k][1]),imag(out[k][1]));
+            // }
+            iw=0;
+            tauS=tauS+out[1][1]*wtot;
+            rhoS=rhoS+out[2][1]*wtot;
+            rhopS=rhopS+out[3][1]*wtot;
+            Ts=Ts+real(out[4][1])*wtot;
+            Rs=Rs+real(out[5][1])*wtot;
+            R1s=R1s+real(out[6][1])*wtot;
+            As=As+real(out[7][1])*wtot;
+            tauP=tauP+out[1][2]*wtot;
+            rhoP=rhoP+out[2][2]*wtot;
+            rhopP=rhopP+out[3][2]*wtot;
+            Tp=Tp+real(out[4][2])*wtot;
+            Rp=Rp+real(out[5][2])*wtot;
+            R1p=R1p+real(out[6][2])*wtot;
+            Ap=Ap+real(out[7][2])*wtot;
+            Bs=Bs+out[0][0]*wtot;
+            Cs=Cs+out[1][0]*wtot;
+            Bp=Bp+out[2][0]*wtot;
+            Cp=Cp+out[3][0]*wtot;
+            Ps=Ps+real(out[0][1])*wtot;
+            Pp=Pp+real(out[0][2])*wtot;
+            PSI=PSI+atan(abs(rhoP/rhoS))/deg2rad*wtot;
+            DELTA=DELTA+arg(rhoP/rhoS)/deg2rad*wtot;
+        }
+        //save Fresnell coefficients
+        freCoeff[0][0]=freCoeff[0][0]+Ps/Dit2;//Poynting s-pol
+        freCoeff[0][1]=freCoeff[0][1]+Pp/Dit2;//Poynting p-pol
+        freCoeff[1][0]=freCoeff[1][0]+rhoS/Dit2;
+        freCoeff[1][1]=freCoeff[1][1]+rhoP/Dit2;
+        freCoeff[2][0]=freCoeff[2][0]+rhopS/Dit2;
+        freCoeff[2][1]=freCoeff[2][1]+rhopP/Dit2;
+        freCoeff[3][0]=freCoeff[3][0]+ir[NFA]/Dit2;
+        freCoeff[4][0]=freCoeff[4][0]+Bs/Dit2;
+        freCoeff[4][1]=freCoeff[4][1]+Cs/Dit2;
+        freCoeff[5][0]=freCoeff[5][0]+Bp/Dit2;
+        freCoeff[5][1]=freCoeff[5][1]+Cp/Dit2;
+
+        //save to VOSI
+        if(NINT(par[54][2])==0){ //specular SF measurements
+            NQ=ir[NFA]*ir[NFA];
+            mus=sqrt(NQ-pq);
+            mup=NQ/mus;
+            nq1=ir[1]*ir[1];
+            mus1=sqrt(nq1-pq);
+            mup1=nq1/mus1;
+
+            vosi[1][1]=vosi[1][1]+real(mus)/real(mus1)*pow(abs(tauS),2.)/Dit2;
+            vosi[1][2]=vosi[1][2]+real(mup)/real(mup1)*pow(abs(tauP),2.)/Dit2;
+            vosi[2][1]=vosi[2][1]+pow(abs(rhoS),2.)/Dit2;
+            vosi[2][2]=vosi[2][2]+pow(abs(rhoP),2.)/Dit2;
+            vosi[3][1]=vosi[3][1]+pow(abs(rhopS),2.)/Dit2;
+            vosi[3][2]=vosi[3][2]+pow(abs(rhopP),2.)/Dit2;
+        }
+        else{ // hemispherical SF measurements
+            vosi[1][1]=vosi[1][1]+Ts/Dit2;
+            vosi[1][2]=vosi[1][2]+Tp/Dit2;
+            vosi[2][1]=vosi[2][1]+Rs/Dit2;
+            vosi[2][2]=vosi[2][2]+Rp/Dit2;
+            vosi[3][1]=vosi[3][1]+R1s/Dit2;
+            vosi[3][2]=vosi[3][2]+R1p/Dit2;
+        }
+        vosi[4][1]=vosi[4][1]+As/Dit2;
+        vosi[4][2]=vosi[4][2]+Ap/Dit2;
+        // vosi[5][1]=vosi[5][1]+atan(abs(rhoP/rhoS))/deg2rad/Dit2;//PSI
+        // vosi[5][2]=vosi[5][2]+arg(rhoP/rhoS)/deg2rad/Dit2;//DELTA
+        vosi[5][1]=vosi[5][1]+PSI/Dit2;//PSI
+        vosi[5][2]=vosi[5][2]+DELTA/Dit2;//DELTA
+        // if(iwl==1wl2print){
+        //     printf("|BUILD>final output:\n DELTA=%f  PSI=%f\n",vosi[5][2],vosi[5][1]);
+        //     printf(" tauP= %f +i%f Tp=%f\n tauS= %f +i%f Ts=%f\n",
+        //        real(tauP),imag(tauP),real(mup)/real(mup1)*pow(abs(tauP),2.),real(tauS),imag(tauS),real(mus)/real(mus1)*pow(abs(tauS),2.));
+        //     printf(" rhoP= %f +i%f Rp=%f\n rhoS= %f +i%f Rs=%f\n",
+        //        real(rhoP),imag(rhoP),pow(abs(rhoP),2.),real(rhoP),imag(rhoP),pow(abs(rhoP),2.));
+        //     printf(" rho1P= %f +i%f R1p=%f\n rho1S= %f +i%f R1s=%f\n",
+        //        real(rhopP),imag(rhopP),pow(abs(rhopP),2.),real(rhopS),imag(rhopS),pow(abs(rhopS),2.));
+        //     fflush(stdout);
+        // }
     }
-    vosi[4][1]=As;
-    vosi[4][2]=Ap;
-    vosi[5][1]=atan(abs(rhoP/rhoS))/deg2rad;
-    vosi[5][2]=atan2(-imag(rhoP/rhoS),-real(rhoP/rhoS))/deg2rad;
-//    if(iwl==100){
-//        printf("rhoP= %f +i%f Rp=%f\nrhoS= %f +i%f Rs=%f\nDELTA=%f  PSI=%f\n",
-//               real(rhoP),imag(rhoP),pow(abs(rhoP),2.),real(rhoS),imag(rhoS),pow(abs(rhoS),2.),vosi[5][2],vosi[5][1]);
-//    }
 }
 
 
-void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],double d[999],complex<double> out[9][3]){
-    complex<double> SC[3][3],PC[3][3],MUS,MUP,NQ,CI,S1,S2,P1,P2,DELTA,C,S,B,BP,CP,deno,nq1,mus1,mup1,
+void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],double d[999],complex<double> out[10][3]){
+    complex<double> SC[3][3],PC[3][3],MUS,MUP,NQ,CI,DELTA,C,S,B,BP,CP,deno,nq1,mus1,mup1,
             rhoS,rhopS,tauS,rhoP,rhopP,tauP;
+    complex<double> a11,a12,a21,a22,b11,b12,b21,b22;
     CI=complex<double>(0.,1.);
+
+    //if(iw==1) printf("-> |CALFRE> NFAin=%d wl=%f\n",NFAin,wl);
 
 //check if a layer absorbs completely the light. In that case this layer becomes the exit medium
     int NFA=NFAin;
@@ -10395,7 +10839,7 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
         MUS=sqrt(NQ-pq);
         MUP=NQ/MUS;
         DELTA=2.*PIG*d[I]*MUS/wl;
-        if (abs(imag(DELTA))>200.) {
+        if(abs(imag(DELTA))>ABSmax) {
             NFA=I;
             break;
         }
@@ -10418,25 +10862,43 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
     // characteristic matrix
     for(int I=2;I<=NFA-1;I++){
         NQ=IR[I]*IR[I];
-        MUS=sqrt(NQ-pq);
+        MUS=sqrt(NQ-pq);//IR[I]*cos(theta_I)
         MUP=NQ/MUS;
         DELTA=2.*PIG*d[I]*MUS/wl;
         C=cos(DELTA);
         S=sin(DELTA)*CI;
-        S1=SC[1][1];
-        S2=SC[2][2];
-        P1=PC[1][1];
-        P2=PC[2][2];
-        SC[1][1]=C*S1+S*MUS*SC[1][2];
-        SC[2][2]=C*S2+S/MUS*SC[2][1];
-        PC[1][1]=C*P1+S*MUP*PC[1][2];
-        PC[2][2]=C*P2+S/MUP*PC[2][1];
-        SC[1][2]=S/MUS*S1+C*SC[1][2];
-        SC[2][1]=S*MUS*S2+C*SC[2][1];
-        PC[1][2]=S/MUP*P1+C*PC[1][2];
-        PC[2][1]=S*MUP*P2+C*PC[2][1];
-//        if(I==6)
-//            printf("d=%f wl=%f DELTA=%e+i%e\n",d[I],wl,real(DELTA),imag(DELTA));
+
+        //s-pol
+        a11=SC[1][1];
+        a12=SC[1][2];
+        a21=SC[2][1];
+        a22=SC[2][2];
+        b11=C;
+        b12=S/MUS;
+        b21=S*MUS;
+        b22=C;
+        SC[1][1]=a11*b11+a12*b21;
+        SC[1][2]=a11*b12+a12*b22;
+        SC[2][1]=a21*b11+a22*b21;
+        SC[2][2]=a21*b12+a22*b22;
+
+        //p-pol
+        a11=PC[1][1];
+        a12=PC[1][2];
+        a21=PC[2][1];
+        a22=PC[2][2];
+        //b11=C;
+        b12=S/MUP;
+        b21=S*MUP;
+        //b22=C;
+        PC[1][1]=a11*b11+a12*b21;
+        PC[1][2]=a11*b12+a12*b22;
+        PC[2][1]=a21*b11+a22*b21;
+        PC[2][2]=a21*b12+a22*b22;
+        // if(abs(SC[1][1])>1.E+06 || abs(SC[1][2])>1.E+06){
+        //     printf("CALFRE @wl=%f & I=%d SC[1][1]=%f +%f*i SC[1][2]=%f +%f*i\n",wl,I,real(SC[1][1]),imag(SC[1][1]),real(SC[1][2]),imag(SC[1][2]));
+        //     printf("|NQ|=%f |MUS|=%f |DELTA|=%f\n",abs(NQ),abs(MUS),abs(imag(DELTA)));
+        // }
     }
     NQ=IR[NFA]*IR[NFA];
     MUS=sqrt(NQ-pq);
@@ -10446,39 +10908,39 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
     mup1=nq1/mus1;
 
     //Fresnel's coefficient and R R1 T A
-    //  polarization-s
+//  polarization-s
     B=SC[1][1]+SC[1][2]*MUS;
     C=SC[2][1]+SC[2][2]*MUS;
-    BP=-SC[1][1]+SC[1][2]*MUS;
-    CP=-SC[2][1]+SC[2][2]*MUS;
-    //BP=SC[2][2]+SC[1][2]*MUS;
-    //CP=SC[2][1]+SC[1][1]*MUS;
+    //BP=-SC[1][1]+SC[1][2]*MUS;
+    //CP=-SC[2][1]+SC[2][2]*MUS;
+    BP=SC[2][2]+SC[1][2]*mus1;//Macleod's formula for inverse path
+    CP=SC[2][1]+SC[1][1]*mus1;
     deno=mus1*B+C;
     rhoS=(mus1*B-C)/deno;
-    rhopS=(mus1*BP+CP)/deno;
     tauS=2.*mus1/deno;
+    rhopS=(MUS*BP-CP)/(MUS*BP+CP);
     double Rs=pow(abs(rhoS),2.);
     double R1s=pow(abs(rhopS),2.);
-    double Ts=4.*real(mus1)*real(MUS)/pow(abs(deno),2.);
+    double Ts=real(MUS)/real(mus1)*pow(abs(tauS),2.);
     double As=4.*real(mus1)*real(B*conj(C)-MUS)/pow(abs(deno),2.);
     out[0][0]=B;
     out[1][0]=C;
     out[0][1]=real(B*conj(C));//Poynting vector s-pol
 
-    //  polarization-p
+//  polarization-p
     B=PC[1][1]+PC[1][2]*MUP;
     C=PC[2][1]+PC[2][2]*MUP;
-    BP=-PC[1][1]+PC[1][2]*MUP;
-    CP=-PC[2][1]+PC[2][2]*MUP;
-    //BP=PC[2][2]+PC[1][2]*MUP;
-    //CP=PC[2][1]+PC[1][1]*MUP;
+    //BP=-PC[1][1]+PC[1][2]*MUP;
+    //CP=-PC[2][1]+PC[2][2]*MUP;
+    BP=PC[2][2]+PC[1][2]*mup1;//Macleod's formula for inverse path
+    CP=PC[2][1]+PC[1][1]*mup1;
     deno=mup1*B+C;
     rhoP=(mup1*B-C)/deno;
-    rhopP=(mup1*BP+CP)/deno;
     tauP=2.*mup1/deno;
+    rhopP=(MUP*BP-CP)/(MUP*BP+CP);
     double Rp=pow(abs(rhoP),2.);
     double R1p=pow(abs(rhopP),2.);
-    double Tp=4.*real(mup1)*real(MUP)/pow(abs(deno),2.);
+    double Tp=real(MUP)/real(mup1)*pow(abs(tauP),2.);
     double Ap=4.*real(mup1)*real(B*conj(C)-MUP)/pow(abs(deno),2.);
     out[2][0]=B;
     out[3][0]=C;
@@ -10514,11 +10976,15 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
         out[4][2]=0.;
         out[7][2]=1.-Rp;
     }
-//            if(wl>12208. && wl<12210.){
-//                printf("pq=%f+i%f lambda=%f \n",real(pq), imag(pq), wl);
-//                printf("tauS=%f rhoS=%f rhopS=%f Ts=%f Rs=%f \n",tauS, rhoS,rhopS, Ts,Rs);
-//            }
-
+    // if(iw==1){
+    //     printf(" tauP= %f +i%f Tp=%f\n tauS= %f +i%f Ts=%f\n",
+    //        real(tauP),imag(tauP),real(MUP)/real(mup1)*pow(abs(tauP),2.),real(tauS),imag(tauS),real(MUS)/real(mus1)*pow(abs(tauS),2.));
+    //     printf(" rhoP= %f +i%f Rp=%f\n rhoS= %f +i%f Rs=%f\n",
+    //        real(rhoP),imag(rhoP),pow(abs(rhoP),2.),real(rhoP),imag(rhoP),pow(abs(rhoP),2.));
+    //     printf(" rho1P= %f +i%f R1p=%f\n rho1S= %f +i%f R1s=%f\n",
+    //        real(rhopP),imag(rhopP),pow(abs(rhopP),2.),real(rhopS),imag(rhopS),pow(abs(rhopS),2.));
+    //     fflush(stdout);
+    // }
 }
 
 
@@ -10598,7 +11064,7 @@ int SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp){
         for(int iK=0;iK<501;iK++){
             KCL=par[2][1]+iK*Dk;
             CNK[1][3]=KCL;
-            ASSEMBLER(iWL,LAM,ikind,tetar,vot);
+            ASSEMBLER(iWL,ikind,tetar,vot);
             if(imis<=6)
                 FM=abs(MIS[imis][iWL][1]-vot[ivot][s1p2])/MIS[imis][iWL][2];
             else
@@ -10641,7 +11107,7 @@ double FMER(double k){
     double FM=.0;
     int NMIS=0;
     if(DATO[1]==2 || DATO[3]==2 ||DATO[5]==2){
-        ASSEMBLER(iWL,wl,1,0.,vot);
+        ASSEMBLER(iWL,1,0.,vot);
         for(int i=1;i<=3;i++){
             int j=2*i-1;
             if(DATO[j]==2){
@@ -10651,7 +11117,7 @@ double FMER(double k){
         }
     }
     if(DATO[2]==2 || DATO[4]==2){
-        ASSEMBLER(iWL,wl,1,teta[1],vot);
+        ASSEMBLER(iWL,1,teta[1],vot);
         for(int i=1;i<=2;i++){
             int j=2*i;
             if(DATO[j]==2){
@@ -10661,13 +11127,13 @@ double FMER(double k){
         }
     }
     if(DATO[6]==2){
-        ASSEMBLER(iWL,wl,2,0.,vot);
+        ASSEMBLER(iWL,2,0.,vot);
         FM=FM+pow(vot[4][1]-MIS[6][iWL][1],2.);
         NMIS++;
     }
     for(int I=1;I<=4;I++){
         if(DATO[5+2*I]==2 || DATO[6+2*I]==2){
-            ASSEMBLER(iWL,wl,I+2,teta[1+I],vot);
+            ASSEMBLER(iWL,I+2,teta[1+I],vot);
             double DE=ELI[5+2*I-6][iWL][1];
             double DC=vot[5][2];//Delta;
             double DDE=ELI[5+2*I-6][iWL][2]*deg2rad;
@@ -10715,7 +11181,7 @@ int FSQ(void *p, int m, int n, const double *x, double *fvec, int iflag){
     for(int i=1;i<=md;i++){
         if(NINT(SOL[i][6])==1){//the data is enabled
             wl=SOL[i][1];
-            ev=12400./wl;
+            ev=1240./wl;
             FDISP(ioptf,ev);
             if(NINT(par[32][5])<=1){
                 j++;
@@ -10763,6 +11229,11 @@ int FSQ(void *p, int m, int n, const double *x, double *fvec, int iflag){
             fchi2.close();
         }
     }
+    QCoreApplication::processEvents();
+    if(iStop){
+        iflag=-1;
+        return(iflag);
+    }
     return(0);
 }
 
@@ -10789,8 +11260,7 @@ int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
     double wl,ev;
     for(int i=1;i<=mwl;i++){
         wl=MIS[7][i][1];
-        ev=12400./wl;
-        par[7][1]=wl;
+        ev=1240./wl;
         par[24][2]=i;
         if(ioptf<1 || ioptf>7){
             FDISP(ioptf,ev);
@@ -10802,7 +11272,7 @@ int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
         CNK[1][1]=ioptf;
         //computing Tn Rn R1
         if(DATO[1]==2 || DATO[3]==2 || DATO[5]==2){
-            ASSEMBLER(i,wl,1,0.,vot);
+            ASSEMBLER(i,1,0.,vot);
             if(DATO[1]==2){
                 fvec[ivec]=(MIS[1][i][1]-vot[1][s1p2])/MIS[1][i][2];
                 chi2=chi2+pow(fvec[ivec],2.)/fredeg;
@@ -10822,7 +11292,7 @@ int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
         //computing Tp Rp
         if(DATO[2]==2 || DATO[4]==2){
             te=par[6][1]*deg2rad;
-            ASSEMBLER(i,wl,1,te,vot);
+            ASSEMBLER(i,1,te,vot);
             if(DATO[2]==2){
                 fvec[ivec]=(MIS[2][i][1]-vot[1][s1p2])/MIS[2][i][2];
                 chi2=chi2+pow(fvec[ivec],2.)/fredeg;
@@ -10838,7 +11308,7 @@ int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
         for(int j=1;j<=4;j++){
             if(DATO[7+2*(j-1)]==2 || DATO[8+2*(j-1)]==2){
                 te=pm[85+j][1]*deg2rad;
-                ASSEMBLER(i,wl,2+j,te,vot);
+                ASSEMBLER(i,2+j,te,vot);
                 if(DATO[7+2*(j-1)]==2){//DELTA
                     //double Der=abs(cos((ELI[1+2*(j-1)][i][1]+ELI[1+2*(j-1)][i][2])*deg2rad)-cos((ELI[1+2*(j-1)][i][1]-ELI[1+2*(j-1)][i][2])*deg2rad));
                     //fvec[ivec]=(cos(ELI[1+2*(j-1)][i][1]*deg2rad)-cos(vot[5][2]*deg2rad))/Der;
@@ -10870,6 +11340,11 @@ int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
             out<<"\n";
             fchi2.close();
         }
+    }
+    QCoreApplication::processEvents();
+    if(iStop){
+        iflag=-1;
+        return(iflag);
     }
     return(0);
 }
@@ -10908,8 +11383,7 @@ int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag){
     double wl,ev;
     for(int i=1;i<=mwl;i++){
         wl=MIS[7][i][1];
-        ev=12400./wl;
-        par[7][1]=wl;
+        ev=1240./wl;
         par[24][2]=i;
         FDISP(ioptf,ev);
         MIS[16][i][1]=sqn;
@@ -10938,7 +11412,7 @@ int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag){
         MIS[16][i][2]=CNK[1][3];
         //computing R
         if(DATO[3]==2 || DATO[5]==2){
-            ASSEMBLER(i,wl,1,0.,vot);
+            ASSEMBLER(i,1,0.,vot);
             if(DATO[3]==2){
                 fvec[ivec]=(MIS[3][i][1]-vot[2][s1p2])/MIS[3][i][2];
                 chi2=chi2+pow(fvec[ivec],2.)/fredeg;
@@ -10951,31 +11425,31 @@ int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag){
             }
         }
         if(DATO[4]==2){
-            ASSEMBLER(i,wl,1,te,vot);
+            ASSEMBLER(i,1,te,vot);
             fvec[ivec]=(MIS[4][i][1]-vot[2][s1p2])/MIS[4][i][2];
             chi2=chi2+pow(fvec[ivec],2.)/fredeg;
             ivec++;
         }
         if(DATO[8]==2){
-            ASSEMBLER(i,wl,1,te,vot);
+            ASSEMBLER(i,1,te,vot);
             fvec[ivec]=(ELI[2][i][1]-vot[5][1])/ELI[2][i][2];
             chi2=chi2+pow(fvec[ivec],2.)/fredeg;
             ivec++;
         }
         if(DATO[10]==2){
-            ASSEMBLER(i,wl,1,te,vot);
+            ASSEMBLER(i,1,te,vot);
             fvec[ivec]=(ELI[4][i][1]-vot[5][1])/ELI[4][i][2];
             chi2=chi2+pow(fvec[ivec],2.)/fredeg;
             ivec++;
         }
         if(DATO[12]==2){
-            ASSEMBLER(i,wl,1,te,vot);
+            ASSEMBLER(i,1,te,vot);
             fvec[ivec]=(ELI[6][i][1]-vot[5][1])/ELI[6][i][2];
             chi2=chi2+pow(fvec[ivec],2.)/fredeg;
             ivec++;
         }
         if(DATO[14]==2){
-            ASSEMBLER(i,wl,1,te,vot);
+            ASSEMBLER(i,1,te,vot);
             fvec[ivec]=(ELI[8][i][1]-vot[5][1])/ELI[8][i][2];
             chi2=chi2+pow(fvec[ivec],2.)/fredeg;
             ivec++;
@@ -11001,6 +11475,11 @@ int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag){
             fchi2.close();
         }
     }
+    QCoreApplication::processEvents();
+    if(iStop){
+        iflag=-1;
+        return(iflag);
+    }
     return(0);
 }
 
@@ -11008,7 +11487,6 @@ double DELTAT(double k){
     //subroutine for computing the difference Texp and Tcalc
     int s1p2=1;
     double texp=0.,tcalc,te=0.,vot[6][3];
-    double wl=par[7][1];
     int iwl=NINT(par[24][2]);
     if(DATO[1]==2){
         texp=MIS[1][iwl][1];
@@ -11022,7 +11500,7 @@ double DELTAT(double k){
     }
     CNK[1][2]=sqn;
     CNK[1][3]=k;
-    ASSEMBLER(iwl,wl,1,te,vot);
+    ASSEMBLER(iwl,1,te,vot);
     tcalc=vot[1][s1p2];
     double dT=tcalc-texp;
     //        printf("|DELTAT> wl = %f  iwl = %d  Texp = %f\n",wl,iwl,texp);
@@ -11512,6 +11990,16 @@ void ksemawc::on_dSB_PM_56_1_valueChanged(const QString &arg1) {SaveSetting(1);}
 void ksemawc::on_dSB_PM_57_1_valueChanged(const QString &arg1) {SaveSetting(1);}
 void ksemawc::on_dSB_PM_58_1_valueChanged(const QString &arg1) {SaveSetting(1);}
 void ksemawc::on_dSB_PM_59_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+
+void ksemawc::on_dSB_PM_91_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_92_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_93_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_94_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_95_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_96_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_97_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_98_1_valueChanged(const QString &arg1) {SaveSetting(1);}
+void ksemawc::on_dSB_PM_99_1_valueChanged(const QString &arg1) {SaveSetting(1);}
 
 void ksemawc::on_dSB_PM_11_1_valueChanged(const QString &arg1) {SaveSetting(1);}
 void ksemawc::on_dSB_PM_12_1_valueChanged(const QString &arg1) {SaveSetting(1);}

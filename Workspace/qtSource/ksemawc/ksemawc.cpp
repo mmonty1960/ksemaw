@@ -39,7 +39,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C      [5][1],[5][2]........ /  ,  /
 //C      [6][1],[6][2]........TETA,  /
 //C      [7][1],[7][2]........ /  ,  /
-//C      [8][1],[8][2]........ / ,   /
+//C      [8][1],[8][2]........ jobtot ,  jobcurrent
 //C      [9][1],[9][2]........if 1 k>=0, if 1 nk_sim->temp from scratch
 //C     [10][1],[10][2].......if 1 plot eps1 eps2 , if 1 no 3-points limit in ELI resampling
 //C     [11][1],[11][2].......attenuation coeff. of k by Fit#N , /
@@ -297,6 +297,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 #include <QMessageBox>
 #include <unistd.h>
 #include <cminpack.h>
+#include <QtGlobal>
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_series_data.h>
@@ -328,7 +329,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 
 
 //global variables
-QString fnproject,pathroot,fileStore,fileStore0,fStdSpect,fRefMir,fNKsim,fMisSim,filechi2,lastAction,fileStoreSpjName;
+QString fnproject,pathroot,fileStore,fileStore0,fStdSpect,fRefMir,fNKsim,fMisSim,filechi2,lastAction,fileStoreSpjName,caller;
 QString info,fnk[9],fnSample,fnTn,fnTp,fnRn,fnRp,fnR1,fnApds,fnE1,fnE2,fnE3,fnE4,fnFnk,ParFitLab[14],NANK[17];
 
 QwtPlot *G1_Tn, *G2_Tp, *G3_Rn, *G4_Rp, *G5_R1, *G6_Apds, *G7_D, *G8_P, *G9_Af, *G10_tTR, *G11_nk, *G12_wn, *G13_wk, *G14_we1, *G15_we2, *G16_Ab;
@@ -341,12 +342,11 @@ int iSelected=0;//used to stop recursive n-selection by polygon
 
 int ink,lastIndex,ifn,npp,ppm[18],nPar,nlayer,lastTab,occupyPF,occupyPEj,DATO[15],IXW[17],iw=0,L1E2=2,iRecChi2=0;
 int ifirstcall=0;//used to initialize fit
-int ifirstWarning=0;//used to warn about T+R>1
+int ifirstWarning=0;//used to warn about A= 1-T-R<0
 int jobtot=0;
 int nOpenGraph=3;
 int NeV; // number of interpolated points in Ev or lambda
 int iDelCon=0;
-int Nperiod=0;
 int iNewSample=0;
 int iwl2print=100;//index of WL at which print when it is due
 
@@ -463,7 +463,7 @@ ksemawc::ksemawc(QWidget *parent) :
     printf("              Program C++ kSEMAW\n\n");
     printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
     printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 3.2 5 Dicember 2025\n\n");
+    printf("         version 3.3 7 January 2026\n\n");
     printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
     printf("          email: marco.montecchi@enea.it\n");
     printf("          Porting to Windows and advanced oscillators by\n");
@@ -480,22 +480,22 @@ ksemawc::ksemawc(QWidget *parent) :
     connect( ui->pBsavePro,  SIGNAL( clicked() ), this, SLOT(SaveProject()));
     connect( ui->pBloadFnk,  SIGNAL( clicked() ), this, SLOT(LoadFilenk()));
     connect( ui->pBclearFnk, SIGNAL( clicked() ), this, SLOT(ClrFnk()));
-    connect( ui->pBnk1, SIGNAL( clicked() ), this, SLOT(Setnk1()));
-    connect( ui->pBnk2, SIGNAL( clicked() ), this, SLOT(Setnk2()));
-    connect( ui->pBnk3, SIGNAL( clicked() ), this, SLOT(Setnk3()));
-    connect( ui->pBnk4, SIGNAL( clicked() ), this, SLOT(Setnk4()));
-    connect( ui->pBnk5, SIGNAL( clicked() ), this, SLOT(Setnk5()));
-    connect( ui->pBnk6, SIGNAL( clicked() ), this, SLOT(Setnk6()));
-    connect( ui->pBnk7, SIGNAL( clicked() ), this, SLOT(Setnk7()));
-    connect( ui->pBnk8, SIGNAL( clicked() ), this, SLOT(Setnk8()));
-    connect( ui->pBclearnk1,SIGNAL( clicked() ), this, SLOT(Clrnk1()));
-    connect( ui->pBclearnk2,SIGNAL( clicked() ), this, SLOT(Clrnk2()));
-    connect( ui->pBclearnk3,SIGNAL( clicked() ), this, SLOT(Clrnk3()));
-    connect( ui->pBclearnk4,SIGNAL( clicked() ), this, SLOT(Clrnk4()));
-    connect( ui->pBclearnk5,SIGNAL( clicked() ), this, SLOT(Clrnk5()));
-    connect( ui->pBclearnk6,SIGNAL( clicked() ), this, SLOT(Clrnk6()));
-    connect( ui->pBclearnk7,SIGNAL( clicked() ), this, SLOT(Clrnk7()));
-    connect( ui->pBclearnk8,SIGNAL( clicked() ), this, SLOT(Clrnk8()));
+    connect( ui->pBnk1, &QPushButton::clicked, this, [this]() {Setnk(1);});
+    connect( ui->pBnk2, &QPushButton::clicked, this, [this]() {Setnk(2);});
+    connect( ui->pBnk3, &QPushButton::clicked, this, [this]() {Setnk(3);});
+    connect( ui->pBnk4, &QPushButton::clicked, this, [this]() {Setnk(4);});
+    connect( ui->pBnk5, &QPushButton::clicked, this, [this]() {Setnk(5);});
+    connect( ui->pBnk6, &QPushButton::clicked, this, [this]() {Setnk(6);});
+    connect( ui->pBnk7, &QPushButton::clicked, this, [this]() {Setnk(7);});
+    connect( ui->pBnk8, &QPushButton::clicked, this, [this]() {Setnk(8);});
+    connect( ui->pBclearnk1, &QPushButton::clicked, this, [this]() {Clrnk(1);});
+    connect( ui->pBclearnk2, &QPushButton::clicked, this, [this]() {Clrnk(2);});
+    connect( ui->pBclearnk3, &QPushButton::clicked, this, [this]() {Clrnk(3);});
+    connect( ui->pBclearnk4, &QPushButton::clicked, this, [this]() {Clrnk(4);});
+    connect( ui->pBclearnk5, &QPushButton::clicked, this, [this]() {Clrnk(5);});
+    connect( ui->pBclearnk6, &QPushButton::clicked, this, [this]() {Clrnk(6);});
+    connect( ui->pBclearnk7, &QPushButton::clicked, this, [this]() {Clrnk(7);});
+    connect( ui->pBclearnk8, &QPushButton::clicked, this, [this]() {Clrnk(8);});
     connect( ui->pBsetSample,SIGNAL( clicked() ), this, SLOT(callSetSample()));
     connect( ui->pBclearFn,SIGNAL( clicked() ), this, SLOT(Clrfn()));
     connect( ui->lineEdit_sample,SIGNAL(textChanged(QString)),this, SLOT(listMeas(QString)));
@@ -505,14 +505,14 @@ ksemawc::ksemawc(QWidget *parent) :
     connect( ui->cBmis4,SIGNAL(currentIndexChanged(int)),this,SLOT(pwRp(int)));
     connect( ui->cBmis5,SIGNAL(currentIndexChanged(int)),this,SLOT(pwR1(int)));
     connect( ui->cBmis6,SIGNAL(currentIndexChanged(int)),this,SLOT(pwApds(int)));
-    connect( ui->cBmis7,SIGNAL(currentIndexChanged(int)),this,SLOT(pwE1(int)));
-    connect( ui->cBmis9,SIGNAL(currentIndexChanged(int)),this,SLOT(pwE2(int)));
-    connect( ui->cBmis11,SIGNAL(currentIndexChanged(int)),this,SLOT(pwE3(int)));
-    connect( ui->cBmis13,SIGNAL(currentIndexChanged(int)),this,SLOT(pwE4(int)));
-    connect( ui->cBteE1,SIGNAL(currentIndexChanged(int)),this,SLOT(pwSubE1(int)));
-    connect( ui->cBteE2,SIGNAL(currentIndexChanged(int)),this,SLOT(pwSubE2(int)));
-    connect( ui->cBteE3,SIGNAL(currentIndexChanged(int)),this,SLOT(pwSubE3(int)));
-    connect( ui->cBteE4,SIGNAL(currentIndexChanged(int)),this,SLOT(pwSubE4(int)));
+    connect( ui->cBmis7 ,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {pwEj(1);});
+    connect( ui->cBmis9 ,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {pwEj(2);});
+    connect( ui->cBmis11,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {pwEj(3);});
+    connect( ui->cBmis13,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {pwEj(4);});
+    connect( ui->cBteE1,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {pwSubEj(1);});
+    connect( ui->cBteE2,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {pwSubEj(2);});
+    connect( ui->cBteE3,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {pwSubEj(3);});
+    connect( ui->cBteE4,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {pwSubEj(4);});
     connect(ui->comboB_PAR_10_3,SIGNAL(currentIndexChanged(int)),this,SLOT(setRifMir()));
     connect(ui->checkB_PAR_22_1,SIGNAL(stateChanged(int) ),this, SLOT(setRifMir()));
     connect(ui->checkB_mis1_1,SIGNAL(stateChanged(int)),this,SLOT(MCRange()));
@@ -525,72 +525,75 @@ ksemawc::ksemawc(QWidget *parent) :
     connect(ui->checkB_mis9_1,SIGNAL(stateChanged(int)),this,SLOT(MCRange()));
     connect(ui->checkB_mis11_1,SIGNAL(stateChanged(int)),this, SLOT(MCRange()));
     connect(ui->checkB_mis13_1,SIGNAL(stateChanged(int)),this, SLOT(MCRange()));
-    connect(ui->cB_cnk1a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat1()));
-    connect(ui->cB_cnk1b,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat1()));
-    connect(ui->cB_cnk2a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat2()));
-    connect(ui->cB_cnk3a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat3()));
-    connect(ui->cB_cnk4a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat4()));
-    connect(ui->cB_cnk5a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat5()));
-    connect(ui->cB_cnk6a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat6()));
-    connect(ui->cB_cnk7a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat7()));
-    connect(ui->cB_cnk8a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat8()));
-    connect(ui->cB_cnk9a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat9()));
-    connect(ui->cB_cnk10a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat10()));
-    connect(ui->cB_cnk11a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat11()));
-    connect(ui->cB_cnk12a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat12()));
-    connect(ui->cB_cnk13a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat13()));
-    connect(ui->cB_cnk14a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat14()));
-    connect(ui->cB_cnk15a,SIGNAL(currentIndexChanged(int)),this,SLOT(setMat15()));
-    connect(ui->cB_cnk1b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA1()));
-    connect(ui->cB_cnk2b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA2()));
-    connect(ui->cB_cnk3b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA3()));
-    connect(ui->cB_cnk4b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA4()));
-    connect(ui->cB_cnk5b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA5()));
-    connect(ui->cB_cnk6b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA6()));
-    connect(ui->cB_cnk7b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA7()));
-    connect(ui->cB_cnk8b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA8()));
-    connect(ui->cB_cnk9b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA9()));
-    connect(ui->cB_cnk10b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA10()));
-    connect(ui->cB_cnk11b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA11()));
-    connect(ui->cB_cnk12b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA12()));
-    connect(ui->cB_cnk13b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA13()));
-    connect(ui->cB_cnk14b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA14()));
-    connect(ui->cB_cnk15b,SIGNAL(currentIndexChanged(int)),this,SLOT(setEMA15()));
-    connect(ui->cB_EMA_1,SIGNAL(stateChanged(int)),this, SLOT(setEMA1()));
-    connect(ui->cB_EMA_2,SIGNAL(stateChanged(int)),this, SLOT(setEMA2()));
-    connect(ui->cB_EMA_3,SIGNAL(stateChanged(int)),this, SLOT(setEMA3()));
-    connect(ui->cB_EMA_4,SIGNAL(stateChanged(int)),this, SLOT(setEMA4()));
-    connect(ui->cB_EMA_5,SIGNAL(stateChanged(int)),this, SLOT(setEMA5()));
-    connect(ui->cB_EMA_6,SIGNAL(stateChanged(int)),this, SLOT(setEMA6()));
-    connect(ui->cB_EMA_7,SIGNAL(stateChanged(int)),this, SLOT(setEMA7()));
-    connect(ui->cB_EMA_8,SIGNAL(stateChanged(int)),this, SLOT(setEMA8()));
-    connect(ui->cB_EMA_9,SIGNAL(stateChanged(int)),this, SLOT(setEMA9()));
-    connect(ui->cB_EMA_10,SIGNAL(stateChanged(int)),this, SLOT(setEMA10()));
-    connect(ui->cB_EMA_11,SIGNAL(stateChanged(int)),this, SLOT(setEMA11()));
-    connect(ui->cB_EMA_12,SIGNAL(stateChanged(int)),this, SLOT(setEMA12()));
-    connect(ui->cB_EMA_13,SIGNAL(stateChanged(int)),this, SLOT(setEMA13()));
-    connect(ui->cB_EMA_14,SIGNAL(stateChanged(int)),this, SLOT(setEMA14()));
-    connect(ui->cB_EMA_15,SIGNAL(stateChanged(int)),this, SLOT(setEMA15()));
-    connect(ui->cBosc_1,SIGNAL(stateChanged(int)),this,SLOT(setOsc1()));
-    connect(ui->cBosc_2,SIGNAL(stateChanged(int)),this,SLOT(setOsc2()));
-    connect(ui->cBosc_3,SIGNAL(stateChanged(int)),this,SLOT(setOsc3()));
-    connect(ui->cBosc_4,SIGNAL(stateChanged(int)),this,SLOT(setOsc4()));
-    connect(ui->cBosc_5,SIGNAL(stateChanged(int)),this,SLOT(setOsc5()));
-    connect(ui->cBosc_6,SIGNAL(stateChanged(int)),this,SLOT(setOsc6()));
-    connect(ui->cBosc_7,SIGNAL(stateChanged(int)),this,SLOT(setOsc7()));
-    connect(ui->cBosc_8,SIGNAL(stateChanged(int)),this,SLOT(setOsc8()));
-    connect(ui->cBosc_9,SIGNAL(stateChanged(int)),this,SLOT(setOsc9()));
-    connect(ui->cBosc_10,SIGNAL(stateChanged(int)),this,SLOT(setOsc10()));
-    connect(ui->cBosc_11,SIGNAL(stateChanged(int)),this,SLOT(setOsc11()));
-    connect(ui->cBosc_12,SIGNAL(stateChanged(int)),this,SLOT(setOsc12()));
-    connect(ui->cBosc_13,SIGNAL(stateChanged(int)),this,SLOT(setOsc13()));
-    connect(ui->cBosc_14,SIGNAL(stateChanged(int)),this,SLOT(setOsc14()));
-    connect(ui->cBosc_15,SIGNAL(stateChanged(int)),this,SLOT(setOsc15()));
-    connect(ui->cBosc_16,SIGNAL(stateChanged(int)),this,SLOT(setOsc16()));
-    connect(ui->cBosc_17,SIGNAL(stateChanged(int)),this,SLOT(setOsc17()));
-    connect(ui->cBosc_18,SIGNAL(stateChanged(int)),this,SLOT(setOsc18()));
-    connect(ui->cBosc_19,SIGNAL(stateChanged(int)),this,SLOT(setOsc19()));
-    connect(ui->cBosc_20,SIGNAL(stateChanged(int)),this,SLOT(setOsc20()));
+    connect(ui->cB_cnk1a, qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {
+        setMat(1);
+        listOsc();
+    });
+    connect(ui->cB_cnk1b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(1);});
+    connect(ui->cB_cnk2a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(2);});
+    connect(ui->cB_cnk3a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(3);});
+    connect(ui->cB_cnk4a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(4);});
+    connect(ui->cB_cnk5a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(5);});
+    connect(ui->cB_cnk6a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(6);});
+    connect(ui->cB_cnk7a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(7);});
+    connect(ui->cB_cnk8a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(8);});
+    connect(ui->cB_cnk9a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(9);});
+    connect(ui->cB_cnk10a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(10);});
+    connect(ui->cB_cnk11a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(11);});
+    connect(ui->cB_cnk12a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(12);});
+    connect(ui->cB_cnk13a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(13);});
+    connect(ui->cB_cnk14a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(14);});
+    connect(ui->cB_cnk15a,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setMat(15);});
+    connect(ui->cB_cnk1b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(1);});
+    connect(ui->cB_cnk2b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(2);});
+    connect(ui->cB_cnk3b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(3);});
+    connect(ui->cB_cnk4b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(4);});
+    connect(ui->cB_cnk5b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(5);});
+    connect(ui->cB_cnk6b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(6);});
+    connect(ui->cB_cnk7b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(7);});
+    connect(ui->cB_cnk8b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(8);});
+    connect(ui->cB_cnk9b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(9);});
+    connect(ui->cB_cnk10b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(10);});
+    connect(ui->cB_cnk11b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(11);});
+    connect(ui->cB_cnk12b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(12);});
+    connect(ui->cB_cnk13b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(13);});
+    connect(ui->cB_cnk14b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(14);});
+    connect(ui->cB_cnk15b,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {setEMA(15);});
+    connect(ui->cB_EMA_1,&QCheckBox::stateChanged, this, [this]() {setEMA(1);});
+    connect(ui->cB_EMA_2,&QCheckBox::stateChanged, this, [this]() {setEMA(2);});
+    connect(ui->cB_EMA_3,&QCheckBox::stateChanged, this, [this]() {setEMA(3);});
+    connect(ui->cB_EMA_4,&QCheckBox::stateChanged, this, [this]() {setEMA(4);});
+    connect(ui->cB_EMA_5,&QCheckBox::stateChanged, this, [this]() {setEMA(5);});
+    connect(ui->cB_EMA_6,&QCheckBox::stateChanged, this, [this]() {setEMA(6);});
+    connect(ui->cB_EMA_7,&QCheckBox::stateChanged, this, [this]() {setEMA(7);});
+    connect(ui->cB_EMA_8,&QCheckBox::stateChanged, this, [this]() {setEMA(8);});
+    connect(ui->cB_EMA_9,&QCheckBox::stateChanged, this, [this]() {setEMA(9);});
+    connect(ui->cB_EMA_10,&QCheckBox::stateChanged, this, [this]() {setEMA(10);});
+    connect(ui->cB_EMA_11,&QCheckBox::stateChanged, this, [this]() {setEMA(11);});
+    connect(ui->cB_EMA_12,&QCheckBox::stateChanged, this, [this]() {setEMA(12);});
+    connect(ui->cB_EMA_13,&QCheckBox::stateChanged, this, [this]() {setEMA(13);});
+    connect(ui->cB_EMA_14,&QCheckBox::stateChanged, this, [this]() {setEMA(14);});
+    connect(ui->cB_EMA_15,&QCheckBox::stateChanged, this, [this]() {setEMA(15);});
+    connect(ui->cBosc_1,&QCheckBox::stateChanged, this, [this]() {setOscN(1);});
+    connect(ui->cBosc_2,&QCheckBox::stateChanged, this, [this]() {setOscN(2);});
+    connect(ui->cBosc_3,&QCheckBox::stateChanged, this, [this]() {setOscN(3);});
+    connect(ui->cBosc_4,&QCheckBox::stateChanged, this, [this]() {setOscN(4);});
+    connect(ui->cBosc_5,&QCheckBox::stateChanged, this, [this]() {setOscN(5);});
+    connect(ui->cBosc_6,&QCheckBox::stateChanged, this, [this]() {setOscN(6);});
+    connect(ui->cBosc_7,&QCheckBox::stateChanged, this, [this]() {setOscN(7);});
+    connect(ui->cBosc_8,&QCheckBox::stateChanged, this, [this]() {setOscN(8);});
+    connect(ui->cBosc_9,&QCheckBox::stateChanged, this, [this]() {setOscN(9);});
+    connect(ui->cBosc_10,&QCheckBox::stateChanged, this, [this]() {setOscN(10);});
+    connect(ui->cBosc_11,&QCheckBox::stateChanged, this, [this]() {setOscN(11);});
+    connect(ui->cBosc_12,&QCheckBox::stateChanged, this, [this]() {setOscN(12);});
+    connect(ui->cBosc_13,&QCheckBox::stateChanged, this, [this]() {setOscN(13);});
+    connect(ui->cBosc_14,&QCheckBox::stateChanged, this, [this]() {setOscN(14);});
+    connect(ui->cBosc_15,&QCheckBox::stateChanged, this, [this]() {setOscN(15);});
+    connect(ui->cBosc_16,&QCheckBox::stateChanged, this, [this]() {setOscN(16);});
+    connect(ui->cBosc_17,&QCheckBox::stateChanged, this, [this]() {setOscN(17);});
+    connect(ui->cBosc_18,&QCheckBox::stateChanged, this, [this]() {setOscN(18);});
+    connect(ui->cBosc_19,&QCheckBox::stateChanged, this, [this]() {setOscN(19);});
+    connect(ui->cBosc_20,&QCheckBox::stateChanged, this, [this]() {setOscN(20);});
     connect(ui->tabWidget,SIGNAL(currentChanged(int)),this,SLOT(tabChanged()));
     connect(ui->dSB_PAR_4_1,SIGNAL(valueChanged(double)),this,SLOT(rangeWL()));
     connect(ui->dSB_PAR_4_2,SIGNAL(valueChanged(double)),this,SLOT(rangeWL()));
@@ -677,24 +680,24 @@ ksemawc::ksemawc(QWidget *parent) :
     connect(ui->pushButton_next,SIGNAL(clicked()), this,SLOT(GoNext()));
     connect(ui->pushButton_saveNKens,SIGNAL(clicked()), this,SLOT(SaveFnk()));
     connect(ui->pushButton_saveNKbestFit,SIGNAL(clicked()), this,SLOT(SaveFnk()));
-    connect(ui->pBmDw1, SIGNAL( clicked() ), this, SLOT(mDw1()));
-    connect(ui->pBmUp1, SIGNAL( clicked() ), this, SLOT(mUp1()));
-    connect(ui->pBmDw2, SIGNAL( clicked() ), this, SLOT(mDw2()));
-    connect(ui->pBmUp2, SIGNAL( clicked() ), this, SLOT(mUp2()));
-    connect(ui->pBmDw3, SIGNAL( clicked() ), this, SLOT(mDw3()));
-    connect(ui->pBmUp3, SIGNAL( clicked() ), this, SLOT(mUp3()));
-    connect(ui->pBmDw4, SIGNAL( clicked() ), this, SLOT(mDw4()));
-    connect(ui->pBmUp4, SIGNAL( clicked() ), this, SLOT(mUp4()));
-    connect(ui->pBmDw5, SIGNAL( clicked() ), this, SLOT(mDw5()));
-    connect(ui->pBmUp5, SIGNAL( clicked() ), this, SLOT(mUp5()));
-    connect(ui->pBmDw6, SIGNAL( clicked() ), this, SLOT(mDw6()));
-    connect(ui->pBmUp6, SIGNAL( clicked() ), this, SLOT(mUp6()));
-    connect(ui->pBmDw7, SIGNAL( clicked() ), this, SLOT(mDw7()));
-    connect(ui->pBmUp7, SIGNAL( clicked() ), this, SLOT(mUp7()));
-    connect(ui->pBmDw8, SIGNAL( clicked() ), this, SLOT(mDw8()));
-    connect(ui->pBmUp8, SIGNAL( clicked() ), this, SLOT(mUp8()));
-    connect(ui->pBmDw9, SIGNAL( clicked() ), this, SLOT(mDw9()));
-    connect(ui->pBmUp9, SIGNAL( clicked() ), this, SLOT(mUp9()));
+    connect(ui->pBmDw1, &QPushButton::clicked, this, [this]() {mDwUp(1, 1);});
+    connect(ui->pBmDw2, &QPushButton::clicked, this, [this]() {mDwUp(2, 1);});
+    connect(ui->pBmDw3, &QPushButton::clicked, this, [this]() {mDwUp(3, 1);});
+    connect(ui->pBmDw4, &QPushButton::clicked, this, [this]() {mDwUp(4, 1);});
+    connect(ui->pBmDw5, &QPushButton::clicked, this, [this]() {mDwUp(5, 1);});
+    connect(ui->pBmDw6, &QPushButton::clicked, this, [this]() {mDwUp(6, 1);});
+    connect(ui->pBmDw7, &QPushButton::clicked, this, [this]() {mDwUp(7, 1);});
+    connect(ui->pBmDw8, &QPushButton::clicked, this, [this]() {mDwUp(8, 1);});
+    connect(ui->pBmDw9, &QPushButton::clicked, this, [this]() {mDwUp(9, 1);});
+    connect(ui->pBmUp1, &QPushButton::clicked, this, [this]() {mDwUp(1,-1);});
+    connect(ui->pBmUp2, &QPushButton::clicked, this, [this]() {mDwUp(2,-1);});
+    connect(ui->pBmUp3, &QPushButton::clicked, this, [this]() {mDwUp(3,-1);});
+    connect(ui->pBmUp4, &QPushButton::clicked, this, [this]() {mDwUp(4,-1);});
+    connect(ui->pBmUp5, &QPushButton::clicked, this, [this]() {mDwUp(5,-1);});
+    connect(ui->pBmUp6, &QPushButton::clicked, this, [this]() {mDwUp(6,-1);});
+    connect(ui->pBmUp7, &QPushButton::clicked, this, [this]() {mDwUp(7,-1);});
+    connect(ui->pBmUp8, &QPushButton::clicked, this, [this]() {mDwUp(8,-1);});
+    connect(ui->pBmUp9, &QPushButton::clicked, this, [this]() {mDwUp(9,-1);});
     connect(ui->pushButton_saveSim, SIGNAL( clicked() ), this, SLOT(saveSim()));
     connect(ui->pushButton_saveNKsim,SIGNAL( clicked() ), this, SLOT(saveNKsim()));
     connect(ui->pushButton_PlotAbsEL,SIGNAL( clicked() ),this, SLOT(PlotAbsEL()));
@@ -1603,24 +1606,25 @@ ksemawc::ksemawc(QWidget *parent) :
     //oscillator list
     for(int k=1;k<=20;k++){
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]-> clear();
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Lorentz");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Quant-homo");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Quant-inhomo");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Flat");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Drude");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Cody");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Tauc");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Cody");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Tauc");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Cody-Urbach");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Tauc-Urbach");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Cody-Urbach");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Tauc-Urbach");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Tauc-Exciton");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Cody-M1M2");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Tauc-M1M2");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Drude-ionized");
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Lorentz-Dirac");
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Lorentz");      //#1
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Quant-homo");   //#2
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Quant-inhomo"); //#3
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Flat");         //#4
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Drude");        //#5
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Cody"); //#6
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Tauc"); //#7
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Cody"); //#8
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Tauc"); //#9
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Cody-Urbach");  //#10
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Ind-Gap-Tauc-Urbach");  //#11
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Cody-Urbach");  //#12
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Tauc-Urbach");  //#13
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Tauc-Exciton"); //#14
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Cody-M1M2");    //#15
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Tauc-M1M2");    //#16
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Drude-ionized");        //#17
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Lorentz-Dirac");        //#18
+        //idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Volum-Scat");           //#19
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->setCurrentIndex(-1);
     }
 
@@ -1705,16 +1709,22 @@ ksemawc::ksemawc(QWidget *parent) :
     occupyPF=0;
     occupyPEj=0;
 
+    //make your choice
     QMessageBox msgBox;
-    msgBox.setText("Do you want to continue the previous session?");
-    //msgBox.setInformativeText("pippo");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    int ret = msgBox.exec();
+    msgBox.setWindowTitle("Starting ksemawc project");
+    msgBox.setText("Please make a choice:");
+    QPushButton* continueButton = msgBox.addButton("Continue the previous session", QMessageBox::AcceptRole);
+    QPushButton* newButton = msgBox.addButton("Start a new project", QMessageBox::RejectRole);
+    QPushButton* openButton = msgBox.addButton("Open an existing project", QMessageBox::DestructiveRole);
+    msgBox.setDefaultButton(newButton);
+    int ret=msgBox.exec();
+    printf("ret=%d\n",ret);
     QString SpjName;
     QFile file(fileStoreSpjName);
     switch (ret) {
-    case QMessageBox::Yes:
+
+    case QMessageBox::AcceptRole:
+        printf("Continue the previous session\n");
         //Load Project name
         if(file.open(QIODevice::ReadOnly | QIODevice::Text)){
             QTextStream stream (&file);
@@ -1722,17 +1732,27 @@ ksemawc::ksemawc(QWidget *parent) :
             file.close();
         }
         if(SpjName.contains("mate/aa999.9")||SpjName.isEmpty()){
+            caller="initialization";
             ReadSetting(fileStore0);
             ui->lineEdit_infoP-> setText("The last session has been loaded. Now please set the project name!");
         }
         else{
+            caller="initialization";
             ReadSetting(pathroot+SpjName);
             ui->lineEdit_P -> setText(SpjName);
         }
         break;
-    case QMessageBox::No:
+
+    case QMessageBox::RejectRole:
+        printf("Start a new project\n");
+        break;
+
+    case QMessageBox::DestructiveRole:
+        printf("Open an existing project\n");
+        LoadProject();
         break;
     }
+
     SaveSetting(-1);//save
 }
 
@@ -1868,6 +1888,7 @@ void ksemawc::LoadProject(){
         idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
     }
 
+    caller="LoadProject";
     ReadSetting(fnproject);
     SPADA();//load file-nk & measurements
     SaveSetting(-1);
@@ -2165,14 +2186,20 @@ void ksemawc::ReadSetting(QString filename){
         }
         JJ++;
     }
-    ui->dSB_PAR_3_3 -> setValue(par[3][3]);
-    ui->dSB_PAR_4_1 -> setValue(par[4][1]);
-    ui->dSB_PAR_4_2 -> setValue(par[4][2]);
-    ui->dSB_PAR_4_3 -> setValue(par[4][3]);
-    ui->dSB_PAR_5_3 -> setValue(par[5][3]);
-    ui->dSB_PAR_6_1 -> setValue(par[6][1]);
-    ui->sB_PAR_8_1 -> setValue(0);
-    ui->sB_PAR_8_2 -> setValue(0);
+    ui->dSB_PAR_3_3 -> setValue(par[3][3]);//Err DBase/Base
+    ui->dSB_PAR_4_1 -> setValue(par[4][1]);//Lmin
+    ui->dSB_PAR_4_2 -> setValue(par[4][2]);//Lmax
+    ui->dSB_PAR_4_3 -> setValue(par[4][3]);//Err DRef/Ref
+    ui->dSB_PAR_5_3 -> setValue(par[5][3]);//ErrReading
+    ui->dSB_PAR_6_1 -> setValue(par[6][1]);//theta
+    if(caller=="LoadProject"){
+        ui->sB_PAR_8_1 -> setValue(0);
+        ui->sB_PAR_8_2 -> setValue(0);
+        jobtot=0;
+        ifirstcall=0;
+        ui->spinBox_jobBest -> setValue(0);
+        ui->lineEdit_chi2Best->setText("1.E+99");
+    }
     if(NINT(par[9][1])==1)
         ui->checkBox_setPsoK -> setCheckState ( Qt::Checked );
     else
@@ -2424,6 +2451,9 @@ void ksemawc::ReadSetting(QString filename){
     ui->sB_PAR_51_2 -> setValue(nlayer);
     occupyPF=0;
 
+    QString sname=ui->lineEdit_sample -> text();
+    if(sname.isEmpty() || sname=="mate/aa999")
+        Clrfn();
     MCRange();
     SetModel(nlayer);
     listOsc();
@@ -2473,19 +2503,19 @@ void ksemawc::AdjTheta(){
     ui->dSB_PAR_6_1tris -> setValue(theta);
 //    ui->dSB_PAR_6_1quater -> setValue(theta);
 //    ui->dSB_PAR_6_1quinto -> setValue(theta);
-    theta=ui->dSB_PM_86_1 -> value();
+//    theta=ui->dSB_PM_86_1 -> value();
 //    ui->dSB_PAR_14_1bis -> setValue(theta);
-    theta=ui->dSB_PM_87_1 -> value();
+//    theta=ui->dSB_PM_87_1 -> value();
 //    ui->dSB_PAR_15_1bis -> setValue(theta);
-    theta=ui->dSB_PM_88_1 -> value();
+//    theta=ui->dSB_PM_88_1 -> value();
 //    ui->dSB_PAR_16_1bis -> setValue(theta);
-    theta=ui->dSB_PM_89_1 -> value();
+//    theta=ui->dSB_PM_89_1 -> value();
 //    ui->dSB_PAR_17_1bis -> setValue(theta);
 }
 
 
 void ksemawc::AdjRoughMax(){
-    double d,dUP,rgh,rghMax;
+    double d,dUP,rghMax;
     for(int i=1;i<10;i++){
         int iKind=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] ->currentIndex();
         if(iKind>0){
@@ -3180,6 +3210,7 @@ void ksemawc::LoadFilenk(){
     for(int L=2;L<=N+1;L++){
         line=stream.readLine();
         line=line.simplified();
+        //printf("line=%s\n",line.toStdString().c_str());
         QStringList List;
         List =line.split(" ");
         int nV=List.count();
@@ -3264,7 +3295,7 @@ void ksemawc::ClrFnk(){
 
 
 void ksemawc::SaveFnk(){
-    printf("-> SaveFnk witl lastAction=%s\n",lastAction.toStdString().c_str());
+    printf("-> SaveFnk with lastAction=%s\n",lastAction.toStdString().c_str());
     QString line;
     int iCase=0;
     int N=NINT(SOL[1][1]);
@@ -3349,7 +3380,7 @@ void ksemawc::Setnk(int ifile){
         msgErrLoad("Setn",fnk[ifile]);
         return;
     }
-    printf("->Setnk(%d) with fnk[%d]=%s\n\n",ifile,ifile,fnk[ifile].toStdString().c_str());
+    printf("->Setnk(%d) with fnk[%d]=%s\n",ifile,ifile,fnk[ifile].toStdString().c_str());
     double val1,val2;
     QTextStream stream ( &file );
     QString line,line2,pezzo;
@@ -3373,6 +3404,7 @@ void ksemawc::Setnk(int ifile){
     val2=line.section(' ', 0, 0).toDouble();
     val1=val1*a2nm;
     val2=val2*a2nm;
+    printf("\tval1=%f val2=%f\n",val1,val2);
     if(val1<val2){
         idToLineEdit["WLminNK"+QString::number(ifile)] -> setText(QString::number(NINT(val1)));
         idToLineEdit["WLmaxNK"+QString::number(ifile)] -> setText(QString::number(NINT(val2)));
@@ -3385,117 +3417,6 @@ void ksemawc::Setnk(int ifile){
     MCRange();
     line2=idToLineEdit["lineEdit"+QString::number(ifile)] -> text();
     updateMatenk(7+ifile,line2);
-}
-
-void ksemawc::Setnk1(){
-    ifn=0;
-    Setnk(1);
-}
-
-void ksemawc::Setnk2(){
-    ifn=0;
-    Setnk(2);
-}
-
-void ksemawc::Setnk3(){
-    ifn=0;
-    Setnk(3);
-}
-
-void ksemawc::Setnk4(){
-    ifn=0;
-    Setnk(4);
-}
-
-void ksemawc::Setnk5(){
-    Setnk(5);
-}
-
-void ksemawc::Setnk6(){
-    ifn=0;
-    Setnk(6);
-}
-
-void ksemawc::Setnk7(){
-    ifn=0;
-    Setnk(7);
-}
-
-void ksemawc::Setnk8(){
-    ifn=0;
-    Setnk(8);
-}
-
-void ksemawc::mDw1(){
-    mDwUp(1,1);
-}
-
-void ksemawc::mUp1(){
-    mDwUp(1,-1);
-}
-
-void ksemawc::mDw2(){
-    mDwUp(2,1);
-}
-
-void ksemawc::mUp2(){
-    mDwUp(2,-1);
-}
-
-void ksemawc::mDw3(){
-    mDwUp(3,1);
-}
-
-void ksemawc::mUp3(){
-    mDwUp(3,-1);
-}
-
-void ksemawc::mDw4(){
-    mDwUp(4,1);
-}
-
-void ksemawc::mUp4(){
-    mDwUp(4,-1);
-}
-
-void ksemawc::mDw5(){
-    mDwUp(5,1);
-}
-
-void ksemawc::mUp5(){
-    mDwUp(5,-1);
-}
-
-void ksemawc::mDw6(){
-    mDwUp(6,1);
-}
-
-void ksemawc::mUp6(){
-    mDwUp(6,-1);
-}
-
-void ksemawc::mDw7(){
-    mDwUp(7,1);
-}
-
-void ksemawc::mUp7(){
-    mDwUp(7,-1);
-}
-
-void ksemawc::mDw8(){
-    mDwUp(8,1);
-}
-
-void ksemawc::mUp8(){
-    mDwUp(8,-1);
-}
-
-void ksemawc::mDw9(){
-    mDwUp(9,1);
-}
-
-void ksemawc::mUp9(){
-    mDwUp(9,-1);
 }
 
 void ksemawc::mDwUp(int iLayer, int Dw1UpM1){
@@ -3562,38 +3483,6 @@ void ksemawc::Clrnk(int ifile){
     idToLineEdit["WLmaxNK"+QString::number(ifile)] -> setText("");
     MCRange();
     updateMatenk(7+ifile,"nk-"+QString::number(ifile));
-}
-
-void ksemawc::Clrnk1(){
-    Clrnk(1);
-}
-
-void ksemawc::Clrnk2(){
-    Clrnk(2);
-}
-
-void ksemawc::Clrnk3(){
-    Clrnk(3);
-}
-
-void ksemawc::Clrnk4(){
-    Clrnk(4);
-}
-
-void ksemawc::Clrnk5(){
-    Clrnk(5);
-}
-
-void ksemawc::Clrnk6(){
-    Clrnk(6);
-}
-
-void ksemawc::Clrnk7(){
-    Clrnk(7);
-}
-
-void ksemawc::Clrnk8(){
-    Clrnk(8);
 }
 
 void ksemawc::callSetSample(){
@@ -3984,22 +3873,6 @@ void ksemawc::pwEj(int j){
     }
 }
 
-void ksemawc::pwE1(const int &){
-    pwEj(1);
-}
-
-void ksemawc::pwE2(const int &){
-    pwEj(2);
-}
-
-void ksemawc::pwE3(const int &){
-    pwEj(3);
-}
-
-void ksemawc::pwE4(const int &){
-    pwEj(4);
-}
-
 
 void ksemawc::pwSubEj(int j){
     if(occupyPEj==1)
@@ -4023,22 +3896,6 @@ void ksemawc::pwSubEj(int j){
         idToLineEdit["WLmax"+QString::number(5+2*j)] -> setText("");
     }
     MCRange();
-}
-
-void ksemawc::pwSubE1(const int &){
-    pwSubEj(1);
-}
-
-void ksemawc::pwSubE2(const int &){
-    pwSubEj(2);
-}
-
-void ksemawc::pwSubE3(const int &){
-    pwSubEj(3);
-}
-
-void ksemawc::pwSubE4(const int &){
-    pwSubEj(4);
 }
 
 void ksemawc::MCRange(){
@@ -4483,53 +4340,6 @@ void ksemawc::RefreshModel(){
     }
 }
 
-
-void ksemawc::setMat1(){
-    setMat(1);
-    listOsc();
-}
-void ksemawc::setMat2(){
-    setMat(2);
-}
-void ksemawc::setMat3(){
-    setMat(3);
-}
-void ksemawc::setMat4(){
-    setMat(4);
-}
-void ksemawc::setMat5(){
-    setMat(5);
-}
-void ksemawc::setMat6(){
-    setMat(6);
-}
-void ksemawc::setMat7(){
-    setMat(7);
-}
-void ksemawc::setMat8(){
-    setMat(8);
-}
-void ksemawc::setMat9(){
-    setMat(9);
-}
-void ksemawc::setMat10(){
-    setMat(10);
-}
-void ksemawc::setMat11(){
-    setMat(11);
-}
-void ksemawc::setMat12(){
-    setMat(12);
-}
-void ksemawc::setMat13(){
-    setMat(13);
-}
-void ksemawc::setMat14(){
-    setMat(14);
-}
-void ksemawc::setMat15(){
-    setMat(15);
-}
 void ksemawc::setMat(int nM){
     printf("->setMat called by cnk %d\n",nM);
     int curI=idToComboBox["cB_cnk"+QString::number(nM)+"a"] -> currentIndex();
@@ -4542,51 +4352,6 @@ void ksemawc::setMat(int nM){
     }
 }
 
-void ksemawc::setEMA1(){
-    setEMA(1);
-}
-void ksemawc::setEMA2(){
-    setEMA(2);
-}
-void ksemawc::setEMA3(){
-    setEMA(3);
-}
-void ksemawc::setEMA4(){
-    setEMA(4);
-}
-void ksemawc::setEMA5(){
-    setEMA(5);
-}
-void ksemawc::setEMA6(){
-    setEMA(6);
-}
-void ksemawc::setEMA7(){
-    setEMA(7);
-}
-void ksemawc::setEMA8(){
-    setEMA(8);
-}
-void ksemawc::setEMA9(){
-    setEMA(9);
-}
-void ksemawc::setEMA10(){
-    setEMA(10);
-}
-void ksemawc::setEMA11(){
-    setEMA(11);
-}
-void ksemawc::setEMA12(){
-    setEMA(12);
-}
-void ksemawc::setEMA13(){
-    setEMA(13);
-}
-void ksemawc::setEMA14(){
-    setEMA(14);
-}
-void ksemawc::setEMA15(){
-    setEMA(15);
-}
 void ksemawc::setEMA(int nM){
     Qt::CheckState state;
     state=idToCheckBox["cB_EMA_"+QString::number(nM)] -> checkState();
@@ -4758,86 +4523,6 @@ void ksemawc::setKindOsc20(){
     pm[196][1]=iKind+1;
     //printf("Osc20->%d type\n",iKind+1);
     listOsc();
-}
-
-void ksemawc::setOsc1(){
-    setOscN(1);
-}
-
-void ksemawc::setOsc2(){
-    setOscN(2);
-}
-
-void ksemawc::setOsc3(){
-    setOscN(3);
-}
-
-void ksemawc::setOsc4(){
-    setOscN(4);
-}
-
-void ksemawc::setOsc5(){
-    setOscN(5);
-}
-
-void ksemawc::setOsc6(){
-    setOscN(6);
-}
-
-void ksemawc::setOsc7(){
-    setOscN(7);
-}
-
-void ksemawc::setOsc8(){
-    setOscN(8);
-}
-
-void ksemawc::setOsc9(){
-    setOscN(9);
-}
-
-void ksemawc::setOsc10(){
-    setOscN(10);
-}
-
-void ksemawc::setOsc11(){
-    setOscN(11);
-}
-
-void ksemawc::setOsc12(){
-    setOscN(12);
-}
-
-void ksemawc::setOsc13(){
-    setOscN(13);
-}
-
-void ksemawc::setOsc14(){
-    setOscN(14);
-}
-
-void ksemawc::setOsc15(){
-    setOscN(15);
-}
-
-void ksemawc::setOsc16(){
-    setOscN(16);
-}
-
-void ksemawc::setOsc17(){
-    setOscN(17);
-}
-
-void ksemawc::setOsc18(){
-    setOscN(18);
-}
-
-void ksemawc::setOsc19(){
-    setOscN(19);
-}
-
-void ksemawc::setOsc20(){
-    setOscN(20);
 }
 
 void ksemawc::setOscN(int k){
@@ -5153,7 +4838,7 @@ void ksemawc::tabChanged(){
             RefTrackG();
         printf("ifirstcall=%d\n",ifirstcall);
         if(ifirstcall==0){
-            ui->lineEdit_chi2Best->setText("1.E+09");
+            ui->lineEdit_chi2Best->setText("1.E+99");
             ui->spinBox_jobBest->setValue(0);
         }
     }
@@ -5431,7 +5116,7 @@ void ksemawc::PanFitPar(){
         if(itab==3 && itab==lastTab){
             printf("\tStart PanFitPar: nppNew=%d npp=%d\n",nppNew,npp);
             if(nppNew > npp){
-                for(int j=npp+1;j<=nppNew;j++){
+                for(int j=npp+1;j<=nppNew;j++){//enable and initialize new parameters
                     idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(true);
                     idToComboBox["cBParFit_"+QString::number(j)] -> clear();
                     idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
@@ -5440,7 +5125,7 @@ void ksemawc::PanFitPar(){
                     idToLineEdit["DPparFitGC_"+QString::number(j)]-> clear();
                     idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(true);
                 }
-                for(int i=1;i<=nlayer;i++){
+                for(int i=1;i<=nlayer;i++){//add avilable layer parameters
                     icoherent=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
                     Lj="L"+QString::number(i);
                     if(icoherent==0) //bulk
@@ -5457,40 +5142,40 @@ void ksemawc::PanFitPar(){
                         }
                     }
                 }
-                for(int i=1;i<=15;i++){
+                for(int i=1;i<=15;i++){//add available EMAs
                     state=idToCheckBox["cB_EMA_"+QString::number(i)]->checkState();
                     if(state==Qt::Checked){
                         for(int j=npp+1;j<=nppNew;j++)
                             idToComboBox["cBParFit_"+QString::number(j)]-> addItem(ParFitLab[12]+QString::number(i));
                     }
                 }
-                for(int i=1;i<=4;i++){
+                for(int i=1;i<=4;i++){//add available THETAs
                     Qt::CheckState state=idToCheckBox["checkB_mis"+QString::number(5+2*i)+"_1"]->checkState();
                     if(state==Qt::Checked){
                         for(int j=npp+1;j<=nppNew;j++)
                             idToComboBox["cBParFit_"+QString::number(j)]-> addItem(ParFitLab[13]+QString::number(i));
                     }
                 }
-                for(int i=1;i<=20;i++){
+                for(int i=1;i<=20;i++){// add available oscillators
                     Lj="O"+QString::number(i);
                     state=idToCheckBox["cBosc_"+QString::number(i)]-> checkState();
                     if( state == Qt::Checked ) {
                         int ifu=idToComboBox["cBpm_"+QString::number(100+1+(i-1)*5)+"_1"]->currentIndex();
                         ifu++;
                         for(int j=npp+1;j<=nppNew;j++){
-                            idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[8]);
+                            idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[8]);     //C
                             if(ifu!=4 && ifu!=5 && ifu!=17)
-                                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[9]);
+                                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[9]); //E
                             if(ifu!=4){
-                                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[10]);
+                                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[10]);//D
                             }
                             if(ifu>5 && ifu!=17)
-                                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[11]);
+                                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[11]);//W
                         }
                     }
                 }
             }
-            else{
+            else{//disable redundand parameters
                 for(int j=nppNew+1;j<=npp;j++){
                     idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(false);
                     idToComboBox["cBParFit_"+QString::number(j)] -> clear();
@@ -5575,6 +5260,7 @@ void ksemawc::PanFitChoice(){
 
 void ksemawc::PlotMENK(){
     printf("-> PlotMENK()\n");
+    iColor=0;//reset to black color
     SPADA();
     PlotME();
     PlotNK(1);
@@ -5605,7 +5291,7 @@ void ksemawc::PlotME(){
                 iPSI++;
         }
         if(DATO[i]!=0)
-            printf("->PlotMe: DATO[%d]=%d\n",i,DATO[i]);
+            printf("->PlotMe: DATO[%d]=%d ifirstWarning=%d\n",i,DATO[i],ifirstWarning);
         if(DATO[i]>0){
             double YOLD,X,Y,errY;
             if(i>=7) YOLD=ELI[i-6][1][1];
@@ -5657,11 +5343,11 @@ void ksemawc::PlotME(){
         PLOTline1bar2(2,iRD,0,9,Ndata,Xp,Yp,ErrXp,ErrYp);
         if(ifirstWarning==0 && iPlotA>0){
             QMessageBox msgBox;
-            msgBox.setText("ATTENTION: Tnorm + Rnorm > 0 !!!\nPlease check your measurements.");
+            msgBox.setText("ATTENTION: A = 1 - Tn - Rn < 0 !!!\nPlease check your measurements.");
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.exec();
+            ifirstWarning=-1;
         }
-        ifirstWarning=-1;
     }
     else if(DATO[1]!=0 && DATO[3]!=0)
         PLOTline1bar2(2,iRD,0,9,0,Xp,Yp,ErrXp,ErrYp);
@@ -5684,7 +5370,7 @@ void ksemawc::PlotME(){
         PLOTline1bar2(2,iRD,0,16,Ndata,Xp,Yp,ErrXp,ErrYp);
         if(ifirstWarning<=0 && iPlotA>0){
             QMessageBox msgBox;
-            msgBox.setText("ATTENTION: Tnorm + R1norm > 0 !!!\nPlease check your measurements.");
+            msgBox.setText("ATTENTION: A= 1 - Tn - R1 <0 !!!\nPlease check your measurements.");
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.exec();
         }
@@ -6086,14 +5772,23 @@ void ksemawc::CalcMis(double mc[15][1000]){
         }
     }
     fileNK.close();
+    int Nperiod;
     double SIMchi2=0.;
     double nMIS=0.;
     //Plot calcData and computing chi2
     for(int ic=1;ic<=14;ic++){
-        double FM=0.,DD=0.;
+        double FM=0.;
         state=idToCheckBox["checkB_mis"+QString::number(ic)+"_2"] -> checkState ();
         if(state==Qt::Checked && DATO[ic]!=0){
             nMIS++;
+            Nperiod=0;
+            if(ic==7 || ic==9 || ic==11 || ic==13){
+                double Diff=.0;
+                for(int i=1;i<=NeV;i++){
+                    Diff=Diff+(mc[ic][i]-ELI[ic-6][i][1])/NeV;
+                }
+                Nperiod=NINT(Diff/Dperiod);
+            }
             for(int i=1;i<=NeV;i++){
                 Yp[i-1]=mc[ic][i];
                 if(ic<=5)
@@ -6101,9 +5796,6 @@ void ksemawc::CalcMis(double mc[15][1000]){
                 if(ic<=6)
                     FM=FM+pow((mc[ic][i]-MIS[ic][i][1])/MIS[ic][i][2],2.)/NeV;
                 else{
-                    Nperiod=0;
-                    if(ic==7 || ic==9 || ic==11 || ic==13)
-                        Nperiod=NINT((mc[ic][i]-ELI[ic-6][i][1])/Dperiod);
                     FM=FM+pow((mc[ic][i]-ELI[ic-6][i][1]-Nperiod*Dperiod)/ELI[ic-6][i][2],2.)/NeV;
                     Yp[i-1]=Yp[i-1]-Nperiod*Dperiod;
                 }
@@ -7313,9 +7005,16 @@ void ksemawc::IbridKernel(QString rc){
             CNK[1][1]=0;//nk unknown
             printf("n(param)= %d m(Ndata)= %d lwa= %d fredeg=%f tol=%e s1p2=%d\n",
                    n,m,lwa,fredeg,tol,NINT(par[27][2]));
-            if(n==0 || m==0){
+            if(n==0){
                 QMessageBox msgBox;
-                msgBox.setText("ATTENTION: n & m must be > 0!!!\n");
+                msgBox.setText("ATTENTION: please enable at least one parameter for best-fit!!!\n");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.exec();
+                return;
+            }
+            if(m==0){
+                QMessageBox msgBox;
+                msgBox.setText("ATTENTION: please select at least one measurement!!!\n");
                 msgBox.setStandardButtons(QMessageBox::Ok);
                 msgBox.exec();
                 return;
@@ -7703,7 +7402,7 @@ void ksemawc::IbridKernel(QString rc){
                 PLOTline1bar2(1,0,iColor,5,mwl,wwl,r1,ErrXp,ErrYp);//R1 plot
             for(int ieli=0;ieli<4;ieli++){
                 if(DATO[7+2*ieli]==2){
-                    Nperiod=NINT(delDiff[ieli]/Dperiod);
+                    int Nperiod=NINT(delDiff[ieli]/Dperiod);
                     for(int i=0;i<NeV;i++)
                         delta[i]=DelMat[i][ieli]-Nperiod*Dperiod;
                     PLOTline1bar2(1,0,iColor,7,mwl,wwl,delta,ErrXp,ErrYp);//DELTA plot
@@ -7756,6 +7455,7 @@ void ksemawc::GoBest(){
     QString infoFnk=ui->lineEdit_infoFnk-> text();
     QString ftmp=pathroot+"temp/semaw"+QString::number(jobBest)+".Spj";
     occupyPF=10;
+    caller="GoBest";
     ReadSetting(ftmp);
     ui->sB_PAR_8_2->setValue(jobBest);
     ui->sB_PAR_8_1->setValue(jobtot);
@@ -7773,6 +7473,7 @@ void ksemawc::GoPrevious(){
     jobview--;
     QString ftmp=pathroot+"temp/semaw"+QString::number(jobview)+".Spj";
     occupyPF=10;
+    caller="GoPrevious";
     ReadSetting(ftmp);
     ui->sB_PAR_8_1->setValue(jobtot);
     ui->sB_PAR_8_2->setValue(jobview);
@@ -7789,6 +7490,7 @@ void ksemawc::GoNext(){
     QString infoFnk=ui->lineEdit_infoFnk-> text();
     jobview++;
     QString ftmp=pathroot+"temp/semaw"+QString::number(jobview)+".Spj";
+    caller="GoNext";
     ReadSetting(ftmp);
     ui->sB_PAR_8_1->setValue(jobtot);
     ui->sB_PAR_8_2->setValue(jobview);

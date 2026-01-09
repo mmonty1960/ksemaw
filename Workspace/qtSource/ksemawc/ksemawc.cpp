@@ -231,10 +231,10 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C       J=14   <-> VNK[14][1 o 2]   = n,k input medium PSI,DELTA #3
 //C       J=15   <-> VNK[15][1 o 2]   = n,k input medium PSI,DELTA #
 //C       J=16   <-> VNK[9][1 o 2]    = n,k output medium Tnormal,..,R1_normal
-//C    CNK[J][1 and 4]=17      =>  n,k  unknown
 //C    CNK[J][1 and 4]=0       =>  n,k cte  n=CNK[J][2 and 5]  k=CNK[J][3 and 6]
 //C    CNK[J][1 and 4]=1..5    =>  n,k by  Fit#
 //C    CNK[J][1 and 4]=8..15   =>  n,k by file-nk loaded in MIS[K][L][NK]
+//C    CNK[J][1 and 4]=16      =>  n,k Material#1
 //C
 //C
 //C    rxy[30][4]: managment matrix of plots
@@ -463,7 +463,7 @@ ksemawc::ksemawc(QWidget *parent) :
     printf("              Program C++ kSEMAW\n\n");
     printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
     printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 3.3 7 January 2026\n\n");
+    printf("         version 3.4 9 January 2026\n\n");
     printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
     printf("          email: marco.montecchi@enea.it\n");
     printf("          Porting to Windows and advanced oscillators by\n");
@@ -813,11 +813,11 @@ ksemawc::ksemawc(QWidget *parent) :
     // initialization of CNK which pilot VNK setting
     for(int i=1;i<=16;i++){
         CNK[i][1]=.0;//option "constant nk"
-        CNK[i][2]=1.;//n value
-        CNK[i][3]=.0;//k value
-        CNK[i][4]=-1.;//option "constant nk"
-        CNK[i][5]=1.;//n value
-        CNK[i][6]=.0;//k value
+        CNK[i][2]=1.;//n1 value
+        CNK[i][3]=.0;//k1 value
+        CNK[i][4]=-1.;//No EMA
+        CNK[i][5]=1.;//n2 value
+        CNK[i][6]=.0;//k2 value
     }
     // initialization of model parameters pm
     for(int i=1;i<=200;i++){
@@ -2395,7 +2395,7 @@ void ksemawc::ReadSetting(QString filename){
             idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setEnabled(false);
             idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> setEnabled(false);
         }
-        if(CNK[i][4]<0.){
+        if(NINT(CNK[i][4])<0.){
             idToCheckBox["cB_EMA_"+QString::number(i)] -> setCheckState ( Qt::Unchecked );
             idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setCurrentIndex(-1);
             idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setEnabled(false);
@@ -6366,7 +6366,7 @@ void ksemawc::NumericalSearch(){
     lastAction="NumSearch";
     iStop=false;
     int NmisEnab=NINT(par[22][2]);
-    printf("Exhaustive numerical n-search in wl-n space with N.meas=%d\n",NmisEnab);
+    printf("Exhaustive numerical n-search in wl-n and wl-k spaces with N.meas=%d sampled on %d points\n",NmisEnab,NeV);
     ui->progressBar_ENS->setValue(0);
     Qt::CheckState state;
     state=ui->checkBox_relMin->checkState();
@@ -6413,6 +6413,7 @@ void ksemawc::NumericalSearch(){
         msgBox.exec();
         return;
     }
+    printf("calN1K2NK3= %d\n",calN1K2NK3);
     double n,k,kMin=100,kMax=-100.;
     double FM,FMold,nMin,dFMold=0.;
     CNK[1][1]=0.;//nk unknown n=CNK[1][2] k=CNK[1][3]
@@ -6478,7 +6479,7 @@ void ksemawc::NumericalSearch(){
                 CNK[1][1]=par[35][4];//Fit option
                 COSVNK(VNK,IL);
                 n=VNK[1][1];
-                k=VNK[1][2];
+                //k=VNK[1][2];
                 CNK[1][1]=0;//nk are unknown
                 CNK[1][2]=n;
                 CNK[1][3]=k;
@@ -6498,6 +6499,7 @@ void ksemawc::NumericalSearch(){
                 SOL[iSol][5]=abs(k-SOL[iSol][3]);
                 SOL[iSol][6]=1.;//enable data
                 i=101;
+                continue;
             }
             if((FMold>1.||i==0) && FM<=1.){
                 iSol++;
@@ -9052,6 +9054,7 @@ void COSVNK(double VNK[17][3],int L){
         int i1=NINT(CNK[J][1]);
         SETVNK(i1,J,VNK,L,2);
         int i2=NINT(CNK[J][4]);
+        //if(L==iwl2print) printf("-> COSVNK @ iWL=%d J=%d i1=%d i2=%d\n",L,J,i1,i2);
         if(i2>=0){
             f2=pm[70+J][1];
             double n1=VNK[J][1];
@@ -9059,10 +9062,12 @@ void COSVNK(double VNK[17][3],int L){
             SETVNK(i2,J,VNK,L,5);
             double n2=VNK[J][1];
             double k2=VNK[J][2];
+            //if(L==iwl2print) printf("\t n2=%f k2=%f\n",n1,k2);
             EMA(n1,k1,n2,k2,f2);
             VNK[J][1]=Nema;
             VNK[J][2]=Kema;
         }
+        //if(L==iwl2print) printf(" VNK[%d][1]=%f VNK[%d][2]=%f\n",J,VNK[J][1],J,VNK[J][2]);
     }
 }
 
@@ -9070,7 +9075,6 @@ void COSVNK(double VNK[17][3],int L){
 void SETVNK(int io,int J,double VNK[17][3],int L,int Kcte){
     // L = index of wavelenght
     // set VNK(J,1) and VNK(J,2) given CNK(J,k)
-    //if(L==iwl2print) printf("-> SETVNK @ iWL=%d CNK[%d][1]=%d CNK[%d][4]=%f\n",L,J,io,J,CNK[J][4]);
     if(io==0){
         VNK[J][1]=CNK[J][Kcte];
         VNK[J][2]=CNK[J][Kcte+1];
@@ -9082,11 +9086,11 @@ void SETVNK(int io,int J,double VNK[17][3],int L,int Kcte){
         VNK[J][1]=sqn;
         VNK[J][2]=sqk;
     }
-    else if(io>=8 &&io<=16){
+    else if(io>=8 &&io<=15){
         VNK[J][1]=MIS[io][L][1];
         VNK[J][2]=MIS[io][L][2];
     }
-    else if(io==17){
+    else if(io==16){
         VNK[J][1]=VNK[1][1];
         VNK[J][2]=VNK[1][2];
     }

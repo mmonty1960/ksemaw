@@ -6665,7 +6665,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -7054,7 +7054,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -7428,7 +7428,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -7802,7 +7802,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -8176,7 +8176,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -8550,7 +8550,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -8924,7 +8924,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -9298,7 +9298,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -9672,7 +9672,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -10046,7 +10046,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -10420,7 +10420,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -10794,7 +10794,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -11168,7 +11168,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -11530,7 +11530,7 @@
            </item>
            <item>
             <property name="text">
-             <string>nk-DataFit</string>
+             <string>Material#1</string>
             </property>
            </item>
           </widget>
@@ -12070,11 +12070,6 @@
              <string>nk-8</string>
             </property>
            </item>
-           <item>
-            <property name="text">
-             <string>nk-DataFit</string>
-            </property>
-           </item>
           </widget>
          </item>
          <item>
@@ -12265,7 +12260,7 @@
          <item>
           <widget class="QComboBox" name="cB_cnk1b">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="sizePolicy">
             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
@@ -12357,16 +12352,6 @@
            <item>
             <property name="text">
              <string>nk-8</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>nk-IbridOne</string>
-            </property>
-           </item>
-           <item>
-            <property name="text">
-             <string>nk-unknown</string>
             </property>
            </item>
           </widget>

@@ -12,3 +12,11 @@ RIF08_after_17_January_2018
 al__/ri008.v3.rn
 RIF_PV_ENEA
 al__/rifPVenea.v1.rn
+Labsphere PTFE SRS-99-020
+Spectralon/LabspeherePTFE8715.txt
+RIF08_after_14_January_2026
+al__/ri008.v4.rn
+MIR513_PV
+al__/MIR513.v1.rn
+MIR-B007
+al__/MIRB007.v1.rn

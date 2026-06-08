@@ -189,6 +189,13 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_about">
+           <property name="text">
+            <string>About kSEMAWc</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -3220,7 +3227,7 @@
             </size>
            </property>
            <property name="text">
-            <string>GRAD-k</string>
+            <string>Grad-k</string>
            </property>
           </widget>
          </item>
@@ -3690,7 +3697,7 @@
             </size>
            </property>
            <property name="text">
-            <string>CURV-k</string>
+            <string>Curv-k</string>
            </property>
           </widget>
          </item>
@@ -4411,7 +4418,7 @@
             </size>
            </property>
            <property name="text">
-            <string>dGRAD-n/dE</string>
+            <string>SlopeGrad-n</string>
            </property>
           </widget>
          </item>
@@ -5078,7 +5085,7 @@
             </size>
            </property>
            <property name="text">
-            <string>CURV-n</string>
+            <string>Curv-n</string>
            </property>
           </widget>
          </item>
@@ -5489,7 +5496,7 @@
             </size>
            </property>
            <property name="text">
-            <string>GRAD-n</string>
+            <string>Grad-n</string>
            </property>
           </widget>
          </item>
@@ -12563,17 +12570,18 @@
           </spacer>
          </item>
          <item>
-          <spacer name="horizontalSpacer_8">
-           <property name="orientation">
-            <enum>Qt::Orientation::Vertical</enum>
+          <widget class="QPushButton" name="pushButton_saveNKmodel">
+           <property name="text">
+            <string>Save NK model</string>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_loadNKmodel">
+           <property name="text">
+            <string>Load NK model</string>
            </property>
-          </spacer>
+          </widget>
          </item>
         </layout>
        </item>
@@ -12717,7 +12725,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>D (eV)</string>
+            <string>D</string>
            </property>
           </widget>
          </item>
@@ -13636,7 +13644,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>W (eV)</string>
+            <string>W</string>
            </property>
           </widget>
          </item>
@@ -14639,7 +14647,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>W (eV)</string>
+            <string>W</string>
            </property>
           </widget>
          </item>
@@ -14977,7 +14985,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>D (eV)</string>
+            <string>D</string>
            </property>
           </widget>
          </item>
@@ -17401,7 +17409,7 @@
                      </size>
                     </property>
                     <property name="text">
-                     <string>R1</string>
+                     <string>R1norm</string>
                     </property>
                    </widget>
                   </item>
@@ -17445,7 +17453,7 @@
                      </size>
                     </property>
                     <property name="text">
-                     <string>Tp</string>
+                     <string>Tpol</string>
                     </property>
                    </widget>
                   </item>
@@ -17470,7 +17478,7 @@
                      </size>
                     </property>
                     <property name="text">
-                     <string>Rn</string>
+                     <string>Rnorm</string>
                     </property>
                    </widget>
                   </item>
@@ -17533,7 +17541,7 @@
                      </size>
                     </property>
                     <property name="text">
-                     <string>Rp</string>
+                     <string>Rpol</string>
                     </property>
                    </widget>
                   </item>
@@ -17577,7 +17585,7 @@
                      </size>
                     </property>
                     <property name="text">
-                     <string>Tn</string>
+                     <string>Tnorm</string>
                     </property>
                    </widget>
                   </item>
@@ -20623,6 +20631,13 @@
           </spacer>
          </item>
          <item>
+          <widget class="QPushButton" name="pushButton_reset">
+           <property name="text">
+            <string>Reset !</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="pushButton_store">
            <property name="text">
             <string>Store !</string>
@@ -23592,10 +23607,10 @@
          <item row="27" column="4">
           <widget class="QSpinBox" name="sB_iwl2print">
            <property name="minimum">
-            <number>1</number>
+            <number>0</number>
            </property>
            <property name="maximum">
-            <number>201</number>
+            <number>999</number>
            </property>
           </widget>
          </item>

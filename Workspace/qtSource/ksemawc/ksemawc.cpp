@@ -12,7 +12,7 @@ Spectrophotometric (SP), Ellipsometric (ELI) and
 Photothermal Deflection Spectroscopy (PDS) measurements
 
 
-   Copyright (C) 2024  Marco Montecchi
+   Copyright (C) 2026  Marco Montecchi
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C     [18][1],[18][2].......verbose [0=no, 1=yes], /
 //C     [19][1],[19][2]....... / , /
 //C     [20][1],[20][2]....... / , /
-//C     [21][1],[21][2].......mwla[N. wl enabled], mda[N. nk enabled]
+//C     [21][1],[21][2]....... / , /
 //C     [22][1],[22][2].......mr[0=>R absolute, 1=> R*Rrif] , Nmis enabled
 //C     [23][1],[23][2].......1 to load SF files, 1 to load ELI files  (0 no files to load)
 //C     [24][1],[24][2].......IUVIR,index-lambda
@@ -68,7 +68,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C     [32][1-    4]........{/}
 //C     [33][1-    4]........{/}
 //C     [34][1-    4]........{/}
-//C     [35][1-    4]... standard-spectrum_for_weighting , S1P2U3 , / , CNK[1][1] in simulation
+//C     [35][1-    4]... standard-spectrum_for_weighting , S1P2U3 , / , /
 //C
 //C     [51-60][1]      pointer to VNK -> nk layer #j=1,9
 //C         [51][2]     Nlayer [max 9]
@@ -190,29 +190,33 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C
 //C
 //C
-//C   MIS[18][1000][3] matrix SF spectra and nk-data loaded as file-nk
-//C      [i][j][k]
-//C       i=1: Tnormal     j=1,1001 <-> Lambda   k=1 <-> value
-//C       i=2: Tpolarised                         2 <-> error
-//C       i=3: Rnormal
-//C       i=4: Rpolarised
-//C       i=5: R1_normal
-//C       i=6: Apds
-//C       i=7: Lambda
-//C       i=8-15:  material #1-8   k=1 <-> n
-//C                                  2 <-> k
-//C       i=16: n[k=1],k[k=2] IbridOne
-//C       i=17: enabling in data-fit
+//C  Experimental measurements are stored in
+//C      ms.measures[i].value[iwl]
+//C      ms.measures[i].error[iwl]
 //C
-//C   ELI[8][1000][2] matrix ellipsometric spectra
-//C      [i][j][k]
-//C       i=1: DELTA_1   j=1,1001 <-> Lambda   k=1 <-> value
-//C       i=2: PSI_1                            2 <-> error
-//C      .. ..
-//C       i=7: DELTA_4
-//C       i=8: PSI_4
+//C       i=0: Tnormal
+//C       i=1: Tpolarised
+//C       i=2: Rnormal
+//C       i=3: Rpolarised
+//C       i=4: R1_normal
+//C       i=5: Apds
+//C       i=6: Delta1
+//C       i=7: Psi1
+//C       i=8: Delta2
+//C       i=9: Psi2
+//C       i=10: Delta3
+//C       i=11: Psi3
+//C       i=12: Delta4
+//C       i=13: Psi4
+//C
+//C  NK-known data are stored in
+//C      nkMaterials[k].n[iwl] with k=0,...,7
+//C      nkMaterials[k].k[iwl]
+//C
+//C  with the common wavelenght set stored in ms.lambda[iwl]
 //C
 //C
+//C  The filenames are stored as follow:
 //C   NANK[1,..,8] : nome "mate/aa999.9" nk-known
 //C   NANK[9]      : nome "mate/aa999.9" nk-solution
 //C   NANK[10]     : nome "mate/aa999  " custom weights for mean computing
@@ -220,20 +224,27 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C   NANK[12,.,15]: nome "mate/aa999" ELI spectra
 //C   NANK[16]     : nome "mate/aa999.9" ksemaw project
 //C
-//C   CNK[17][7]
+//C
+//C  The istructions on how to assign nk values to each layer are in:
+//C   CNK[17][9]
 //C   CNK[J][K]: managment matrix of VNK[J][H]
 //C       J=1    <-> VNK[1][1 o 2]    = n,k working
 //C       J=2..8 <-> VNK[2..8][1 o 2] = n,k known
-//C       J=10   <-> VNK[10][1 o 2]   = n,k input medium Tnormal,..,R1_normal
+//C       J=9    <-> VNK[9][1 o 2]    = n,k exit  medium SF
+//C       J=10   <-> VNK[10][1 o 2]   = n,k input medium SF
 //C       J=11   <-> VNK[11][1 o 2]   = n,k input medium PDS
 //C       J=12   <-> VNK[12][1 o 2]   = n,k input medium PSI,DELTA #1
 //C       J=13   <-> VNK[13][1 o 2]   = n,k input medium PSI,DELTA #2
 //C       J=14   <-> VNK[14][1 o 2]   = n,k input medium PSI,DELTA #3
-//C       J=15   <-> VNK[15][1 o 2]   = n,k input medium PSI,DELTA #
-//C       J=16   <-> VNK[9][1 o 2]    = n,k output medium Tnormal,..,R1_normal
+//C       J=15   <-> VNK[15][1 o 2]   = n,k input medium PSI,DELTA #4
+//C       J=16   <->
+//C    CNK[J][0]=0 -> VNK[J][k]=VNK[J][k]
+//C              1 -> VNK[J][1]=CNK[J][7] VNK[J][2]=VNK[J][2]
+//C              2 -> VNK[J][1]=VNK[J][1] VNK[J][2]=CNK[J][8]
+//C              3 -> VNK[J][1]=CNK[J][7] VNK[J][2]=CNK[J][8]
 //C    CNK[J][1 and 4]=0       =>  n,k cte  n=CNK[J][2 and 5]  k=CNK[J][3 and 6]
 //C    CNK[J][1 and 4]=1..5    =>  n,k by  Fit#
-//C    CNK[J][1 and 4]=8..15   =>  n,k by file-nk loaded in MIS[K][L][NK]
+//C    CNK[J][1 and 4]=8..15   =>  n,k by file-nk loaded in nkMaterials[K]
 //C    CNK[J][1 and 4]=16      =>  n,k Material#1
 //C
 //C
@@ -280,18 +291,19 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C         int(rxy[25][4]) = 1 => nm step
 //C         int(rxy[25][4]) = 2 => eV step
 //C
-//C    ARSE[500][2] service array
 */
 
 
 #include "ksemawc.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include <QDebug>
+#include <cstdio>
+#include <cstdlib>
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <vector>
 #include <qfile.h>
 #include <qtextstream.h>
-#include <math.h>
 #include <complex>
-#include <iostream>
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -326,21 +338,35 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 #include <gsl/gsl_complex_math.h>
 #include <gsl/gsl_specfunc.h>
 
+#ifdef __unix__
+    static constexpr bool IS_POSIX = true;
+#else
+    static constexpr bool IS_POSIX = false;
+#endif
 
+// shortcut
+inline int nint(double val) {
+    return static_cast<int>(std::lround(val));
+}
+
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+const double PIG=M_PI;
+const double deg2rad=PIG/180.;
+const double Dperiod=180.;//period of DELTA
 
 //global variables
 QString fnproject,pathroot,fileStore,fileStore0,fStdSpect,fRefMir,fNKsim,fMisSim,filechi2,lastAction,fileStoreSpjName,caller;
 QString info,fnk[9],fnSample,fnTn,fnTp,fnRn,fnRp,fnR1,fnApds,fnE1,fnE2,fnE3,fnE4,fnFnk,ParFitLab[14],NANK[17];
 
-QwtPlot *G1_Tn, *G2_Tp, *G3_Rn, *G4_Rp, *G5_R1, *G6_Apds, *G7_D, *G8_P, *G9_Af, *G10_tTR, *G11_nk, *G12_wn, *G13_wk, *G14_we1, *G15_we2, *G16_Ab;
-QPolygon polygon;
 QPolygonF polygonF;
 QColor myColor[7]={Qt::black,Qt::blue,Qt::cyan,Qt::green,Qt::magenta,Qt::red,Qt::yellow};
 QString labelQwt;//label to use in absorptance plot
 int iColor=0;
 int iSelected=0;//used to stop recursive n-selection by polygon
 
-int ink,lastIndex,ifn,npp,ppm[18],nPar,nlayer,lastTab,occupyPF,occupyPEj,DATO[15],IXW[17],iw=0,L1E2=2,iRecChi2=0;
+int ink,lastIndex,ifn,npp,ppm[18],nPar,nlayer,lastTab,DATO[15],iw=0,L1E2=2,iRecChi2=0;
 int ifirstcall=0;//used to initialize fit
 int ifirstWarning=0;//used to warn about A= 1-T-R<0
 int jobtot=0;
@@ -348,14 +374,11 @@ int nOpenGraph=3;
 int NeV; // number of interpolated points in Ev or lambda
 int iDelCon=0;
 int iNewSample=0;
-int iwl2print=100;//index of WL at which print when it is due
+int iwl2print=0;//index of WL at which print when it is due
 
-double MIS[18][1000][3],ELI[9][1000][3],pf[8][22],pm[201][6],par[61][6],CNK[17][7],rxy[31][5],ARSE[501][3];
-double SOL[4000][7]; // solutions from the search algorithm
-double PIG=acos(-1.);
-double deg2rad=PIG/180.;
-double Dperiod=180.;//period of DELTA
-double Nema,Kema,sqn,sqk,EpsiR,EpsiI;
+//attention, the index [0] is not used make save the FORTRAN style
+double pf[8][22],pm[201][6],par[61][6],CNK[17][9],rxy[31][5];
+std::vector<std::array<double,6>> Sol;// solutions from the search algorithm
 double Vservice[3];//for transporting
 double ABSmax=20.;//max value of abs(imag(DELTA)), beyond the layer is considered as exit medium
 double cDAW[7];//c[NMAX+1] with NMAX=6 use in DAWS function
@@ -394,16 +417,13 @@ complex<double> freCoeff[6][2];// Fresnell coefficient
 //                     Bp           Cp
 
 bool iStop=false;
+bool iShemispherical=false;
 
 //invoked functions
 void previewFile(QString filename, QString lab,QString& info,double& wmax,double& wmin);
 int FPAR(void *p, int m, int n, const double *x, double *fvec, int iflag);
-void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int IUVIR);
-void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double *Yp,double *ErrXp,double *ErrYp);
-void COSVNK(double VNK[17][3],int L);
-void SETVNK(int io,int J,double VNK[17][3],int L,int Kcte);
-void EMA(double N,double K,double NA,double KA,double FA);
-void FDISP(int iopt,double eV);
+EmaResult EMA(double N,double K,double NA,double KA,double FA);
+FdispResult FDISP(int iopt,double eV);
 long double I2CODYRE(long double E,long double E0,long double Ep,long double D);
 long double ICCODYRE(long double E,long double Ep,long double D);
 long double I2CODYIM(long double E,long double E0,long double Ep,long double D);
@@ -431,27 +451,11 @@ long double ImIndirCodyUrb(long double E,long double C,long double E0,long doubl
 long double ReIndirCodyUrb(long double E,long double C,long double E0,long double E3,long double D);
 long double ImIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D,long double Ex,long double Ey,long double TUx,long double TUy, long double KTi);
 long double ReIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D,long double Ex,long double Ey,long double TUx,long double TUy, long double KTi);
-void ASSEMBLER(int iwl, int ikind,double teta,double vot[6][3]);
-void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi[6][3]);
-void CALFRE(int NFA,double wl,complex<double> pq,complex<double> IR[999],double d[999],complex<double> out[9][3]);
-int SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp);
-double FMER(double k);
-double FindRoot(double (*FT)(double),double t,double dt,double dlim,double tol);
-int FSQ(void *p, int m, int n, const double *x, double *fvec, int iflag);
-int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag);
-int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag);
-double DELTAT(double k);
-int NINT(double x);
-void MATINV(int n, int np,double **as,double **b);
+void CALFRE(int NFA,double wl,complex<double> pq,const std::vector<std::complex<double>>& ir,std::vector<double> d,complex<double> out[10][3]);
+bool MATINV(int n, int np,double **as,double **b);
 void lubksb(int np,double **a,int n,int *indx,double *b);
-void ludcmp(int np,double **a,int n,int *indx,double d);
-//void AbsLayInco(double atten, double Ra, double R1a, double Rb);
+bool ludcmp(int np,double **a,int n,int *indx,double& d);
 void nextColor();
-
-static struct pointToFit2{
-    int Nt;
-}pTF2[1];
-
 
 ksemawc::ksemawc(QWidget *parent) :
     QWidget(parent),
@@ -459,23 +463,13 @@ ksemawc::ksemawc(QWidget *parent) :
 {
     //setupUi(this); // this sets up GUI
     ui->setupUi(this);
-    printf("****************************************************\n");
-    printf("              Program C++ kSEMAW\n\n");
-    printf("Spectro-Ellipsometric Measurement Analysis Workbench\n");
-    printf("  (spectrophotometric, ellipsometric and PDS)\n\n");
-    printf("         version 3.4 9 January 2026\n\n");
-    printf("       Main author: Marco Montecchi, ENEA (Italy)\n");
-    printf("          email: marco.montecchi@enea.it\n");
-    printf("          Porting to Windows and advanced oscillators by\n");
-    printf("               Alberto Mittiga, ENEA (Italy)\n");
-    printf("          email: alberto.mittiga@enea.it\n ");
-    printf("****************************************************\n");
 
 //    const QByteArray value = qgetenv("USER");
 //    QString uName=QString::fromLocal8Bit(value);
 //    cout << "current user = " << uName.toStdString() <<endl;
 
     // signals/slots mechanism in action
+    connect( ui->pushButton_about,SIGNAL( clicked() ), this, SLOT(about()));
     connect( ui->pBloadPro,  SIGNAL( clicked() ), this, SLOT(LoadProject()));
     connect( ui->pBsavePro,  SIGNAL( clicked() ), this, SLOT(SaveProject()));
     connect( ui->pBloadFnk,  SIGNAL( clicked() ), this, SLOT(LoadFilenk()));
@@ -498,13 +492,13 @@ ksemawc::ksemawc(QWidget *parent) :
     connect( ui->pBclearnk8, &QPushButton::clicked, this, [this]() {Clrnk(8);});
     connect( ui->pBsetSample,SIGNAL( clicked() ), this, SLOT(callSetSample()));
     connect( ui->pBclearFn,SIGNAL( clicked() ), this, SLOT(Clrfn()));
-    connect( ui->lineEdit_sample,SIGNAL(textChanged(QString)),this, SLOT(listMeas(QString)));
-    connect( ui->cBmis1,SIGNAL(currentIndexChanged(int)),this,SLOT(pwTn(int)));
-    connect( ui->cBmis2,SIGNAL(currentIndexChanged(int)),this,SLOT(pwTp(int)));
-    connect( ui->cBmis3,SIGNAL(currentIndexChanged(int)),this,SLOT(pwRn(int)));
-    connect( ui->cBmis4,SIGNAL(currentIndexChanged(int)),this,SLOT(pwRp(int)));
-    connect( ui->cBmis5,SIGNAL(currentIndexChanged(int)),this,SLOT(pwR1(int)));
-    connect( ui->cBmis6,SIGNAL(currentIndexChanged(int)),this,SLOT(pwApds(int)));
+    connect( ui->lineEdit_sample,SIGNAL(textChanged(QString)),this, SLOT(listMeas()));
+    connect( ui->cBmis1,SIGNAL(currentIndexChanged(int)),this,SLOT(pwTn()));
+    connect( ui->cBmis2,SIGNAL(currentIndexChanged(int)),this,SLOT(pwTp()));
+    connect( ui->cBmis3,SIGNAL(currentIndexChanged(int)),this,SLOT(pwRn()));
+    connect( ui->cBmis4,SIGNAL(currentIndexChanged(int)),this,SLOT(pwRp()));
+    connect( ui->cBmis5,SIGNAL(currentIndexChanged(int)),this,SLOT(pwR1()));
+    connect( ui->cBmis6,SIGNAL(currentIndexChanged(int)),this,SLOT(pwApds()));
     connect( ui->cBmis7 ,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {pwEj(1);});
     connect( ui->cBmis9 ,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {pwEj(2);});
     connect( ui->cBmis11,qOverload<int>(&QComboBox::currentIndexChanged), this, [this]() {pwEj(3);});
@@ -594,6 +588,8 @@ ksemawc::ksemawc(QWidget *parent) :
     connect(ui->cBosc_18,&QCheckBox::stateChanged, this, [this]() {setOscN(18);});
     connect(ui->cBosc_19,&QCheckBox::stateChanged, this, [this]() {setOscN(19);});
     connect(ui->cBosc_20,&QCheckBox::stateChanged, this, [this]() {setOscN(20);});
+    connect(ui->pushButton_saveNKmodel,SIGNAL(clicked()), this, SLOT(saveNKmodel()));
+    connect(ui->pushButton_loadNKmodel,SIGNAL(clicked()), this, SLOT(loadNKmodel()));
     connect(ui->tabWidget,SIGNAL(currentChanged(int)),this,SLOT(tabChanged()));
     connect(ui->dSB_PAR_4_1,SIGNAL(valueChanged(double)),this,SLOT(rangeWL()));
     connect(ui->dSB_PAR_4_2,SIGNAL(valueChanged(double)),this,SLOT(rangeWL()));
@@ -703,51 +699,66 @@ ksemawc::ksemawc(QWidget *parent) :
     connect(ui->pushButton_PlotAbsEL,SIGNAL( clicked() ),this, SLOT(PlotAbsEL()));
     connect(ui->comboBox_searchNK,SIGNAL(currentIndexChanged(int)),this,SLOT(manageLEwl()));
     connect(ui->pushButton_selectN,SIGNAL( clicked() ), this, SLOT(selectNsol()));
-    connect(ui->cBpm_101_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc1()));
-    connect(ui->cBpm_106_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc2()));
-    connect(ui->cBpm_111_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc3()));
-    connect(ui->cBpm_116_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc4()));
-    connect(ui->cBpm_121_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc5()));
-    connect(ui->cBpm_126_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc6()));
-    connect(ui->cBpm_131_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc7()));
-    connect(ui->cBpm_136_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc8()));
-    connect(ui->cBpm_141_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc9()));
-    connect(ui->cBpm_146_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc10()));
-    connect(ui->cBpm_151_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc11()));
-    connect(ui->cBpm_156_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc12()));
-    connect(ui->cBpm_161_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc13()));
-    connect(ui->cBpm_166_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc14()));
-    connect(ui->cBpm_171_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc15()));
-    connect(ui->cBpm_176_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc16()));
-    connect(ui->cBpm_181_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc17()));
-    connect(ui->cBpm_186_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc18()));
-    connect(ui->cBpm_191_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc19()));
-    connect(ui->cBpm_196_1,SIGNAL(currentIndexChanged(int)),this,SLOT(setKindOsc20()));
+    connect(ui->pushButton_reset,SIGNAL( clicked() ), this, SLOT(reset()));
+
+    for (int N = 1; N <= 20; N++) {
+        int pmIdx = 101 + 5 * (N - 1);
+        QString name = QString("cBpm_%1_1").arg(pmIdx);
+        QComboBox* w = findChild<QComboBox*>(name);
+        if (w)
+            connect(w, qOverload<int>(&QComboBox::currentIndexChanged),
+                    this, [this, N]() { setKindOsc(N); });
+    }
+
     connect(ui->comboBox_DeltaPsiScale,SIGNAL(currentIndexChanged(int)),this,SLOT(setRangeEli()));
 
     connect(ui->pushButton_setFont, SIGNAL( clicked() ), this, SLOT(setFontDia()));
 
-    occupyPF=1;//disable severals call during initial setting
-    occupyPEj=1;
+    const QList<int> dSB_indices = {
+        1,2,3,4,5,6,7,8,9,
+        11,12,13,14,15,16,17,18,19,
+        21,22,23,24,25,26,27,28,29,
+        31,32,33,34,35,36,37,38,39,
+        41,42,43,44,45,46,47,48,49,
+        51,52,53,54,55,56,57,58,59,
+        61,62,63,64,65,66,67,68,69,
+        91,92,93,94,95,96,97,98,99
+    };
+    for (int idx : dSB_indices) {
+        QString name = QString("dSB_PM_%1_1").arg(idx);
+        QDoubleSpinBox* w = findChild<QDoubleSpinBox*>(name);
+        if (w)
+            connect(w, &QDoubleSpinBox::textChanged,
+                    this, [this]() { SaveSetting(1); });
+        else
+            qWarning() << "widget non trovato:" << name;
+    }
+
+    // LEpm_*_1 → SaveSetting(2)
+    const QList<int> LE_indices = {
+        160,162,163,164,165,167,168,169,170,
+        172,173,174,175,177,178,179,180,
+        182,183,184,185,187,188,189,190,
+        192,193,194,195,197,198,199,200
+    };
+    for (int idx : LE_indices) {
+        QString name = QString("LEpm_%1_1").arg(idx);
+        QLineEdit* w = findChild<QLineEdit*>(name);
+        if (w)
+            connect(w, &QLineEdit::textChanged,
+                    this, [this]() { SaveSetting(2); });
+        else
+            qWarning() << "widget non trovato:" << name;
+    }
+
+    setGuiMute(true);
 
     // parameter initialization
-#ifdef __unix__
-#define IS_POSIX 1
-#else
-#define IS_POSIX 0
-#endif
-
     QDir dir;  //current directory
     dir.cdUp();//cd ..
     dir.cdUp();//cd ..
-    if (IS_POSIX == 1) {
-        //Linux path initialization
-        //nothing to do
-    }
-    else {
-        //windows path inizialization
-        dir.cdUp();//cd ..
-    }
+    if(!IS_POSIX)
+        dir.cdUp();
     pathroot=dir.absolutePath()+"/";
     fRefMir=pathroot+"qtSource/ksemawc/referenceMirrors.txt";
     fStdSpect=pathroot+"qtSource/ksemawc/standardSpectra.txt";
@@ -758,11 +769,11 @@ ksemawc::ksemawc(QWidget *parent) :
     fMisSim=pathroot+"expo/MisSim.dat";
     filechi2=pathroot+"temp/ksemawc.log";
 
-    cout<<"pathroot= "<<pathroot.toStdString()<<"\n";
+    qDebug()<<"pathroot= "<<pathroot;
 
     // stylesheet
-    cout << "styleSheet= " << QApplication::style()->metaObject()->className() <<"\n";
-    cout << "Current StyleSheet:" << qApp->styleSheet().toStdString().c_str()<<"\n";
+    qDebug() << "styleSheet= " << QApplication::style()->metaObject()->className();
+    qDebug() << "Current StyleSheet:" << qApp->styleSheet().toStdString().c_str();
     //set specific background color to groupBox of DataAnalysis Tab
     ui->groupBox->setStyleSheet("background-color: #eff0f1;");
     ui->groupBox_2->setStyleSheet("background-color: #ffdede;");
@@ -794,7 +805,6 @@ ksemawc::ksemawc(QWidget *parent) :
     par[6][3]=1.0;    // ... depending on wavelengh
     par[7][3]=1.2505E-7; //cte used for computing the substrate contribution to PDS signal
     par[11][1]=1;     //attenuation coeff. of k by Fit#N
-    par[11][2]=0;     //is set to 1 when ludcmp found singular matrix
     par[21][3]=.001;  //n step
     par[22][3]=1.e-4; //k step
     par[28][1]=3.;    //N for computing <f(x)>
@@ -812,12 +822,15 @@ ksemawc::ksemawc(QWidget *parent) :
     par[42][5]=112;   //C3
     // initialization of CNK which pilot VNK setting
     for(int i=1;i<=16;i++){
+        CNK[i][0]=0.;//no forced
         CNK[i][1]=.0;//option "constant nk"
         CNK[i][2]=1.;//n1 value
         CNK[i][3]=.0;//k1 value
         CNK[i][4]=-1.;//No EMA
         CNK[i][5]=1.;//n2 value
         CNK[i][6]=.0;//k2 value
+        CNK[i][7]=1.;//n forced
+        CNK[i][8]=.0;//k forced
     }
     // initialization of model parameters pm
     for(int i=1;i<=200;i++){
@@ -1600,8 +1613,6 @@ ksemawc::ksemawc(QWidget *parent) :
                 j++;
         }
     }
-    for(int i=1;i<=16;i++)
-        IXW[i]=-1;//no graph window
 
     //oscillator list
     for(int k=1;k<=20;k++){
@@ -1624,10 +1635,9 @@ ksemawc::ksemawc(QWidget *parent) :
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Dir-Gap-Tauc-M1M2");    //#16
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Drude-ionized");        //#17
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Lorentz-Dirac");        //#18
-        //idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Volum-Scat");           //#19
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->addItem("Volume-Scattering");     //#19
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"]->setCurrentIndex(-1);
     }
-
 
     QString line;
     //Refrence mirror list
@@ -1642,7 +1652,7 @@ ksemawc::ksemawc(QWidget *parent) :
             line = stream.readLine();
             ui -> comboB_PAR_10_3->addItem(line);
             line = stream.readLine();
-            printf("-> RefMir #%d -> %s\n",iB103,line.toStdString().c_str());
+            qDebug()<<"-> RefMir # -> "<<iB103<<" "<<line;
         }while(!stream.atEnd());
         file0.close();
     }
@@ -1656,22 +1666,23 @@ ksemawc::ksemawc(QWidget *parent) :
         do{
             line = stream1.readLine();
             ui->comboBox_average -> addItem(line);
-            printf("-> StdSpectrum #%d: %s",iStdS,line.toStdString().c_str());
+            qDebug()<< "-> StdSpectrum #"<<iStdS<<line;
             line = stream1.readLine();
-            printf(" -> %s\n",line.toStdString().c_str());
+            qDebug()<<" -> "<<line;
             iStdS++;
         }while(!stream1.atEnd());
         file1.close();
     }
 
+    //label
     ParFitLab[0]="_dNonUni";
     ParFitLab[1]="_d";
-    ParFitLab[2]="_Dn/<n>";
-    ParFitLab[3]="_(nav/<n>-1)";
-    ParFitLab[4]="_Dk/<k>";
-    ParFitLab[5]="_(kav/<k>-1)";
+    ParFitLab[2]="_grad-n";
+    ParFitLab[3]="_curv-n";
+    ParFitLab[4]="_grad-k";
+    ParFitLab[5]="_curv-k";
     ParFitLab[6]="_sigma_rough";
-    ParFitLab[7]="_slope_Dn";
+    ParFitLab[7]="_slopeGrad-n";
     ParFitLab[8]="_C";
     ParFitLab[9]="_E";
     ParFitLab[10]="_D";
@@ -1679,10 +1690,16 @@ ksemawc::ksemawc(QWidget *parent) :
     ParFitLab[12]="fEMA_";
     ParFitLab[13]="Theta_";
 
+    //Graph initialization
+    for(int i = 0; i <= N_GRAPHS; ++i){
+        m_graphs[i]  = nullptr;
+        m_pickers[i] = nullptr;
+    }
+
     //set the latest Size & font if settings exist
     QSettings settings("ksemawc","ksemawc");
     QString usnam=settings.fileName();
-    cout<<"setting-file exists! "<<usnam.toStdString()<<"\n";
+    qDebug()<<"setting-file exists! "<<usnam;
     if (settings.status() == QSettings::NoError && settings.status() != QSettings::FormatError && settings.status() !=QSettings::AccessError){
         restoreGeometry(settings.value("geometry").toByteArray());
         QVariant fontFamily=settings.value("fontFamily",QString());
@@ -1706,8 +1723,7 @@ ksemawc::ksemawc(QWidget *parent) :
         QCoreApplication::processEvents();
     }
 
-    occupyPF=0;
-    occupyPEj=0;
+    setGuiMute(false);
 
     //make your choice
     QMessageBox msgBox;
@@ -1718,13 +1734,11 @@ ksemawc::ksemawc(QWidget *parent) :
     QPushButton* openButton = msgBox.addButton("Open an existing project", QMessageBox::DestructiveRole);
     msgBox.setDefaultButton(newButton);
     int ret=msgBox.exec();
-    printf("ret=%d\n",ret);
     QString SpjName;
     QFile file(fileStoreSpjName);
     switch (ret) {
 
     case QMessageBox::AcceptRole:
-        printf("Continue the previous session\n");
         //Load Project name
         if(file.open(QIODevice::ReadOnly | QIODevice::Text)){
             QTextStream stream (&file);
@@ -1744,16 +1758,28 @@ ksemawc::ksemawc(QWidget *parent) :
         break;
 
     case QMessageBox::RejectRole:
-        printf("Start a new project\n");
         break;
 
     case QMessageBox::DestructiveRole:
-        printf("Open an existing project\n");
         LoadProject();
         break;
     }
 
     SaveSetting(-1);//save
+}
+
+
+void ksemawc::about(){
+    QMessageBox::about(this, "kSEMAWc",
+                       "<b>kSEMAWc</b> <br>"
+                       "Spectro-Ellipsometric Measurement Analysis Workbench<br>"
+                       "Version 4.0 — 5 June 2026<br><br>"
+                       "Main author: Marco Montecchi, ENEA (Italy)<br>"
+                       "email: marco.montecchi@enea.it<br><br>"
+                       "Porting to Windows and advanced oscillators by<br>"
+                       "Alberto Mittiga, ENEA (Italy)<br>"
+                       "email: alberto.mittiga@enea.it"
+                       );
 }
 
 
@@ -1771,7 +1797,7 @@ void ksemawc::closeEvent ( QCloseEvent * event )
     //save project in default
     QString command;
     int ierr;
-    if (IS_POSIX == 1){
+    if (IS_POSIX){
         command="cp "+fileStore+" "+fileStore0;
         ierr=system((command.toStdString()).c_str());}
     else{
@@ -1779,12 +1805,10 @@ void ksemawc::closeEvent ( QCloseEvent * event )
         QStringList List;
         List =command.split("/");
         int nV=List.count();
-        //printf("\nnV=%d\n",nV);
         QString commandw;
         QString pezzo;
         for(int iv=0;iv<nV;iv++){
             pezzo=List.at(iv).toLocal8Bit().constData();
-            //printf("pezzo[%d]= %s\t",iv,pezzo.toStdString().c_str());
             if(iv==0){
                 commandw=pezzo;
             }
@@ -1792,15 +1816,14 @@ void ksemawc::closeEvent ( QCloseEvent * event )
                 commandw=commandw+"\\"+pezzo;
             }
         }
-        //printf("comando=%s\n",(commandw.toStdString()).c_str());
         ierr=system((commandw.toStdString()).c_str());
     }
     if(ierr != 0){
         msgErrLoad("SaveProject",fnproject);
-        printf("Error copying project!!!\n");
+        qWarning()<<"Error copying project!!!";
     }
     else
-        printf("Project saved as %s\n",(fnproject.toStdString()).c_str());
+        qInfo()<<"Project saved as "+fnproject;
     //save widget size
     QSettings settings("ksemawc","ksemawc");
     settings.setValue("geometry", saveGeometry());
@@ -1836,19 +1859,33 @@ void ksemawc::setFontDia(){
 }
 
 
+void ksemawc::setGuiMute(bool mute) {
+    if(mute)
+        qDebug()<<"=> setGuiMute(true)";
+    else
+        qDebug()<<"=> setGuiMute(false)";
+    m_guiIsMuted = mute;
+    // Trova tutti i widget figli (pulsanti, spinbox, checkbox, ecc.)
+    // e silenzia i loro segnali in un colpo solo
+    const auto widgets = this->findChildren<QWidget*>();
+    for (auto w : widgets) {
+        w->blockSignals(mute);
+    }
+}
+
+
 void ksemawc::LoadProject(){
-    printf("-> LoadProject\n");
+    qDebug()<<"-> LoadProject";
     fnproject = QFileDialog::getOpenFileName(
                 this,
                 "Choose a SEMAW project", //window title
                 pathroot,                 //initial directory
                 "Semaw Project (*.Spj)"); //file extension
-    // printf("fnprojet=%s\n",fnproject.toStdString().c_str());
     if(fnproject.isEmpty())
         return;
 
-    occupyPF=10;
     ui->tabWidget -> setCurrentIndex(0);
+    setGuiMute(true);
     //thetaEli reset
     pm[86][1]=0.;
     pm[87][1]=0.;
@@ -1889,17 +1926,17 @@ void ksemawc::LoadProject(){
     }
 
     caller="LoadProject";
+    setGuiMute(false);
     ReadSetting(fnproject);
-    SPADA();//load file-nk & measurements
+    //SPADA();//load file-nk & measurements
     SaveSetting(-1);
     ifirstWarning=0;
 }
 
 
-
 void ksemawc::ReadSetting(QString filename){
-    if(occupyPF!=0 && occupyPF!=10) return;
-    printf("-> ReadSetting (occupyPF=%d) from %s\n",occupyPF,(filename.toStdString()).c_str());
+    qDebug()<<"-> ReadSetting from "<<filename;
+    setGuiMute(true);
     for(int i=1;i<=8;i++)
         Clrnk(i);
     ClrFnk();
@@ -1908,40 +1945,39 @@ void ksemawc::ReadSetting(QString filename){
     QFileInfo info(filename);
     QDateTime dtTm=info.lastModified();
     QString as = dtTm.toString("yyyy-MM-dd HH:mm:ss");
-    cout<<"date: "<<as.toStdString()<<"\n";
+    qInfo()<<"date: "<<as;
     QDateTime tLim(QDate(2022, 1, 1), QTime(0, 00, 0));
     QDateTime tLim2(QDate(2023, 4, 11), QTime(0, 00, 0));
-    QDateTime tLim3(QDate(2025, 10, 25), QTime(0, 00, 0));
+    //QDateTime tLim3(QDate(2025, 10, 25), QTime(0, 00, 0));
     int old0new1=0;
     if(dtTm<tLim)
-        printf("The project is older than January 2022\n");
+        qInfo()<<"The project is older than January 2022";
     else if(dtTm>=tLim && dtTm<tLim2){
-        printf("The project is newer than January 2022 and older than 11 April 2023\n");
+        qInfo()<<"The project is newer than January 2022 and older than 11 April 2023";
         old0new1=1;
     }
     else{
-        printf("The project version is up-to-date\n");
+        qInfo()<<"The project version is up-to-date";
         old0new1=2;
     }
-    double a2nm=1.;
-    if(dtTm<tLim3){
-        a2nm=0.1;
-        printf("The projet is older than 25 October 2025 wl and thickness will be converted in nm!!!\n");
-    }
+    double a2nm=0.1;
     QFile file(filename);
     if (!file.open (QIODevice::ReadOnly | QIODevice::Text)){
-        occupyPF=0;
+        setGuiMute(false);
         return;
     }
     QTextStream stream ( &file );
     QString line,line2,lab;
     int irx=30;
     line = stream.readLine();
-    if(line.contains("iVspj=1"))
+    if(line.contains("iVspj=1")){
+        if(line.contains("nm"))
+            a2nm=1;
         line = stream.readLine();
+    }
     else{
         irx=25;
-        printf("-> Spj old version\n");
+        qInfo()<<"-> Spj old version";
     }
     ui->lineEdit_infoP -> setText(line.simplified());
     line2=fnproject.section(pathroot, 1, 1);
@@ -1972,23 +2008,39 @@ void ksemawc::ReadSetting(QString filename){
     NANK[11]=line.simplified();
     ui->lineEdit_sample-> setText(NANK[11]);
     fnSample=pathroot+line.simplified();
-    ifn=0;
-    if(!fnSample.contains("mate/aa999")){
-        ifn=1;
-        listMeas(fnSample);
-    }
     line = stream.readLine();
     NANK[12]=line.simplified();
     fnE1=pathroot+line.simplified()+".el";
+    line2=fnE1.section('.', 1, 1);//N. mis el
+    par[27][4]=line2.toDouble();
+    //qDebug("from fnE1 -> par[27][4]=%f",par[27][4]);
     line = stream.readLine();
     NANK[13]=line.simplified();
     fnE2=pathroot+line.simplified()+".el";
+    line2=fnE2.section('.', 1, 1);//N. mis el
+    par[28][4]=line2.toDouble();
     line = stream.readLine();
     NANK[14]=line.simplified();
     fnE3=pathroot+line.simplified()+".el";
+    line2=fnE3.section('.', 1, 1);//N. mis el
+    par[29][4]=line2.toDouble();
     line = stream.readLine();
     NANK[15]=line.simplified();
     fnE4=pathroot+line.simplified()+".el";
+    line2=fnE4.section('.', 1, 1);//N. mis el
+    par[30][4]=line2.toDouble();
+
+    // setGuiMute(false);
+    if(fnSample.isEmpty() || fnSample.contains("mate/aa999")){
+        Clrfn();
+        ifn=0;
+    }
+    else{
+        ifn=1;
+        listMeas();
+        //qDebug("After listMeas par[27][4]=%f",par[27][4]);
+    }
+    // setGuiMute(true);
 
     QString pezzo;
     //setSample();
@@ -2024,11 +2076,11 @@ void ksemawc::ReadSetting(QString filename){
     }
     rxy[20][1]=rxy[20][1]*a2nm;//WLmin in nm
     rxy[20][2]=rxy[20][2]*a2nm;//Wlmax in nm
-    if(NINT(rxy[25][3])==1)
+    if(nint(rxy[25][3])==1)
         ui->checkB_RXY_25_3 -> setCheckState ( Qt::Unchecked );
     else
         ui->checkB_RXY_25_3 -> setCheckState ( Qt::Checked );
-    if(NINT(rxy[25][4])==1)
+    if(nint(rxy[25][4])==1)
         ui->checkB_RXY_25_4 -> setCheckState ( Qt::Unchecked );
     else
         ui->checkB_RXY_25_4 -> setCheckState ( Qt::Checked );
@@ -2036,32 +2088,25 @@ void ksemawc::ReadSetting(QString filename){
     //CNK
     for(int i=1;i<=15;i++){
         line = stream.readLine();
-        // printf("line: %s\n",line.toStdString().c_str());
-        // fflush(stdout);
         line=line.simplified();
         QStringList List0;
         List0 =line.split(" ");
         int nV=List0.count();
-        //printf("nV=%d\n",nV);
         fflush(stdout);
         for(int j=1;j<=nV;j++){
             pezzo=List0.at(j-1).toLocal8Bit().constData();
             CNK[i][j]=pezzo.toDouble();
-            //printf("CNK[%d][%d]=%f\n",i,j,CNK[i][j]);
-            //fflush(stdout);
         }
-        if(nV==3){
+        if(nV==3){//old project
             if(CNK[i][1]<=17){
                 CNK[i][4]=-1.;
             }
             else{
-                int i1=NINT(CNK[i][1]/1000.);
-                int i2=NINT((CNK[i][1]-i1*1000.)/10.);
+                int i1=nint(CNK[i][1]/1000.);
+                int i2=nint((CNK[i][1]-i1*1000.)/10.);
                 CNK[i][1]=i1;
                 CNK[i][4]=i2;
             }
-            //printf("-> CNK[%d][1]=%f CNK[%d][4]=%f\n",i,CNK[i][1],i,CNK[i][4]);
-            //fflush(stdout);
         }
     }
 
@@ -2071,80 +2116,60 @@ void ksemawc::ReadSetting(QString filename){
             stream>> par[i][j];
         }
     }
+    //qDebug("After read par: par[27][4]=%f",par[27][4]);
     par[4][1]=par[4][1]*a2nm;//WLmin in nm
     par[4][2]=par[4][2]*a2nm;//WLmax in nm
-    int nItem=0;
+    double WLmin=par[4][1];
+    double WLmax=par[4][2];
     if(!fnE1.contains("mate/aa999")){
-        line2=fnE1.section('.', 1, 1);
-        nItem=ui->cBmis7 -> count();
-        int i=-1;
-        do{
-            i++;
-            lab=ui->cBmis7 -> itemText(i);
-        }while(!line2.contains(lab) && i<nItem);
+        int i=nint(par[27][4])-1;
         ui->cBmis7 ->setCurrentIndex(i);
     }
     if(!fnE2.contains("mate/aa999")){
-        line2=fnE2.section('.', 1, 1);
-        nItem=ui->cBmis9 -> count();
-        int i=-1;
-        do{
-            i++;
-            lab=ui->cBmis9 -> itemText(i);
-        }while(!line2.contains(lab) && i<nItem);
+        int i=nint(par[28][4])-1;
         ui->cBmis9 ->setCurrentIndex(i);
     }
     if(!fnE3.contains("mate/aa999")){
-        line2=fnE3.section('.', 1, 1);
-        nItem=ui->cBmis11 -> count();
-        int i=-1;
-        do{
-            i++;
-            lab=ui->cBmis11 -> itemText(i);
-        }while(!line2.contains(lab) && i<nItem);
+        int i=nint(par[29][4])-1;
         ui->cBmis11 ->setCurrentIndex(i);
     }
     if(!fnE4.contains("mate/aa999")){
-        line2=fnE4.section('.', 1, 1);
-        nItem=ui->cBmis13 -> count();
-        int i=-1;
-        do{
-            i++;
-            lab=ui->cBmis13 -> itemText(i);
-        }while(!line2.contains(lab) && i<nItem);
+        int i=nint(par[30][4])-1;
         ui->cBmis13 ->setCurrentIndex(i);
     }
+
     int JJ=1,Jitem=-1,nMis;
     for(int i=1;i<=14;i++){
-        if(NINT(par[i][4])==-1){
+        if(nint(par[i][4])==-1){
             idToCheckBox["checkB_mis"+QString::number(i)+"_1"] -> setCheckState ( Qt::Unchecked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_2"] -> setCheckState ( Qt::Checked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setCheckState ( Qt::Unchecked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setEnabled(false);
             DATO[i]=-1;
         }
-        else if(NINT(par[i][4])==0){
+        else if(nint(par[i][4])==0){
             idToCheckBox["checkB_mis"+QString::number(i)+"_1"] -> setCheckState ( Qt::Unchecked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_2"] -> setCheckState ( Qt::Unchecked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setCheckState ( Qt::Unchecked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setEnabled(false);
             DATO[i]=0;
         }
-        else if(NINT(par[i][4])==1){
+        else if(nint(par[i][4])==1){
             idToCheckBox["checkB_mis"+QString::number(i)+"_1"] -> setCheckState ( Qt::Checked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_2"] -> setCheckState ( Qt::Checked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setCheckState ( Qt::Unchecked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setEnabled(true);
             DATO[i]=1;
         }
-        else if(NINT(par[i][4])==2){
+        else if(nint(par[i][4])==2){
             idToCheckBox["checkB_mis"+QString::number(i)+"_1"] -> setCheckState ( Qt::Checked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_2"] -> setCheckState ( Qt::Checked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setCheckState ( Qt::Checked );
             idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setEnabled(true);
             DATO[i]=2;
         }
-        nMis=NINT(par[20+JJ][4]);
+        nMis=nint(par[20+JJ][4]);
+        qDebug("\ti=%d nMis=par[20+%d][4]=%d",i,JJ,nMis);
         if(nMis>=0){
             int iCount=idToComboBox["cBmis"+QString::number(i)] -> count();
             for(int ii=0;ii<iCount;ii++){
@@ -2154,30 +2179,49 @@ void ksemawc::ReadSetting(QString filename){
             }
             //idToComboBox["cBmis"+QString::number(i)] -> setCurrentIndex(nMis);
         }
+        if(i==1)
+            pwTn();
+        else if(i==2)
+            pwTp();
+        else if(i==3)
+            pwRn();
+        else if(i==4)
+            pwRp();
+        else if(i==5)
+            pwR1();
+        else if(i==6)
+            pwApds();
         if(i==7 || i==9 || i==11 || i==13){//if(JJ>=7)//set angle and Psi checkBox
+            if(i==7)
+                pwEj(1);
+            else if(i==9)
+                pwEj(2);
+            else if(i==11)
+                pwEj(3);
+            else if(i==13)
+                pwEj(4);
             Jitem=idToComboBox["cBteE"+QString::number(JJ-6)] -> findText(QString::number(par[13+JJ-6][1]),Qt::MatchExactly);
-            //printf("i=%d JJ=%d Jitem=%d\n",i,JJ,Jitem);
             if(Jitem>=0) idToComboBox["cBteE"+QString::number(JJ-6)] ->setCurrentIndex(Jitem);
-            i++;
-            if(NINT(par[i][4])==-1){
+            i++;//PSI
+            if(nint(par[i][4])==-1){
                 idToCheckBox["checkB_mis"+QString::number(i)+"_2"] -> setCheckState ( Qt::Checked );
                 idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setCheckState ( Qt::Unchecked );
                 idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setEnabled(false);
                 DATO[i]=-1;
             }
-            else if(NINT(par[i][4])==0){
+            else if(nint(par[i][4])==0){
                 idToCheckBox["checkB_mis"+QString::number(i)+"_2"] -> setCheckState ( Qt::Unchecked );
                 idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setCheckState ( Qt::Unchecked );
                 idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setEnabled(false);
                 DATO[i]=0;
             }
-            else if(NINT(par[i][4])==1){
+            else if(nint(par[i][4])==1){
                 idToCheckBox["checkB_mis"+QString::number(i)+"_2"] -> setCheckState ( Qt::Checked );
                 idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setCheckState ( Qt::Unchecked );
                 idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setEnabled(true);
                 DATO[i]=1;
             }
-            else if(NINT(par[i][4])==2){
+            else if(nint(par[i][4])==2){
                 idToCheckBox["checkB_mis"+QString::number(i)+"_2"] -> setCheckState ( Qt::Checked );
                 idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setCheckState ( Qt::Checked );
                 idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setEnabled(true);
@@ -2193,22 +2237,17 @@ void ksemawc::ReadSetting(QString filename){
     ui->dSB_PAR_5_3 -> setValue(par[5][3]);//ErrReading
     ui->dSB_PAR_6_1 -> setValue(par[6][1]);//theta
     if(caller=="LoadProject"){
-        ui->sB_PAR_8_1 -> setValue(0);
-        ui->sB_PAR_8_2 -> setValue(0);
-        jobtot=0;
-        ifirstcall=0;
-        ui->spinBox_jobBest -> setValue(0);
-        ui->lineEdit_chi2Best->setText("1.E+99");
+        reset();
     }
-    if(NINT(par[9][1])==1)
+    if(nint(par[9][1])==1)
         ui->checkBox_setPsoK -> setCheckState ( Qt::Checked );
     else
         ui->checkBox_setPsoK -> setCheckState ( Qt::Unchecked );
-    if(NINT(par[10][1])==0)
+    if(nint(par[10][1])==0)
         ui->cBox_PAR_10_1 -> setCheckState (Qt::Unchecked);
     else
         ui->cBox_PAR_10_1 -> setCheckState (Qt::Checked);
-    if(NINT(par[10][2])==0)
+    if(nint(par[10][2])==0)
         ui->checkBox_3points -> setCheckState (Qt::Checked);
     else
         ui->checkBox_3points -> setCheckState (Qt::Unchecked);
@@ -2216,29 +2255,28 @@ void ksemawc::ReadSetting(QString filename){
         QMessageBox msgBox;
         msgBox.setText("The project kind is old => k=extinction_coefficient=0");
         msgBox.setInformativeText("Would you like to update to k evaluated from epsilon?");
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Cancel);
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
         int ret = msgBox.exec();
         switch (ret) {
         case QMessageBox::Yes:
             par[11][1]=1.;
             break;
-        case QMessageBox::Cancel:
+        case QMessageBox::No:
             break;
         }
     }
     int expA=0;
     if(par[11][1]>0.)
-        expA=NINT(log10(par[11][1]));//attenuation coefficient of k by Fit#N
+        expA=nint(log10(par[11][1]));//attenuation coefficient of k by Fit#N
     else
         expA=0;
     double valA=par[11][1]/pow(10.,expA);
-    //printf("par[11][1]=%f expA=%d valA=%f\n",par[11][1],expA,valA);
     ui->spinBox_expAENS->setValue(expA);
     ui->doubleSpinBox_valAENS->setValue(valA);
-    int irif=NINT(par[10][3]);
+    int irif=nint(par[10][3]);
     ui->comboB_PAR_10_3 -> setCurrentIndex(irif);
-    if(NINT(par[13][2])==0){
+    if(nint(par[13][2])==0){
         iDelCon=0;
         ui->checkBox_deltaConnect->setCheckState(Qt::Unchecked);
     }
@@ -2246,42 +2284,44 @@ void ksemawc::ReadSetting(QString filename){
         iDelCon=1;
         ui->checkBox_deltaConnect->setCheckState(Qt::Checked);
     }
-    iw=NINT(par[18][1]);
+    iw=nint(par[18][1]);
     if(iw==1)
         ui->checkB_par_18_1 -> setCheckState ( Qt::Checked );
     else
         ui->checkB_par_18_1 -> setCheckState ( Qt::Unchecked );
-    int imultiply=NINT(par[22][1]);
+    int imultiply=nint(par[22][1]);
     if(imultiply==0)
         ui->checkB_PAR_22_1 -> setCheckState ( Qt::Unchecked );
-    else
+    else{
         ui->checkB_PAR_22_1 -> setCheckState ( Qt::Checked );
+        ui->comboB_PAR_10_3 -> setEnabled(true);
+    }
     ui->DP_PAR_27_1  -> setText(QString::number(par[27][1]));
-    int s1p2=NINT(par[27][2]);
+    int s1p2=nint(par[27][2]);
     ui->cB_PAR_27_2 -> setCurrentIndex(s1p2-1);
-    ui->sB_PAR_28_1 -> setValue(NINT(par[28][1]));
-    ui->sB_PAR_28_2 -> setValue(NINT(par[28][2]));
-    ui->sB_PAR_29_1 -> setValue(NINT(par[29][1]));
-    if(NINT(par[31][5])==0)
+    ui->sB_PAR_28_1 -> setValue(nint(par[28][1]));
+    ui->sB_PAR_28_2 -> setValue(nint(par[28][2]));
+    ui->sB_PAR_29_1 -> setValue(nint(par[29][1]));
+    if(nint(par[31][5])==0)
         ui->checkBox_logScale->setCheckState(Qt::Unchecked);
     else
         ui->checkBox_logScale->setCheckState(Qt::Checked);
-    ui->comboBox_DeltaPsiScale ->setCurrentIndex(NINT(par[33][5]));
-    nlayer=NINT(par[51][2]);//N, layer
-    int isimmetry=NINT(par[52][2]);
+    ui->comboBox_DeltaPsiScale ->setCurrentIndex(nint(par[33][5]));
+    nlayer=nint(par[51][2]);//N, layer
+    int isimmetry=nint(par[52][2]);
     if(isimmetry==0)
         ui->checkB_PAR_52_2 -> setCheckState ( Qt::Unchecked );
     else
         ui->checkB_PAR_52_2 -> setCheckState ( Qt::Checked );
-    int ihemi=NINT(par[54][2]);
+    int ihemi=nint(par[54][2]);
     if(ihemi==0)
         ui->checkB_PAR_54_2 -> setCheckState ( Qt::Unchecked );
     else
         ui->checkB_PAR_54_2 -> setCheckState ( Qt::Checked );
     ui->DP_PAR_55_2 -> setText(QString::number(par[55][2]));
-    npp=NINT(par[34][5]);//N par fit
-    ui->cB_PAR_35_2 -> setCurrentIndex(NINT(par[35][2]-1.));
-    nPar=NINT(par[35][5]);//N par enabled for fit
+    npp=nint(par[34][5]);//N par fit
+    ui->cB_PAR_35_2 -> setCurrentIndex(nint(par[35][2]-1.));
+    nPar=nint(par[35][5]);//N par enabled for fit
     ui->sB_PAR_34_5 -> setValue(npp);
     ui->sB_PAR_35_5 -> setValue(nPar);
     for(int i=1;i<=14;i++){
@@ -2304,17 +2344,16 @@ void ksemawc::ReadSetting(QString filename){
         }
     }
 
-    ui->comboBox_average->setCurrentIndex(NINT(par[35][1]));//set std spectrum
+    ui->comboBox_average->setCurrentIndex(nint(par[35][1]));//set std spectrum
 
     for(int i=1;i<=npp;i++)
-        ppm[i]=NINT(par[35+i][5]);
+        ppm[i]=nint(par[35+i][5]);
 
     //PM
     for(int i=1;i<=200;i++){
         for(int j=1;j<=5;j++){
             stream>> pm[i][j];
         }
-        //printf("pm[%d][1-5]: %f %f %f %f %f\n",i,pm[i][1],pm[i][2],pm[i][3],pm[i][4],pm[i][5]);
     }
     if(a2nm<1.){//Angstrom -> nm
         for(int i=1;i<=9;i++){
@@ -2322,7 +2361,6 @@ void ksemawc::ReadSetting(QString filename){
             pm[50+i][1]=pm[50+i][1]*a2nm;//roughness
         }
     }
-    //printf("\tReadSetting: pm[100][1]= %f\n",pm[100][1]);
     if(old0new1<2){//renormalization of oscillator coeff for old project
         for(int i=1;i<=20;i++){
             if(pm[101+(i-1)*5][1]==1){//Lorentz
@@ -2334,40 +2372,40 @@ void ksemawc::ReadSetting(QString filename){
             }
             else if(pm[101+(i-1)*5][1]==3){//Inhomo
                 double sqrln2=0.832554611;
-                long double E0=abs(pm[103+(i-1)*5][1]);
-                long double D=abs(pm[104+(i-1)*5][1]);
+                long double E0=std::abs(pm[103+(i-1)*5][1]);
+                long double D=std::abs(pm[104+(i-1)*5][1]);
                 long double Kinho=pow((D/sqrln2),2.)/2*exp(-pow(E0*sqrln2/D,2.))+
                                     E0*D/sqrln2/2.*sqrt(PIG)*erfcl(-E0*sqrln2/D);
                 pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*Kinho;
             }
             else if(pm[101+(i-1)*5][1]==5){//Drude
-                double E0=abs(pm[103+(i-1)*5][1]);
+                double E0=std::abs(pm[103+(i-1)*5][1]);
                 pm[102+(i-1)*5][1]=E0*E0*PIG/2.;
                 pm[103+(i-1)*5][1]=0.;
             }
             else if(pm[101+(i-1)*5][1]==6){//Indirect-Cody
-                double E0=abs(pm[103+(i-1)*5][1]);
-                double De=abs(pm[105+(i-1)*5][1]);
+                double E0=std::abs(pm[103+(i-1)*5][1]);
+                double De=std::abs(pm[105+(i-1)*5][1]);
                 double KCi=E0*De+De*De/2.;
                 pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KCi;
             }
             else if(pm[101+(i-1)*5][1]==7){//Indirect-Tauc
-                double E0=abs(pm[103+(i-1)*5][1]);
-                double De=abs(pm[105+(i-1)*5][1]);
+                double E0=std::abs(pm[103+(i-1)*5][1]);
+                double De=std::abs(pm[105+(i-1)*5][1]);
                 double r=E0/De;
                 double KTi=2.*(8.*r*r*log((4.*r+1.)/(4.*r)) + 8.*pow((r+1.),2.)*log((4.*r+4.)/(4.*r+3.))
                            - (1.+8.*r*(r+1.))*log((4.*r+3.)/(4.*r+1.)) );
                 pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KTi;
             }
             else if(pm[101+(i-1)*5][1]==8){//Direct-Cody
-                double E0=abs(pm[103+(i-1)*5][1]);
-                double K=abs(pm[105+(i-1)*5][1]);
+                double E0=std::abs(pm[103+(i-1)*5][1]);
+                double K=std::abs(pm[105+(i-1)*5][1]);
                 double KCd=PIG/16.*K*K*(2.*E0+K);
                 pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KCd*PIG;
             }
             else if(pm[101+(i-1)*5][1]==9){//Direct-Tauc
-                double E0=abs(pm[103+(i-1)*5][1]);
-                double K=abs(pm[105+(i-1)*5][1]);
+                double E0=std::abs(pm[103+(i-1)*5][1]);
+                double K=std::abs(pm[105+(i-1)*5][1]);
                 double KTd=PIG/2.*(2.*E0+K-2.*sqrt(E0*(E0+K)));
                 pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KTd;
             }
@@ -2384,8 +2422,8 @@ void ksemawc::ReadSetting(QString filename){
     //inserimento valori cnk
     double f2=0.;
     for(int i=1;i<=15;i++){
-        idToComboBox["cB_cnk"+QString::number(i)+"a"] -> setCurrentIndex(NINT(CNK[i][1]));
-        if(NINT(CNK[i][1])==0){
+        idToComboBox["cB_cnk"+QString::number(i)+"a"] -> setCurrentIndex(nint(CNK[i][1]));
+        if(nint(CNK[i][1])==0){
             idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setEnabled(true);
             idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> setEnabled(true);
             idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setText(QString::number(CNK[i][2]));
@@ -2395,7 +2433,7 @@ void ksemawc::ReadSetting(QString filename){
             idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setEnabled(false);
             idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> setEnabled(false);
         }
-        if(NINT(CNK[i][4])<0.){
+        if(nint(CNK[i][4])<0.){
             idToCheckBox["cB_EMA_"+QString::number(i)] -> setCheckState ( Qt::Unchecked );
             idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setCurrentIndex(-1);
             idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setEnabled(false);
@@ -2406,8 +2444,8 @@ void ksemawc::ReadSetting(QString filename){
         else{
             idToCheckBox["cB_EMA_"+QString::number(i)] -> setCheckState ( Qt::Checked );
             idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setEnabled(true);
-            idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setCurrentIndex(NINT(CNK[i][4]));
-            if(NINT(CNK[i][4])==0){
+            idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setCurrentIndex(nint(CNK[i][4]));
+            if(nint(CNK[i][4])==0){
                 idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> setEnabled(true);
                 idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> setEnabled(true);
                 idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> setText(QString::number(CNK[i][5]));
@@ -2425,9 +2463,9 @@ void ksemawc::ReadSetting(QString filename){
     //aggiornamento valori PanFit
     for(int i=1;i<=npp;i++){
         state=idToCheckBox["chBeParFit_"+QString::number(i)]-> checkState();
-        int ip=NINT(ppm[i]);
+        int ip=nint(ppm[i]);
         if(ip>100)
-            pm[ip][1]=abs(pm[ip][1]);
+            pm[ip][1]=std::abs(pm[ip][1]);
         idToLineEdit["DPparFitV_"+QString::number(i)] -> setEnabled(true);
         idToLineEdit["DPparFitErr_"+QString::number(i)] -> setEnabled(true);
         idToLineEdit["DPparFitGC_"+QString::number(i)] -> setEnabled(true);
@@ -2446,20 +2484,22 @@ void ksemawc::ReadSetting(QString filename){
         idToLineEdit["DPparFitErr_"+QString::number(i)] -> setEnabled(false);
         idToLineEdit["DPparFitGC_"+QString::number(i)] -> setEnabled(false);
     }
-    //printf("i0= %d\n",i0);
-    ui->cB_cnk1a -> setCurrentIndex(NINT(pm[100][1]));//fit option
+    ui->cB_cnk1a -> setCurrentIndex(nint(pm[100][1]));//fit option
     ui->sB_PAR_51_2 -> setValue(nlayer);
-    occupyPF=0;
+    setGuiMute(false);
+    qDebug()<<"ReadSetting completed. Now call setRifMir MCRange, SetModel, ListOsc, PanFitPar";
 
-    QString sname=ui->lineEdit_sample -> text();
-    if(sname.isEmpty() || sname=="mate/aa999")
-        Clrfn();
+    setRifMir();
     MCRange();
     SetModel(nlayer);
     listOsc();
     PanFitPar();
 
-    printf("exit from ReadSetting\n");
+    //set the WL range as stored in the project
+    ui->dSB_PAR_4_1 -> setValue(WLmin);//Lmin
+    ui->dSB_PAR_4_2 -> setValue(WLmax);//Lmax
+
+    qDebug()<<"exit from ReadSetting";
 }
 
 
@@ -2469,7 +2509,7 @@ void ksemawc::setRifMir(){
     ui->comboB_PAR_10_3-> setEnabled(state==Qt::Checked);
     if(state==Qt::Checked){
         int nrif=ui->comboB_PAR_10_3 -> currentIndex();
-        printf("->setRifMir nrif=%d\n",nrif);
+        qDebug()<<"->setRifMir nrif="<<nrif;
         if(nrif!=0){
             QString line,line2,fnam;
             QFile file(fRefMir);
@@ -2494,7 +2534,6 @@ void ksemawc::setRifMir(){
     else
         MCRange();
 }
-
 
 
 void ksemawc::AdjTheta(){
@@ -2532,9 +2571,8 @@ void ksemawc::AdjRoughMax(){
 }
 
 
-
 void ksemawc::setRangeEli(){
-    printf("-> setRangeEli\n");
+    qDebug()<<"-> setRangeEli";
     int kD,kP;
     int DP0cosDtanP1=ui->comboBox_DeltaPsiScale->currentIndex();
     if(DP0cosDtanP1==0){
@@ -2553,7 +2591,7 @@ void ksemawc::setRangeEli(){
 
 
 void ksemawc::readRangeEli(){
-    printf("-> readRangeEli\n");
+    qDebug()<<"-> readRangeEli";
     int kD,kP;
     int DP0cosDtanP1=ui->comboBox_DeltaPsiScale->currentIndex();
     if(DP0cosDtanP1==0){
@@ -2571,11 +2609,9 @@ void ksemawc::readRangeEli(){
 }
 
 
-
 void ksemawc::SaveProject(){
     SaveSetting(-1);
     int ierr;
-    occupyPF=1;
     QString command,subfnproject,sample;
     subfnproject=ui->lineEdit_P -> text();
     if(subfnproject.contains("mate/aa999.9")){
@@ -2596,7 +2632,7 @@ void ksemawc::SaveProject(){
     subfnproject=fnproject.section(pathroot, 1, 1);
     if(fnproject!=".Spj"){
         ui->lineEdit_P -> setText(subfnproject);
-        if (IS_POSIX == 1) {
+        if (IS_POSIX) {
             command="cp "+fileStore+" "+fnproject;
             ierr=system((command.toStdString()).c_str());}
         else
@@ -2605,12 +2641,10 @@ void ksemawc::SaveProject(){
             QStringList List;
             List =command.split("/");
             int nV=List.count();
-            //printf("\nnV=%d\n",nV);
             QString commandw;
             QString pezzo;
             for(int iv=0;iv<nV;iv++){
                 pezzo=List.at(iv).toLocal8Bit().constData();
-                //printf("pezzo[%d]= %s\t",iv,pezzo.toStdString().c_str());
                 if(iv==0){
                     commandw=pezzo;
                 }
@@ -2618,26 +2652,23 @@ void ksemawc::SaveProject(){
                     commandw=commandw+"\\"+pezzo;
                 }
             }
-            //printf("comando=%s\n",(commandw.toStdString()).c_str());
             ierr=system((commandw.toStdString()).c_str());
         }
         if(ierr != 0){
             msgErrLoad("SaveProject",fnproject);
-            printf("Error copying project!!!\n");
+            qWarning()<<"Error copying project!!!";
         }
         else
-            printf("Project saved as %s\n",(fnproject.toStdString()).c_str());
+            qInfo()<<"Project saved as "<<fnproject;
     }
-    occupyPF=0;
 }
 
 
-
 void ksemawc::SaveSetting(int iCall){
-    if(occupyPF!=0) return;
-    printf("-> SaveSetting (occupyPF=%d option_iCall=%d) to %s\n",
-           occupyPF,iCall,(fileStore.toStdString()).c_str());
-    occupyPF=1;
+    if(isGuiMuted())
+        return;
+    qDebug()<<"-> SaveSetting option_iCall="<<iCall<<" to "<<fileStore;
+    setGuiMute(true);
     Qt::CheckState state,state1,state2;
     QString stringa,lab,svalue;
     int itab;
@@ -2645,7 +2676,7 @@ void ksemawc::SaveSetting(int iCall){
         itab=ui->tabWidget -> currentIndex();
     else
         itab=iCall;
-    printf("itab=%d\n",itab);
+    qDebug()<<"itab="<<itab;
     if(itab==1){//Model TAB
         state=ui->checkBox_setPsoK -> checkState ();
         if( state == Qt::Checked )
@@ -2661,9 +2692,9 @@ void ksemawc::SaveSetting(int iCall){
                 pm[i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> value();
                 pm[50+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> value();
                 pm[90+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> value();
-                if(NINT(par[50+i][3])==1){
+                if(nint(par[50+i][3])==1){
                     pm[i][1]=pm[i][1]/1.E-6;//mm->nm
-                } else if(NINT(par[50+i][3])==3){
+                } else if(nint(par[50+i][3])==3){
                     pm[10+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> value();
                     pm[20+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> value();
                     pm[30+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> value();
@@ -2677,10 +2708,9 @@ void ksemawc::SaveSetting(int iCall){
         //refresh PanFit values
         for(int i=1;i<=npp;i++){
             state=idToCheckBox["chBeParFit_"+QString::number(i)]-> checkState();
-            int ip=NINT(ppm[i]);
-            //printf("npp=%d i=%d ip=%d\n",npp,i,ip);
+            int ip=nint(ppm[i]);
             if(ip>100 && ip <=200)
-                pm[ip][1]=abs(pm[ip][1]);
+                pm[ip][1]=std::abs(pm[ip][1]);
             idToLineEdit["DPparFitV_"+QString::number(i)] -> setText(QString::number(pm[ip][1]));
             if( state == Qt::Checked ){
                 idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(pm[ip][4]));
@@ -2691,17 +2721,6 @@ void ksemawc::SaveSetting(int iCall){
                 idToLineEdit["DPparFitGC_"+QString::number(i)] -> setText(QString::number(0));
             }
         }
-//        //enabled measures
-//        for(int i=1;i<=13;i++){
-//            state=idToCheckBox["checkB_mis"+QString::number(i)+"_1"] -> checkState();
-//            idToCheckBox["checkB_mis"+QString::number(i)+"_2"]->setCheckState(state);
-//            idToCheckBox["checkB_mis"+QString::number(i)+"_3"]->setCheckState(state);
-//            if(state==Qt::Unchecked)
-//                idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setEnabled(false);
-//            else
-//                idToCheckBox["checkB_mis"+QString::number(i)+"_3"] -> setEnabled(true);
-//            if(i==7 || i==9 || i==11 ) i++;
-//        }
     }
     else if(itab==2){//Simulation TAB
         setTabSim();
@@ -2713,7 +2732,7 @@ void ksemawc::SaveSetting(int iCall){
                         DATO[i]=2;
             }
         }
-        printf("\t apply savePanFit\n");
+        //qDebug()<<"\t apply savePanFit";
         int n,n1,n2,ip,jpf;
         QString Lj,Valore;
         Qt::CheckState state;
@@ -2765,7 +2784,7 @@ void ksemawc::SaveSetting(int iCall){
                 }
                 idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pm[ip][1]));//eventually correct the value
 
-                printf("\tSavePanFit:  j=%d n1=%d n2=%d ip=%d pm[%d][1]=%f\n",j,n1,n2,ip,ip,pm[ip][1]);
+                //qDebug()<<"\tSavePanFit:  j="<<j<<" n1="<<n1<<" n2="<<n2<<" ip="<<ip<<" pm["<<ip<<"][1]="<<pm[ip][1];
                 if( state == Qt::Unchecked ){
                     pm[ip][2]=0;
                     n--;
@@ -2783,7 +2802,7 @@ void ksemawc::SaveSetting(int iCall){
             msgBox.setText("Please select each individual fit-parameter before fitting!!!");
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.exec();
-            occupyPF=0;
+            setGuiMute(false);
             return;
         }
         par[34][5]=npp;//N par fit
@@ -2801,11 +2820,11 @@ void ksemawc::SaveSetting(int iCall){
     QFile file(fileStore);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
         msgErrLoad("SaveSetting-fileStore",fileStore);
-        occupyPF=0;
+        setGuiMute(false);
         return;
     }
     QTextStream out(&file);
-    out << "iVspj=1" << "\n";
+    out << "iVspj=1nm" << "\n";
     stringa=ui->lineEdit_infoP -> text();
     out << stringa.simplified() << "\n";
     //file nk
@@ -2827,7 +2846,7 @@ void ksemawc::SaveSetting(int iCall){
     QFile file1(fStdSpect);
     if (!file1.open (QIODevice::ReadOnly | QIODevice::Text)){
         msgErrLoad("SaveSetting-fStdSpect",fStdSpect);
-        occupyPF=0;
+        setGuiMute(false);
         return;
     }
     QTextStream stream1 ( &file1 );
@@ -2850,6 +2869,7 @@ void ksemawc::SaveSetting(int iCall){
     else{
         NANK[12]=stringa+"."+lab;
         out << stringa+"."+lab << "\n";
+        par[27][4]=lab.toDouble();
         if(pm[86][1]<1.)
             ui->dSB_PM_86_1-> setValue(ui->cBteE1 -> currentText().toDouble());
         else
@@ -2862,6 +2882,7 @@ void ksemawc::SaveSetting(int iCall){
     else{
         NANK[13]=stringa+"."+lab;
         out << stringa+"."+lab << "\n";
+        par[28][4]=lab.toDouble();
         if(pm[87][1]<1.)
             ui->dSB_PM_87_1-> setValue(ui->cBteE2 -> currentText().toDouble());
         else
@@ -2874,6 +2895,7 @@ void ksemawc::SaveSetting(int iCall){
     else{
         NANK[14]=stringa+"."+lab;
         out << stringa+"."+lab << "\n";
+        par[29][4]=lab.toDouble();
         if(pm[88][1]<1.)
             ui->dSB_PM_88_1-> setValue(ui->cBteE3 -> currentText().toDouble());
         else
@@ -2886,11 +2908,13 @@ void ksemawc::SaveSetting(int iCall){
     else{
         NANK[15]=stringa+"."+lab;
         out << stringa+"."+lab << "\n";
+        par[30][4]=lab.toDouble();
         if(pm[89][1]<1.)
             ui->dSB_PM_89_1-> setValue(ui->cBteE4 -> currentText().toDouble());
         else
             ui->dSB_PM_89_1-> setValue(pm[89][1]);
     }
+    //qDebug("saving par[27][4]=%f",par[27][4]);
     //RXY
     state=ui->checkB_RXY_25_3 -> checkState();
     if(state==Qt::Unchecked){
@@ -2971,8 +2995,12 @@ void ksemawc::SaveSetting(int iCall){
         if(i<=6 && state==Qt::Checked){
             if(lab.at(0).toLatin1() == 'i') par[24][1]=2.0;//SF IR
         }
-        par[20+JJ][4]=(lab.at(1)).digitValue();// in Qt6 digitValue() deve essere sostituito da unicode()
-        //printf("Savesetting JJ=%d (lab.at(1)).digitValue()= %f\n",JJ,par[20+JJ][4]);
+        if(i<=6){
+            if(lab.size() >= 2)
+                par[20+JJ][4] = (lab.at(1)).digitValue();// in Qt6 digitValue() deve essere sostituito da unicode()
+            else
+                par[20+JJ][4] = 1.;  // valore di default
+        }
         if(JJ>=7){
             i++;
             state1=idToCheckBox["checkB_mis"+QString::number(i)+"_2"] -> checkState ();
@@ -3064,11 +3092,10 @@ void ksemawc::SaveSetting(int iCall){
             rxy[17][1]=rxy[17][2]/10000.;
     }
     par[33][5]=ui->comboBox_DeltaPsiScale->currentIndex();
-    if(fabs(par[21][3]) < 0.003*fabs(rxy[16][2]-rxy[16][1]))
-        par[21][3]=0.003*fabs(rxy[16][2]-rxy[16][1]);
-    if(fabs(par[22][3]) < 0.003*fabs(rxy[17][2]-rxy[17][1]))
-        par[22][3]=0.003*fabs(rxy[17][2]-rxy[17][1]);
-    par[35][4]=CNK[1][1];//used in simulation
+    if(std::abs(par[21][3]) < 0.003*std::abs(rxy[16][2]-rxy[16][1]))
+        par[21][3]=0.003*std::abs(rxy[16][2]-rxy[16][1]);
+    if(std::abs(par[22][3]) < 0.003*std::abs(rxy[17][2]-rxy[17][1]))
+        par[22][3]=0.003*std::abs(rxy[17][2]-rxy[17][1]);
     //  setting the model
     nlayer=ui->sB_PAR_51_2 -> value();
     par[51][2]=nlayer;
@@ -3088,7 +3115,7 @@ void ksemawc::SaveSetting(int iCall){
             par[50+i][1]++;
             par[50+i][3]=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
             par[50+i][3]++;
-            if(NINT(par[50+i][1])==1) par[53][2]=i;//puntatore strato incognito
+            if(nint(par[50+i][1])==1) par[53][2]=i;//puntatore strato incognito
         }
         else{
             par[50+i][1]=0;
@@ -3141,8 +3168,9 @@ void ksemawc::SaveSetting(int iCall){
         out << "\n";
     }
     file.close();
-    printf("exit from SaveSetting \n");
-    occupyPF=0;
+    qDebug()<<"exit from SaveSetting";
+    //qDebug("with par[27][4]=%f",par[27][4]);
+    setGuiMute(false);
 }
 
 
@@ -3154,8 +3182,8 @@ void ksemawc::msgErrLoad(QString where,QString fnERR){
     msgBox.exec();
 }
 
+
 void ksemawc::LoadFilenk(){
-    double NKNEW[1000][6];
     QString fnam=ui->lineEdit_Fnk -> text();
     fnam=fnam.simplified();
     if(fnam.contains("mate/aa999.9")){
@@ -3167,10 +3195,10 @@ void ksemawc::LoadFilenk(){
     }
     else
         fnFnk=pathroot+fnam;
-    printf("LoadFilenk-> load file nk-solutions= %s\n",fnFnk.toStdString().c_str());
+    qDebug()<<"LoadFilenk-> load file nk-solutions= "<<fnFnk;
     QFile file(fnFnk);
     if (!file.open (QIODevice::ReadOnly | QIODevice::Text)){
-        printf("\t ERROR!!!\n");
+        qWarning()<<"\t ERROR!!!";
         msgErrLoad("LoadFilenk",fnFnk);
         return;
     }
@@ -3185,7 +3213,7 @@ void ksemawc::LoadFilenk(){
     //display info
     line = stream.readLine();
     ui->lineEdit_infoFnk -> setText(line.simplified());
-    printf("\tInfo: %s\n",(line.simplified()).toStdString().c_str());
+    qDebug()<<"\tInfo: "<<line.simplified();
     //read Ndata
     line = stream.readLine();
     line=line.simplified();
@@ -3196,21 +3224,17 @@ void ksemawc::LoadFilenk(){
     double a2nm=0.1;
     if(line.contains("nm"))
         a2nm=1.;
-    printf("\tN. (L,n,k)= %d a2nm=%f\n",N,a2nm);
-    if(N>999){
-        msgErrLoad("LoadFilenk","Ndata > 999, MAXIMUM limit");
-        return;
-    }
+    qDebug()<<"\tN. (L,n,k)= "<<N<<" a2nm="<<a2nm;
     rxy[16][3]=1000.;
     rxy[16][4]=-1000.;
     rxy[17][3]=1000.;
     rxy[17][4]=-1000.;
-    SOL[1][1]=N;
+    Sol.clear();
+    Sol.resize(N);
     //load data
-    for(int L=2;L<=N+1;L++){
+    for(int L=0;L<N;L++){
         line=stream.readLine();
         line=line.simplified();
-        //printf("line=%s\n",line.toStdString().c_str());
         QStringList List;
         List =line.split(" ");
         int nV=List.count();
@@ -3221,8 +3245,8 @@ void ksemawc::LoadFilenk(){
                 List=line.split(" ");
                 nV=List.count();
                 if(nV!=5){
-                    printf("nV=%d line=%s\n",nV,line.toStdString().c_str());
-                    printf("LoadFilenk-> ERROR reading file-nk= %s: separator char invalid\n",fnam.toStdString().c_str());
+                    qDebug()<<"nV="<<nV<<" line="<<line;
+                    qWarning()<<"LoadFilenk-> ERROR reading file-nk= "<<fnam<<": separator char invalid";
                     QMessageBox msgBox;
                     msgBox.setText("LoadFilenk-> ERROR reading file-nk="+fnam+"\n: separator char invalid or ERRn and ERRk missing");
                     msgBox.setStandardButtons(QMessageBox::Ok);
@@ -3233,15 +3257,15 @@ void ksemawc::LoadFilenk(){
             }
         }
         for(int kk=1;kk<=nV;kk++)
-            SOL[L][kk]=List.at(kk-1).toDouble();
-        //stream>>SOL[L][1]>>SOL[L][2]>>SOL[L][3]>>SOL[L][4]>>SOL[L][5];
-        SOL[L][1]=SOL[L][1]*a2nm;
-        //rxy[20][3]=min(rxy[20][3],SOL[L][1]);
-        //rxy[20][4]=max(rxy[20][4],SOL[L][1]);
-        rxy[16][3]=min(rxy[16][3],SOL[L][2]-SOL[L][4]);
-        rxy[16][4]=max(rxy[16][4],SOL[L][2]+SOL[L][4]);
-        rxy[17][3]=min(rxy[17][3],SOL[L][3]-SOL[L][5]);
-        rxy[17][4]=max(rxy[17][4],SOL[L][3]+SOL[L][5]);
+            Sol[L][kk]=List.at(kk-1).toDouble();
+        Sol[L][0]=1.;//enable data
+        Sol[L][1]=Sol[L][1]*a2nm;//wavelength in nm
+        //rxy[20][3]=min(rxy[20][3],Sol[L][1]);
+        //rxy[20][4]=max(rxy[20][4],Sol[L][1]);
+        rxy[16][3]=min(rxy[16][3],Sol[L][2]-Sol[L][4]);
+        rxy[16][4]=max(rxy[16][4],Sol[L][2]+Sol[L][4]);
+        rxy[17][3]=min(rxy[17][3],Sol[L][3]-Sol[L][5]);
+        rxy[17][4]=max(rxy[17][4],Sol[L][3]+Sol[L][5]);
     }
     file.close();
     ui->DP_RXY_16_3->setText(QString::number(rxy[16][3]));
@@ -3249,41 +3273,39 @@ void ksemawc::LoadFilenk(){
     ui->DP_RXY_17_3->setText(QString::number(rxy[17][3]));
     ui->DP_RXY_17_4->setText(QString::number(rxy[17][4]));
     int NORD=2;
-    for(int I=2;I<=N+1;I++){
+    std::vector<std::vector<double>> NKNEW(N, std::vector<double>(6, 0.0));
+    for(int I=0;I<N;I++){
         double WWM=1.E30;
-        for(int H=2;H<=N+1;H++){
-            if(SOL[H][1]>=.0 && SOL[H][1]<WWM){
-                WWM=SOL[H][1];
+        for(int H=0;H<N;H++){
+            if(Sol[H][1]>=.0 && Sol[H][1]<WWM){
+                WWM=Sol[H][1];
                 NORD=H;
             }
         }
         for(int k=1;k<=5;k++){
-            NKNEW[I][k]=SOL[NORD][k];
+            NKNEW[I][k]=Sol[NORD][k];
         }
-        SOL[NORD][1]=-1.;
+        Sol[NORD][1]=-1.;
     }
-    int i=2;
-    int inew=2;
-    while(i<=N+1){
+    int i=0;
+    int inew=0;
+    while(i<N){
         if(NKNEW[i][4]<=.0)
             NKNEW[i][4]=0.001*NKNEW[i][2];//set minimal n-error
-        if(SOL[i][5]<=0.){//set minimal k-error
+        if(Sol[i][5]<=0.){//set minimal k-error
             if(NKNEW[i][3]>0.)
                 NKNEW[i][5]=0.001*NKNEW[i][3];
             else
                 NKNEW[i][5]=0.001*(rxy[17][4]-rxy[17][3]);
         }
         for(int k=1;k<=5;k++)
-            SOL[inew][k]=NKNEW[i][k];
-        SOL[inew][6]=1.;//enabled for fit
+            Sol[inew][k]=NKNEW[i][k];
+        Sol[inew][0]=1.;//enabled for fit
         inew++;
         i++;
     }
-    SOL[1][1]=inew-2;
-    N=inew-2;
-    printf("\tRange: Lmin= %f Lmax= %f\n",SOL[2][1],SOL[N+1][1]);
-    rxy[20][3]=min(rxy[20][3],SOL[2][1]);
-    rxy[20][4]=max(rxy[20][4],SOL[N+1][1]);
+    rxy[20][3]=min(rxy[20][3],Sol[0][1]);
+    rxy[20][4]=max(rxy[20][4],Sol[N-1][1]);
 }
 
 
@@ -3291,14 +3313,19 @@ void ksemawc::ClrFnk(){
     ui->lineEdit_Fnk -> setText("mate/aa999.9");
     ui->lineEdit_infoFnk ->setText("");
     NANK[9]="mate/aa999.9";
+    Sol.clear();
 }
 
 
 void ksemawc::SaveFnk(){
-    printf("-> SaveFnk with lastAction=%s\n",lastAction.toStdString().c_str());
+    qDebug()<<"-> SaveFnk with lastAction="<<lastAction;
     QString line;
     int iCase=0;
-    int N=NINT(SOL[1][1]);
+    int N;
+    if(lastAction.contains("FitExpMeas") || lastAction.contains("CalcMis") || lastAction.contains("IbridCurrent"))
+        N=NeV;
+    else
+        N=Sol.size();
     if(N==0){
         QMessageBox msgBox;
         msgBox.setText("ATTENTION: launch a best-fit procedure before to save nk-BestFit!\nOtherwise goto Simulation to save nk-Simulated!");
@@ -3321,18 +3348,17 @@ void ksemawc::SaveFnk(){
     pippo.setLabelText("Please set a comment!");
     pippo.setInputMode(QInputDialog::TextInput);
     //pippo.setTextValue(QString::number(expTime));
-    pippo.setOkButtonText("Yes");
+    pippo.setOkButtonText("OK");
     //pippo.setCancelButtonText("No, thanks!");
     bool ok=pippo.exec();
     QString text =pippo.textValue();
     if (ok && !text.isEmpty()){
         line=text;
     }
-    printf("SaveFnk-> save file.nk= %s\n",fnFnk.toStdString().c_str());
     QFile file(fnFnk);
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text)){
         msgErrLoad("SaveFnk",fnFnk);
-        printf("IONK-> ERROR opening file= %s\n",fnFnk.toStdString().c_str());
+        qWarning()<<"IONK-> ERROR opening file= "<<fnFnk;
     }
     int iok=1;
     if( iCase==1 && file.exists() ){
@@ -3359,8 +3385,14 @@ void ksemawc::SaveFnk(){
         QTextStream stream (&file);
         stream<<line<<"\n";
         stream<<N<<" nm"<<"\n";
-        for(int L=2;L<=N+1;L++)
-            stream<<SOL[L][1]<<"\t"<<SOL[L][2]<<"\t"<<SOL[L][3]<<"\t"<<SOL[L][4]<<"\t"<<SOL[L][5]<<"\n";
+        if(lastAction.contains("FitExpMeas") || lastAction.contains("CalcMis") || lastAction.contains("IbridCurrent")){
+            for(int L=0;L<N;L++)
+                stream<<ms.lambda[L]<<"\t"<<nkSol.n[L]<<"\t"<<nkSol.k[L]<<"\t"<<nkSol.n[L]*0.001<<"\t"<<nkSol.k[L]*0.001<<"\n";
+        }
+        else{
+            for(int L=0;L<N;L++)
+                stream<<Sol[L][1]<<"\t"<<Sol[L][2]<<"\t"<<Sol[L][3]<<"\t"<<Sol[L][4]<<"\t"<<Sol[L][5]<<"\n";
+        }
         file.close();
     }
 }
@@ -3380,10 +3412,10 @@ void ksemawc::Setnk(int ifile){
         msgErrLoad("Setn",fnk[ifile]);
         return;
     }
-    printf("->Setnk(%d) with fnk[%d]=%s\n",ifile,ifile,fnk[ifile].toStdString().c_str());
+    qDebug()<<"->Setnk("<<ifile<<" with fnk["<<ifile<<"]="<<fnk[ifile];
     double val1,val2;
     QTextStream stream ( &file );
-    QString line,line2,pezzo;
+    QString line,line2;
     line = stream.readLine();//info line
     idToLineEdit["lineEdit_infoNK_"+QString::number(ifile)] -> setText(line.simplified());
     line2=fnk[ifile].section(pathroot, 1, 1);
@@ -3404,20 +3436,20 @@ void ksemawc::Setnk(int ifile){
     val2=line.section(' ', 0, 0).toDouble();
     val1=val1*a2nm;
     val2=val2*a2nm;
-    printf("\tval1=%f val2=%f\n",val1,val2);
     if(val1<val2){
-        idToLineEdit["WLminNK"+QString::number(ifile)] -> setText(QString::number(NINT(val1)));
-        idToLineEdit["WLmaxNK"+QString::number(ifile)] -> setText(QString::number(NINT(val2)));
+        idToLineEdit["WLminNK"+QString::number(ifile)] -> setText(QString::number(nint(val1)));
+        idToLineEdit["WLmaxNK"+QString::number(ifile)] -> setText(QString::number(nint(val2)));
     }
     else{
-        idToLineEdit["WLminNK"+QString::number(ifile)] -> setText(QString::number(NINT(val2)));
-        idToLineEdit["WLmaxNK"+QString::number(ifile)] -> setText(QString::number(NINT(val1)));
+        idToLineEdit["WLminNK"+QString::number(ifile)] -> setText(QString::number(nint(val2)));
+        idToLineEdit["WLmaxNK"+QString::number(ifile)] -> setText(QString::number(nint(val1)));
     }
     file.close();
     MCRange();
     line2=idToLineEdit["lineEdit"+QString::number(ifile)] -> text();
     updateMatenk(7+ifile,line2);
 }
+
 
 void ksemawc::mDwUp(int iLayer, int Dw1UpM1){
     double tmp1=par[50+iLayer][1];
@@ -3444,9 +3476,6 @@ void ksemawc::mDwUp(int iLayer, int Dw1UpM1){
 
 
 void ksemawc::Clrfn(){
-    if(occupyPF==10)
-        return;
-    occupyPF=2;
     NANK[11]="mate/aa999";
     ui->lineEdit_sample-> setText(NANK[11]);
     fnSample=pathroot+NANK[11];
@@ -3457,6 +3486,8 @@ void ksemawc::Clrfn(){
         idToComboBox["cBmis"+QString::number(imis)] -> clear();
         idToCheckBox["checkB_mis"+QString::number(imis)+"_1"] -> setCheckState(Qt::Unchecked);
         idToCheckBox["checkB_mis"+QString::number(imis)+"_3"] -> setCheckState(Qt::Unchecked);
+        idToLineEdit["WLmin"+QString::number(imis)] -> clear();
+        idToLineEdit["WLmax"+QString::number(imis)] -> clear();
     }
     ui->lineEdit_Tn->setText("");
     ui->lineEdit_Tp->setText("");
@@ -3468,11 +3499,13 @@ void ksemawc::Clrfn(){
     ui->lineEdit_E2->setText("");
     ui->lineEdit_E3->setText("");
     ui->lineEdit_E4->setText("");
-    occupyPF=0;
+    ui->cBteE1 -> clear();
+    ui->cBteE2 -> clear();
+    ui->cBteE3 -> clear();
+    ui->cBteE4 -> clear();
     SaveSetting(0);
     MCRange();
 }
-
 
 
 void ksemawc::Clrnk(int ifile){
@@ -3485,11 +3518,13 @@ void ksemawc::Clrnk(int ifile){
     updateMatenk(7+ifile,"nk-"+QString::number(ifile));
 }
 
+
 void ksemawc::callSetSample(){
     iNewSample=1;
     ifn=0;
     setSample();
 }
+
 
 void ksemawc::setSample(){
     QString line2;
@@ -3507,13 +3542,11 @@ void ksemawc::setSample(){
         Clrfn();
 }
 
-void ksemawc::listMeas(const QString &){
-    if(occupyPF==2)
+
+void ksemawc::listMeas(){
+    if(fnSample.isEmpty() || fnSample.contains("mate/aa999"))
         return;
-    if(fnSample.isEmpty())
-        return;
-    printf("->listMeas (occupyPF=%d) with fnSample= %s\n",occupyPF,fnSample.toStdString().c_str());
-    int i,j;
+    qDebug()<<"->listMeas  with fnSample= "<<fnSample;
     QString lab,estens[7];
     estens[1]=".tn";
     estens[2]=".tp";
@@ -3522,7 +3555,6 @@ void ksemawc::listMeas(const QString &){
     estens[5]=".r1";
     estens[6]=".an";
 
-    occupyPF++;
     ui->lineEdit_Tn->clear();
     ui->lineEdit_Tp->clear();
     ui->lineEdit_Rn->clear();
@@ -3530,18 +3562,17 @@ void ksemawc::listMeas(const QString &){
     ui->lineEdit_R1->clear();
     ui->lineEdit_Apds->clear();
     for(int imis=1;imis<=6;imis++){
-        idToCheckBox["checkB_mis"+QString::number(imis)+"_1"] ->setCheckState(Qt::Unchecked);
+        //idToCheckBox["checkB_mis"+QString::number(imis)+"_1"] ->setCheckState(Qt::Unchecked);
         idToComboBox["cBmis"+QString::number(imis)] -> clear();
         idToLineEdit["WLmin"+QString::number(imis)] -> clear();
         idToLineEdit["WLmax"+QString::number(imis)] -> clear();
-        for(j=0;j<2;j++){
+        for(int j=0;j<2;j++){
             lab="v";
             if(j==1) lab="i";
-            for(i=0;i<10;i++){
+            for(int i=0;i<10;i++){
                 QFile file(fnSample+"."+lab+QString::number(i)+estens[imis]);
                 if(file.exists()) {
                     idToComboBox["cBmis"+QString::number(imis)] -> addItem(lab+QString::number(i));
-                    //printf("addItem %s%d\n",lab.toStdString().c_str(),i);
                     file.close();
                 }
             }
@@ -3552,7 +3583,7 @@ void ksemawc::listMeas(const QString &){
     ui->cBmis9 -> clear();
     ui->cBmis11 -> clear();
     ui->cBmis13 -> clear();
-    for(i=0;i<10;i++){
+    for(int i=0;i<10;i++){
         QFile file(fnSample+"."+QString::number(i)+".el");
         if(file.exists()) {
             ui->cBmis7 -> addItem(QString::number(i));
@@ -3567,23 +3598,20 @@ void ksemawc::listMeas(const QString &){
         for(int j=2;j<=4;j++){
             int nELIpre=idToComboBox["cBmis"+QString::number(5+2*(j-1))]->currentIndex();
             int nEli=idToComboBox["cBmis"+QString::number(5+2*j)]->currentIndex();
-            printf("iNewSample=%d nELIpre=%d nEli=%d\n",iNewSample,nELIpre,nEli);
             if(nELIpre>=0 && nEli==nELIpre){
                 int nTheta=idToComboBox["cBteE"+QString::number(j)] -> count();
                 int iThetaPre=idToComboBox["cBteE"+QString::number(j-1)] -> currentIndex();
                 int iTheta=idToComboBox["cBteE"+QString::number(j)] -> currentIndex();
-                printf("\tnTheta=%d iThetaPre=%d iTheta=%d\n",nTheta,iThetaPre,iTheta);
                 if(iTheta<=iThetaPre && iThetaPre<nTheta-1)
                     idToComboBox["cBteE"+QString::number(j)] -> setCurrentIndex(iThetaPre+1);
             }
         }
         iNewSample=0;
     }
-
-    occupyPF--;
 }
 
-void ksemawc::pwTn(const int &){
+
+void ksemawc::pwTn(){
     if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
@@ -3605,7 +3633,8 @@ void ksemawc::pwTn(const int &){
     MCRange();
 }
 
-void ksemawc::pwTp(const int &){
+
+void ksemawc::pwTp(){
     if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
@@ -3625,12 +3654,13 @@ void ksemawc::pwTp(const int &){
     ui->dSB_PAR_6_1 -> setValue(par[6][1]);
     ui->dSB_PAR_6_1bis -> setValue(par[6][1]);
     ui->dSB_PAR_6_1tris -> setValue(par[6][1]);
-    int s1p2=NINT(par[27][2]);
+    int s1p2=nint(par[27][2]);
     ui->cB_PAR_27_2 -> setCurrentIndex(s1p2-1);
     MCRange();
 }
 
-void ksemawc::pwRn(const int &){
+
+void ksemawc::pwRn(){
     if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
@@ -3650,7 +3680,8 @@ void ksemawc::pwRn(const int &){
     MCRange();
 }
 
-void ksemawc::pwRp(const int &){
+
+void ksemawc::pwRp(){
     if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
@@ -3670,7 +3701,8 @@ void ksemawc::pwRp(const int &){
     MCRange();
 }
 
-void ksemawc::pwR1(const int &){
+
+void ksemawc::pwR1(){
     if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
@@ -3690,7 +3722,8 @@ void ksemawc::pwR1(const int &){
     MCRange();
 }
 
-void ksemawc::pwApds(const int &){
+
+void ksemawc::pwApds(){
     if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     double wmin=0.,wmax=0.;
@@ -3712,8 +3745,6 @@ void ksemawc::pwApds(const int &){
 
 
 void ksemawc::pwEj(int j){
-    printf("pwEj(%d) occupyPF=%d ...",j,occupyPF);
-    fflush(stdout);
     if(fnSample.contains("mate/aa") || fnSample.isEmpty())
         return;
     int ntel=0,ndat=0,i,index;
@@ -3739,6 +3770,7 @@ void ksemawc::pwEj(int j){
             return;
         }
         else if(file.exists()) {
+            qDebug("pwEj(%d) fnEli=%s",j,fnEli.toStdString().c_str());
             QTextStream stream ( &file );
             info = stream.readLine();
             idToLineEdit["lineEdit_E"+QString::number(j)]-> setText(info);
@@ -3759,8 +3791,7 @@ void ksemawc::pwEj(int j){
                 pezzo=List0.at(1).toLocal8Bit().constData();
                 ndat=pezzo.toInt();
                 info=List0.at(2).toLocal8Bit().constData();
-                printf("->pwEj(%d) file=%s Ntheta=%d Ndat=%d format=%s\n",j,
-                   fnEli.toStdString().c_str(),ntel,ndat,info.toStdString().c_str());
+                qDebug()<<"->pwEj("<<j<<") file="<<fnEli<<" Ntheta="<<ntel<<" Ndat="<<ndat<<" format="<<info;
                 EliTab[j][0][0]=ntel;
                 for(i=0;i<ntel;i++){
                     stream >> theta >> ndat >> wmin >> wmax;
@@ -3768,7 +3799,6 @@ void ksemawc::pwEj(int j){
                     EliTab[j][i][1]=ndat;
                     EliTab[j][i][2]=wmin;
                     EliTab[j][i][3]=wmax;
-                    printf("theta=%f Ndat=%d WLmin=%f WLmax=%f\n",theta,ndat,wmin,wmax);
                     idToComboBox["cBteE"+QString::number(j)]-> addItem(QString::number(theta));
                 }
                 int Npez=6;
@@ -3781,7 +3811,6 @@ void ksemawc::pwEj(int j){
                 QStringList List;
                 List =line.split(" ");
                 int nV=List.count();
-                printf("found %d columns on %d expected\n",nV,Npez);
                 if(nV!=Npez){
                     QMessageBox msgBox;
                     msgBox.setText("Format ERROR in "+fnEli+":\nthe number of column mismatch the declared format "+info);
@@ -3801,7 +3830,6 @@ void ksemawc::pwEj(int j){
                 }
             }
             else{
-                occupyPEj=1;//for disabling pwSubEj
                 line=stream.readLine();
                 line=stream.readLine();
                 if(line.contains("eV") || line.contains("nm")){
@@ -3822,7 +3850,6 @@ void ksemawc::pwEj(int j){
                         eV=pezzo.toDouble();
                         pezzo=List.at(2).toLocal8Bit().constData();
                         theta=pezzo.toDouble();
-                        //printf("theta=%f\n",theta);
                         if(theta==theta2){
                             ndat++;
                             wmin=min(wmin,eV);
@@ -3838,7 +3865,6 @@ void ksemawc::pwEj(int j){
                             }
                         }
                         else{
-                            printf("found new theta=%f eV=%f wl%f!\n",theta,eV,1240./eV);
                             ntel++;
                             EliTab[j][ntel][0]=theta;
                             EliTab[j][0][0]=ntel+1;
@@ -3851,7 +3877,6 @@ void ksemawc::pwEj(int j){
                     }while(!stream.atEnd());
                     EliTab[j][0][0]=ntel+1;
                 }
-                occupyPEj=0;
                 pwSubEj(j);
             }
             file.close();
@@ -3875,14 +3900,12 @@ void ksemawc::pwEj(int j){
 
 
 void ksemawc::pwSubEj(int j){
-    if(occupyPEj==1)
-        return;
-    int ntel=int(EliTab[j][0][0]+0.5);
+    int ntel=static_cast<int>(EliTab[j][0][0]+0.5);
     if(ntel>0){
         int index=idToComboBox["cBteE"+QString::number(j)]->currentIndex();//ui->cBteE1 -> currentIndex();
         if(index<0)
             return;
-        printf("\t->pwSubEj(%d) ntel=%d index=%d\n",j,ntel,index);
+        qDebug()<<"\t->pwSubEj("<<j<<") ntel="<<ntel<<" index="<<index;
         double theta=idToComboBox["cBteE"+QString::number(j)] -> currentText().toDouble();
         idToDoubleSpinBox["dSB_PM_"+QString::number(85+j)+"_1"]->setValue(theta);
         pm[85+j][1]=theta;
@@ -3898,10 +3921,12 @@ void ksemawc::pwSubEj(int j){
     MCRange();
 }
 
+
 void ksemawc::MCRange(){
     //setting the maximum common wavelenght range
-    if(occupyPF!=0) return;
-    //printf("-> MCrange (occupyPF=%d)\n",occupyPF);
+    if(isGuiMuted())
+        return;
+    qDebug("->MCRange");
     double Lmin=0.,Lmax=1.E+20,vmin,vmax;
     QString str;
     Qt::CheckState state1;
@@ -3912,8 +3937,6 @@ void ksemawc::MCRange(){
         vmax=str.toDouble();
         if(vmin != 0.) Lmin=max(Lmin,vmin);
         if(vmax != 0.) Lmax=min(Lmax,vmax);
-        //if(vmin != 0. && vmax != 0.)
-        //    printf("filenk-%d wlmin=%f wlmax=%f\n",ink,Lmin,Lmax);
     }
     if(fnSample.isEmpty()){
         for(int imis=1;imis<=14;imis++){
@@ -3962,7 +3985,7 @@ void ksemawc::MCRange(){
             if(vmax != 0.) Lmax=min(Lmax,vmax);
         }
     }
-     printf("\tLmin=%f Lmax=%f\n",Lmin,Lmax);
+    qDebug()<<"\t Lmin="<<Lmin<<" Lmax="<<Lmax;
     if(Lmin>0. && Lmax<1.E+20){
         Qt::CheckState state;
         state = ui->checkBox_msgr -> checkState();
@@ -3985,6 +4008,7 @@ void ksemawc::MCRange(){
     }
 }
 
+
 void ksemawc::updateMatenk(int index, QString newName){
     for(int i=1;i<=15;i++){
         idToComboBox["cB_cnk"+QString::number(i)+"a"]-> setItemText(index,newName);
@@ -3992,10 +4016,11 @@ void ksemawc::updateMatenk(int index, QString newName){
     }
 }
 
+
 void previewFile(QString filename, QString lab,QString& info,double& wmin,double& wmax){
     if(lab.isEmpty())
         return;
-    printf("->previewFile %s occupyPF=%d lab=%s\n",filename.toStdString().c_str(),occupyPF,lab.toStdString().c_str());
+    qDebug()<<"->previewFile "<<filename<<" lab="<<lab;
     int i,ndati,ilinrim;
     double ridelta,dini,dfin,dmin,dmax,val;
     QString line,line0,pezzo;
@@ -4011,13 +4036,14 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
         QTextStream stream ( &file );
         info = stream.readLine();
         line0 = stream.readLine();
-          //printf("preview->line0= %s \n",(line0.toStdString()).c_str());
         if(info.contains("PE UV", Qt::CaseInsensitive)){
             // file Perkin Elmer L900 - L950
             for(i=0;i<6;i++) line = stream.readLine();
             info = stream.readLine();
             for(i=0;i<5;i++) line = stream.readLine();
-            if(line.contains("PerkinElmer UV WinLab 5", Qt::CaseInsensitive))
+            if(line.contains("PerkinElmer UV WinLab 7", Qt::CaseInsensitive))
+                ilinrim=73;
+            else if(line.contains("PerkinElmer UV WinLab 5", Qt::CaseInsensitive))
                 ilinrim=65;
             else
                 ilinrim=69;
@@ -4026,13 +4052,10 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
             stream >> ridelta;
             stream >> ndati;
             wmin=wmax+ridelta*(ndati-1);
-                 printf("file Perkin Elmer L900 - L950 \n");
-                 printf(" ridelta=%f ndati=%d wmin= %f wmax= %f \n",ridelta,ndati,wmin,wmax);
         }
         else if(line0.contains("#####SCALED") || line0.contains("#####SCALEDA") ||
                 line0.contains("#####SCALED%")){
             // SCALED file
-            //printf("\tfile SCALED %s\n",line0.toStdString().c_str());
             stream >> dini;
             stream >> dfin;
             if(dini < dfin){
@@ -4063,7 +4086,6 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
             dini=pezzo.toDouble();
             pezzo=List.at(2).toLocal8Bit().constData();//theta
             par[6][1]=pezzo.toDouble();
-            printf("\tTheta_Tp=%f\n",par[6][1]);
             do{
                 line = stream.readLine();
             }while(!stream.atEnd());
@@ -4084,7 +4106,6 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
             // file Lambda9 or old FTIR Perkin Elmer
             stream >> line >> dmax >> line >> val;
             stream >> line >> dmin >> line >> val;
-            //    printf("old fashion file dmin= %f dmax= %f \n",dmin,dmax);
             if(lab.contains("v")){
                 wmin=dmin;
                 wmax=dmax;
@@ -4122,17 +4143,15 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
             }
         }
     }
-    //printf("wmin= %f wmax= %f \n",wmin,wmax);
 }
 
+
 void ksemawc::SetModel(const int &){
-    int itab=ui->tabWidget -> currentIndex();
-    if(occupyPF!=0 && itab!=3) return;
-    occupyPF=1;
     int nlayerOld=nlayer;
     nlayer=ui->sB_PAR_51_2 -> value();
     int Dnl=nlayer-nlayerOld;
-    printf("-> SetModel with Dnl=%d\n",Dnl);
+    qDebug()<<"-> SetModel with Dnl="<<Dnl;
+    setGuiMute(true);
     if(Dnl>0){
         for(int i=0;i<nlayerOld;i++){
             par[50+nlayer-i][1]=par[50+nlayerOld-i][1];
@@ -4207,13 +4226,13 @@ void ksemawc::SetModel(const int &){
     }
     for(int i=1;i<=9;i++){
         if(i <= nlayer){
-            if(NINT(par[50+i][3])<1 || NINT(par[50+i][3])>5) par[50+i][3]=1.;
-            if(NINT(par[50+i][1])<1 || NINT(par[50+i][1])>9) par[50+i][1]=1.;
+            if(nint(par[50+i][3])<1 || nint(par[50+i][3])>5) par[50+i][3]=1.;
+            if(nint(par[50+i][1])<1 || nint(par[50+i][1])>9) par[50+i][1]=1.;
             idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> setEnabled(true);
             idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> setEnabled(true);
-            idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> setCurrentIndex(NINT(par[50+i][1])-1);
-            idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> setCurrentIndex(NINT(par[50+i][3])-1);
-            if(NINT(par[50+i][3])==1){
+            idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> setCurrentIndex(nint(par[50+i][1])-1);
+            idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> setCurrentIndex(nint(par[50+i][3])-1);
+            if(nint(par[50+i][3])==1){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setValue(pm[i][1]*1.E-6);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
@@ -4224,7 +4243,7 @@ void ksemawc::SetModel(const int &){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
-            } else if(NINT(par[50+i][3])==2){
+            } else if(nint(par[50+i][3])==2){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setValue(pm[i][1]);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
@@ -4236,7 +4255,7 @@ void ksemawc::SetModel(const int &){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
-            } else if(NINT(par[50+i][3])==3){
+            } else if(nint(par[50+i][3])==3){
                 idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(true);
@@ -4270,78 +4289,82 @@ void ksemawc::SetModel(const int &){
     //refresh f2 values
     for(int i=71;i<=85;i++)
         idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
-    occupyPF=0;
+    setGuiMute(false);
 }
 
 
 void ksemawc::RefreshModel(){
-    if(occupyPF!=1){
-        printf("-> RefreshModel\n");
-        for(int i=1;i<=9;i++){
-            if(i <= nlayer){
-                par[50+i][3]=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
-                par[50+i][3]++;
-                par[50+i][1]=idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> currentIndex();
-                par[50+i][1]++;
-                if(NINT(par[50+i][3])==1){
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
-                    //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]*1.E-6);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
-                    //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[50+i][1]);
-                } else if(NINT(par[50+i][3])==2){
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
-                    //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
-                } else if(NINT(par[50+i][3])==3){
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(true);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
-                    //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setValue(pm[10+i][1]);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setValue(pm[20+i][1]);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setValue(pm[30+i][1]);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setValue(pm[40+i][1]);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setValue(pm[60+i][1]);
-                    idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
-                }
-            } else{
-                idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> setEnabled(false);
-                idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(false);
+    if(isGuiMuted())
+        return;
+    qDebug()<<"-> RefreshModel";
+    for(int i=1;i<=9;i++){
+        if(i <= nlayer){
+            par[50+i][3]=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
+            par[50+i][3]++;
+            par[50+i][1]=idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> currentIndex();
+            par[50+i][1]++;
+            if(nint(par[50+i][3])==1){
+                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
+                //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]*1.E-6);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(false);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
                 idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
+                //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[50+i][1]);
+            } else if(nint(par[50+i][3])==2){
+                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
+                //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
+            } else if(nint(par[50+i][3])==3){
+                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(true);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(true);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(true);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(true);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(true);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
+                //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setValue(pm[10+i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setValue(pm[20+i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setValue(pm[30+i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setValue(pm[40+i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setValue(pm[60+i][1]);
+                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
             }
+        } else{
+            idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> setEnabled(false);
+            idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> setEnabled(false);
+            idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(false);
+            idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
+            idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
+            idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
+            idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
+            idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(false);
+            idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
+            idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
         }
     }
+    //refresh f2 values
+    for(int i=71;i<=85;i++)
+        idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
 }
 
+
 void ksemawc::setMat(int nM){
-    printf("->setMat called by cnk %d\n",nM);
+    qDebug()<<"->setMat called by cnk "<<nM;
     int curI=idToComboBox["cB_cnk"+QString::number(nM)+"a"] -> currentIndex();
     idToLineEdit["LEcnk"+QString::number(nM)+"_2"] -> setEnabled(curI==0);
     idToLineEdit["LEcnk"+QString::number(nM)+"_3"] -> setEnabled(curI==0);
@@ -4352,10 +4375,11 @@ void ksemawc::setMat(int nM){
     }
 }
 
+
 void ksemawc::setEMA(int nM){
     Qt::CheckState state;
     state=idToCheckBox["cB_EMA_"+QString::number(nM)] -> checkState();
-    printf("->setEMA called by checkBox %d\n",nM);
+    qDebug()<<"->setEMA called by checkBox "<<nM;
     idToComboBox["cB_cnk"+QString::number(nM)+"b"] -> setEnabled(state==Qt::Checked);
     idToDoubleSpinBox["dSB_PM_"+QString::number(70+nM)+"_1"] -> setEnabled(state==Qt::Checked);
     if(state!=Qt::Checked)
@@ -4365,183 +4389,35 @@ void ksemawc::setEMA(int nM){
     idToLineEdit["LEcnk"+QString::number(nM)+"_6"] -> setEnabled(curI==0 && state==Qt::Checked);
 }
 
-void ksemawc::setKindOsc1(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_101_1->currentIndex();
-    pm[101][1]=iKind+1;
-    //printf("Osc1->%d type\n",iKind+1);
+
+void ksemawc::setKindOsc(int N) {
+    if(isGuiMuted())
+        return;
+    int pmIdx = 101 + 5 * (N - 1);
+    QString name = QString("cBpm_%1_1").arg(pmIdx);
+    QComboBox* w = findChild<QComboBox*>(name);
+    if (w) pm[pmIdx][1] = w->currentIndex() + 1;
     listOsc();
 }
 
-void ksemawc::setKindOsc2(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_106_1->currentIndex();
-    pm[106][1]=iKind+1;
-    //printf("Osc2->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc3(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_111_1->currentIndex();
-    pm[111][1]=iKind+1;
-    //printf("Osc3->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc4(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_116_1->currentIndex();
-    pm[116][1]=iKind+1;
-    //printf("Osc4->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc5(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_121_1->currentIndex();
-    pm[121][1]=iKind+1;
-    //printf("Osc5->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc6(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_126_1->currentIndex();
-    pm[126][1]=iKind+1;
-    //printf("Osc6->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc7(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_131_1->currentIndex();
-    pm[131][1]=iKind+1;
-    //printf("Osc7->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc8(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_136_1->currentIndex();
-    pm[136][1]=iKind+1;
-    //printf("Osc8->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc9(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_141_1->currentIndex();
-    pm[141][1]=iKind+1;
-    //printf("Osc9->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc10(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_146_1->currentIndex();
-    pm[146][1]=iKind+1;
-    //printf("Osc10->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc11(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_151_1->currentIndex();
-    pm[151][1]=iKind+1;
-    //printf("Osc11->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc12(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_156_1->currentIndex();
-    pm[156][1]=iKind+1;
-    //printf("Osc12->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc13(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_161_1->currentIndex();
-    pm[161][1]=iKind+1;
-    //printf("Osc13->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc14(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_166_1->currentIndex();
-    pm[166][1]=iKind+1;
-    //printf("Osc14->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc15(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_171_1->currentIndex();
-    pm[171][1]=iKind+1;
-    //printf("Osc15->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc16(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_176_1->currentIndex();
-    pm[176][1]=iKind+1;
-    //printf("Osc16->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc17(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_181_1->currentIndex();
-    pm[181][1]=iKind+1;
-    //printf("Osc17->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc18(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_186_1->currentIndex();
-    pm[186][1]=iKind+1;
-    //printf("Osc18->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc19(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_191_1->currentIndex();
-    pm[191][1]=iKind+1;
-    //printf("Osc19->%d type\n",iKind+1);
-    listOsc();
-}
-
-void ksemawc::setKindOsc20(){
-    if(occupyPF!=0) return;
-    int iKind=ui->cBpm_196_1->currentIndex();
-    pm[196][1]=iKind+1;
-    //printf("Osc20->%d type\n",iKind+1);
-    listOsc();
-}
 
 void ksemawc::setOscN(int k){
-    //int itab=ui->tabWidget -> currentIndex();
-    if(occupyPF!=0) return;
+    if(isGuiMuted())
+        return;
+    setTabSim();//save current setting
     int ioptFit=ui->cB_cnk1a -> currentIndex();//Fit#
-    int Nosc=pf[ioptFit][1];//N. Osc
+    int Nosc=nint(pf[ioptFit][1]);//N. Osc
     Qt::CheckState state;
     state=idToCheckBox["cBosc_"+QString::number(k)]->checkState();
-    printf("->setOscN ioptFit=%d N.Osc=%d call-by-oscN=%d ",ioptFit,Nosc,k);
+    qDebug()<<"->setOscN ioptFit="<<ioptFit<<" N.Osc="<<Nosc<<" call-by-oscN="<<k;
     if(state==Qt::Checked){
-        printf("to be add\n");
         pf[ioptFit][Nosc+1+1]=k;
         pf[ioptFit][1]=Nosc+1;
     }
     else{
-        printf("to be deleted\n");
+        Nosc++;//in the call of setTabSim Nosc has been already decreased
         int jj=1;
-        while(pf[ioptFit][jj+1]!=k && jj<Nosc){
+        while(nint(pf[ioptFit][jj+1])!=k && jj<Nosc){
             jj++;
         }
         for (int i=jj;i<=Nosc;i++) {
@@ -4555,12 +4431,12 @@ void ksemawc::setOscN(int k){
 
 
 void ksemawc::listOsc(){
-    //int itab=ui->tabWidget -> currentIndex();
-    if(occupyPF!=0) return;
-    occupyPF=1;
+    if(isGuiMuted())
+        return;
     int iok;
     int ioptFit=ui->cB_cnk1a -> currentIndex();
-    printf("->ListOsc: ioptFit= %d\n",ioptFit);
+    qDebug()<<"->ListOsc: ioptFit="<<ioptFit;
+    setGuiMute(true);
     if(ioptFit==0 || ioptFit>7){
         for(int k=1;k<=20;k++){
             idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setEnabled(false);
@@ -4574,13 +4450,13 @@ void ksemawc::listOsc(){
         for(int k=1;k<=20;k++){
             iok=0;
             for(int i=2;i<=21;i++) {
-                if(NINT(pf[ioptFit][i])==k)iok=1;
+                if(nint(pf[ioptFit][i])==k)iok=1;
             }
             if(iok==1){
-                int ifu=NINT(pm[100+1+(k-1)*5][1]);
+                int ifu=nint(pm[100+1+(k-1)*5][1]);
                 idToCheckBox["cBosc_"+QString::number(k)]-> setCheckState ( Qt::Checked );
                 idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setEnabled(true);
-                idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setCurrentIndex(NINT(pm[100+1+(k-1)*5][1])-1);
+                idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setCurrentIndex(nint(pm[100+1+(k-1)*5][1])-1);
                 //idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setSizeAdjustPolicy(QComboBox::AdjustToContents);
                 for(int iC=2;iC<=5;iC++){
                     idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setEnabled(true);
@@ -4590,7 +4466,7 @@ void ksemawc::listOsc(){
                     idToLineEdit["LEpm_"+QString::number(100+5+(k-1)*5)+"_1"] -> setEnabled(false);
                     idToLineEdit["LEpm_"+QString::number(100+5+(k-1)*5)+"_1"] -> setText("unused");
                 }
-                if(ifu==4){//Flat
+                else if(ifu==4){//Flat
                     for(int iC=3;iC<=5;iC++){
                         idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setEnabled(false);
                         idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setText("unused");
@@ -4602,10 +4478,14 @@ void ksemawc::listOsc(){
                     idToLineEdit["LEpm_"+QString::number(100+3+(k-1)*5)+"_1"] -> setText("unused");
                     idToLineEdit["LEpm_"+QString::number(100+5+(k-1)*5)+"_1"] -> setText("unused");
                 }
+                else if(ifu==19){
+                    idToLineEdit["LEpm_"+QString::number(100+3+(k-1)*5)+"_1"] -> setEnabled(false);
+                    idToLineEdit["LEpm_"+QString::number(100+3+(k-1)*5)+"_1"] -> setText("unused");
+                }
                 for(int iC=2;iC<=5;iC++){
                     QString content=idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> text();
                     if(content!="unused")
-                       idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setText(QString::number(abs(pm[100+iC+(k-1)*5][1])));
+                       idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setText(QString::number(std::abs(pm[100+iC+(k-1)*5][1])));
                 }
             }
             else{
@@ -4623,7 +4503,167 @@ void ksemawc::listOsc(){
             idToCheckBox["cBosc_"+QString::number(k)]-> setCheckState ( Qt::Unchecked );
     }
     lastIndex=ioptFit;
-    occupyPF=0;
+    setGuiMute(false);
+}
+
+
+void ksemawc::saveNKmodel(){
+    int iok2,iCase=0;
+    int ioptFit=ui->cB_cnk1a -> currentIndex();
+    qDebug()<<"->saveOscModel ioptFit="<<ioptFit;
+    if(ioptFit>0 && ioptFit<8){
+        QString fn= QFileDialog::getSaveFileName(
+                    this,
+                    "Filename to save",
+                    pathroot,
+                    "nkMod file (*.nkMod)");
+        if(fn.isEmpty())
+            return;
+        if(!fn.contains(".nkMod"))
+            fn=fn+".nkMod";
+        QInputDialog pippo;
+        pippo.setLabelText("Please set a comment!");
+        pippo.setInputMode(QInputDialog::TextInput);
+        //pippo.setTextValue(QString::number(expTime));
+        pippo.setOkButtonText("OK");
+        //pippo.setCancelButtonText("No, thanks!");
+        bool ok=pippo.exec();
+        QString line;
+        QString text =pippo.textValue();
+        if (ok && !text.isEmpty()){
+            line=text;
+        }
+        QFile file(fn);
+        if(!file.open(QIODevice::WriteOnly | QIODevice::Text)){
+            msgErrLoad("Save Osc Model",fn);
+            qWarning()<<"IONK-> ERROR opening file= "<<fn;
+            return;
+        }
+        int iok=1;
+        if( iCase==1 && file.exists() ){
+            QMessageBox msgBox;
+            msgBox.setText("The file already exist!");
+            msgBox.setInformativeText("Do you want to save anyway?");
+            msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::Save);
+            int ret = msgBox.exec();
+            switch (ret) {
+            case QMessageBox::Save:
+                // Save was clicked
+                iok=1;
+                break;
+            case QMessageBox::No:
+                // Cancel was clicked
+                iok=0;
+                file.close();
+                break;
+            }
+        }
+        if(iok==1){
+            QTextStream stream (&file);
+            stream<<line<<"\n";
+            for(int k=1;k<=20;k++){
+                iok2=0;
+                for(int i=2;i<=21;i++) {
+                    if(nint(pf[ioptFit][i])==k) iok2=1;
+                }
+                if(iok2==1){
+                    stream<<k<<"\t";//#Osc
+                    for(int J=1;J<=5;J++)
+                        stream<<pm[100+J+(k-1)*5][1]<<"\t";//Osc kind and parameter
+                    stream<<"\n";
+                }
+            }
+        }
+        file.close();
+    }
+}
+
+
+void ksemawc::loadNKmodel(){
+    qDebug()<<"-> LoadNKmodel";
+    int ioptFit=ui->cB_cnk1a -> currentIndex();
+    if(ioptFit==0 || ioptFit>7){
+        QMessageBox msgBox;
+        msgBox.setText("Please set a valid Fit option");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
+        return;
+    }
+    QString fn = QFileDialog::getOpenFileName(
+                this,
+                "Choose a NK model", //window title
+                pathroot,                 //initial directory
+                "nkMod file (*.nkMod)"); //file extension
+    if(fn.isEmpty())
+        return;
+    QFile file(fn);
+    if (!file.open (QIODevice::ReadOnly | QIODevice::Text))
+        return;
+    setGuiMute(true);
+    for(int k=1;k<=20;k++){
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setEnabled(false);
+        idToLineEdit["LEpm_"+QString::number(100+2+(k-1)*5)+"_1"] -> setEnabled(false);
+        idToLineEdit["LEpm_"+QString::number(100+3+(k-1)*5)+"_1"] -> setEnabled(false);
+        idToLineEdit["LEpm_"+QString::number(100+4+(k-1)*5)+"_1"] -> setEnabled(false);
+        idToLineEdit["LEpm_"+QString::number(100+5+(k-1)*5)+"_1"] -> setEnabled(false);
+    }
+    qDebug()<<"\tfile: "<<fn;
+    QTextStream stream (&file);
+    QString line;
+    line=stream.readLine();
+    qDebug()<<"\tcomment: "<<line;
+    do{
+        line=stream.readLine();
+        line=line.simplified();
+        QStringList List;
+        List =line.split(" ");
+        int nV=List.count();
+        if(nV!=6){
+            qDebug("Error: expectet 6 values at line, but found %d",nV);
+            return;
+        }
+        int OscN=nint(List.at(0).toDouble());
+        for(int J=1;J<=5;J++)
+            pm[100+J+(OscN-1)*5][1]=List.at(J).toDouble();
+        int ifu=nint(pm[100+1+(OscN-1)*5][1]);
+        int k=OscN;
+        idToCheckBox["cBosc_"+QString::number(k)]-> setCheckState ( Qt::Checked );
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setEnabled(true);
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setCurrentIndex(nint(pm[100+1+(k-1)*5][1])-1);
+        //idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setSizeAdjustPolicy(QComboBox::AdjustToContents);
+        for(int iC=2;iC<=5;iC++){
+            idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setEnabled(true);
+            idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setText("");
+        }
+        if(ifu<4){//Lorentz, Q-homo, Q-inhomo
+            idToLineEdit["LEpm_"+QString::number(100+5+(k-1)*5)+"_1"] -> setEnabled(false);
+            idToLineEdit["LEpm_"+QString::number(100+5+(k-1)*5)+"_1"] -> setText("unused");
+        }
+        else if(ifu==4){//Flat
+            for(int iC=3;iC<=5;iC++){
+                idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setEnabled(false);
+                idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setText("unused");
+            }
+        }
+        else if(ifu==5 || ifu==17){//Drude or Drude-ionized
+            idToLineEdit["LEpm_"+QString::number(100+3+(k-1)*5)+"_1"] -> setEnabled(false);
+            idToLineEdit["LEpm_"+QString::number(100+5+(k-1)*5)+"_1"] -> setEnabled(false);
+            idToLineEdit["LEpm_"+QString::number(100+3+(k-1)*5)+"_1"] -> setText("unused");
+            idToLineEdit["LEpm_"+QString::number(100+5+(k-1)*5)+"_1"] -> setText("unused");
+        }
+        else if(ifu==19){
+            idToLineEdit["LEpm_"+QString::number(100+3+(k-1)*5)+"_1"] -> setEnabled(false);
+            idToLineEdit["LEpm_"+QString::number(100+3+(k-1)*5)+"_1"] -> setText("unused");
+        }
+        for(int iC=2;iC<=5;iC++){
+            QString content=idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> text();
+            if(content!="unused")
+               idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setText(QString::number(std::abs(pm[100+iC+(k-1)*5][1])));
+        }
+    }while(!stream.atEnd());
+    file.close();
+    setGuiMute(false);
 }
 
 
@@ -4645,14 +4685,13 @@ void ksemawc::rangeWL(){
 
 
 void ksemawc::saveNKsim(){
-    printf("->saveNKsim with lastAction=%s\n",lastAction.toStdString().c_str());
+    qDebug()<<"->saveNKsim with lastAction="<<lastAction;
     int ierr,iok=1;
     QString command,sample,fn2s;
     sample=ui->lineEdit_sample-> text();
     if(sample.contains("mate/aa999.9"))
         sample="";
     sample=sample+"_"+lastAction+".nk";
-    printf("sample= %s\n",sample.toStdString().c_str());
     fn2s = QFileDialog::getSaveFileName(
                 this,
                 "Filename to save NKsim",
@@ -4674,15 +4713,14 @@ void ksemawc::saveNKsim(){
         case QMessageBox::No:
             // Cancel was clicked
             iok=0;
-            printf("as you requested file was not saved!\n");
             break;
         }
     }
     if(iok==1){
-        cout<< "fNKsim= "<<fNKsim.toStdString()<<endl;
-        cout<< "fn2s= "<<fn2s.toStdString()<<endl;
+        qDebug()<< "fNKsim= "<<fNKsim;
+        qDebug()<< "fn2s= "<<fn2s;
         //ierr=system((command.toStdString()).c_str());
-        if (IS_POSIX == 1) {
+        if (IS_POSIX) {
             command="cp "+fNKsim+" "+fn2s;
             ierr=system((command.toStdString()).c_str());}
         else
@@ -4691,12 +4729,10 @@ void ksemawc::saveNKsim(){
             QStringList List;
             List =command.split("/");
             int nV=List.count();
-            //printf("\nnV=%d\n",nV);
             QString commandw;
             QString pezzo;
             for(int iv=0;iv<nV;iv++){
                 pezzo=List.at(iv).toLocal8Bit().constData();
-                //printf("pezzo[%d]= %s\t",iv,pezzo.toStdString().c_str());
                 if(iv==0){
                     commandw=pezzo;
                 }
@@ -4704,13 +4740,12 @@ void ksemawc::saveNKsim(){
                     commandw=commandw+"\\"+pezzo;
                 }
             }
-            //printf("comando=%s\n",(commandw.toStdString()).c_str());
             ierr=system((commandw.toStdString()).c_str());
         }
         if(ierr != 0)
-            printf("Error copying NKsim!!!\n");
+            qWarning()<<"Error copying NKsim!!!";
         else
-            printf("NKsim saved as %s\n",(fn2s.toStdString()).c_str());
+            qDebug()<<"NKsim saved as "<<fn2s;
     }
 }
 
@@ -4739,15 +4774,14 @@ void ksemawc::saveSim(){
         case QMessageBox::No:
             // Cancel was clicked
             iok=0;
-            printf("as you requested file was not saved!\n");
             break;
         }
     }
     if(iok==1){
-        cout<< "fMisSim= "<<fMisSim.toStdString()<<endl;
-        cout<< "fn2s= "<<fn2s.toStdString()<<endl;
+        qDebug()<< "fMisSim= "<<fMisSim;
+        qDebug()<< "fn2s= "<<fn2s;
         //ierr=system((command.toStdString()).c_str());
-        if (IS_POSIX == 1) {
+        if (IS_POSIX) {
             command="cp "+fMisSim+" "+fn2s;
             ierr=system((command.toStdString()).c_str());}
         else
@@ -4756,12 +4790,10 @@ void ksemawc::saveSim(){
             QStringList List;
             List =command.split("/");
             int nV=List.count();
-            //printf("\nnV=%d\n",nV);
             QString commandw;
             QString pezzo;
             for(int iv=0;iv<nV;iv++){
                 pezzo=List.at(iv).toLocal8Bit().constData();
-                //printf("pezzo[%d]= %s\t",iv,pezzo.toStdString().c_str());
                 if(iv==0){
                     commandw=pezzo;
                 }
@@ -4769,26 +4801,22 @@ void ksemawc::saveSim(){
                     commandw=commandw+"\\"+pezzo;
                 }
             }
-            //printf("comando=%s\n",(commandw.toStdString()).c_str());
             ierr=system((commandw.toStdString()).c_str());
         }
         if(ierr != 0){
-            printf("Error copying MisSim.dat!!!\n");
+            qWarning()<<"Error copying MisSim.dat!!!";
             msgErrLoad("saveSim","Error copying MisSim.dat!!!");
         }
         else
-            printf("MisSim saved as %s\n",(fn2s.toStdString()).c_str());
+            qDebug()<<"MisSim saved as "<<fn2s;
     }
 }
+
 
 void ksemawc::tabChanged(){
     QMessageBox msgBox;
     int itab=ui->tabWidget -> currentIndex();
-    printf("-> tabChanged:  itab=%d lastTab=%d\n",itab,lastTab);
-    // QString filepro=ui->lineEdit_P -> text();
-    // if(filepro.contains("mate/aa999") && itab!=5)
-    //     SaveProject();
-    readRangeEli();
+    qDebug()<<"-> tabChanged:  itab="<<itab<<" lastTab="<<lastTab;
     AdjRoughMax();
     SaveSetting(lastTab);
     if(lastTab==0 && itab!=0){
@@ -4815,14 +4843,12 @@ void ksemawc::tabChanged(){
                     return;
                     break;
                 case QMessageBox::No:
-                    printf("None experimental measurements is loaded!\n");
                     break;
                 }
             }
         }
-        occupyPF=1;
+        readRangeEli();
         SPADA();//load measurements, file-nk and solution-nk
-        occupyPF=0;
     }
     if(lastTab==3)//Analysis
         setTabSim();
@@ -4836,7 +4862,6 @@ void ksemawc::tabChanged(){
             StoreFitSet();
         if(lastTab==4)
             RefTrackG();
-        printf("ifirstcall=%d\n",ifirstcall);
         if(ifirstcall==0){
             ui->lineEdit_chi2Best->setText("1.E+99");
             ui->spinBox_jobBest->setValue(0);
@@ -4854,10 +4879,9 @@ void ksemawc::tabChanged(){
 
 
 void ksemawc::setTabSim(){
-    printf("-> setTabSim\n");
+    qDebug()<<"-> setTabSim";
     int ioptFit=ui->cB_cnk1a -> currentIndex();
     if(ioptFit>0 && ioptFit<8){
-        printf("-> SaveOsc pf[%d,i]\n",ioptFit);
         for(int i=1;i<=21;i++) pf[ioptFit][i]=0.;
         int j=2;
         Qt::CheckState state;
@@ -4879,40 +4903,36 @@ void ksemawc::setTabSim(){
                     }
                 }
                 j++;
-                //printf("pm[%d][1]: %f %f %f %f %f\n",100+2+(i-1)*5,pm[100+1+(i-1)*5][1],
-                //        pm[100+2+(i-1)*5][1],pm[100+3+(i-1)*5][1],
-                //        pm[100+4+(i-1)*5][1],pm[100+5+(i-1)*5][1]);
             }
         }
-        pm[71][1]=ui->dSB_PM_1_1->value();
         pf[ioptFit][1]=j-2;
+        //qDebug("\tNosc=%d",nint(pf[ioptFit][1]));
     }
 }
 
 
 void ksemawc::refreshFitPar(){
     int icoherent,klim,ivp,n_fresh,iDecine,ilayer,iosc,Jcombo,ip;
-    occupyPF=1;
-    printf("-> refreshFitPar\n");
+    setGuiMute(true);
+    qDebug()<<"-> refreshFitPar";
     fflush(stdout);
     npp=ui->sB_PAR_34_5 -> value();
     n_fresh=0;
     QString Lj,Lparametro;
+    //setting the parameter choice
     for(int j=1;j<=17;j++){
         idToComboBox["cBParFit_"+QString::number(j)] -> clear();
         idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
     }
-    for(int i=1;i<=nlayer;i++){
+    for(int i=1;i<=nlayer;i++){//layers
         icoherent=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
         Lj="L"+QString::number(i);
         if(icoherent==0)
             klim=-1;
         else if(icoherent==1)
-            klim=2;
+            klim=1;
         else if(icoherent==2)
             klim=7;
-        else if(icoherent == 3 || icoherent == 4)
-            klim=2;
         for(int j=1;j<=npp;j++){
             idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[6]);//roughness is always included
             for(int k=0;k<=klim;k++){
@@ -4921,52 +4941,51 @@ void ksemawc::refreshFitPar(){
             }
         }
     }
-    for(int i=1;i<=15;i++){
+    for(int i=1;i<=15;i++){//EMA
         Qt::CheckState state=idToCheckBox["cB_EMA_"+QString::number(i)]->checkState();
         if(state==Qt::Checked){
-            printf("\tstate==Qt::Checked for i=%d -> add fEMA_%d\n",i,i);
             for(int j=1;j<=npp;j++)
                 idToComboBox["cBParFit_"+QString::number(j)]-> addItem(ParFitLab[12]+QString::number(i));
         }
     }
-    for(int i=1;i<=4;i++){
+    for(int i=1;i<=4;i++){//Thetas
         Qt::CheckState state=idToCheckBox["checkB_mis"+QString::number(5+2*i)+"_1"]->checkState();
         if(state==Qt::Checked){
-            printf("\tstate==Qt::Checked for i=%d -> add Theta_%d\n",i,i);
             for(int j=1;j<=npp;j++)
                 idToComboBox["cBParFit_"+QString::number(j)]-> addItem(ParFitLab[13]+QString::number(i));
         }
     }
-    for(int i=1;i<=20;i++){
+    for(int i=1;i<=20;i++){//oscillator
         Lj="O"+QString::number(i);
         Qt::CheckState state=idToCheckBox["cBosc_"+QString::number(i)]-> checkState();
         if( state == Qt::Checked ) {
             int ifu=idToComboBox["cBpm_"+QString::number(100+1+(i-1)*5)+"_1"]->currentIndex();
             ifu++;
             for(int j=1;j<=npp;j++){
-                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[8]);
-                if(ifu!=4 && ifu!=5 && ifu!=17)
-                    idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[9]);
+                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[8]);//"C"
+                if(ifu!=4 && ifu!=5 && ifu!=17 && ifu!=19)
+                    idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[9]);//"E0"
                 if(ifu!=4){
-                    idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[10]);
+                    idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[10]);//"D"
                 }
                 if(ifu>5 && ifu!=17)
-                    idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[11]);
+                    idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[11]);//"W"
             }
         }
     }
+
+    //setting the parameter value
     for(int j=1;j<=17;j++){
         if(j<=npp){
             //if(lastTab != itab){
-            ivp=NINT(pm[ppm[j]][2]);
+            ivp=nint(pm[ppm[j]][2]);
             ip=ppm[j];
             if(ip<=69 || (ip>=91 && ip<=99)){
-                iDecine=int(double(ip)/10.);
+                iDecine=static_cast<int>(static_cast<double>(ip)/10.);
                 ilayer=ip-iDecine*10;
                 if(iDecine==9)
                     iDecine=-1;
                 Lparametro="L"+QString::number(ilayer)+ParFitLab[iDecine+1];
-                //      printf("j=%d ip=%d iDecine=%d ilayer=%d Lparametro=%s\n",j,ip,iDecine,ilayer,(Lparametro.toStdString()).c_str());
             }
             else if(ip>=71 && ip<=85){//EMA
                 Lparametro=ParFitLab[12]+QString::number(ip-70);
@@ -4975,11 +4994,9 @@ void ksemawc::refreshFitPar(){
                 Lparametro=ParFitLab[13]+QString::number(ip-85);
             }
             else{
-                iosc=int(double(ip-101)/5.)+1;
+                iosc=static_cast<int>(static_cast<double>(ip-101)/5.)+1;
                 Lparametro="O"+QString::number(iosc)+ParFitLab[7+ip-101-5*(iosc-1)];
-                //      printf("j=%d ip=%d iosc=%d Lparametro=%s\n",j,ip,iosc,(Lparametro.toStdString()).c_str());
             }
-            printf("j=%d ivp=%d ip=%d Lparametro=%s\n",j,ivp,ip,Lparametro.toStdString().c_str());
             Jcombo=idToComboBox["cBParFit_"+QString::number(j)] -> findText(Lparametro);
             if(Jcombo>=0) idToComboBox["cBParFit_"+QString::number(j)] -> setCurrentIndex(Jcombo);
             idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pm[ip][1]));
@@ -4997,7 +5014,6 @@ void ksemawc::refreshFitPar(){
                 idToLineEdit["DPparFitErr_"+QString::number(j)] -> setText(QString::number(pm[ip][4]));
                 idToLineEdit["DPparFitGC_"+QString::number(j)] -> setText(QString::number(pm[ip][5]));
             }
-            printf("j=% ip=%d pm[%d][1]=%f\n",j,ip,ip,pm[ip][1]);
         }
         else{
             idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
@@ -5006,272 +5022,263 @@ void ksemawc::refreshFitPar(){
     }
     nPar=n_fresh;
     ui->sB_PAR_35_5 -> setValue(nPar);
-    occupyPF=0;
+    setGuiMute(false);
     SaveSetting(-1);
 }
-
 
 
 void ksemawc::PanFitEnable(){
     int n_fresh,n1,n2,ip;
     int itab=ui->tabWidget -> currentIndex();
 
-    if(occupyPF==0){
-        printf("-> PanFitEnable with itab=%d\n",itab);
+    if(isGuiMuted())
+        return;
+    qDebug()<<"-> PanFitEnable with itab="<<itab;
+    fflush(stdout);
+    setGuiMute(true);
+    npp=ui->sB_PAR_34_5 -> value();
+    n_fresh=0;
+    Qt::CheckState state;
+    //state = Qt::Checked;
+    QString Lj,Valore;
+    if(itab==3 && itab==lastTab){
         fflush(stdout);
-        occupyPF=1;
-        npp=ui->sB_PAR_34_5 -> value();
-        n_fresh=0;
-        Qt::CheckState state;
-        //state = Qt::Checked;
-        QString Lj,Valore;
-        if(itab==3 && itab==lastTab){
-            printf("\t apply PanFitEnable with npp=%d\n",npp);
-            fflush(stdout);
-            for(int j=1;j<=17;j++){
-                if(j<=npp){
-                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(true);
-                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(true);
-                    state=idToCheckBox["chBeParFit_"+QString::number(j)]-> checkState();
-                    if( state == Qt::Checked ){
-                        n_fresh++;
-                        idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(true);
-                        idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(true);
-                    }
-                    else{
-                        idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(false);
-                        idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
-                    }
-                    Lj=idToComboBox["cBParFit_"+QString::number(j)] -> currentText();
-                    ip=0;
-                    if(Lj.at(0)=='L'){
-                        n1=(Lj.at(1)).digitValue();
-                        n2=-1;
-                        do{
-                            n2++;
-                        } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<7);
-                        if(n2==0)
-                            ip=90+n1;
-                        else
-                            ip=10*(n2-1)+n1;
-                    }
-                    else if(Lj.at(0)=='f'){
-                        ip=70+Lj.at(5).digitValue();
-                    }
-                    else if(Lj.at(0)=='T')
-                        ip=85+Lj.at(6).digitValue();
-                    else{
-                        n1=(Lj.at(1)).digitValue();
-                        if(Lj.at(2).isNumber()) {
-                            n1=n1*10;
-                            n1=n1+((Lj.at(2)).digitValue());
-                        }
-                        n2=6;
-                        do{
-                            n2++;
-                        } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<=12);
-                        ip=100+(n1-1)*5+(n2-7)+1;
-                    }
-                    ppm[j]=ip;
-                    Valore=idToLineEdit["DPparFitV_"+QString::number(j)] -> text();
-                    pm[ip][1]=Valore.toDouble();
-                    if(ip>100)
-                        pm[ip][1]=abs(pm[ip][1]);
-                    if( state == Qt::Unchecked )
-                        pm[ip][2]=0;
-                    else{
-                        pm[ip][2]=j;
-                        pm[n_fresh][3]=ip;
-                    }
-                    //     printf("j=%d ip=%d pm[%d][1]=%f pm[%d][2]=%f pm[%d][3]=%f\n",j,ip,ip,pm[ip][1],ip,pm[ip][2],n_fresh,pm[n_fresh][3]);
+        for(int j=1;j<=17;j++){
+            if(j<=npp){
+                idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(true);
+                idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(true);
+                state=idToCheckBox["chBeParFit_"+QString::number(j)]-> checkState();
+                if( state == Qt::Checked ){
+                    n_fresh++;
+                    idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(true);
+                    idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(true);
                 }
                 else{
-                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
-                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(false);
-                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(false);
                     idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(false);
                     idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
                 }
-            }
-            nPar=n_fresh;
-            ui->sB_PAR_35_5 -> setValue(nPar);
-//            printf("END PanFitEnable\n");
-        }
-        occupyPF=0;
-    }
-}
-
-
-void ksemawc::PanFitPar(){
-    if(occupyPF!=0) return;
-    printf("-> PanFitPar\n");
-    int icoherent,klim,nppNew;
-    int itab=ui->tabWidget -> currentIndex();
-    if(occupyPF==0){
-        occupyPF=1;
-        nppNew=ui->sB_PAR_34_5 -> value();
-        Qt::CheckState state;
-        //state = Qt::Checked;
-        QString Lj;
-        if(itab==3 && itab==lastTab){
-            printf("\tStart PanFitPar: nppNew=%d npp=%d\n",nppNew,npp);
-            if(nppNew > npp){
-                for(int j=npp+1;j<=nppNew;j++){//enable and initialize new parameters
-                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(true);
-                    idToComboBox["cBParFit_"+QString::number(j)] -> clear();
-                    idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
-                    idToLineEdit["DPparFitV_"+QString::number(j)]-> clear();
-                    idToLineEdit["DPparFitErr_"+QString::number(j)]-> clear();
-                    idToLineEdit["DPparFitGC_"+QString::number(j)]-> clear();
-                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(true);
-                }
-                for(int i=1;i<=nlayer;i++){//add avilable layer parameters
-                    icoherent=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
-                    Lj="L"+QString::number(i);
-                    if(icoherent==0) //bulk
-                        klim=-1;
-                    else if(icoherent==1) //film homo
-                        klim=2;
-                    else if(icoherent==2) //film inhomo
-                        klim=7;
-                    for(int j=npp+1;j<=nppNew;j++){
-                        idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[6]);//roughness is always included
-                        for(int k=0;k<=klim;k++){
-                            if(k!=6)
-                                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[k]);
-                        }
-                    }
-                }
-                for(int i=1;i<=15;i++){//add available EMAs
-                    state=idToCheckBox["cB_EMA_"+QString::number(i)]->checkState();
-                    if(state==Qt::Checked){
-                        for(int j=npp+1;j<=nppNew;j++)
-                            idToComboBox["cBParFit_"+QString::number(j)]-> addItem(ParFitLab[12]+QString::number(i));
-                    }
-                }
-                for(int i=1;i<=4;i++){//add available THETAs
-                    Qt::CheckState state=idToCheckBox["checkB_mis"+QString::number(5+2*i)+"_1"]->checkState();
-                    if(state==Qt::Checked){
-                        for(int j=npp+1;j<=nppNew;j++)
-                            idToComboBox["cBParFit_"+QString::number(j)]-> addItem(ParFitLab[13]+QString::number(i));
-                    }
-                }
-                for(int i=1;i<=20;i++){// add available oscillators
-                    Lj="O"+QString::number(i);
-                    state=idToCheckBox["cBosc_"+QString::number(i)]-> checkState();
-                    if( state == Qt::Checked ) {
-                        int ifu=idToComboBox["cBpm_"+QString::number(100+1+(i-1)*5)+"_1"]->currentIndex();
-                        ifu++;
-                        for(int j=npp+1;j<=nppNew;j++){
-                            idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[8]);     //C
-                            if(ifu!=4 && ifu!=5 && ifu!=17)
-                                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[9]); //E
-                            if(ifu!=4){
-                                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[10]);//D
-                            }
-                            if(ifu>5 && ifu!=17)
-                                idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[11]);//W
-                        }
-                    }
-                }
-            }
-            else{//disable redundand parameters
-                for(int j=nppNew+1;j<=npp;j++){
-                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(false);
-                    idToComboBox["cBParFit_"+QString::number(j)] -> clear();
-                    idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
-                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
-                    idToLineEdit["DPparFitV_"+QString::number(j)] -> clear();//setText("");
-                    idToLineEdit["DPparFitErr_"+QString::number(j)] -> clear();
-                    idToLineEdit["DPparFitGC_"+QString::number(j)] -> clear();
-                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(false);
-                    idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(false);
-                    idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
-                }
-            }
-            //   printf("End PanFitPar\n");
-            npp=nppNew;
-            PanFitEnable();
-        }
-        occupyPF=0;
-    }
-}
-
-
-void ksemawc::PanFitChoice(){
-    int n1,n2,ip;
-    int itab=ui->tabWidget -> currentIndex();
-    QString Lj;
-    Qt::CheckState state;
-    if(occupyPF==0){
-        printf("-> PanFitChoice\n");
-        occupyPF=1;
-        if(itab==3 && itab==lastTab){
-            npp=ui->sB_PAR_34_5 -> value();
-            for(int j=1;j<=npp;j++){
                 Lj=idToComboBox["cBParFit_"+QString::number(j)] -> currentText();
-                if(Lj=="none"){
-                    idToLineEdit["DPparFitV_"+QString::number(j)]   -> clear();
-                    idToLineEdit["DPparFitErr_"+QString::number(j)] -> clear();
-                    idToLineEdit["DPparFitGC_"+QString::number(j)]  -> clear();
-                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
+                ip=0;
+                if(Lj.at(0)=='L'){
+                    n1=(Lj.at(1)).digitValue();
+                    n2=-1;
+                    do{
+                        n2++;
+                    } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<7);
+                    if(n2==0)
+                        ip=90+n1;
+                    else
+                        ip=10*(n2-1)+n1;
                 }
+                else if(Lj.at(0)=='f'){
+                    ip=70+Lj.at(5).digitValue();
+                }
+                else if(Lj.at(0)=='T')
+                    ip=85+Lj.at(6).digitValue();
                 else{
                     n1=(Lj.at(1)).digitValue();
                     if(Lj.at(2).isNumber()) {
                         n1=n1*10;
                         n1=n1+((Lj.at(2)).digitValue());
                     }
-                    n2=-1;
-                    ip=0;
+                    n2=6;
                     do{
                         n2++;
                     } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<=12);
-                    if(n2==0)
-                        ip=90+n1;
-                    else if(1<=n2 && n2<=7)
-                        ip=10*(n2-1)+n1;
-                    else if(8<=n2 && n2<=11)
-                        ip=100+(n1-1)*5+(n2-7)+1;
-                    else if(n2==12)
-                        ip=70+Lj.at(5).digitValue();
-                    else if(n2==13)
-                        ip=85+Lj.at(6).digitValue();
-                    printf("PanFitChoice j=%d Lj=%s n1=%d n2=%d ip=%d\n",j,(Lj.toStdString()).c_str(),n1,n2,ip);
-                    if(1<=ip && ip<=200){
-                        idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pm[ip][1]));
-                        state=idToCheckBox["chBeParFit_"+QString::number(j)]-> checkState();
-                        if( state == Qt::Checked ){
-                            idToLineEdit["DPparFitErr_"+QString::number(j)] -> setText(QString::number(pm[ip][4]));
-                            idToLineEdit["DPparFitGC_"+QString::number(j)] -> setText(QString::number(pm[ip][5]));
-                        }
-                        else{
-                            idToLineEdit["DPparFitErr_"+QString::number(j)] -> clear();
-                            idToLineEdit["DPparFitGC_"+QString::number(j)]  -> clear();
-                        }
+                    ip=100+(n1-1)*5+(n2-7)+1;
+                }
+                ppm[j]=ip;
+                Valore=idToLineEdit["DPparFitV_"+QString::number(j)] -> text();
+                pm[ip][1]=Valore.toDouble();
+                if(ip>100)
+                    pm[ip][1]=std::abs(pm[ip][1]);
+                if( state == Qt::Unchecked )
+                    pm[ip][2]=0;
+                else{
+                    pm[ip][2]=j;
+                    pm[n_fresh][3]=ip;
+                }
+            }
+            else{
+                idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
+                idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(false);
+                idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(false);
+                idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(false);
+                idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
+            }
+        }
+        nPar=n_fresh;
+        ui->sB_PAR_35_5 -> setValue(nPar);
+    }
+    setGuiMute(false);
+}
+
+
+void ksemawc::PanFitPar(){
+    if(isGuiMuted())
+        return;
+    qDebug()<<"-> PanFitPar";
+    int icoherent,klim,nppNew;
+    int itab=ui->tabWidget -> currentIndex();
+    setGuiMute(true);
+    nppNew=ui->sB_PAR_34_5 -> value();
+    Qt::CheckState state;
+    //state = Qt::Checked;
+    QString Lj;
+    if(itab==3 && itab==lastTab){
+        if(nppNew > npp){
+            for(int j=npp+1;j<=nppNew;j++){//enable and initialize new parameters
+                idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(true);
+                idToComboBox["cBParFit_"+QString::number(j)] -> clear();
+                idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
+                idToLineEdit["DPparFitV_"+QString::number(j)]-> clear();
+                idToLineEdit["DPparFitErr_"+QString::number(j)]-> clear();
+                idToLineEdit["DPparFitGC_"+QString::number(j)]-> clear();
+                idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(true);
+            }
+            for(int i=1;i<=nlayer;i++){//add avilable layer parameters
+                icoherent=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
+                Lj="L"+QString::number(i);
+                if(icoherent==0) //bulk
+                    klim=-1;
+                else if(icoherent==1) //film homo
+                    klim=2;
+                else if(icoherent==2) //film inhomo
+                    klim=7;
+                for(int j=npp+1;j<=nppNew;j++){
+                    idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[6]);//roughness is always included
+                    for(int k=0;k<=klim;k++){
+                        if(k!=6)
+                            idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[k]);
                     }
                 }
             }
-            //   printf("End PanFitChoice\n");
+            for(int i=1;i<=15;i++){//add available EMAs
+                state=idToCheckBox["cB_EMA_"+QString::number(i)]->checkState();
+                if(state==Qt::Checked){
+                    for(int j=npp+1;j<=nppNew;j++)
+                        idToComboBox["cBParFit_"+QString::number(j)]-> addItem(ParFitLab[12]+QString::number(i));
+                }
+            }
+            for(int i=1;i<=4;i++){//add available THETAs
+                Qt::CheckState state=idToCheckBox["checkB_mis"+QString::number(5+2*i)+"_1"]->checkState();
+                if(state==Qt::Checked){
+                    for(int j=npp+1;j<=nppNew;j++)
+                        idToComboBox["cBParFit_"+QString::number(j)]-> addItem(ParFitLab[13]+QString::number(i));
+                }
+            }
+            for(int i=1;i<=20;i++){// add available oscillators
+                Lj="O"+QString::number(i);
+                state=idToCheckBox["cBosc_"+QString::number(i)]-> checkState();
+                if( state == Qt::Checked ) {
+                    int ifu=idToComboBox["cBpm_"+QString::number(100+1+(i-1)*5)+"_1"]->currentIndex();
+                    ifu++;
+                    for(int j=npp+1;j<=nppNew;j++){
+                        idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[8]);     //C
+                        if(ifu!=4 && ifu!=5 && ifu!=17 && ifu!=19)
+                            idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[9]); //E
+                        if(ifu!=4){
+                            idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[10]);//D
+                        }
+                        if(ifu>5 && ifu!=17)
+                            idToComboBox["cBParFit_"+QString::number(j)]-> addItem(Lj+ParFitLab[11]);//W
+                    }
+                }
+            }
         }
-        occupyPF=0;
+        else{//disable redundand parameters
+            for(int j=nppNew+1;j<=npp;j++){
+                idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(false);
+                idToComboBox["cBParFit_"+QString::number(j)] -> clear();
+                idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
+                idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
+                idToLineEdit["DPparFitV_"+QString::number(j)] -> clear();//setText("");
+                idToLineEdit["DPparFitErr_"+QString::number(j)] -> clear();
+                idToLineEdit["DPparFitGC_"+QString::number(j)] -> clear();
+                idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(false);
+                idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(false);
+                idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
+            }
+        }
+        npp=nppNew;
+        PanFitEnable();
     }
+    setGuiMute(false);
 }
 
+
+void ksemawc::PanFitChoice(){
+    if(isGuiMuted())
+        return;
+    int n1,n2,ip;
+    int itab=ui->tabWidget -> currentIndex();
+    QString Lj;
+    Qt::CheckState state;
+    qDebug()<<"-> PanFitChoice";
+    setGuiMute(true);
+    if(itab==3 && itab==lastTab){
+        npp=ui->sB_PAR_34_5 -> value();
+        for(int j=1;j<=npp;j++){
+            Lj=idToComboBox["cBParFit_"+QString::number(j)] -> currentText();
+            if(Lj=="none"){
+                idToLineEdit["DPparFitV_"+QString::number(j)]   -> clear();
+                idToLineEdit["DPparFitErr_"+QString::number(j)] -> clear();
+                idToLineEdit["DPparFitGC_"+QString::number(j)]  -> clear();
+                idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
+            }
+            else{
+                n1=(Lj.at(1)).digitValue();
+                if(Lj.at(2).isNumber()) {
+                    n1=n1*10;
+                    n1=n1+((Lj.at(2)).digitValue());
+                }
+                n2=-1;
+                ip=0;
+                do{
+                    n2++;
+                } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<=12);
+                if(n2==0)
+                    ip=90+n1;
+                else if(1<=n2 && n2<=7)
+                    ip=10*(n2-1)+n1;
+                else if(8<=n2 && n2<=11)
+                    ip=100+(n1-1)*5+(n2-7)+1;
+                else if(n2==12)
+                    ip=70+Lj.at(5).digitValue();
+                else if(n2==13)
+                    ip=85+Lj.at(6).digitValue();
+                if(1<=ip && ip<=200){
+                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pm[ip][1]));
+                    state=idToCheckBox["chBeParFit_"+QString::number(j)]-> checkState();
+                    if( state == Qt::Checked ){
+                        idToLineEdit["DPparFitErr_"+QString::number(j)] -> setText(QString::number(pm[ip][4]));
+                        idToLineEdit["DPparFitGC_"+QString::number(j)] -> setText(QString::number(pm[ip][5]));
+                    }
+                    else{
+                        idToLineEdit["DPparFitErr_"+QString::number(j)] -> clear();
+                        idToLineEdit["DPparFitGC_"+QString::number(j)]  -> clear();
+                    }
+                }
+            }
+        }
+    }
+    setGuiMute(false);
+}
+
+
 void ksemawc::PlotMENK(){
-    printf("-> PlotMENK()\n");
+    qDebug()<<"-> PlotMENK()";
     iColor=0;//reset to black color
-    SPADA();
+    //SPADA();
     PlotME();
     PlotNK(1);
 }
 
 
-
 void ksemawc::PlotME(){
     int Ndata=NeV;
     int iRD,iPSI=0,iDELTA=0;
-    double Xp[Ndata],Yp[Ndata],ErrXp[Ndata],ErrYp[Ndata];
+    std::vector <double> Xp(Ndata),Yp(Ndata),ErrXp(Ndata),ErrYp(Ndata);
     SaveSetting(-1);
     for(int i=1;i<=14;i++){
         int iGraph=i;
@@ -5291,37 +5298,28 @@ void ksemawc::PlotME(){
                 iPSI++;
         }
         if(DATO[i]!=0)
-            printf("->PlotMe: DATO[%d]=%d ifirstWarning=%d\n",i,DATO[i],ifirstWarning);
+            qDebug()<<"->PlotMe: DATO["<<i<<"]="<<DATO[i]<<" ifirstWarning="<<ifirstWarning;
         if(DATO[i]>0){
-            double YOLD,X,Y,errY;
-            if(i>=7) YOLD=ELI[i-6][1][1];
+            double X,Y,errY;
             for(int L=1;L<=Ndata;L++){
-                X=MIS[7][L][1];
+                X=ms.lambda[L-1];
                 if(i<=6){
-                    Y=MIS[i][L][1]*100.;
-                    errY=MIS[i][L][2]*100.;
+                    Y=ms.measures[i-1].value[L-1]*100.;
+                    errY=ms.measures[i-1].error[L-1]*100.;
                 }
                 else if(i>=7){
-                    Y=ELI[i-6][L][1];
-                    errY=ELI[i-6][L][2];
-                    if(iDelCon==1){
-                        if(i==7||i==9||i==11||i==13){
-                            if(L==1)
-                                YOLD=Y;
-                            Y=Y-Dperiod*NINT((Y-YOLD)/Dperiod);
-                            YOLD=Y;
-                        }
-                    }
+                    Y=ms.measures[i-1].value[L-1];
+                    errY=ms.measures[i-1].error[L-1];
                 }
                 Xp[L-1]=X;
                 Yp[L-1]=Y;
                 ErrYp[L-1]=errY;
             }
             iColor=0;
-            PLOTline1bar2(2,iRD,0,iGraph,Ndata,Xp,Yp,ErrXp,ErrYp);
+            PLOTline1bar2(2,iRD,0,iGraph,Ndata,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
         }
         else if(DATO[i]!=0)
-            PLOTline1bar2(2,iRD,0,iGraph,0,Xp,Yp,ErrXp,ErrYp);//erase without data plot
+            PLOTline1bar2(2,iRD,0,iGraph,0,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());//erase without data plot
     }
 
     iRD=1;
@@ -5330,9 +5328,9 @@ void ksemawc::PlotME(){
         rxy[18][3]=1000.;
         rxy[18][4]=-1000.;
         for(int L=1;L<=Ndata;L++){
-            Xp[L-1]=MIS[7][L][1];
-            Yp[L-1]=(1.-MIS[1][L][1]-MIS[3][L][1])*100.;//A=1-T-R
-            ErrYp[L-1]=(MIS[1][L][2]+MIS[3][L][2])*100.;//error
+            Xp[L-1]=ms.lambda[L-1];
+            Yp[L-1]=(1.-ms.measures[0].value[L-1]-ms.measures[2].value[L-1])*100.;
+            ErrYp[L-1]=(ms.measures[0].error[L-1]+ms.measures[2].error[L-1])*100.;
             if(Yp[L-1]<0.) iPlotA++;
             rxy[18][3]=min(rxy[18][3],Yp[L-1]);
             rxy[18][4]=max(rxy[18][4],Yp[L-1]);
@@ -5340,7 +5338,7 @@ void ksemawc::PlotME(){
         ui->DP_RXY_18_3 -> setText(QString::number(rxy[18][3]));
         ui->DP_RXY_18_4 -> setText(QString::number(rxy[18][4]));
         labelQwt="A_front";
-        PLOTline1bar2(2,iRD,0,9,Ndata,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(2,iRD,0,9,Ndata,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
         if(ifirstWarning==0 && iPlotA>0){
             QMessageBox msgBox;
             msgBox.setText("ATTENTION: A = 1 - Tn - Rn < 0 !!!\nPlease check your measurements.");
@@ -5350,16 +5348,16 @@ void ksemawc::PlotME(){
         }
     }
     else if(DATO[1]!=0 && DATO[3]!=0)
-        PLOTline1bar2(2,iRD,0,9,0,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(2,iRD,0,9,0,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
 
     if(DATO[1]>0 && DATO[5]>0){
         int iPlotA=0;
         rxy[15][3]=1000.;
         rxy[15][4]=-1000.;
         for(int L=1;L<=Ndata;L++){
-            Xp[L-1]=MIS[7][L][1];
-            Yp[L-1]=(1.-MIS[1][L][1]-MIS[5][L][1])*100.;//A=1-T-R1
-            ErrYp[L-1]=(MIS[1][L][2]+MIS[5][L][2])*100.;//error
+            Xp[L-1]=ms.lambda[L-1];
+            Yp[L-1]=(1.-ms.measures[0].value[L-1]-ms.measures[4].value[L-1])*100.;
+            ErrYp[L-1]=(ms.measures[0].error[L-1]+ms.measures[4].error[L-1])*100.;
             if(Yp[L-1]<0.) iPlotA++;
             rxy[15][3]=min(rxy[15][3],Yp[L-1]);
             rxy[15][4]=max(rxy[15][4],Yp[L-1]);
@@ -5367,7 +5365,7 @@ void ksemawc::PlotME(){
         ui->DP_RXY_15_3 -> setText(QString::number(rxy[15][3]));
         ui->DP_RXY_15_4 -> setText(QString::number(rxy[15][4]));
         labelQwt="A_back";
-        PLOTline1bar2(2,iRD,0,16,Ndata,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(2,iRD,0,16,Ndata,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
         if(ifirstWarning<=0 && iPlotA>0){
             QMessageBox msgBox;
             msgBox.setText("ATTENTION: A= 1 - Tn - R1 <0 !!!\nPlease check your measurements.");
@@ -5377,89 +5375,78 @@ void ksemawc::PlotME(){
         ifirstWarning=1;
     }
     else if(DATO[1]!=0 && DATO[5]!=0)
-        PLOTline1bar2(2,iRD,0,16,0,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(2,iRD,0,16,0,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
 
 
-    // save to HD splined experimental measurements
-    QFile file0(pathroot+"expo/MisSFexp.dat");
+    // save to HD re-sampled experimental measurements and loaded NK
+    QFile file0(pathroot+"expo/MeasExp.dat");
     if (!file0.open(QIODevice::WriteOnly | QIODevice::Text)){
-        msgErrLoad("PlotMe file0","Error opening expo/MisSFexp.dat");
-        printf("Error opening expo/MisSFexp.dat\n");
+        msgErrLoad("Save file0","Error opening expo/MisSFexp.dat");
     }
     QTextStream stream0 (&file0);
 
-    QFile file1(pathroot+"expo/MisSFexpErr.dat");
+    QFile file1(pathroot+"expo/ErrMeas.dat");
     if (!file1.open(QIODevice::WriteOnly | QIODevice::Text)){
-        msgErrLoad("PlotMe file1","Error opening expo/MisSFexpErr.dat");
-        printf("Error opening expo/MisSFexpErr.dat\n");
+        msgErrLoad("Save file1","Error opening expo/ErrMeas.dat");
     }
     QTextStream stream1 (&file1);
 
-    QFile file2(pathroot+"expo/MisELIexp.dat");
+    QFile file2(pathroot+"expo/loadedNK.dat");
     if (!file2.open(QIODevice::WriteOnly | QIODevice::Text)){
-        msgErrLoad("PlotMe file2","Error opening expo/MisELIexp.dat");
-        printf("Error opening expo/MisELIexp.dat\n");
+        msgErrLoad("Save file2","Error opening expo/loadedNK.dat");
     }
     QTextStream stream2 (&file2);
 
-    QFile file3(pathroot+"expo/MisELIexpErr.dat");
-    if (!file3.open(QIODevice::WriteOnly | QIODevice::Text)){
-        msgErrLoad("PlotMe file3","Error opening expo/MisELIErr.dat");
-        printf("Error opening expo/MisELIErr.dat\n");
-    }
-    QTextStream stream3 (&file3);
-
-    stream0<<"Tn\tTp\tRn\tRp\tR1\tAPDS\twl(nm)\tn1\tn2\tn3\tn4\tn5\tn6\tn7\tn8\tn_ibri"<<"\n";
-    stream1<<"eTn\teTp\teRn\teRp\teR1\teAPDS\teLETT\tk1\tk2\tk3\tk4\tk5\tk6\tk7\tk8\tk_ibri"<<"\n";
-    stream2<<"DEL_1\tPSI_1\tDEL_2\tPSI_2\tDEL_3\tPSI_3\tDEL_4\tPSI_4"<<"\n";
-    stream3<<"eDEL_1\tePSI_1\teDEL_2\tePSI_2\teDEL_3\tePSI_3\teDEL_4\tePSI_4"<<"\n";
-    for(int i=1;i<=NeV;i++){
-        for(int j=1;j<=16;j++) stream0<<QString::number(MIS[j][i][1],'f',7)<<"\t";
-        for(int j=1;j<=16;j++) stream1<<QString::number(MIS[j][i][2],'f',7)<<"\t";
-        for(int j=1;j<=8;j++)  stream2<<QString::number(ELI[j][i][1],'f',7)<<"\t";
-        for(int j=1;j<=8;j++)  stream3<<QString::number(ELI[j][i][2],'f',7)<<"\t";
+    stream0<<"wl(nm)\tTn\tTp\tRn\tRp\tR1\tAPDS\tDEL_1\tPSI_1\tDEL_2\tPSI_2\tDEL_3\tPSI_3\tDEL_4\tPSI_4"<<"\n";
+    stream1<<"wl(nm)\teTn\teTp\teRn\teRp\teR1\teAPDS\teDEL_1\tePSI_1\teDEL_2\tePSI_2\teDEL_3\tePSI_3\teDEL_4\tePSI_4"<<"\n";
+    stream2<<"wl(nm)\tn1\tk1\tn2\tk2\tn3\tk3\tn4\tk4\tn5\tk5\tn6\tk6\tn7\tk7\tn8\tk8"<<"\n";
+    for(int i=0;i<NeV;i++){
+        stream0<<QString::number(ms.lambda[i])<<"\t";
+        for(int j=0;j<14;j++) stream0<<QString::number(ms.measures[j].value[i],'f',7)<<"\t";
+        stream1<<QString::number(ms.lambda[i])<<"\t";
+        for(int j=0;j<14;j++) stream1<<QString::number(ms.measures[j].error[i],'f',7)<<"\t";
+        stream2<<QString::number(ms.lambda[i])<<"\t";
+        for(int j=0;j<7;j++)  stream2<<QString::number(nkMaterials[j].n[i],'f',7)<<"\t"<<QString::number(nkMaterials[j].k[i],'f',7)<<"\t";
         stream0<<"\n";
         stream1<<"\n";
         stream2<<"\n";
-        stream3<<"\n";
     }
     file0.close();
     file1.close();
     file2.close();
-    file3.close();
 }
 
 
 void ksemawc::PlotNK(int iRD){
-    int Ndata=NINT(SOL[1][1]);
+    int Ndata=Sol.size();
     //if(Ndata==0)
     //    return;
-    double Xp[Ndata],Yp[Ndata],ErrXp[Ndata],ErrYp[Ndata];
+    std::vector <double> Xp(Ndata),Yp(Ndata),ErrXp(Ndata),ErrYp(Ndata);
     // n-data plot
     for(int i=0;i<Ndata;i++){
-        Xp[i]=SOL[i+2][1];
-        Yp[i]=SOL[i+2][2];
-        ErrYp[i]=SOL[i+2][4];
+        Xp[i]=Sol[i][1];
+        Yp[i]=Sol[i][2];
+        ErrYp[i]=Sol[i][4];
     }
-    PLOTline1bar2(2,iRD,iColor,12,Ndata,Xp,Yp,ErrXp,ErrYp);
+    PLOTline1bar2(2,iRD,iColor,12,Ndata,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
     // k-data plot
     for(int i=0;i<Ndata;i++){
-        Xp[i]=SOL[i+2][1];
-        Yp[i]=SOL[i+2][3];
-        ErrYp[i]=SOL[i+2][5];
+        Xp[i]=Sol[i][1];
+        Yp[i]=Sol[i][3];
+        ErrYp[i]=Sol[i][5];
     }
-    PLOTline1bar2(2,iRD,iColor,13,Ndata,Xp,Yp,ErrXp,ErrYp);
+    PLOTline1bar2(2,iRD,iColor,13,Ndata,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
     //eps1 eps2 plot
-    if(NINT(par[10][1])==1){
+    if(nint(par[10][1])==1){
         //eps1-data plot
         double v1,v2,v3,v4,yd,yu;
         rxy[26][3]=1000.;
         rxy[26][4]=-1000.;
-        for(int i=2;i<=Ndata+1;i++){
-            v1=pow(SOL[i][1+1]-SOL[i][1+3],2.)-pow(SOL[i][2+1]-SOL[i][2+3],2.);
-            v2=pow(SOL[i][1+1]-SOL[i][1+3],2.)-pow(SOL[i][2+1]+SOL[i][2+3],2.);
-            v3=pow(SOL[i][1+1]+SOL[i][1+3],2.)-pow(SOL[i][2+1]-SOL[i][2+3],2.);
-            v4=pow(SOL[i][1+1]+SOL[i][1+3],2.)-pow(SOL[i][2+1]+SOL[i][2+3],2.);
+        for(int i=0;i<Ndata;i++){
+            v1=pow(Sol[i][2]-Sol[i][4],2.)-pow(Sol[i][3]-Sol[i][5],2.);
+            v2=pow(Sol[i][2]-Sol[i][4],2.)-pow(Sol[i][3]+Sol[i][5],2.);
+            v3=pow(Sol[i][2]+Sol[i][4],2.)-pow(Sol[i][3]-Sol[i][5],2.);
+            v4=pow(Sol[i][2]+Sol[i][4],2.)-pow(Sol[i][3]+Sol[i][5],2.);
             yd=min(v1,v2);
             yd=min(yd,v3);
             yd=min(yd,v4);
@@ -5468,21 +5455,21 @@ void ksemawc::PlotNK(int iRD){
             yu=max(yu,v4);
             rxy[26][3]=min(rxy[26][3],yd);
             rxy[26][4]=max(rxy[26][4],yu);
-            Xp[i-2]=SOL[i][1];
-            Yp[i-2]=(yu+yd)/2.;
-            ErrYp[i-2]=(yu-yd)/2.;
+            Xp[i]=Sol[i][1];
+            Yp[i]=(yu+yd)/2.;
+            ErrYp[i]=(yu-yd)/2.;
         }
-        PLOTline1bar2(2,iRD,iColor,14,Ndata,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(2,iRD,iColor,14,Ndata,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
         ui->DP_RXY_26_3->setText(QString::number(rxy[26][3]));
         ui->DP_RXY_26_4->setText(QString::number(rxy[26][4]));
         //eps2-data plot
         rxy[27][3]=1000.;
         rxy[27][4]=-1000.;
-        for(int i=2;i<=Ndata+1;i++){
-            v1=2.*(SOL[i][1+1]-SOL[i][1+3])*(SOL[i][2+1]-SOL[i][2+3]);
-            v2=2.*(SOL[i][1+1]-SOL[i][1+3])*(SOL[i][2+1]+SOL[i][2+3]);
-            v3=2.*(SOL[i][1+1]+SOL[i][1+3])*(SOL[i][2+1]-SOL[i][2+3]);
-            v4=2.*(SOL[i][1+1]+SOL[i][1+3])*(SOL[i][2+1]+SOL[i][2+3]);
+        for(int i=0;i<Ndata;i++){
+            v1=2.*(Sol[i][2]-Sol[i][4])*(Sol[i][3]-Sol[i][5]);
+            v2=2.*(Sol[i][2]-Sol[i][4])*(Sol[i][3]+Sol[i][5]);
+            v3=2.*(Sol[i][2]+Sol[i][4])*(Sol[i][3]-Sol[i][5]);
+            v4=2.*(Sol[i][2]+Sol[i][4])*(Sol[i][3]+Sol[i][5]);
             yd=min(v1,v2);
             yd=min(yd,v3);
             yd=min(yd,v4);
@@ -5491,11 +5478,11 @@ void ksemawc::PlotNK(int iRD){
             yu=max(yu,v4);
             rxy[27][3]=min(rxy[27][3],yd);
             rxy[27][4]=max(rxy[27][4],yu);
-            Xp[i-2]=SOL[i][1];
-            Yp[i-2]=(yu+yd)/2.;
-            ErrYp[i-2]=(yu-yd)/2.;
+            Xp[i]=Sol[i][1];
+            Yp[i]=(yu+yd)/2.;
+            ErrYp[i]=(yu-yd)/2.;
         }
-        PLOTline1bar2(2,iRD,iColor,15,Ndata,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(2,iRD,iColor,15,Ndata,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
         ui->DP_RXY_27_3->setText(QString::number(rxy[27][3]));
         ui->DP_RXY_27_4->setText(QString::number(rxy[27][4]));
     }
@@ -5503,11 +5490,11 @@ void ksemawc::PlotNK(int iRD){
 
 
 void ksemawc::Simula(){
-    printf("->Simula\n");
+    qDebug()<<"->Simula";
     lastAction="Simula";
     AdjRoughMax();
     SaveSetting(-1);
-    double mc[15][1000];
+    std::vector<std::vector<double>> mc(15, std::vector<double>(NeV+1, 0.0));
     Qt::CheckState state,state1;
     state=ui->cBox_PAR_19_1 -> checkState();
     int iok=0;
@@ -5540,30 +5527,25 @@ void ksemawc::Simula(){
     par[11][1]=valA*pow(10.,expA);
     CalcMis(mc);
     if(state == Qt::Checked && iok==1){
-        int i1=1;
-        int i2=14;
         double INSTR[21];
         for(int j=1;j<=20;j++)
             INSTR[j]=par[j][3];
-        for(int ic=i1;ic<=i2;ic++){
+        for(int ic=1;ic<=14;ic++){
             if(DATO[ic]!=0){
                 DATO[ic]=1;
                 par[ic][4]=1.;
                 idToCheckBox["checkB_mis"+QString::number(ic)+"_3"] -> setEnabled(true);
-                printf("%s is enabled\n",("checkB_mis"+QString::number(ic)+"_3").toStdString().c_str());
                 for(int i=1;i<=NeV;i++){
+                    ms.measures[ic-1].value[i]=mc[ic][i];
                     if(ic<=6){
-                        MIS[ic][i][1]=mc[ic][i];
-                        double DL=MIS[7][i][2];
+                        double DL=ms.driftBaseline[i-1];
                         if(ic==1 || ic==2)
-                            MIS[ic][i][2]=MIS[ic][i][1]*INSTR[3]+DL;
+                            ms.measures[ic-1].error[i-1]=ms.measures[ic-1].value[i-1]*INSTR[3]+DL;
                         if(ic==3 || ic==4 || ic==5)
-                            MIS[ic][i][2]=MIS[ic][i][1]*(INSTR[3]+INSTR[4])+DL;
-                        if(iw==1)
-                            printf("MIS[%d][%d][1]= %f\n",ic,i,MIS[ic][i][1]);
+                            ms.measures[ic-1].error[i-1]=ms.measures[ic-1].value[i-1]*(INSTR[3]+INSTR[4])+DL;
                     }
                     else if(ic>=7 && ic<=14)
-                        ELI[ic-6][i][1]=mc[ic][i];
+                        ms.measures[ic-1].error[i]=0.01;
                 }
             }
         }
@@ -5583,7 +5565,6 @@ void ksemawc::Simula(){
     QFile file(fnmean);
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
         msgErrLoad("Simula fnmean",fnmean);
-        printf("-> Simula ERROR opening file= %s\n",fnmean.toStdString().c_str());
         return;
     }
     else{
@@ -5591,7 +5572,7 @@ void ksemawc::Simula(){
         QString line,pezzo;
         QTextStream stream (&file);
         line = stream.readLine();//info line
-        cout << line.toStdString()<<"\n";
+        qDebug() << line;
         line = stream.readLine();//Ndat & "nm" for new file
         line=line.simplified();
         QStringList List0;
@@ -5601,29 +5582,29 @@ void ksemawc::Simula(){
         double a2nm=0.1;
         if(line.contains("nm"))
             a2nm=1.;
-        printf("Ndat= %d a2nm=%f\n",ipr,a2nm);
-        double wp[ipr+1][3];
-        for(int i=1;i<=ipr;i++){
-            stream>>wp[i][1]>>wp[i][2];
-            wp[i][1]=wp[i][1]*a2nm;
-            //printf("\t %f %f\n",wp[i][1],wp[i][2]);
+        qDebug("Ndat= %d a2nm=%f",ipr,a2nm);
+        std::vector<std::vector<double>> wp(ipr+1, std::vector<double>(3, 0.0));
+        for(int i=1; i<=ipr; i++){
+            double tmp1, tmp2;
+            stream >> tmp1 >> tmp2;
+            wp[i][1] = tmp1 * a2nm;
+            wp[i][2] = tmp2;
+            //qDebug()<<i<<" "<<wp[i][1]<<" "<<wp[i][2];
         }
         file.close();
         //weight
         double speso=0.;
         int jjmin=1;
-        while(wp[jjmin][1] < MIS[7][1][1] && jjmin<ipr)
+        while(wp[jjmin][1] < ms.lambda[0] && jjmin<ipr)
             jjmin++;
         int jj=jjmin;
         int jjmax=jj;
-        while(wp[jj][1] >= MIS[7][1][1] && wp[jj][1] <= MIS[7][NeV][1] && jj<=ipr){
+        while(jj<=ipr && wp[jj][1] >= ms.lambda[0] && wp[jj][1] <= ms.lambda[NeV-1] ){
             speso=speso+wp[jj][2];
             jjmax=jj;
             jj++;
+            //qDebug("while jj=%d",jj);
         }
-        printf("jjmin= %d wl=%f\n",jjmin,wp[jjmin][1]);
-        printf("jjmax= %d wl=%f\n",jjmax,wp[jjmax][1]);
-        printf("SUMpeso= %f\n",speso);
         // reset adders
         double av[7],avs[7],val[7][3];
         for( int i=1;i<=6;i++){
@@ -5633,23 +5614,21 @@ void ksemawc::Simula(){
         // mean @theta
         for(int ii=jjmin;ii<=jjmax;ii++){
             int ij=1;
-            while(wp[ii][1]>MIS[7][ij][1] && ij<=NINT(par[28][2])-1)
+            while(wp[ii][1]>ms.lambda[ij-1] && ij<=nint(par[28][2]-1))
                 ij++;
             if(ij>1) ij--;
-            double x=(wp[ii][1]-MIS[7][ij][1])/(MIS[7][ij+1][1]-MIS[7][ij][1]);
-            //printf("x=%f wp[%d][1]=%f MIS[7][%d][1]=%f\n",x,ii,wp[ii][1],ij,MIS[7][ij][1]);
+            double x=(wp[ii][1]-ms.lambda[ij-1])/(ms.lambda[ij]-ms.lambda[ij-1]);
             for(int j=1;j<=2;j++){
                 int ik=ij+j-1;
                 if(j==1){
                     for(int iv1=1;iv1<=6;iv1++){
-                        val[iv1][1]=MIS[iv1][ik][1]*(1.-x);
+                        val[iv1][1]=ms.measures[iv1-1].value[ik-1]*(1.-x);
                         val[iv1][2]=mc[iv1][ik]*(1.-x);
-                        //if(iv1==3) printf("mc[3][%d]=%f x=%f\n",ik,mc[iv1][ik],x);
                     }
                 }
                 else{
                     for(int iv1=1;iv1<=6;iv1++){
-                        val[iv1][1]=val[iv1][1]+MIS[iv1][ik][1]*x;
+                        val[iv1][1]=val[iv1][1]+ms.measures[iv1-1].value[ik-1]*x;
                         val[iv1][2]=val[iv1][2]+mc[iv1][ik]*x;
                     }
                 }
@@ -5657,7 +5636,6 @@ void ksemawc::Simula(){
             for(int j=1;j<=6;j++){
                 av[j]=av[j]+val[j][1]*wp[ii][2]/speso;
                 avs[j]=avs[j]+val[j][2]*wp[ii][2]/speso;
-                //if(j==3) printf("val[3][2]=%f\n",val[j][2]);
             }
         }
         for(int i=1;i<=6;i++){
@@ -5679,27 +5657,34 @@ void ksemawc::Simula(){
     }
 }
 
-void ksemawc::CalcMis(double mc[15][1000]){
-    printf("->CalcMis\n");
+
+void ksemawc::CalcMis(std::vector<std::vector<double>>& mc){
+    qDebug("->CalcMis with CNK[1][0]=%d",nint(CNK[1][0]));
     nextColor();
     int s1p2u3=ui->cB_PAR_35_2 ->currentIndex();
     s1p2u3++;
+    Qt::CheckState state;
+    state=ui->checkB_PAR_54_2 -> checkState ();
+    if(state==Qt::Unchecked)
+        par[54][2]=0;
+    else
+        par[54][2]=1;
+    int iSpec0Hemi1=par[54][2];
     int nwl=NeV;
-    double teta[6],wl,Xp[nwl],Yp[nwl],ErrXp[nwl],ErrYp[nwl],nn[nwl],kk[nwl],e1[nwl],e2[nwl],VNK[17][3],vot[6][3],delOld[4],del=0.;
-    fill_n(ErrXp, nwl, 0.);
-    fill_n(ErrYp, nwl, 0.);
+    double teta[6],wl,VNK[17][3],vot[6][3],delOld[4],del=0.;
+    std::vector <double> Xp(nwl),Yp(nwl),ErrXp(nwl),ErrYp(nwl),nn(nwl),kk(nwl),e1(nwl),e2(nwl);
+    fill_n(ErrXp.data(), nwl, 0.);
+    fill_n(ErrYp.data(), nwl, 0.);
     teta[1]=ui->dSB_PAR_6_1->value();
     teta[2]=ui->dSB_PM_86_1->value();
     teta[3]=ui->dSB_PM_87_1->value();
     teta[4]=ui->dSB_PM_88_1->value();
     teta[5]=ui->dSB_PM_89_1->value();
-    Qt::CheckState state;
     state=ui->checkBox_deltaConnect->checkState();
     int iDelCon=0;
     if(state==Qt::Checked)
         iDelCon=1;
     for(int k=1;k<6;k++){
-        printf("teta[%d]=%f\n",k,teta[k]);
         teta[k]=teta[k]*deg2rad;
     }
     QFile fileNK(fNKsim);
@@ -5711,15 +5696,21 @@ void ksemawc::CalcMis(double mc[15][1000]){
     streamNK<<"nk-values of last simulation\n";
     streamNK<<QString::number(NeV)<<" nm\n";
     for(int i=1;i<=NeV;i++){
-        wl=MIS[7][i][1];
+        wl=ms.lambda[i-1];
         Xp[i-1]=wl;
         COSVNK(VNK,i);
         nn[i-1]=VNK[1][1];
         kk[i-1]=VNK[1][2];
         e1[i-1]=VNK[1][1]*VNK[1][1]-VNK[1][2]*VNK[1][2];
         e2[i-1]=2.*VNK[1][1]*VNK[1][2];
+        nkSol.n[i-1]=VNK[1][1];
+        nkSol.k[i-1]=VNK[1][2];
         streamNK<<wl<<"\t"<<VNK[1][1]<<"\t"<<VNK[1][2]<<"\t"<<VNK[1][1]*0.001<<"\t"<<VNK[1][2]*0.001<<"\n";
         if(DATO[1]!=0 || DATO[3]!=0 || DATO[5]!=0){
+            if(iSpec0Hemi1==1)
+                iShemispherical=true;
+            else
+                iShemispherical=false;
             ASSEMBLER(i,1,0.,vot);
             mc[1][i]=vot[1][1];
             mc[3][i]=vot[2][1];
@@ -5731,7 +5722,10 @@ void ksemawc::CalcMis(double mc[15][1000]){
             mc[5][i]=.0;
         }
         if(DATO[2]!=0 || DATO[4]!=0){
+            par[54][2]=0;//Tp and Rp are always direct/specular
+            iShemispherical=false;
             ASSEMBLER(i,1,teta[1],vot);
+            par[54][2]=iSpec0Hemi1;
             if(s1p2u3<3){
                 mc[2][i]=vot[1][s1p2u3];
                 mc[4][i]=vot[2][s1p2u3];
@@ -5746,12 +5740,17 @@ void ksemawc::CalcMis(double mc[15][1000]){
             mc[4][i]=.0;
         }
         if(DATO[6]!=0){
+            if(iSpec0Hemi1==1)
+                iShemispherical=true;
+            else
+                iShemispherical=false;
             ASSEMBLER(i,2,0.,vot);
             mc[6][i]=vot[4][1];
         }
         else
             mc[6][i]=.0;
         for(int j=1;j<=4;j++){
+            iShemispherical=false;
             if(DATO[7+2*(j-1)]!=0 || DATO[8+2*(j-1)]!=0){
                 ASSEMBLER(i,2+j,teta[j+1],vot);
                 del=vot[5][2];//Delta
@@ -5759,7 +5758,7 @@ void ksemawc::CalcMis(double mc[15][1000]){
                     if(i==1){
                         delOld[j-1]=del;
                     }
-                    del=del-Dperiod*NINT((del-delOld[j-1])/Dperiod);
+                    del=del-Dperiod*nint((del-delOld[j-1])/Dperiod);
                     delOld[j-1]=del;
                 }
                 mc[7+2*(j-1)][i]=del;//+Dperiod*N180offset;//Delta
@@ -5785,30 +5784,29 @@ void ksemawc::CalcMis(double mc[15][1000]){
             if(ic==7 || ic==9 || ic==11 || ic==13){
                 double Diff=.0;
                 for(int i=1;i<=NeV;i++){
-                    Diff=Diff+(mc[ic][i]-ELI[ic-6][i][1])/NeV;
+                    Diff=Diff+(mc[ic][i]-ms.measures[ic-6+5].value[i-1])/NeV;
                 }
-                Nperiod=NINT(Diff/Dperiod);
+                Nperiod=nint(Diff/Dperiod);
             }
             for(int i=1;i<=NeV;i++){
                 Yp[i-1]=mc[ic][i];
                 if(ic<=5)
                     Yp[i-1]=Yp[i-1]*100.;
                 if(ic<=6)
-                    FM=FM+pow((mc[ic][i]-MIS[ic][i][1])/MIS[ic][i][2],2.)/NeV;
+                    FM=FM+pow((mc[ic][i]-ms.measures[ic-1].value[i-1])/ms.measures[ic-1].error[i-1],2.)/NeV;
                 else{
-                    FM=FM+pow((mc[ic][i]-ELI[ic-6][i][1]-Nperiod*Dperiod)/ELI[ic-6][i][2],2.)/NeV;
+                    FM=FM+pow((mc[ic][i]-ms.measures[ic-1].value[i-1]-Nperiod*Dperiod)/ms.measures[ic-1].error[i-1],2.)/NeV;
                     Yp[i-1]=Yp[i-1]-Nperiod*Dperiod;
                 }
             }
             par[35+ic][1]=sqrt(FM);
             if(ic<=6)
-                PLOTline1bar2(1,0,iColor,ic,NeV,Xp,Yp,ErrXp,ErrYp);
+                PLOTline1bar2(1,0,iColor,ic,NeV,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
             else if(ic==7 || ic==9 || ic==11 || ic==13)
-                PLOTline1bar2(1,0,iColor,7,NeV,Xp,Yp,ErrXp,ErrYp);
+                PLOTline1bar2(1,0,iColor,7,NeV,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
             else if(ic==8 || ic==10 || ic==12 || ic==14)
-                PLOTline1bar2(1,0,iColor,8,NeV,Xp,Yp,ErrXp,ErrYp);
+                PLOTline1bar2(1,0,iColor,8,NeV,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
             SIMchi2=SIMchi2+FM;
-            printf("ic=%d FM=%f SIMchi2=%f\n",ic,FM,SIMchi2);
         }
     }
     ui->lineEdit_SIMchi2->setText("chi2= "+QString::number(SIMchi2/nMIS));
@@ -5817,23 +5815,21 @@ void ksemawc::CalcMis(double mc[15][1000]){
             Yp[i-1]=(1.-mc[1][i]-mc[3][i])*100.;
         }
         labelQwt="A_front";
-        PLOTline1bar2(1,0,iColor,9,NeV,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(1,0,iColor,9,NeV,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
     }
     if(DATO[1]!=0 && DATO[5]!=0){
         for(int i=1;i<=NeV;i++){
             Yp[i-1]=(1.-mc[1][i]-mc[5][i])*100.;
         }
         labelQwt="A_back";
-        PLOTline1bar2(1,0,iColor,16,NeV,Xp,Yp,ErrXp,ErrYp);
+        PLOTline1bar2(1,0,iColor,16,NeV,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
     }
-    //if(IXW[12]>0){//plot nk
-        PLOTline1bar2(1,0,iColor,12,NeV,Xp,nn,ErrXp,ErrYp);
-        PLOTline1bar2(1,0,iColor,13,NeV,Xp,kk,ErrXp,ErrYp);
-        if(NINT(par[10][1])==1){//plot permittivity
-            PLOTline1bar2(1,0,iColor,14,NeV,Xp,e1,ErrXp,ErrYp);
-            PLOTline1bar2(1,0,iColor,15,NeV,Xp,e2,ErrXp,ErrYp);
-        }
-    //}
+    PLOTline1bar2(1,0,iColor,12,NeV,Xp.data(),nn.data(),ErrXp.data(),ErrYp.data());
+    PLOTline1bar2(1,0,iColor,13,NeV,Xp.data(),kk.data(),ErrXp.data(),ErrYp.data());
+    if(nint(par[10][1])==1){//plot permittivity
+        PLOTline1bar2(1,0,iColor,14,NeV,Xp.data(),e1.data(),ErrXp.data(),ErrYp.data());
+        PLOTline1bar2(1,0,iColor,15,NeV,Xp.data(),e2.data(),ErrXp.data(),ErrYp.data());
+    }
     QFile file(fMisSim);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
         msgErrLoad("CalcMis-fMisSim",fMisSim);
@@ -5842,7 +5838,7 @@ void ksemawc::CalcMis(double mc[15][1000]){
     QTextStream stream(&file);
     stream<<"wl\tTn\tTp\tRn\tRp\tR1\tApds\tDELTA\tPSI\n";
     for(int i=1;i<=NeV;i++){
-        stream<<MIS[7][i][1];
+        stream<<ms.lambda[i-1];
         for(int ii=1;ii<=14;ii++)
             stream<<"\t"<<mc[ii][i];
         stream<<"\n";
@@ -5850,27 +5846,28 @@ void ksemawc::CalcMis(double mc[15][1000]){
     file.close();
 }
 
+
 void ksemawc::PlotAve(){
     //computing mean value SF VS theta
     QString line,pezzo;
     int ipr;
     double vot[6][3],vt[4][3],tet[92],tau[92],rho[92],rho1[92],ErrXp[92],ErrYp[92];
     fill_n(ErrXp, 92, 0.);
-    fill_n(ErrXp, 92, 0.);
+    fill_n(ErrYp, 92, 0.);
     SaveSetting(-1);
     int s1p2u3=ui->cB_PAR_35_2 ->currentIndex();
     s1p2u3++;
+    int iSpec0Hemi1=nint(par[54][2]);
     // kind of average
     QString fname=pathroot+NANK[10].simplified();
     QFile file(fname);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
         msgErrLoad("PlotAve fname",fname);
-        printf("file %s not found\n",fname.toStdString().c_str());
         return;
     }
     QTextStream stream(&file);
     line=stream.readLine();//info line
-    cout<<line.toStdString()<<"\n";
+    qDebug()<<line;
     line=stream.readLine();
     line=line.simplified();
     QStringList List;
@@ -5880,13 +5877,15 @@ void ksemawc::PlotAve(){
     double wl2nm=1.;
     if(line.contains("nm"))
         wl2nm=0.1;
-    printf("Ndati= %d\n",ipr);
-    double wp[ipr+1][3];
+    std::vector<std::vector<double>> wp(ipr+1, std::vector<double>(3, 0.0));
     double speso=0.;
     for(int i=1;i<=ipr;i++){
-        stream>>wp[i][1]>>wp[i][2];
+        double tmp1, tmp2;
+        stream >> tmp1 >> tmp2;
+        wp[i][1]=tmp1;
+        wp[i][2]=tmp2;
         wp[i][1]=wl2nm*wp[i][1];
-        cout<< wp[i][1] <<"\t"<< wp[i][2]<<"\n";
+        qDebug()<< wp[i][1] <<"\t"<< wp[i][2];
         speso=speso+wp[i][2];
     }
     file.close();
@@ -5902,8 +5901,12 @@ void ksemawc::PlotAve(){
         ui->DP_RXY_21_1 -> setText(QString::number(0));
         ui->DP_RXY_21_2 -> setText(QString::number(90));
     }
+    if(iSpec0Hemi1==1)
+        iShemispherical=true;
+    else
+        iShemispherical=false;
     for(int I=1;I<=NT;I++){
-        teta=rxy[21][1]+(rxy[21][2]-rxy[21][1])*(I-1)/double(NT-1);
+        teta=rxy[21][1]+(rxy[21][2]-rxy[21][1])*(I-1)/static_cast<double>(NT-1);
         if(teta>90.)
             teta=90.;
         tetar=teta*deg2rad;
@@ -5916,25 +5919,25 @@ void ksemawc::PlotAve(){
         int ij=1;
         double x=0.;
         for(int ii=1;ii<=ipr;ii++){
-            if(wp[ii][1]<=MIS[7][1][1]){
+            if(wp[ii][1]<=ms.lambda[0]){
                 ij=1;
                 x=0.;
-                if(wp[ii][1]<MIS[7][1][1] && I==1)
-                    printf("Attention wl_mean = %f <WLmin!!!\n",wp[ii][1]);
+                if(wp[ii][1]<ms.lambda[0] && I==1)
+                    qWarning()<<"Attention wl_mean="<<wp[ii][1]<<" <WLmin!!!";
             }
-            else if(wp[ii][1]>MIS[7][1][1] && wp[ii][1]<MIS[7][NeV][1]){
+            else if(wp[ii][1]>ms.lambda[0] && wp[ii][1]<ms.lambda[NeV-1]){
                 ij=1;
-                while(wp[ii][1]>MIS[7][ij][1])
+                while(wp[ii][1]>ms.lambda[ij-1])
                     ij++;
                 if(ij>1)
                     ij--;
-                x=(wp[ii][1]-MIS[7][ij][1])/(MIS[7][ij+1][1]-MIS[7][ij][1]);
+                x=(wp[ii][1]-ms.lambda[ij-1])/(ms.lambda[ij]-ms.lambda[ij-1]);
             }
-            else if(wp[ii][1]>=MIS[7][NeV][1]){
+            else if(wp[ii][1]>=ms.lambda[NeV-1]){
                 ij=NeV-1;
                 x=1.;
-                if(wp[ii][1]>MIS[7][NeV][1] && I==1)
-                    printf("Attention wl_mean = %f >WLmax!!!!\n",wp[ii][1]);
+                if(wp[ii][1]>ms.lambda[NeV-1] && I==1)
+                    qWarning()<<"Attention wl_mean="<<wp[ii][1]<<" >WLmax!!!!";
             }
             for(int j=1;j<=2;j++){
                 int ik=ij+j-1;
@@ -5984,8 +5987,8 @@ void ksemawc::PlotAve(){
     if(rxy[23][2]<1.){
         rxy[23][1]=ymin*100.;
         rxy[23][2]=ymax*100.;
-        ui->DP_RXY_23_1 -> setText(QString::number(int(ymin*100.)));
-        ui->DP_RXY_23_2 -> setText(QString::number(NINT(ymax*100.)));
+        ui->DP_RXY_23_1 -> setText(QString::number(static_cast<int>(ymin*100.)));
+        ui->DP_RXY_23_2 -> setText(QString::number(nint(ymax*100.)));
     }
     iColor=1;
     PLOTline1bar2(1,1,iColor,10,91,tet,tau,ErrXp,ErrYp);
@@ -6000,7 +6003,6 @@ void ksemawc::PlotAve(){
     QFile file2(fname2);
     if (!file2.open(QIODevice::WriteOnly | QIODevice::Text)){
         msgErrLoad("PlotAve fname2",fname2);
-        printf("Error opening %s\n",fname2.toStdString().c_str());
         return;
     }
     QTextStream out(&file2);
@@ -6009,35 +6011,42 @@ void ksemawc::PlotAve(){
     for(int i=1;i<=NT;i++)
         out<< tet[i]<<"\t"<<tau[i]<<"\t"<<rho[i]<<"\t"<<rho1[i]<<"\n";
     file2.close();
-    printf("Data vs theta saved in: expo/ThetaRhoVStheta.dat\n");
+    qInfo()<<"Data vs theta saved in: expo/ThetaRhoVStheta.dat";
 }
 
+
 void ksemawc::PlotAbsEL(){
-    int LastMediumAtWl[1002];
-    double wwl[1002],x[1002],y[1002],ErrXp[1002],ErrYp[1002],Trasm1[1002],vosi[6][3],denom,ABS[1002][10];
-    fill_n(ErrXp, 1002, 0.);
-    fill_n(ErrYp, 1002, 0.);
-    fill_n(Trasm1, 1002, 1.);
-    long double Ps[1002][11],Pp[1002][11];
-    complex<long double> Bs[1002][11],Cs[1002][11],Bp[1002][11],Cp[1002][11];
+    std::vector <int> LastMediumAtWl(NeV+1);
+    double vosi[6][3],denom;
+    std::vector <double> wwl(NeV+1),x(NeV+1),y(NeV+1),ErrXp(NeV+1),ErrYp(NeV+1),Trasm1(NeV+1);
+    std::vector<std::vector<double>> ABS(NeV+1, std::vector<double>(10, 0.0));
+    fill_n(ErrXp.data(), NeV+1, 0.);
+    fill_n(ErrYp.data(), NeV+1, 0.);
+    fill_n(Trasm1.data(), NeV+1, 1.);
+    std::vector<std::vector<long double>> Ps(NeV+1, std::vector<long double>(11, 0.0));
+    std::vector<std::vector<long double>> Pp(NeV+1, std::vector<long double>(11, 0.0));
+    std::vector<std::vector<std::complex<long double>>> Bs(NeV+1, std::vector<std::complex<long double>>(11, 0.0));
+    std::vector<std::vector<std::complex<long double>>> Cs(NeV+1, std::vector<std::complex<long double>>(11, 0.0));
+    std::vector<std::vector<std::complex<long double>>> Bp(NeV+1, std::vector<std::complex<long double>>(11, 0.0));
+    std::vector<std::vector<std::complex<long double>>> Cp(NeV+1, std::vector<std::complex<long double>>(11, 0.0));
     complex<double> irup,irdw,irup2,irdw2,mups,mupp,mdws,mdwp,pq,ir[10], NQ, MUS, DELTA;
     int icol,ivnkdw,ivnkup,s1p2u3, LastMedium,ivnk;
     double VNK[17][3];
     SaveSetting(-1);
 
-    s1p2u3=NINT(par[35][2]);
+    s1p2u3=nint(par[35][2]);
     double teta=par[6][1]*deg2rad;
     int iFirstCoe=1;
-    int Nlayers=NINT(par[51][2]);
+    int Nlayers=nint(par[51][2]);
     ivnkdw=9;//output media for SF measurements
     ivnkup=10;//refractive index of input medium for SF measurements
     int iRD=1;//redraw the Absorptance plot
 
-    printf("plot Abs at each layer of %d at theta=%f with polarization %d\n\t Nlayers=%d ivnkdw=%d\n",NINT(par[51][2]),par[6][1],s1p2u3,Nlayers,ivnkdw);
+    qDebug() << "plot Abs at each layer of " << QString::number(nint(par[51][2]))<<" at theta="<<par[6][1]<<" with polarization "<<s1p2u3<<" Nlayers="<<Nlayers<<" ivnkdw="<<ivnkdw;
 
     //set wwl array
     for(int i=1;i<=NeV;i++){
-        wwl[i]=MIS[7][i][1];
+        wwl[i]=ms.lambda[i-1];
         for(int j=1;j<=Nlayers;j++)
             ABS[i][j]=-1.1;
     }
@@ -6051,17 +6060,15 @@ void ksemawc::PlotAbsEL(){
         LastMediumAtWl[i]=Nlayers+1;//i.e. the medium after the last layer
         for(int j=1;j<=Nlayers;j++){
             int iWorn=0;
-            if(NINT(par[50+j][3])==1 && j>1)
+            if(nint(par[50+j][3])==1 && j>1)
                 iWorn=1;
-            ivnk=int(par[50+j][1]);//index of the material to be assigned to the ii layer
+            ivnk=static_cast<int>(par[50+j][1]);//index of the material to be assigned to the ii layer
             ir[j]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
             NQ=ir[j]*ir[j];
             MUS=sqrt(NQ-pq);
             DELTA=2.*PIG*pm[j][1]*MUS/wwl[i];
-            //printf("iwl=%d iLayer=%d ds=%f abs(real/DELTA))=%f abs(imag(DELTA))=%f\n",i,j,pm[j][1],abs(real(DELTA)),abs(imag(DELTA)));
-            if(abs(imag(DELTA))>ABSmax) {
+            if(std::abs(imag(DELTA))>ABSmax) {
                 //if(i==iwl2print)
-                    //printf("fully absorbing layer=%d wl[%d]=%f d=%f nm n=%f k=%f \n",j,i, wwl[i],pm[j][1], real(ir[j]), imag(ir[j]));
                 LastMediumAtWl[i]=j;
                 break;
             }
@@ -6075,7 +6082,7 @@ void ksemawc::PlotAbsEL(){
                 return;
             }
         }
-        if(i==iwl2print) printf("LastMediumAtWl[%d]=%d\n",i,LastMediumAtWl[i]);
+        if(i==iwl2print) qDebug()<<"LastMediumAtWl["<<i<<"]="<<LastMediumAtWl[i];
     }
 
     //computing at each wavelength
@@ -6087,7 +6094,7 @@ void ksemawc::PlotAbsEL(){
         ivnkdw=9;
         LastMedium=LastMediumAtWl[i];
         if(LastMedium<Nlayers+1){
-            ivnkdw=NINT(par[50+LastMedium][1]);
+            ivnkdw=nint(par[50+LastMedium][1]);
             for(int m=LastMedium+1;m<=Nlayers+1;m++){
                 Ps[i][m]=0.;
                 Pp[i][m]=0.;
@@ -6096,14 +6103,14 @@ void ksemawc::PlotAbsEL(){
         //loop on the layers
         for(int iLayer=1;iLayer<=LastMedium;iLayer++){
             if(i==iwl2print){
-                printf("\n|PlotAbsEL@wl=%f> for-loop with iLayer=%d<=%d\n",MIS[7][iwl2print][1],iLayer,LastMedium);
+                qDebug()<<"\n|PlotAbsEL@wl="<<ms.lambda[iwl2print-1]<<"> for-loop with iLayer="<<iLayer<<"<="<<LastMedium;
             }
-            if(iLayer==1 && (NINT(par[51][3])==1 || LastMedium==1)){//the first layer is inchoerent or completely absorbing
+            if(iLayer==1 && (nint(par[51][3])==1 || LastMedium==1)){//the first layer is inchoerent or completely absorbing
                 irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
                 pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
                 if(i==iwl2print)
-                    printf("\t Incoherent ivnkup=%d nup=%f kup=%f\n",ivnkup, VNK[ivnkup][1],-VNK[ivnkup][2]);
-                ivnkdw=NINT(par[51][1]);//refractive index of first layer
+                    qDebug()<<"\t Incoherent ivnkup="<<ivnkup<<" nup="<<VNK[ivnkup][1]<<" kup="<<-VNK[ivnkup][2];
+                ivnkdw=nint(par[51][1]);//refractive index of first layer
                 irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
                 irup2=irup*irup;
                 pq=pow(irup*sin(teta),2.);// (n_input*sin(teta))**2.
@@ -6114,23 +6121,22 @@ void ksemawc::PlotAbsEL(){
                 mdws=sqrt(irdw2-pq);
                 mdwp=irdw2/mdws;
                 double atten=exp(-4.*PIG*pm[1][1]/wwl[i]*imag(-mdws));
-                double RaS=pow(abs((mups-mdws)/(mups+mdws)),2.);
-                double RaP=pow(abs((mupp-mdwp)/(mupp+mdwp)),2.);
+                double RaS=pow(std::abs((mups-mdws)/(mups+mdws)),2.);
+                double RaP=pow(std::abs((mupp-mdwp)/(mupp+mdwp)),2.);
                 //double TaS=1.-RaS;//T=1-R because A=0 at the interface
                 //double TaP=1.-RaP;
                 //double R1aS=RaS;
                 //double R1aP=RaP;
                 if(i==iwl2print){
-                    printf("The first layer is inchoerent with first interface:\n");
-                    printf("nUP=%f kUP=%f nDW=%f kDW=%f d=%f\n",
-                           VNK[ivnkup][1],VNK[ivnkup][2],VNK[ivnkdw][1],VNK[ivnkdw][2],pm[1][1]);
-                    printf("atten=%f RaS=%f RaP=%f\n",atten,RaS,RaP);
-                    printf("2nd interface: call BUILDER: iFirstLayer=%d ncoe=%d\n",2,Nlayers-1);
+                    qDebug()<<"The first layer is inchoerent with first interface:";
+                    qDebug()<<"nUP="<<VNK[ivnkup][1]<<" kUP="<<VNK[ivnkup][2]<<" nDW="<<VNK[ivnkdw][1]<<" kDW="<<VNK[ivnkdw][2]<<" d="<<pm[1][1];
+                    qDebug()<<"atten="<<atten<<" RaS="<<RaS<<" RaP="<<RaP;
+                    qDebug()<<"2nd interface: call BUILDER: iFirstLayer=2 ncoe="<<Nlayers-1;
                 }
                 BUILDER(i,1,2,Nlayers-1,pq,vosi);
                 double RbS=vosi[2][1];
                 double RbP=vosi[2][2];
-                if(i==iwl2print) printf("RbS=%f RbP=%f\n",RbS,RbP);
+                if(i==iwl2print) qDebug()<<"RbS="<<RbS<<" RbP="<<RbP;
                 //double TbS=vosi[1][1];
                 //double TbP=vosi[1][2];
                 //double R1bS=vosi[3][1];
@@ -6153,14 +6159,9 @@ void ksemawc::PlotAbsEL(){
                 ABS[i][1]=Abso*100.;
                 Trasm1[i]=Trans;
                 iFirstCoe=2;
-                // if(i==iwl2print)
-                //     printf("\tFirst inchoerent layer, results: Abso=%f Trans=%f\n",Abso,Trans);
-
             }
             else{//thin layer
                 if(iLayer<LastMedium){
-                    if(i==iwl2print)
-                        printf("->call BUILDER: iFirstLayer=%d ncoe=%d\n",iLayer,LastMedium-iLayer);
                     BUILDER(i,1,iLayer,LastMedium-iLayer,pq,vosi);
                     Bs[i][iLayer]=freCoeff[4][0];
                     Cs[i][iLayer]=freCoeff[4][1];
@@ -6168,15 +6169,9 @@ void ksemawc::PlotAbsEL(){
                     Cp[i][iLayer]=freCoeff[5][1];
                     Ps[i][iLayer]=real(freCoeff[0][0]);
                     Pp[i][iLayer]=real(freCoeff[0][1]);
-                    if(i==iwl2print)
-                        printf("|PlotAbsEL> Bs[%d][%d]=%f + %f*i\n",i,iLayer,real(freCoeff[4][0]),imag(freCoeff[4][0]));
                     if(iLayer==iFirstCoe){
                         Bs[i][iFirstCoe-1]=complex<double>(vosi[2][1],0.);//Rs full stack
                         Bp[i][iFirstCoe-1]=complex<double>(vosi[2][2],0.);
-                        if(i==iwl2print){
-                            printf("\tiLayer=iFirstCoe=%d -> Re{Bs[%d][%d]}=%Lf\n",iLayer,i,iFirstCoe-1,real(Bs[i][iFirstCoe-1]));
-                            printf("\t\tPs[%d][%d]=%Lf \n",i,iLayer,Ps[i][iLayer]);
-                        }
                     }
                 }
                 if(iLayer==LastMedium){
@@ -6189,10 +6184,6 @@ void ksemawc::PlotAbsEL(){
                     Bp[i][iLayer]=complex<double>(1.,0.);
                     Cp[i][iLayer]=NQ/MUS;
                     Pp[i][iLayer]=real(Bp[i][iLayer]*conj(Cp[i][iLayer]));//Poynting vector p-pol
-                    if(i==iwl2print){
-                        printf("|PlotAbsEL> iLayer=LastMedium=%d ->B & C computing with ivnkdw=%d irdw=%f + %f*i\n",iLayer,ivnkdw,real(irdw),imag(irdw));
-                        printf("                  -> Ps[%d][%d]=%Lf \n",i,iLayer,Ps[i][iLayer]);
-                    }
                 }
             }
         }
@@ -6213,12 +6204,7 @@ void ksemawc::PlotAbsEL(){
                     ABS[i][iLayer]=ABS[i][iLayer]/2.;
                 ABS[i][iLayer]=ABS[i][iLayer]*100.*Trasm1[i];
                 if(ABS[i][iLayer]<0.) ABS[i][iLayer]=0.;
-                if(i==iwl2print){
-                    printf("Layer=%d ASB[%d]=%f  \nPs[%d]=%Le \nPs[%d]=%Le \nPs[%d]=%Le \nRfront=real(Bs[%d])=%Lf \n",
-                           iLayer,i, ABS[i][iLayer],iLayer,Ps[i][iLayer],iLayer+1,Ps[i][iLayer+1],iFirstCoe,Ps[i][iFirstCoe],iFirstCoe-1,real(Bs[i][iFirstCoe-1]));
-                }
             }
-            //if(i==iwl2print)printf("calc abs with iLayer=%d -> ABS[%d]=%f \n",iLayer-1,i,ABS[i][iLayer]);
         }
     }
 
@@ -6231,7 +6217,6 @@ void ksemawc::PlotAbsEL(){
         QFile file(fname);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)){
             msgErrLoad("PlotAbsEL",fname);
-            printf("Error opening %s\n",fname.toStdString().c_str());
             return;
         }
         QTextStream out(&file);
@@ -6253,7 +6238,7 @@ void ksemawc::PlotAbsEL(){
             labelQwt="layer_"+QString::number(j);
             icol=j-1;
             if(icol>=7) icol=icol-6;
-            PLOTline1bar2(1,iRD,icol,9,Np,x,y,ErrXp,ErrYp);
+            PLOTline1bar2(1,iRD,icol,9,Np,x.data(),y.data(),ErrXp.data(),ErrYp.data());
             if(iRD==1)
                 iRD=0;
         }
@@ -6267,15 +6252,21 @@ void ksemawc::PlotTexturized(){
     double alpha=ui->doubleSpinBox_alpha->value();
     double theta1=alpha;
     double theta2=180.-3.*alpha;
+    int iSpec0Hemi1=nint(par[54][2]);
+    if(iSpec0Hemi1==1)
+        iShemispherical=true;
+    else
+        iShemispherical=false;
     ui->lineEdit_texture->setText("theta1="+QString::number(theta1)+" theta2="+QString::number(theta2));
-    printf("->Plot texturized\n");
+    qDebug()<<"->Plot texturized";
     AdjRoughMax();
     SaveSetting(-1);
-    double wl,Xp[NeV],Atext[NeV],Rtext[NeV],Ttext[NeV],ErrXp[NeV],ErrYp[NeV],VNK[17][3],vot[6][3];
-    fill_n(ErrXp, NeV, 0.);
-    fill_n(ErrYp, NeV, 0.);
+    double wl,VNK[17][3],vot[6][3];
+    std::vector <double> Xp(NeV),Atext(NeV),Rtext(NeV),Ttext(NeV),ErrXp(NeV),ErrYp(NeV);
+    fill_n(ErrXp.data(), NeV, 0.);
+    fill_n(ErrYp.data(), NeV, 0.);
     for(int i=1;i<=NeV;i++){
-        wl=MIS[7][i][1];
+        wl=ms.lambda[i-1];;
         Xp[i-1]=wl;
         COSVNK(VNK,i);
         ASSEMBLER(i,1,theta1*deg2rad,vot);
@@ -6293,18 +6284,19 @@ void ksemawc::PlotTexturized(){
         Atext[i-1]=100.-Rtext[i-1]-Ttext[i-1];
         //Rtext[i-1]=(R1s*R2s+R1p*R2p+T1s*R1p+T1p*R1s)/2.*100.;//(R1s*R2s+R1p*R2p+R1s*T2s*T3s+R1p*T2p*T3p)/2.*100.;
         //Ttext[i-1]=(T1s+T1p)/2.*100.;//(T1s+R1s*T2s*R3s+T1p+R1p*T2p*R3p)/2.*100.;
-        //printf("wl=%f Rtext=%f Ttext=%f\n",wl,Rtext[i-1],Ttext[i-1]);
     }
     nextColor();
-    PLOTline1bar2(1,0,iColor,1,NeV,Xp,Ttext,ErrXp,ErrYp);
-    PLOTline1bar2(1,0,iColor,3,NeV,Xp,Rtext,ErrXp,ErrYp);
-    PLOTline1bar2(1,0,iColor,9,NeV,Xp,Atext,ErrXp,ErrYp);
+    PLOTline1bar2(1,0,iColor,1,NeV,Xp.data(),Ttext.data(),ErrXp.data(),ErrYp.data());
+    PLOTline1bar2(1,0,iColor,3,NeV,Xp.data(),Rtext.data(),ErrXp.data(),ErrYp.data());
+    PLOTline1bar2(1,0,iColor,9,NeV,Xp.data(),Atext.data(),ErrXp.data(),ErrYp.data());
 }
+
 
 void ksemawc::manageLEwl(){
     int iChoiceWL=ui->comboBox_searchNK -> currentIndex();
     ui->dSB_WLsearchNK->setEnabled(iChoiceWL==0);
 }
+
 
 void ksemawc::searchNK(){
     //set nk search-range
@@ -6314,7 +6306,8 @@ void ksemawc::searchNK(){
     par[2][2]=rxy[17][2];
 
     int Ndat=0,iCol=0,Ndata=NeV*2;
-    double Xp[Ndata],Yp[Ndata],ErrXp[Ndata],ErrYp[Ndata],WL;
+    double WL;
+    std::vector <double> Xp(Ndata),Yp(Ndata),ErrXp(Ndata),ErrYp(Ndata);
     int iChoiceWL=ui->comboBox_searchNK -> currentIndex();
     if(iChoiceWL==0)
         WL=ui->dSB_WLsearchNK -> value();
@@ -6323,37 +6316,38 @@ void ksemawc::searchNK(){
     else
         WL=ui->dSB_PAR_4_2 -> value();
     int iWL=1;
-    while(MIS[7][iWL][1]<WL && iWL<NeV)
+    while(ms.lambda[iWL-1]<WL && iWL<NeV)
         iWL++;
-    WL=MIS[7][iWL][1];
-    printf("->searchNK @ WL= %f\n",WL);
+    WL=ms.lambda[iWL-1];
+    qDebug()<<"->searchNK @ WL= "<<WL;
     SaveSetting(-1);
-    CNK[1][1]=0.;//nk unknown
-    PLOTline1bar2(1,1,iCol,11,0,Xp,Yp,ErrXp,ErrYp);//erase plot
+    PLOTline1bar2(1,1,iCol,11,0,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());//erase plot
+    CNK[1][0]=3;//nk-uncknown will be set to forced values
     for(int imis=1;imis<=14;imis++){
         if(DATO[imis]==2){
             if(imis<=6){
                 iCol=imis;
-                printf("imis=%d: %f +-%f\n ",imis,MIS[imis][iWL][1],MIS[imis][iWL][2]);
-                Ndat=SOLVE(imis,iWL,Xp,Yp,ErrYp);
-                PLOTline1bar2(2,0,iCol,11,Ndat,Xp,Yp,ErrXp,ErrYp);
+                qDebug("imis=%d: %f +-%f\n ",imis,ms.measures[imis-1].value[iWL-1],ms.measures[imis-1].error[iWL-1]);
+                Ndat=SOLVE(imis,iWL,Xp.data(),Yp.data(),ErrYp.data());
+                PLOTline1bar2(2,0,iCol,11,Ndat,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
             }
             else{
                 int I=imis-6;
                 if(I==1 || I==3 || I==5 || I==7) iCol=1;
                 if(I==2 || I==4 || I==6 || I==8) iCol=4;
-                printf("imis=%d: %f +-%f\n ",imis,ELI[I][iWL][1],ELI[I][iWL][2]);
-                Ndat=SOLVE(imis,iWL,Xp,Yp,ErrYp);
-                PLOTline1bar2(2,0,iCol,11,Ndat,Xp,Yp,ErrXp,ErrYp);
+                qDebug("imis=%d: %f +-%f\n ",imis,ms.measures[I+5].value[iWL-1],ms.measures[I+5].error[iWL]);
+                Ndat=SOLVE(imis,iWL,Xp.data(),Yp.data(),ErrYp.data());
+                PLOTline1bar2(2,0,iCol,11,Ndat,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());
             }
         }
     }
+    CNK[1][0]=0;//nk-uncknown by the chosen option
 }
 
 
 void ksemawc::RefTrackG(){
     SaveSetting(-1);
-    SPADA();
+    //SPADA();
     PlotMENK();
     par[1][1]=rxy[16][1];
     par[1][2]=rxy[16][2];
@@ -6361,12 +6355,13 @@ void ksemawc::RefTrackG(){
     par[2][2]=rxy[17][2];
 }
 
+
 void ksemawc::NumericalSearch(){
     SaveSetting(-1);
     lastAction="NumSearch";
     iStop=false;
-    int NmisEnab=NINT(par[22][2]);
-    printf("Exhaustive numerical n-search in wl-n and wl-k spaces with N.meas=%d sampled on %d points\n",NmisEnab,NeV);
+    int NmisEnab=nint(par[22][2]);
+    qDebug("Exhaustive numerical n-search in wl-n and wl-k spaces with N.meas=%d sampled on %d points",NmisEnab,NeV);
     ui->progressBar_ENS->setValue(0);
     Qt::CheckState state;
     state=ui->checkBox_relMin->checkState();
@@ -6391,7 +6386,7 @@ void ksemawc::NumericalSearch(){
         QPushButton *kButton = msgBox.addButton("k", QMessageBox::YesRole);
         QPushButton *abortButton = msgBox.addButton("Abort", QMessageBox::RejectRole);
         int result = msgBox.exec();
-        printf("results=%d\n",result);
+        qDebug()<<"results="<<result;
         QAbstractButton *clickedButton = msgBox.clickedButton();
         if(clickedButton == nButton){
             calN1K2NK3=1;
@@ -6413,10 +6408,9 @@ void ksemawc::NumericalSearch(){
         msgBox.exec();
         return;
     }
-    printf("calN1K2NK3= %d\n",calN1K2NK3);
+    qDebug()<<"calN1K2NK3= "<<calN1K2NK3;
     double n,k,kMin=100,kMax=-100.;
     double FM,FMold,nMin,dFMold=0.;
-    CNK[1][1]=0.;//nk unknown n=CNK[1][2] k=CNK[1][3]
     par[1][1]=rxy[16][1];//nMin
     par[1][2]=rxy[16][2];//nMax
     par[2][1]=rxy[17][1];//kMin
@@ -6428,22 +6422,21 @@ void ksemawc::NumericalSearch(){
     pm[89][1]=ui->dSB_PM_89_1->value();
     int IL1=1;
     int IL2=NeV;
-    int iSol=1;
+    Sol.clear();//reset Sol
+    Sol.reserve(2*NeV);
     double Dn=(par[1][2]-par[1][1])/100.;
     k=par[2][1];
     for(int IL=IL1;IL<=IL2;IL++){
-        printf("\rProgress: %d%%",int(double(IL-IL1)/double(IL2-IL1)*100.));
-        fflush(stdout);
-        ui->progressBar_ENS->setValue(int(double(IL-IL1)/double(IL2-IL1)*100.));
+        ui->progressBar_ENS->setValue(static_cast<int>(static_cast<double>(IL-IL1)/static_cast<double>(IL2-IL1)*100.));
         ui->progressBar_ENS->update();
         par[24][2]=IL;
-        double lam=MIS[7][IL][1];
+        double lam=ms.lambda[IL-1];
         double Trasm=1.,dt,dlim,tol;
-        if(NINT(par[50+NINT(par[53][2])][3])==1){
-            if(DATO[1]>0) Trasm=MIS[1][IL][1];
-            if(DATO[2]>0) Trasm=MIS[2][IL][1];
-            double dinco=pm[NINT(par[53][2])][1];
-            if(iw==3) printf("Trasm = %f\n",Trasm);
+        if(nint(par[50+nint(par[53][2])][3])==1){
+            if(DATO[1]>0) Trasm=ms.measures[0].value[IL-1];
+            if(DATO[2]>0) Trasm=ms.measures[1].value[IL-1];
+            double dinco=pm[nint(par[53][2])][1];
+            if(iw==3) qDebug()<<"Trasm = "<<Trasm;
             dt=-0.1*lam/4./3.14/dinco*log(Trasm);
             dlim=1.e-10;
         }
@@ -6457,91 +6450,73 @@ void ksemawc::NumericalSearch(){
         for(int i=0;i<101;i++){
             n=par[1][1]+i*Dn;
             if(calN1K2NK3==3){//searching nk mathematical solutions
-                CNK[1][2]=n;
-                CNK[1][3]=k;
-                double dt=0.001*fabs(rxy[17][2]-rxy[17][1]);
-                FM=FindRoot(&FMER,k,dt,dlim,tol);
-                k=CNK[1][3];
-                //printf("n=%f k=%f FM=%f FMold=%f dFMold=%f\n",n,k,FM,FMold,dFMold);
+                CNK[1][0]=3;//nk-uncknown will be set to forced values
+                CNK[1][7]=n;
+                CNK[1][8]=k;
+                double dt=0.001*std::abs(rxy[17][2]-rxy[17][1]);
+                FM=FindRoot([this](double k){ return FMER(k); },k,dt,dlim,tol);
+                k=CNK[1][8];
             }
             else if(calN1K2NK3==1){//n calculation with k=k_simulation
                 double VNK[17][3];
-                CNK[1][1]=par[35][4];//Fit option
+                CNK[1][0]=1;//n-unknown will be set to forced value
                 COSVNK(VNK,IL);
                 k=VNK[1][2];
-                CNK[1][1]=0;//nk are unknown
-                CNK[1][2]=n;
-                CNK[1][3]=k;
+                CNK[1][7]=n;
                 FM=FMER(k);
             }
             else if(calN1K2NK3==2){//k calculation with n=n_simulation
                 double VNK[17][3];
-                CNK[1][1]=par[35][4];//Fit option
+                CNK[1][0]=2;//k-unknown will be set to forced value
                 COSVNK(VNK,IL);
                 n=VNK[1][1];
-                //k=VNK[1][2];
-                CNK[1][1]=0;//nk are unknown
-                CNK[1][2]=n;
-                CNK[1][3]=k;
-                double dt=0.001*fabs(rxy[17][2]-rxy[17][1]);
-                FM=FindRoot(&FMER,k,dt,dlim,tol);
-                k=CNK[1][3];
-                iSol++;
-                SOL[iSol][1]=lam;
-                SOL[iSol][2]=n;
-                SOL[iSol][4]=n*0.01;
-                SOL[iSol][3]=k;
+                CNK[1][8]=k;
+                double dt=0.001*std::abs(rxy[17][2]-rxy[17][1]);
+                FM=FindRoot([this](double k){ return FMER(k); },k,dt,dlim,tol);
+                if(IL==iwl2print)
+                    qDebug("IL=%d FM=%f n=%f k_fin=%f",IL,FM,n,CNK[1][3]);
+                k=CNK[1][8];
+                Sol.emplace_back(std::array<double, 6>{1., lam, n, k, n*0.001, 0.});
                 double Dk=k/100.;//error evaluation
                 do{
                     k=k+Dk;
                     FMold=FMER(k*1.01);
                 }while(FMold<1.);
-                SOL[iSol][5]=abs(k-SOL[iSol][3]);
-                SOL[iSol][6]=1.;//enable data
+                int iSol=Sol.size();
+                iSol--;
+                Sol[iSol][5]=std::abs(k-Sol[iSol][3]);
                 i=101;
-                continue;
+                //continue;
             }
-            if((FMold>1.||i==0) && FM<=1.){
-                iSol++;
-                nMin=n;
-                kMin=k;
-                kMax=k;
-            }
-            else if(i>0 && FMold<=1. && FM<=1.){
-                kMin=min(kMin,k);
-                kMax=max(kMax,k);
-            }
-            else if(i>0 && FMold<=1. && FM>1.){
-                SOL[iSol][1]=lam;
-                SOL[iSol][2]=(nMin+n)/2.;
-                SOL[iSol][4]=(n-nMin)/2.;
-                SOL[iSol][3]=(kMin+kMax)/2.;
-                SOL[iSol][5]=(kMax-kMin)/2.;
-                SOL[iSol][6]=1.;//enable data
-                //printf("sol-nk: %f %f %f %f %f\n",SOL[iSol][1],SOL[iSol][2],SOL[iSol][3],SOL[iSol][4],SOL[iSol][5]);
-            }
-            else if(irm==1&& dFMold<0. && (FM-FMold)>0. && FM>1. && FMold>1.){//found a minimum
-                iSol++;
-                SOL[iSol][1]=lam;
-                SOL[iSol][2]=n;
-                SOL[iSol][3]=k;
-                SOL[iSol][4]=n*0.0001;
-                SOL[iSol][5]=k*0.0001;
-                SOL[iSol][6]=1.;//enable data
-                //printf("Found relative minimum -> add solution-point @ lam=%f\n",lam);
+            if(calN1K2NK3!=2){
+                if((FMold>1.||i==0) && FM<=1.){
+                    nMin=n;
+                    kMin=k;
+                    kMax=k;
+                }
+                else if(i>0 && FMold<=1. && FM<=1.){
+                    kMin=min(kMin,k);
+                    kMax=max(kMax,k);
+                }
+                else if(i>0 && FMold<=1. && FM>1.){
+                    Sol.emplace_back(std::array<double, 6>{1., lam, (nMin+n)/2., (kMin+kMax)/2., (n-nMin)/2., (kMax-kMin)/2.});
+                }
+                else if(irm==1&& dFMold<0. && (FM-FMold)>0. && FM>1. && FMold>1.){//found a minimum
+                    Sol.emplace_back(std::array<double, 6>{1., lam, n, k, n*0.0001, k*0.0001});
+                }
             }
             dFMold=FM-FMold;
             FMold=FM;
             QCoreApplication::processEvents();
             if(iStop){
-                printf("The exhaustive computing was stopped as requested by the user!\n");
+                qInfo()<<"The exhaustive computing was stopped as requested by the user!";
                 return;
             }
-        }
-    }
-    SOL[1][1]=iSol-1;
-    printf("\nFound %d nk-solutions\n",iSol-1);
-    if(iSol-1==0){
+        }//end for n
+    }//end for wl
+    int iSol=Sol.size();
+    qDebug()<<"\nFound "<<iSol<<" nk-solutions";
+    if(iSol==0){
         QMessageBox msgBox;
         msgBox.setText("No solution has been found!\nPlease change the n-range of the search");
         msgBox.setStandardButtons(QMessageBox::Ok);
@@ -6549,20 +6524,40 @@ void ksemawc::NumericalSearch(){
     }
     nextColor();
     PlotNK(0);
+    CNK[1][0]=0;//nk-unknown by the chosen option
 }
 
+
 void ksemawc::selectNsol(){
+    if(m_graphs[12] == nullptr){
+        QMessageBox msgBox;
+        msgBox.setText("Please open the n(λ) graph first by clicking 'Plot Exp. Measures!'");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
+        return;
+    }
+
+    if(d_picker){
+        delete d_picker;
+        d_picker = nullptr;
+        picker_m = nullptr;
+    }
     polygonF.clear();
+
     QMessageBox msgBox;
-    msgBox.setText("Please delimit with a polygon the n-solutions to be deleted!\nLeft click to set a point; click on the first point to terminate!");
+    msgBox.setText("Please delimit with a polygon the n-solutions to be deleted!\n"
+                   "Left click to set a point; click on the first point to terminate!");
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.exec();
+
     picker_m = new QwtPickerClickPointMachine();
-    d_picker = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
+    d_picker = new QwtPlotPicker(
+        QwtAxis::XBottom, QwtAxis::YLeft,
         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-        G12_wn->canvas() );
+        m_graphs[12]->canvas());   // ← sostituito G12_wn
     d_picker->setStateMachine(picker_m);
-    connect(d_picker, SIGNAL(selected(QPointF)), this, SLOT(drawPolygon(QPointF)));
+    connect(d_picker, qOverload<const QPointF &>(&QwtPlotPicker::selected),
+            this, &ksemawc::drawPolygon);
 }
 
 
@@ -6574,56 +6569,55 @@ void ksemawc::drawPolygon(QPointF pos){
         x1=1240./x1;
     polygonF<<QPointF(x1,y1);
     int Np=polygonF.count();
-    //printf("pt_%d: x=%f y=%f\n",Np,x1,y1);
     if(Np<=1)
         return;
-    double x[Np],y[Np],ErrXp[Np],ErrYp[Np];
+    std::vector <double> x(Np),y(Np),ErrXp(Np),ErrYp(Np);
     for(int i=0;i<Np;i++){
         x[i]=polygonF.at(i).x();
         y[i]=polygonF.at(i).y();
-        printf("x[%d]=%f y[%d]=%f\n",i,x[i],i,y[i]);
     }
-    PLOTline1bar2(1,0,1,12,Np,x,y,ErrXp,ErrYp);//n plot
+    PLOTline1bar2(1,0,1,12,Np,x.data(),y.data(),ErrXp.data(),ErrYp.data());//n plot
     double delta=pow((x[Np-1]-x[0])/(rxy[20][2]-rxy[20][1]),2.)+
                    pow((y[Np-1]-y[0])/(rxy[16][2]-rxy[16][1]),2.);
     if(sqrt(delta)>0.01)
         return;
     QPointF ptF;
-    int nSol=NINT(SOL[1][1]);
-    printf("nSol=%d\n",nSol);
-    for(int i=2;i<=nSol+1;i++){
-        ptF.setX(SOL[i][1]);
-        ptF.setY(SOL[i][2]);
+    int nSol=Sol.size();
+    for(int i=0;i<nSol;i++){
+        ptF.setX(Sol[i][1]);
+        ptF.setY(Sol[i][2]);
         if(polygonF.containsPoint(ptF,Qt::OddEvenFill)){
-            //printf("i=%d wl=%f n=%f is contained! It will be canceled\n",i,x1,y1);
-            SOL[i][6]=0.;//to be canceled
+            qDebug("i=%d wl=%f n=%f is contained! It will be canceled\n",i,x1,y1);
+            Sol[i][0]=0.;//to be canceled
         }
         else
-            SOL[i][6]=1.;
+            Sol[i][0]=1.;
     }
     fflush(stdout);
     //cancel selected nk-solutions
-    int newN=0;
-    double NKNEW[1000][6];
-    for(int I=2;I<=nSol+1;I++){
-        if(SOL[I][6]>0.5){
+    int newN=-1;
+    std::vector<std::vector<double>> NKNEW(nSol, std::vector<double>(6, 0.0));
+    for(int I=0;I<nSol;I++){
+        if(Sol[I][0]>0.5){
             newN++;
             for(int k=1;k<=5;k++)
-                NKNEW[newN+1][k]=SOL[I][k];
+                NKNEW[newN][k]=Sol[I][k];
         }
     }
-    SOL[1][1]=newN;
-    for(int I=2;I<=newN+1;I++){
+    Sol.clear();//reset Sol
+    Sol.resize(newN);
+    for(int I=0;I<newN;I++){
         for(int k=1;k<=5;k++)
-            SOL[I][k]=NKNEW[I][k];
-        SOL[I][6]=1;
+            Sol[I][k]=NKNEW[I][k];
+        Sol[I][0]=1;
     }
-    printf("now the nk-solutions are %d\n",newN);
+    qDebug("now the nk-solutions are %d",newN);
+    if (d_picker) {
+        d_picker->deleteLater();
+        d_picker = nullptr;
+        picker_m = nullptr; // È gestito dal picker, quindi basta azzerarlo
+    }
     PlotNK(1);//plot nk
-    //stop motor&picker
-    delete picker_m;
-    picker_m=nullptr;
-    d_picker->setEnabled(false);
 }
 
 
@@ -6633,10 +6627,6 @@ void ksemawc::IbridPlotFit(){
     IbridKernel("g");
 }
 
-// void ksemawc::IbridPlotIbrid(){
-//     SaveSetting(-1);
-//     IbridKernel("gi");
-// }
 
 void ksemawc::FitN(){
     lastAction="FitN";
@@ -6645,12 +6635,14 @@ void ksemawc::FitN(){
     IbridFit();
 }
 
+
 void ksemawc::FitNK(){
     lastAction="FitNK";
     LoadFilenk();
     par[32][5]=1.;//Fit n&K in IbridOne
     IbridFit();
 }
+
 
 void ksemawc::FitE1E2(){
     lastAction="FitE1E2";
@@ -6660,6 +6652,7 @@ void ksemawc::FitE1E2(){
     IbridFit();
 }
 
+
 void ksemawc::FitSelExpMeas(){
     lastAction="FitExpMeas";
     SaveSetting(3);
@@ -6667,8 +6660,26 @@ void ksemawc::FitSelExpMeas(){
     IbridKernel("fsem");
 }
 
+
 void ksemawc::IbridFit(){
     Qt::CheckState state;
+    state=ui->cB_EMA_1->checkState();
+    if(state==Qt::Checked){
+        QMessageBox msgBox;
+        msgBox.setText("ATTENTION: EMA will be disabled to best-fit n, k , epsi1 and epsi2");
+        msgBox.setInformativeText("Do you agree?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        int ret = msgBox.exec();
+        switch (ret) {
+        case QMessageBox::Yes:
+            ui->cB_EMA_1->setCheckState(Qt::Unchecked);
+            break;
+        case QMessageBox::No:
+            return;
+            break;
+        }
+    }
     npp=ui->sB_PAR_34_5 -> value();
     for(int j=1;j<=npp;j++){
         state=idToCheckBox["chBeParFit_"+QString::number(j)]-> checkState();
@@ -6680,11 +6691,13 @@ void ksemawc::IbridFit(){
     IbridKernel("f");
 }
 
+
 void ksemawc::IbridOne(){
     lastAction="IbridOne";
     SaveSetting(3);
     IbridKernel("i");
 }
+
 
 void ksemawc::IbridOneStore(){
     lastAction="IbridOne";
@@ -6692,82 +6705,92 @@ void ksemawc::IbridOneStore(){
     IbridKernel("M");
 }
 
+
 void ksemawc::ClearTempIbri(){
-    SOL[1][1]=0.;
+    Sol.clear();
 }
+
 
 void ksemawc::setStop(){
     iStop=true;
-    printf("-> setStop: iStop= true\n");
+    qDebug()<<"-> setStop: iStop= true";
     fflush(stdout);
 }
+
 
 void ksemawc::IbridKernel(QString rc){
     PanFitEnable();
     // data number
-    printf("-> IbridKernel with rc=%s\n",rc.toStdString().c_str());
+    qDebug()<<"-> IbridKernel with rc="<<rc;
+    ui->lineEdit_chi2Best->setStyleSheet("background-color: white;");
     int mwl=NeV;//SF and ELI
     int mwla=NeV;//enabled wavelengths
-    int md=NINT(SOL[1][1]);//nk-data
+    int md=Sol.size();//nk-data
     int mda=0;//enabled nk-data
     int ial=0;
-    int nparmax=17;
+    constexpr int nparmax=17;
     int ibridok,m=0,ifit;
     int Info=0;
-    double wwl[mwl],kk[mwl],nn[mwl],e1[mwl],e2[mwl],vot[6][3],tn[mwl],tp[mwl],rn[mwl],rp[mwl],r1[mwl],ErrXp[mwl],ErrYp[mwl],
-            miss[6][NeV+1],elis[9][NeV+1],pst[nparmax+1][3],ncent[mwl],ndev[mwl],kcent[mwl],kdev[mwl],ps[NeV],psi[mwl],delta[mwl];
-    double PsiMat[mwl][4],DelMat[mwl][4];
+    Qt::CheckState state;
+    state=ui->checkB_PAR_54_2 -> checkState ();
+    if(state==Qt::Unchecked)
+        par[54][2]=0;
+    else
+        par[54][2]=1;
+    int iSpec0Hemi1=par[54][2];
+    double pst[nparmax+1][3],vot[6][3];
+    std::vector<std::vector<double>> miss(6, std::vector<double>(NeV+1, 0.0));
+    std::vector<std::vector<double>> elis(9, std::vector<double>(NeV+1, 0.0));
+    std::vector<std::vector<double>> PsiMat(mwl, std::vector<double>(4, 0.0));
+    std::vector<std::vector<double>> DelMat(mwl, std::vector<double>(4, 0.0));
+    std::vector <double> wwl(mwl),kk(mwl),nn(mwl),e1(mwl),e2(mwl),tn(mwl),tp(mwl),rn(mwl),rp(mwl),r1(mwl),ErrXp(mwl),ErrYp(mwl),
+            ncent(mwl),ndev(mwl),kcent(mwl),kdev(mwl),psi(mwl),delta(mwl),ps(NeV);
     double chi2ini=1.E+09;
     par[38][1]=1.e+20;
     par[38][2]=0.;
-    for(int i=2;i<=md+1;i++){
-        if(NINT(SOL[i][6])>0){
-            if(SOL[i][1]>=par[4][1] && SOL[i][1]<=par[4][2]){
+    for(int i=0;i<md;i++){
+        if(nint(Sol[i][0])>0){
+            if(Sol[i][1]>=par[4][1] && Sol[i][1]<=par[4][2]){
                 mda=mda+1;
-                par[38][1]=min(par[38][1],SOL[i][1]);
-                par[38][2]=max(par[38][2],SOL[i][1]);
+                par[38][1]=min(par[38][1],Sol[i][1]);
+                par[38][2]=max(par[38][2],Sol[i][1]);
             }
             else
-                SOL[i][6]=0.;
+                Sol[i][0]=0.;
         }
-        if(SOL[i][4]<=0.){
+        if(Sol[i][4]<=0.){
             if(ial==0){
-                printf("ERRn = 0 @%f  => ERRn = Dn =%f\n",SOL[i][1],par[21][3]);
+                qDebug("ERRn = 0 @%f  => ERRn = Dn =%f",Sol[i][1],par[21][3]);
                 ial=1;
             }
-            SOL[i][4]=abs(par[21][3]);
+            Sol[i][4]=std::abs(par[21][3]);
         }
     }
-    printf("WLmin=%f WLmax=%f md=%d mda=%d\n",par[4][1],par[4][2],md,mda);
+    qDebug("WLmin=%f WLmax=%f mwl=%d md=%d mda=%d",par[4][1],par[4][2],mwl,md,mda);
     par[38][3]=1.e+20;
     par[38][4]=0.;
     for(int i=1;i<=NeV;i++){
-            par[38][3]=min(par[38][3],MIS[7][i][1]);
-            par[38][4]=max(par[38][4],MIS[7][i][1]);
+            par[38][3]=min(par[38][3],ms.lambda[i-1]);
+            par[38][4]=max(par[38][4],ms.lambda[i-1]);
     }
     //initialization par for fit
-    int n=ui->sB_PAR_35_5 -> value();//NINT(par[35][5]);
-    double p[n];
+    int n=ui->sB_PAR_35_5 -> value();//nint(par[35][5]);
+    std::vector <double> p(n);
     //double* p=nullptr;
     //p = new double[n];
     for(int i=1;i<=n;i++){
-        int ipm=NINT(pm[i][3]);
+        int ipm=nint(pm[i][3]);
         p[i-1]=pm[ipm][1];
-        //printf("%d ipm=%d p[%d]=%f pm[%d][2]=%f\n",i,ipm,i,p[i-1],ipm,pm[ipm][2]);
     }
     if(ifirstcall==0){// IbridKernel has been called
         ifirstcall++;
     }
     // initialization
-    int ioptf=NINT(pm[100][1]);
     double chi2fin=par[55][2];
     double fredeg=par[56][2];
     // minimal initialization
-    CNK[1][1]=0.;//nk unknown
     double te=0.;//incident angle
-    //int imR=3;//Rn
-    //int iwr=13;// Rn
-    int s1p2=NINT(par[27][2]);//polarization
+    int s1p2=nint(par[27][2]);//polarization
     int nmisure=0;
     for(int i=1;i<=5;i++){
         if(DATO[i]==2)
@@ -6784,12 +6807,12 @@ void ksemawc::IbridKernel(QString rc){
             if(jie>jiemax){//stop
                 for(int ii=1;ii<=NeV;ii++){
                     for(int i=1;i<=5;i++)
-                        MIS[i][ii][1]=miss[i][ii];//restore measured values
+                        ms.measures[i-1].value[ii-1]=miss[i][ii];//restore measured values
                     for(int i=1;i<=8;i++)
-                        ELI[i][ii][1]=elis[i][ii];
+                        ms.measures[i+5].value[ii-1]=elis[i][ii];//idem
                 }
                 for(int i=1;i<=n;i++){
-                    int ip=NINT(pm[i][3]);
+                    int ip=nint(pm[i][3]);
                     p[i-1]=pst[i][1];//central value (jie=0)
                     pm[ip][1]=p[i-1];
                     if(pst[i][2]>.0)
@@ -6801,8 +6824,8 @@ void ksemawc::IbridKernel(QString rc){
                     //store central value of solution
                     nn[i]=ncent[i];
                     kk[i]=kcent[i];
-                    MIS[16][i+1][1]=nn[i];
-                    MIS[16][i+1][2]=kk[i];
+                    nkSol.n[i]=nn[i];
+                    nkSol.k[i]=kk[i];
                     if(ndev[i]>0.)
                         ndev[i]=sqrt(ndev[i]);
                     else
@@ -6812,21 +6835,15 @@ void ksemawc::IbridKernel(QString rc){
                     else
                         kdev[i]=0.;
                 }
-//                int isol=NINT(SOL[1][1]);
-//                int irima=998-isol;
-                printf("<<<<<<<<<< Save nk IbridOne >>>>>>>>>>>>>>\n");
-                SOL[1][1]=mwl;
-                printf("Saving nk-solutions in temp:\n");
-//                printf(" N. solutions already stored = %d\n",isol);
-//                printf(" N. solutions to add = %d\n", mwl);
-//                printf(" available space = %d\n",irima);
+                qDebug()<<"Saving nk-solutions in temp";
+                Sol.resize(mwl);
                 for(int i=0;i<mwl;i++){
-                    SOL[i+2][1]=wwl[i];
-                    SOL[i+2][2]=ncent[i];
-                    SOL[i+2][3]=kcent[i];
-                    SOL[i+2][4]=ndev[i];
-                    SOL[i+2][5]=kdev[i];
-                    SOL[i+2][6]=1.;//data enabled
+                    Sol[i][1]=wwl[i];
+                    Sol[i][2]=ncent[i];
+                    Sol[i][3]=kcent[i];
+                    Sol[i][4]=ndev[i];
+                    Sol[i][5]=kdev[i];
+                    Sol[i][0]=1.;//data enabled
                 }
                 rc="X";
                 ieon=0;
@@ -6845,9 +6862,9 @@ void ksemawc::IbridKernel(QString rc){
                 r="i";//IbridOne
                 for(int ii=1;ii<=NeV;ii++){
                     for(int i=1;i<=5;i++)
-                        miss[i][ii]=MIS[i][ii][1];//store measured values
+                        miss[i][ii]=ms.measures[i-1].value[ii-1];//store measured values
                     for(int i=1;i<=8;i++)
-                        elis[i][ii]=ELI[i][ii][1];
+                        elis[i][ii]=ms.measures[i+5].value[ii-1];
                 }
             }
             else
@@ -6857,22 +6874,22 @@ void ksemawc::IbridKernel(QString rc){
         if(r=="i" && ieon==1 && jie>0){
             // measurement perturbation with the error
             int imisura=1;
-            printf("..... IbridOne with error computing: step %d of %d\n",jie,jiemax);
+            qDebug("..... IbridOne with error computing: step %d of %d",jie,jiemax);
             for(int i=1;i<=5;i++){
                 if(DATO[i]==2){
-                    int iespo=int((jie+1)/imisura);
-                    printf("  measure= %d (-1)^%d= %d\n",i,iespo,int(pow(-1,iespo)));
+                    int iespo=static_cast<int>((jie+1)/imisura);
+                    qDebug("  measure= %d (-1)^%d= %d",i,iespo,static_cast<int>(pow(-1,iespo)));
                     for(int ii=1;ii<=NeV;ii++)
-                        MIS[i][ii][1]=miss[i][ii]+MIS[i][ii][2]*pow(-1.,iespo);
+                        ms.measures[i-1].value[ii-1]=miss[i][ii]+ms.measures[i-1].error[ii-1]*pow(-1.,iespo);
                     imisura++;
                 }
             }
             for(int i=8;i<=14;i=i+2){
                 if(DATO[i]==2){
-                    int iespo=int((jie+1)/imisura);
-                    printf("  measure= %d (-1)^%d= %d\n",i,iespo,int(pow(-1,iespo)));
+                    int iespo=static_cast<int>((jie+1)/imisura);
+                    qDebug("  measure= %d (-1)^%d= %d",i,iespo,static_cast<int>(pow(-1,iespo)));
                     for(int ii=1;ii<=NeV;ii++)
-                        ELI[i-7][ii][1]=elis[i-1][ii]+ELI[i-7][ii][2]*pow(-1.,iespo);
+                        ms.measures[i-7+5].value[ii-1]=elis[i-1][ii]+ms.measures[i-7+5].error[ii-1]*pow(-1.,iespo);
                     imisura++;
                 }
             }
@@ -6884,53 +6901,53 @@ void ksemawc::IbridKernel(QString rc){
             if(r=="i"){//set IbridOne computing
                 ibridok=0;
                 if(DATO[1]==2){
-                    printf("-> launch IbridOne: compute k from Tn\n");
+                    qDebug("-> launch IbridOne: compute k from Tn");
                     ibridok=1;
                 }
                 else if(DATO[2]==2){
-                    printf("-> launch IbridOne: compute k from Tp teta= %f deg  S1P2= %d\n",par[6][1],s1p2);
+                    qDebug("-> launch IbridOne: compute k from Tp teta= %f deg  S1P2= %d",par[6][1],s1p2);
                     ibridok=1;
                 }
                 else if(DATO[1]!=2 && DATO[2]!=2){
-                    printf("-> ABORT IbridOne because transmittance is not enabled\n");
+                    qDebug("-> ABORT IbridOne because transmittance is not enabled");
                     ibridok=-100;
                     r=" ";//abort
                     QMessageBox msgBox;
-                    msgBox.setText("IbridOne aborted because transmittance is not enabled\n");
+                    msgBox.setText("IbridOne aborted because transmittance is not enabled");
                     msgBox.setStandardButtons(QMessageBox::Ok);
                     msgBox.exec();
                     return;
                 }
                 if(DATO[3]==2){
-                    printf("\tfit of Rn\n");
+                    qDebug("\tfit of Rn");
                     ibridok++;
                 }
                 if(DATO[4]==2){
-                    printf("\tfit of Rp  teta= %f deg  S1P2= %d\n",par[6][1],s1p2);
+                    qDebug("\tfit of Rp  teta= %f deg  S1P2= %d",par[6][1],s1p2);
                     ibridok++;
                 }
                 if(DATO[5]==2){
-                    printf("\tfit of R1\n");
+                    qDebug("\tfit of R1");
                     ibridok++;
                 }
                 if(DATO[8]==2){
-                    printf("\tfit of PSI_1\n");
+                    qDebug("\tfit of PSI_1");
                     ibridok++;
                 }
                 if(DATO[10]==2){
-                    printf("\tfit of PSI_2\n");
+                    qDebug("\tfit of PSI_2");
                     ibridok++;
                 }
                 if(DATO[12]==2){
-                    printf("\tfit of PSI_3\n");
+                    qDebug("\tfit of PSI_3");
                     ibridok++;
                 }
                 if(DATO[14]==2){
-                    printf("\tfit of PSI_4\n");
+                    qDebug("\tfit of PSI_4");
                     ibridok++;
                 }
                 if(ibridok<2){
-                    printf("IbridOne aborted because needs T&R or T&DELTA-PSI!\n");
+                    qDebug("IbridOne aborted because needs T&R or T&DELTA-PSI!");
                     r=" ";//abort
                     QMessageBox msgBox;
                     msgBox.setText("IbridOne aborted because needs T&R or T&DELTA-PSI!");
@@ -6940,18 +6957,18 @@ void ksemawc::IbridKernel(QString rc){
                 }
                 else{
                     m=(ibridok-1)*mwla;
-                    printf("     ... on %d data and %d parameters\n",m,n);
+                    qDebug("     ... on %d data and %d parameters",m,n);
                 }
             }
             else if(r=="f"){// suppress p_fit ><  SELMQ
-                if(NINT(par[32][5])==0)
+                if(nint(par[32][5])==0)
                     m=mda;
                 else
                     m=2*mda;
                 int npfit=n;
                 for(int ipf=npfit;ipf>=1;ipf--){
-                    int ipm=NINT(pm[ipf][3]);
-                    printf("ipf = %d ipm = %d\n",ipf,ipm);
+                    int ipm=nint(pm[ipf][3]);
+                    qDebug("ipf = %d ipm = %d",ipf,ipm);
                     if(ipm<100){
                         pm[ipm][2]=.0;
                         for(int iii=ipf;iii<=n;iii++){
@@ -6960,18 +6977,18 @@ void ksemawc::IbridKernel(QString rc){
                             pm[iii][5]=pm[iii+1][5];
                         }
                         n=n-1;
-                        printf("n = %d\n",n);
+                        qDebug("n = %d",n);
                     }
                     par[35][5]=n;
                 }
                 QString fitwhat;
-                if(NINT(par[32][5])==0)
+                if(nint(par[32][5])==0)
                     fitwhat="n";
-                else if(NINT(par[32][5])==1)
+                else if(nint(par[32][5])==1)
                     fitwhat="n & k";
-                else if(NINT(par[32][5])==2)
+                else if(nint(par[32][5])==2)
                     fitwhat="epsi1 & epsi2";
-                printf("launch fit of %s\n",fitwhat.toStdString().c_str());
+                qDebug("launch fit of %s",fitwhat.toStdString().c_str());
             }
             else if(r=="fsem"){
                 int iSEM=0;
@@ -6982,102 +6999,86 @@ void ksemawc::IbridKernel(QString rc){
                 if(iSEM==0)
                     r="X";
                 m=iSEM*mwl;
-                printf("launch fit of Selected Experimental Measurements: Nsem=%d Ndata=%d\n",iSEM,m);
+                qDebug("launch fit of Selected Experimental Measurements: Nsem=%d Ndata=%d",iSEM,m);
             }
 
             //Fit, compute jac & cov matrices, err. e corr.
-            //int* iwa=nullptr;
-            //iwa = new int[n];
-            //double* fvec=nullptr;
-            //fvec = new double[m];
-            //double* wa=nullptr;
-            //wa = new double[lwa];
-            fredeg=double(m-n);
+            fredeg=static_cast<double>(m-n);
             par[56][2]=fredeg;
             ifit=1;
             QFile fchi2(filechi2);
             fchi2.resize(0);
             fchi2.close();
-            int iwa[n];
             int lwa=m*n+5*n+m;
-            double wa[lwa];
-            double fvec[m];
-            double FJAC[m*n];
+            std::vector <int> iwa(n);
+            std::vector <double> wa(lwa),fvec(m),FJAC(m*n);
             double tol=sqrt(dpmpar(1));
-            CNK[1][1]=0;//nk unknown
-            printf("n(param)= %d m(Ndata)= %d lwa= %d fredeg=%f tol=%e s1p2=%d\n",
-                   n,m,lwa,fredeg,tol,NINT(par[27][2]));
+            qDebug("n(param)= %d m(Ndata)= %d lwa= %d fredeg=%f tol=%e s1p2=%d",
+                   n,m,lwa,fredeg,tol,s1p2);
             if(n==0){
                 QMessageBox msgBox;
-                msgBox.setText("ATTENTION: please enable at least one parameter for best-fit!!!\n");
+                msgBox.setText("ATTENTION: please enable at least one parameter for best-fit!!!");
                 msgBox.setStandardButtons(QMessageBox::Ok);
                 msgBox.exec();
                 return;
             }
             if(m==0){
                 QMessageBox msgBox;
-                msgBox.setText("ATTENTION: please select at least one measurement!!!\n");
+                msgBox.setText("ATTENTION: please select at least one measurement!!!");
                 msgBox.setStandardButtons(QMessageBox::Ok);
                 msgBox.exec();
                 return;
             }
             iRecChi2=1;//save chi2 values at the end of called functions
             if(r=="f" && n>0){
-                Info=lmdif1(FSQ, &pTF2,m,n,p,fvec,tol,iwa,wa,lwa);
-                //printf("Info_FSQ= %d\n",Info);
+                Info=lmdif1(FSQ, this,m,n,p.data(),fvec.data(),tol,iwa.data(),wa.data(),lwa);
             }
             else if(r=="fsem" && n>0 && m>0){
-                Info=lmdif1(FSEM, &pTF2,m,n,p,fvec,tol,iwa,wa,lwa);
-                //printf("Info_FSEM= %d\n",Info);
+                Info=lmdif1(FSEM, this,m,n,p.data(),fvec.data(), tol, iwa.data(), wa.data(), lwa);
             }
             else if(r=="i"){
-                Info=lmdif1(FRCK, &pTF2,m,n,p,fvec,tol,iwa,wa,lwa);
-                //printf("Info_FRCK= %d\n",Info);
+                Info=lmdif1(FRCK, this,m,n,p.data(), fvec.data(), tol, iwa.data(), wa.data(), lwa);
             }
             iRecChi2=0;
 
             //analysis chi2
-//            if((r=="f" || r=="fsem" || (r=="i" && ieon==0)) && n>0){
-                QFile fchi2b(filechi2);
-                if(fchi2b.open(QIODevice::ReadOnly | QIODevice::Text)){
-                    QTextStream inp(&fchi2b);
-                    QString linea,st1;
-                    int iLine=0;
-                    double chi2;
-                    do{
-                        linea=inp.readLine();
-                        //printf("iLine=%d-> %s\n",iLine,linea.toStdString().c_str());
-                        QStringList list;
-                        list = linea.split("\t");
-                        st1=list.at(0).toLocal8Bit().constData();
-                        chi2=st1.toDouble();
-                        if(iLine==0){
-                            chi2ini=chi2;
-                            chi2fin=chi2ini;
+            QFile fchi2b(filechi2);
+            if(fchi2b.open(QIODevice::ReadOnly | QIODevice::Text)){
+                QTextStream inp(&fchi2b);
+                QString linea,st1;
+                int iLine=0;
+                double chi2;
+                do{
+                    linea=inp.readLine();
+                    QStringList list;
+                    list = linea.split("\t");
+                    st1=list.at(0).toLocal8Bit().constData();
+                    chi2=st1.toDouble();
+                    if(iLine==0){
+                        chi2ini=chi2;
+                        chi2fin=chi2ini;
+                    }
+                    if(iLine==0 || chi2<chi2fin){
+                        chi2fin=chi2;
+                        for(int i=0;i<n;i++){
+                            st1=list.at(1+i).toLocal8Bit().constData();
+                            p[i]=st1.toDouble();
                         }
-                        if(iLine==0 || chi2<chi2fin){
-                            chi2fin=chi2;
-                            for(int i=0;i<n;i++){
-                                st1=list.at(1+i).toLocal8Bit().constData();
-                                p[i]=st1.toDouble();
-                            }
-                        }
-                        //printf("chi2=%f  chi2ini=%f chi2fin=%f\n",chi2,chi2ini,chi2fin);
-                        iLine++;
-                    }while(!inp.atEnd());
-                    fchi2b.close();
-                    par[27][1]=chi2ini;
-                    par[55][2]=chi2fin;
-                    ui->DP_PAR_27_1->setText(QString::number(chi2ini));
-                    ui->DP_PAR_55_2->setText(QString::number(chi2fin));
-                }
-//            }
+                    }
+                    iLine++;
+                }while(!inp.atEnd());
+                fchi2b.close();
+                par[27][1]=chi2ini;
+                par[55][2]=chi2fin;
+                ui->DP_PAR_27_1->setText(QString::number(chi2ini));
+                ui->DP_PAR_55_2->setText(QString::number(chi2fin));
+            }
 
             // set BF parameters
             //fnorm=enorm(m,fvec);
-            printf("BF: chi2= %.9g\n",chi2fin);
+            qDebug("BF: chi2= %.9g",chi2fin);
             for(int i=1;i<=n;i++){
-                int ip=NINT(pm[i][3]);
+                int ip=nint(pm[i][3]);
                 pm[ip][1]=p[i-1];
                 //check value
                 if((ip>0 && ip<10) || (ip>50 && ip<60) || ip>100)//thickness or roughness or oscillator
@@ -7090,103 +7091,80 @@ void ksemawc::IbridKernel(QString rc){
                         pm[ip][1]=1.;
                 }
                 pm[ip][4]=.0;
-                printf("\tp[%d]=pm[%d][1]=%.9g\n",i-1,ip,p[i-1]);
+                qDebug("\tp[%d]=pm[%d][1]=%.9g",i-1,ip,p[i-1]);
             }
-            printf("\n");
             if(ifit==1){//write Info fit
-                printf("********************INFO FIT***********************\n");
-                printf("Enabled point m=%d\n",m);
-                printf("N parameters n=%d => degree of freedom=%d\n",n,NINT(fredeg));
-    //            if(n>0){
-    //                printf("Chi^2: %f -> %f\n",chi2ini,chi2fin);
-    //                par[27][1]=chi2ini;
-    //            }
-    //            else{
-    //                printf("Chi^2 =%f\n",chi2fin);
-    //                par[27][1]=chi2fin;
-    //            }
-                //printf("Final L2 norm of the residual = %f\n",fnorm);
+                qDebug("********************INFO FIT***********************");
+                qDebug("Enabled point m=%d",m);
+                qDebug("N parameters n=%d => degree of freedom=%d",n,nint(fredeg));
+                //qDebug("Final L2 norm of the residual = %f",fnorm);
                 if(Info<0)
-                    printf("excetution terminated by user\n");
+                    qDebug("excetution terminated by user");
                 else if(Info==0)
-                    printf("Info=0: improper input parameters\n");
+                    qDebug("Info=0: improper input parameters");
                 else if(Info==1)
-                    printf("Info=1: algorithm estimates that the relative error in the sum of squares is at most tol\n");
+                    qDebug("Info=1: algorithm estimates that the relative error in the sum of squares is at most tol");
                 else if(Info==2)
-                    printf("Info=2: algorithm estimates that the relative error between x and the solution is at most tol\n");
+                    qDebug("Info=2: algorithm estimates that the relative error between x and the solution is at most tol");
                 else if(Info==3)
-                    printf("Info=3: conditions for Info = 1 and Info = 2 both hold\n");
+                    qDebug("Info=3: conditions for Info = 1 and Info = 2 both hold");
                 else if(Info==4)
-                    printf("Info=4:  fvec is orthogonal to the columns of the jacobian to machine precision\n");
+                    qDebug("Info=4:  fvec is orthogonal to the columns of the jacobian to machine precision");
                 else if(Info==5)
-                    printf("Info=5:  number of calls to fcn has reached or exceeded %d\n",200*(n+1));
+                    qDebug("Info=5:  number of calls to fcn has reached or exceeded %d",200*(n+1));
                 else if(Info==6)
-                    printf("Info=6: tol is too small. no further reduction in the sum of squares is possible\n");
+                    qDebug("Info=6: tol is too small. no further reduction in the sum of squares is possible");
                 else if(Info==7)
-                    printf("Info=7: tol is too small. no further improvement in the approximate solution x is possible\n");
-                printf("*************************************************\n");
+                    qDebug("Info=7: tol is too small. no further improvement in the approximate solution x is possible");
+                qDebug("*************************************************");
                 ifit=0;
             }
 
             if(m>0 && ieon==0){
-//                for(int i=0;i<m;i++)
-//                    printf("fvec[%d]=%f\twa[%d]=%f\n",i,fvec[i],i,wa[i]);
                 //computing jabobiana fjac
                 for(int i=1;i<=200;i++)//save actual status
                     ps[i]=pm[i][1];
                 //int iflag=2;
                 double epsfcn=100.*tol;//0.;
-                printf("epsfcn=%e\n",epsfcn);
+                qDebug("epsfcn=%e",epsfcn);
                 if(r=="f" && n>0)
-                    fdjac2(FSQ,&pTF2,m,n,p,fvec,FJAC,m,epsfcn,wa);
+                    fdjac2(FSQ,this,m,n,p.data(),fvec.data(),FJAC.data(),m,epsfcn,wa.data());
                 else if(r=="fsem" && n>0)
-                    fdjac2(FSEM,&pTF2,m,n,p,fvec,FJAC,m,epsfcn,wa);
+                    fdjac2(FSEM,this,m,n,p.data(),fvec.data(),FJAC.data(),m,epsfcn,wa.data());
                 else if(r=="i" && n>0)
-                    fdjac2(FRCK,&pTF2,m,n,p,fvec,FJAC,m,epsfcn,wa);
+                    fdjac2(FRCK,this,m,n,p.data(),fvec.data(),FJAC.data(),m,epsfcn,wa.data());
                 for(int i=1;i<=200;i++)//return to best fit
                     pm[i][1]=ps[i];
                 for(int i=1;i<=n;i++){
-                    p[i-1]=pm[NINT(pm[i][3])][1];
+                    p[i-1]=pm[nint(pm[i][3])][1];
                 }
 
                 //computing matrix inv covar (fjac_trasposta)*(fjac)
-                double **cinv;
-                cinv= new double *[n];
-                for(int i=0;i<n;i++)
-                    cinv[i]=new double[n];
-                double **cov;
-                cov= new double *[n];
-                for(int i=0;i<n;i++)
-                    cov[i]=new double[n];
-                //double cinv[n][n],cov[n][n];
+                std::vector<std::vector<double>> cinv(n, std::vector<double>(n, 0.0));
+                std::vector<std::vector<double>> cov(n, std::vector<double>(n, 0.0));
                 for(int i=0;i<n;i++){
-//                    for(int i2=0;i2<m;i2++)
-//                        printf("fjac[%d][%d]=%f\n",i2,i,FJAC[i2+i*m]);
                     for(int j=0;j<n;j++){
                         cinv[i][j]=.0;
                         for(int i2=0;i2<m;i2++)
                             cinv[i][j]=cinv[i][j]+FJAC[i2+i*m]*FJAC[i2+j*m];//fjac[i + j * ldfjac]
-                        //printf("cinv[%d][%d]=%f\n",i,j,cinv[i][j]);
                     }
                 }
 
                 //compunting matrix varianza-covarianza
-                printf("computing MATINV...");
-                par[11][2]=0.;
-                MATINV(n,n,cinv,cov);
-                if(NINT(par[11][2])==0){
-                    //MATINV(n,nparmax,cinv,cov);
-                    printf("done!\n");
-                    //                for(int i=0;i<n;i++){
-                    //                    for(int j=0;j<n;j++)
-                    //                        cout<<cov[i][j]<<"\n";
-                    //                }
-
+                qDebug("computing MATINV...");
+                // costruisci array di puntatori per MATINV
+                std::vector<double*> cinv_ptr(n), cov_ptr(n);
+                for(int i=0; i<n; i++){
+                    cinv_ptr[i] = cinv[i].data();
+                    cov_ptr[i]  = cov[i].data();
+                }
+                bool berr=MATINV(n,n,cinv_ptr.data(),cov_ptr.data());
+                if(berr){
+                    qDebug("done!");
                     //computing errors at 99% of confidency
                     for(int i=1;i<=n;i++){
                         if(cov[i-1][i-1]<1.e3){
-                            pm[NINT(pm[i][3])][4]=sqrt(abs(6.635*cov[i-1][i-1]));
-                            //printf("pm[%d][4]=%f\n",NINT(pm[i][3]),pm[NINT(pm[i][3])][4]);
+                            pm[nint(pm[i][3])][4]=sqrt(std::abs(6.635*cov[i-1][i-1]));
                         }
                     }
                     fflush(stdout);
@@ -7195,12 +7173,11 @@ void ksemawc::IbridKernel(QString rc){
                     if(n>1){
                         for(int i=1;i<=n;i++){
                             if(1.-1./(cov[i-1][i-1]*cinv[i-1][i-1])>0.)
-                                pm[NINT(pm[i][3])][5]=sqrt(1.-1./(cov[i-1][i-1]*cinv[i-1][i-1]));
+                                pm[nint(pm[i][3])][5]=sqrt(1.-1./(cov[i-1][i-1]*cinv[i-1][i-1]));
                             else
-                                pm[NINT(pm[i][3])][5]=1.;
-                            if(pm[NINT(pm[i][3])][5]>1.)
-                                pm[NINT(pm[i][3])][5]=1.;
-                            //printf("pm[%d][5]=%f\n",NINT(pm[i][3]),pm[NINT(pm[i][3])][5]);
+                                pm[nint(pm[i][3])][5]=1.;
+                            if(pm[nint(pm[i][3])][5]>1.)
+                                pm[nint(pm[i][3])][5]=1.;
                         }
                     }
                 }
@@ -7208,7 +7185,7 @@ void ksemawc::IbridKernel(QString rc){
                 Qt::CheckState state;
                 for(int i=1;i<=npp;i++){
                     state=idToCheckBox["chBeParFit_"+QString::number(i)]-> checkState();
-                    int ip=NINT(ppm[i]);
+                    int ip=nint(ppm[i]);
                     //check value
                     if((ip>0 && ip<10) || (ip>50 && ip<60) || ip>100)//thickness or roughness or oscillator
                         if(pm[ip][1]<.0)
@@ -7230,144 +7207,133 @@ void ksemawc::IbridKernel(QString rc){
                     }
                 }
             }
-//            if(wa){
-//                delete[] wa;
-//                wa = nullptr;
-//            }
-//            if(fvec){
-//                delete [] fvec;
-//                fvec=nullptr;
-//            }
-//            if(iwa){
-//                delete []  iwa;
-//                iwa=nullptr;
-//            }
-
         }
 
-        if(r=="f" || r=="fsem" || r=="i" || r=="g" || r=="gi"){
+        if(r=="f" || r=="fsem" || r=="i" || r=="g"){
             //refresh plots
             nextColor();
             double ymin=1.e6;
             double ymax=-1.e6;
             double chi2=.0;
-            double delOld[4],del,delDiff[4]={0};
-            printf("r=%s Computing n by ioptf=%d\n",r.toStdString().c_str(),ioptf);
-            if(r=="fsem" || r=="f")
-                SOL[1][1]=0;
+            double delOld[4],del,delDiff[4]={0},VNK[17][3];
+            qDebug()<<"r="<<r;
             for(int i=1;i<=mwl;i++){
                 par[24][2]=i;//iWL
-                double wl=MIS[7][i][1];
-                double eV=1240./wl;
-                if(r=="f" || r=="fsem" || r=="i" || r=="g"){
-                    FDISP(ioptf,eV);
-                    CNK[1][2]=sqn;
-                    CNK[1][3]=sqk;
-                    MIS[16][i][1]=sqn;
-                    if(r=="i" || r=="g"){//IbridOne, compute k with best-fit parameters
-                        par[24][2]=i;
-                        MIS[16][i][1]=sqn;
-                        double Trasm=1.,dt,dlim,tol;
-                        if(NINT(par[50+NINT(par[53][2])][3])==1){
-                            if(DATO[1]>0) Trasm=MIS[1][i][1];
-                            if(DATO[2]>0) Trasm=MIS[2][i][1];
-                            double dinco=pm[NINT(par[53][2])][1];
-                            dt=-0.1*wl/4./3.14/dinco*log(Trasm);
-                            dlim=1.e-10;
-                            if(iw>0)
-                                printf("Trasm = %f dt=%f\n",Trasm,dt);
-                        }
-                        else{
-                            dt=0.001;//DELTA_k for thin film
-                            dlim=1.e-5;
-                        }
-                        tol=dt/1000.;
-                        //CNK[1][3]=MIS[16][i][2];//<<<<<<<<<<<<<prima era commentata
-                        double k=CNK[1][3];
-                        FindRoot(&DELTAT,k,dt,dlim,tol);
-                        MIS[16][i][2]=CNK[1][3];
-                        //printf("wl=%f n=%f k=%f\n",wl,CNK[1][2],CNK[1][3]);
+                double wl=ms.lambda[i-1];
+                CNK[1][0]=0;//nk-unknown by the chosen option
+                COSVNK(VNK,i);
+                CNK[1][7]=VNK[1][1];
+                CNK[1][8]=VNK[1][2];
+                nkSol.n[i-1]=VNK[1][1];
+                if(r=="i" || r=="g"){//IbridOne, compute k with best-fit parameters
+                    CNK[1][0]=2;//k-unknown will be set to forced value
+                    par[24][2]=i;
+                    nkSol.n[i-1]=VNK[1][1];
+                    double Trasm=1.,dt,dlim,tol;
+                    if(nint(par[50+nint(par[53][2])][3])==1){
+                        if(DATO[1]>0) Trasm=ms.measures[0].value[i-1];
+                        if(DATO[2]>0) Trasm=ms.measures[1].value[i-1];
+                        double dinco=pm[nint(par[53][2])][1];
+                        dt=-0.1*wl/4./3.14/dinco*log(Trasm);
+                        dlim=1.e-10;
+                        if(iw>0)
+                            qDebug("Trasm = %f dt=%f",Trasm,dt);
                     }
-                    else if(r=="f" || r=="fsem"){
-                        MIS[16][i][1]=CNK[1][2];
-                        MIS[16][i][2]=CNK[1][3];
-                        SOL[1][1]++;
-                        SOL[i+1][1]=wl;
-                        SOL[i+1][2]=CNK[1][2];
-                        SOL[i+1][3]=CNK[1][3];
-                        SOL[i+1][4]=0.001;
-                        SOL[i+1][5]=CNK[1][3]/100.;
-                        SOL[i+1][6]=1.;//data enabled
+                    else{
+                        dt=0.001;//DELTA_k for thin film
+                        dlim=1.e-5;
                     }
+                    tol=dt/1000.;
+                    CNK[1][0]=2;//k-unknown will bet set to forced values
+                    double k=CNK[1][8];
+                    FindRoot([this](double k){ return DELTAT(k); },k,dt,dlim,tol);
+                    nkSol.k[i-1]=CNK[1][8];
+                    CNK[1][0]=0;
                 }
-                else if(r=="gi"){
-                    CNK[1][2]=MIS[16][i][1];
-                    CNK[1][3]=MIS[16][i][2];
+                else if(r=="f" || r=="fsem"){
+                    nkSol.n[i-1]=VNK[1][1];
+                    nkSol.k[i-1]=VNK[1][2];
                 }
                 wwl[i-1]=wl;
-                nn[i-1]=CNK[1][2];
-                kk[i-1]=CNK[1][3];
-                e1[i-1]=CNK[1][2]*CNK[1][2]-CNK[1][3]*CNK[1][3];
-                e2[i-1]=2.*CNK[1][2]*CNK[1][3];
+                nn[i-1]=nkSol.n[i-1];
+                kk[i-1]=nkSol.k[i-1];
+                e1[i-1]=nkSol.n[i-1]*nkSol.n[i-1]-nkSol.k[i-1]*nkSol.k[i-1];
+                e2[i-1]=2.*nkSol.n[i-1]*nkSol.k[i-1];
                 ymax=max(kk[i-1],ymax);
                 ymin=min(kk[i-1],ymin);
                 ErrXp[i-1]=0.;
                 ErrYp[i-1]=0.;
+                if(r=="f" || r=="fsem"){
+                    CNK[1][0]=0;//nk-unknown by the chosen option
+                }
+                else if(r=="i" || r=="g"){
+                    CNK[1][0]=2;//k-unknown set to forced value
+                }
+
                 //computing Tn Rn R1
                 if(DATO[1]==2 || DATO[3]==2 || DATO[5]==2){
+                    if(iSpec0Hemi1==1)
+                        iShemispherical=true;
+                    else
+                        iShemispherical=false;
                     ASSEMBLER(i,1,0.,vot);
                     tn[i-1]=vot[1][s1p2]*100.;
                     rn[i-1]=vot[2][s1p2]*100.;
                     r1[i-1]=vot[3][s1p2]*100.;
                     if(DATO[1]==2)
-                        chi2=chi2+pow((MIS[1][i][1]-tn[i-1]/100.)/MIS[1][i][2],2.)/fredeg;
+                        chi2=chi2+pow((ms.measures[0].value[i-1]-tn[i-1]/100.)/ms.measures[0].error[i-1],2.)/fredeg;
                     if(DATO[3]==2)
-                        chi2=chi2+pow((MIS[3][i][1]-rn[i-1]/100.)/MIS[3][i][2],2.)/fredeg;
+                        chi2=chi2+pow((ms.measures[2].value[i-1]-rn[i-1]/100.)/ms.measures[2].error[i-1],2.)/fredeg;
                     if(DATO[5]==2)
-                        chi2=chi2+pow((MIS[5][i][1]-r1[i-1]/100.)/MIS[5][i][2],2.)/fredeg;
+                        chi2=chi2+pow((ms.measures[4].value[i-1]-r1[i-1]/100.)/ms.measures[4].error[i-1],2.)/fredeg;
                 }
                 if(DATO[2]==2 || DATO[4]==2){
                     te=par[6][1]*deg2rad;
+                    par[54][2]=0;//Tp and Rp are always direct/specular
+                    iShemispherical=false;
                     ASSEMBLER(i,1,te,vot);
+                    par[54][2]=iSpec0Hemi1;
                     tp[i-1]=vot[1][s1p2]*100.;
                     rp[i-1]=vot[2][s1p2]*100.;
                     if(DATO[2]==2)
-                        chi2=chi2+pow((MIS[2][i][1]-rp[i-1]/100.)/MIS[2][i][2],2.)/fredeg;
+                        chi2=chi2+pow((ms.measures[1].value[i-1]-tp[i-1]/100.)/ms.measures[1].error[i-1],2.)/fredeg;
                     if(DATO[4]==2)
-                        chi2=chi2+pow((MIS[4][i][1]-rp[i-1]/100.)/MIS[4][i][2],2.)/fredeg;
+                        chi2=chi2+pow((ms.measures[3].value[i-1]-rp[i-1]/100.)/ms.measures[3].error[i-1],2.)/fredeg;
                 }
                 for(int ieli=0;ieli<4;ieli++){
                     if(DATO[7+2*ieli]==2 ||DATO[8+2*ieli]==2){
                         te=pm[86+ieli][1]*deg2rad;;//par[14+ieli][1]*deg2rad;
+                        iShemispherical=false;
                         ASSEMBLER(i,1,te,vot);
                         del=vot[5][2];//Delta
                         if(iDelCon==1){
                             if(i==1){
                                 delOld[ieli]=del;
                             }
-                            del=del-Dperiod*NINT((del-delOld[ieli])/Dperiod);
+                            del=del-Dperiod*nint((del-delOld[ieli])/Dperiod);
                             delOld[ieli]=del;
                         }
                         PsiMat[i-1][ieli]=vot[5][1];
                         DelMat[i-1][ieli]=del;
                         if(DATO[7+2*ieli]>0)
-                            delDiff[ieli]=delDiff[ieli]+(del-ELI[1+2*ieli][i][1])/mwl;
+                            delDiff[ieli]=delDiff[ieli]+(del-ms.measures[6+2*ieli].value[i-1])/mwl;
                     }
                 }
+                CNK[1][0]=0;
             }
             for(int ieli=0;ieli<4;ieli++){
                 if(DATO[7+2*ieli]>0)
-                    printf("|IbridKernel> delDiff[%d]=%f\n",ieli,delDiff[ieli]);
+                    qDebug("|IbridKernel> delDiff[%d]=%f",ieli,delDiff[ieli]);
             }
             if(ieon==1){// save central value and RMS deviation
                 if(jie==0){
-                    printf("***setting ncent & kcent and initialize ndev kdev****\n");
+                    qDebug("***setting ncent & kcent and initialize ndev kdev****");
                     for(int i=0;i<NeV;i++){
                         ncent[i]=nn[i];
                         ndev[i]=0.;
                         kcent[i]=kk[i];
                         kdev[i]=0.;
-                        printf("wl=%f ncent=%f kcent=%f\n",wwl[i],ncent[i],kcent[i]);
+                        qDebug("wl=%f ncent=%f kcent=%f",wwl[i],ncent[i],kcent[i]);
                     }
                     for(int i=0;i<n;i++){
                         pst[i][1]=p[i];
@@ -7375,7 +7341,7 @@ void ksemawc::IbridKernel(QString rc){
                     }
                 }
                 else{
-                    printf("***computing ndev & kdev****\n");
+                    qDebug("***computing ndev & kdev****");
                     for(int i=0;i<NeV;i++){
                         ndev[i]=ndev[i]+pow(ncent[i]-nn[i],2.)/jiemax;
                         kdev[i]=kdev[i]+pow(kcent[i]-kk[i],2.)/jiemax;
@@ -7386,33 +7352,33 @@ void ksemawc::IbridKernel(QString rc){
             }
 
             //refresh plot
-            PLOTline1bar2(1,0,iColor,12,mwl,wwl,nn,ErrXp,ErrYp);//n plot
-            PLOTline1bar2(1,0,iColor,13,mwl,wwl,kk,ErrXp,ErrYp);//k plot
-            if(NINT(par[10][1])==1){
-                PLOTline1bar2(1,0,iColor,14,mwl,wwl,e1,ErrXp,ErrYp);//e1 plot
-                PLOTline1bar2(1,0,iColor,15,mwl,wwl,e2,ErrXp,ErrYp);//e2 plot
+            PLOTline1bar2(1,0,iColor,12,mwl,wwl.data(),nn.data(),ErrXp.data(),ErrYp.data());//n plot
+            PLOTline1bar2(1,0,iColor,13,mwl,wwl.data(),kk.data(),ErrXp.data(),ErrYp.data());//k plot
+            if(nint(par[10][1])==1){
+                PLOTline1bar2(1,0,iColor,14,mwl,wwl.data(),e1.data(),ErrXp.data(),ErrYp.data());//e1 plot
+                PLOTline1bar2(1,0,iColor,15,mwl,wwl.data(),e2.data(),ErrXp.data(),ErrYp.data());//e2 plot
             }
             if(DATO[1]==2)
-                PLOTline1bar2(1,0,iColor,1,mwl,wwl,tn,ErrXp,ErrYp);//Tn plot
+                PLOTline1bar2(1,0,iColor,1,mwl,wwl.data(),tn.data(),ErrXp.data(),ErrYp.data());//Tn plot
             if(DATO[2]==2)
-                PLOTline1bar2(1,0,iColor,2,mwl,wwl,rp,ErrXp,ErrYp);//Tp plot
+                PLOTline1bar2(1,0,iColor,2,mwl,wwl.data(),tp.data(),ErrXp.data(),ErrYp.data());//Tp plot
             if(DATO[3]==2)
-                PLOTline1bar2(1,0,iColor,3,mwl,wwl,rn,ErrXp,ErrYp);//Rn plot
+                PLOTline1bar2(1,0,iColor,3,mwl,wwl.data(),rn.data(),ErrXp.data(),ErrYp.data());//Rn plot
             if(DATO[4]==2)
-                PLOTline1bar2(1,0,iColor,4,mwl,wwl,rp,ErrXp,ErrYp);//Rp plot
+                PLOTline1bar2(1,0,iColor,4,mwl,wwl.data(),rp.data(),ErrXp.data(),ErrYp.data());//Rp plot
             if(DATO[5]==2)
-                PLOTline1bar2(1,0,iColor,5,mwl,wwl,r1,ErrXp,ErrYp);//R1 plot
+                PLOTline1bar2(1,0,iColor,5,mwl,wwl.data(),r1.data(),ErrXp.data(),ErrYp.data());//R1 plot
             for(int ieli=0;ieli<4;ieli++){
                 if(DATO[7+2*ieli]==2){
-                    int Nperiod=NINT(delDiff[ieli]/Dperiod);
+                    int Nperiod=nint(delDiff[ieli]/Dperiod);
                     for(int i=0;i<NeV;i++)
                         delta[i]=DelMat[i][ieli]-Nperiod*Dperiod;
-                    PLOTline1bar2(1,0,iColor,7,mwl,wwl,delta,ErrXp,ErrYp);//DELTA plot
+                    PLOTline1bar2(1,0,iColor,7,mwl,wwl.data(),delta.data(),ErrXp.data(),ErrYp.data());//DELTA plot
                 }
                 if(DATO[8+2*ieli]==2){
                     for(int i=0;i<NeV;i++)
                         psi[i]=PsiMat[i][ieli];
-                    PLOTline1bar2(1,0,iColor,8,mwl,wwl,psi,ErrXp,ErrYp);//PSI plot
+                    PLOTline1bar2(1,0,iColor,8,mwl,wwl.data(),psi.data(),ErrXp.data(),ErrYp.data());//PSI plot
                 }
             }
         }
@@ -7422,6 +7388,7 @@ void ksemawc::IbridKernel(QString rc){
             StoreFitSet();
             double chi2Best= ui->lineEdit_chi2Best->text().toDouble();
             if(chi2fin<chi2Best){
+                ui->lineEdit_chi2Best->setStyleSheet("background-color: yellow;");
                 ui->lineEdit_chi2Best->setText(QString::number(chi2fin));
                 ui->spinBox_jobBest->setValue(jobtot);
             }
@@ -7430,10 +7397,6 @@ void ksemawc::IbridKernel(QString rc){
         if(ieon==0)
             r="X";
     }
-//    if(p){
-//        delete [] p;
-//        p=nullptr;
-//    }
 }
 
 
@@ -7443,7 +7406,6 @@ void ksemawc::StoreFitSet(){
     fileStore=pathroot+"temp/semaw"+QString::number(jobtot)+".Spj";
     SaveSetting(3);
     fileStore=fileStorecurrent;
-    CNK[1][1]=0;//because it was modified along the saving
     ui->sB_PAR_8_1->setValue(jobtot);
     ui->sB_PAR_8_2->setValue(jobtot);
 }
@@ -7456,7 +7418,6 @@ void ksemawc::GoBest(){
     QString SpjName=ui->lineEdit_P -> text();
     QString infoFnk=ui->lineEdit_infoFnk-> text();
     QString ftmp=pathroot+"temp/semaw"+QString::number(jobBest)+".Spj";
-    occupyPF=10;
     caller="GoBest";
     ReadSetting(ftmp);
     ui->sB_PAR_8_2->setValue(jobBest);
@@ -7464,6 +7425,7 @@ void ksemawc::GoBest(){
     ui->lineEdit_P -> setText(SpjName);
     ui->lineEdit_infoFnk-> setText(infoFnk);
 }
+
 
 void ksemawc::GoPrevious(){
     int jobview=ui->sB_PAR_8_2->value();
@@ -7474,7 +7436,6 @@ void ksemawc::GoPrevious(){
     QString infoFnk=ui->lineEdit_infoFnk-> text();
     jobview--;
     QString ftmp=pathroot+"temp/semaw"+QString::number(jobview)+".Spj";
-    occupyPF=10;
     caller="GoPrevious";
     ReadSetting(ftmp);
     ui->sB_PAR_8_1->setValue(jobtot);
@@ -7482,6 +7443,7 @@ void ksemawc::GoPrevious(){
     ui->lineEdit_P -> setText(SpjName);
     ui->lineEdit_infoFnk-> setText(infoFnk);
 }
+
 
 void ksemawc::GoNext(){
     int jobview=ui->sB_PAR_8_2->value();
@@ -7500,35 +7462,56 @@ void ksemawc::GoNext(){
     ui->lineEdit_infoFnk-> setText(infoFnk);
 }
 
+void ksemawc::reset(){
+    ui->sB_PAR_8_1 -> setValue(0);
+    ui->sB_PAR_8_2 -> setValue(0);
+    jobtot=0;
+    ifirstcall=0;
+    ui->spinBox_jobBest -> setValue(0);
+    ui->lineEdit_chi2Best->setText("1.E+99");
+}
+
 
 void ksemawc::SPADA(){
-    printf("-> SPADA ....\n");
+    qDebug("-> SPADA ....");
+
+    // Fase 1 — resize strutture nuove
+    ms.resize(NeV);
+    nkMaterials.resize(8);   // per ora fisso, diventerà dinamico in Fase 3
+    for(auto& nk : nkMaterials)
+        nk.resize(NeV);
+    nkSol.resize(NeV);
+
+    // Tipo misura — popolato qui una volta sola
+    static const MeasureType sfTypes[6] = {
+        MeasureType::TransmittanceNormal,
+        MeasureType::TransmittancePolarised,
+        MeasureType::ReflectanceNormal,
+        MeasureType::ReflectancePolarised,
+        MeasureType::ReflectanceBack,
+        MeasureType::Absorptance
+    };
+    for(int i = 0; i < 6; ++i)
+        ms.measures[i].type = (DATO[i+1] >= 1.) ? sfTypes[i] : MeasureType::None;
+
     int N,MR,Ndati,ilinrim,NANG;
-    double instr[21],X[12000],Y[12000],Z[12000],EPR[3][12000][3],
-            wmin,wmax,dmin,dmax,Div,rstep,DLAM;
+    double instr[21],Xtmp,Ytmp,wmin,wmax,dmin,dmax,Div,rstep,DLAM;
+    std::vector<double> X,Y,Z;
+    X.reserve(1000);  // initial dimension to avoid frequent re-allocation
+    Y.reserve(1000);
+    Z.reserve(1000);
+    std::vector<double> Delta,Psi,ErrD,ErrP;
+    Delta.reserve(1000);  // initial dimension to avoid frequent re-allocation
+    Psi.reserve(1000);
+    ErrD.reserve(1000);
+    ErrP.reserve(1000);
     QString ST1,ST2,DIS[7],EST[8],ER,SPA,SAL,fnam,line,line2,line3,pezzo;
-    // matrix initialization for measures and temporary solutions
-    SOL[1][1]=0.;//none solution
-    for(int I=1;I<=17;I++){
-        for(int J=1;J<=NeV;J++){
-            MIS[I][J][1]=0.;
-            if(I<=15)
-                MIS[I][J][2]=1.;
-            else
-                MIS[I][J][2]=0.;
-        }
+    //reset Min Max
+    for(int I=1;I<=22;I++){
+        rxy[I][3]=1.e+36;
+        rxy[I][4]=-1.e+36;
     }
-    for(int I=1;I<=8;I++){
-        for(int J=1;J<=NeV;J++){
-            ELI[I][J][1]=0.;
-            ELI[I][J][2]=1.;
-        }
-    }
-    rxy[19][3]=10.;//cos(Delta)
-    rxy[19][4]=-10.;
-    rxy[22][3]=10.e+36;//tan(Psi)
-    rxy[22][4]=-10.;
-    int IUVIR=NINT(par[24][1]);
+    int IUVIR=nint(par[24][1]);
     if(IUVIR==1) ST2=".v";
     if(IUVIR==2) ST2=".i";
     DIS[1]=".tn";
@@ -7539,13 +7522,12 @@ void ksemawc::SPADA(){
     DIS[6]=".an";
     for(int i=1;i<=14;i++){
         if(DATO[i]>=1. && i<=6){
-            //printf("SPADA-> DATO[%d]=%d\n",i,DATO[i]);
-            ST1=QString::number(NINT(par[20+i][4]));
+            ST1=QString::number(nint(par[20+i][4]));
             EST[i]=ST2+ST1+DIS[i];
         }
     }
     if(!NANK[9].contains("mate/aa999")){
-        printf("\tSPADA-> call LoadFilenk with file-solutions %s\n",NANK[9].toStdString().c_str());
+        qDebug()<<"\tSPADA-> call LoadFilenk with file-solutions "<<NANK[9];
         LoadFilenk();
     }
     for(int i=1;i<=20;i++)
@@ -7555,30 +7537,34 @@ void ksemawc::SPADA(){
     else
         ER=" ";
     SPA="L";
-    if(NINT(rxy[25][4])==2)
+    if(nint(rxy[25][4])==2)
         SPA="E";
     SAL="n";
-    MR=NINT(par[22][1]);
-    int nrif=NINT(par[10][3]);
+    MR=nint(par[22][1]);
+    int nrif=nint(par[10][3]);
     dmin=par[4][1];
     dmax=par[4][2];
     int STEP=1;
     // set WL and baseline error
     for(int L=1;L<=NeV;L++){
+        double xwe;
         if(SPA=="L")
-            MIS[7][L][1]=dmin+double(L-1)/(NeV-1)*(dmax-dmin);
+            xwe=dmin+static_cast<double>(L-1)/(NeV-1)*(dmax-dmin);
         else
-            MIS[7][L][1]=1./(1./dmin+double(L-1)/(NeV-1)*(1./dmax-1./dmin));
-        MIS[6][L][1]=1.;//reflectance correction
-        MIS[7][L][2]=instr[5];
+            xwe=1./(1./dmin+static_cast<double>(L-1)/(NeV-1)*(1./dmax-1./dmin));
+        ms.lambda[L-1]=xwe;
+        ms.measures[5].value[L-1]=1.;//Rreference stored in temporary allocation
+        double errBL=instr[5];
+        ms.driftBaseline[L-1]=instr[5];
         if(ER!="y"){
             if(IUVIR==1){
-                if(MIS[7][L][1]>184.9 && MIS[7][L][1]<860.81)
-                    MIS[7][L][2]=.0005+.838951/(1+pow((MIS[7][L][1]-183.5)/0.7,2.))+.0026/(1.+pow((MIS[7][L][1]-870.)/25.,4.));
-                if(MIS[7][L][1]>3100. && MIS[7][L][1]<3200.1)
-                    MIS[7][L][2]=-4.66E-04+.00476/(1+pow((MIS[7][L][1]-3500.)/200.,2.));
+                if(xwe>184.9 && xwe<860.81)
+                    errBL=.0005+.838951/(1+pow((xwe-183.5)/0.7,2.))+.0026/(1.+pow((xwe-870.)/25.,4.));
+                if(xwe>3100. && xwe<3200.1)
+                    errBL=-4.66E-04+.00476/(1+pow((xwe-3500.)/200.,2.));
             }
-            if(MIS[7][L][2]<instr[5]) MIS[7][L][2]=instr[5];
+            if(errBL<instr[5]) errBL=instr[5];
+            ms.driftBaseline[L-1]=errBL;
         }
     }
     //file-nk load
@@ -7586,11 +7572,10 @@ void ksemawc::SPADA(){
         fnam=pathroot+NANK[I].simplified();
         if(!fnam.contains("mate/aa999.9")){
             fnam=fnam+".nk";
-            printf("\tSPADA-> load file-nk %s\n",fnam.toStdString().c_str());
+            qDebug()<<"\tSPADA-> load file-nk "<<fnam;
             QFile file(fnam);
             if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
                 msgErrLoad("SPADA-fnam",fnam);
-                printf("SPADA-> ERROR opening file-nk= %s\n",fnam.toStdString().c_str());
                 continue;
             }
             QTextStream stream (&file);
@@ -7601,35 +7586,21 @@ void ksemawc::SPADA(){
             List0=line.split(" ");
             pezzo=List0.at(0).toLocal8Bit().constData();
             Ndati=pezzo.toInt();
-            printf("\tNdata= %d\n",Ndati);
+            qDebug()<<"\tNdata= "<<Ndati;
             double A2nm=0.1;
             if(line.contains("nm"))
                 A2nm=1;
-            if(Ndati>12000){
-                QMessageBox msgBox;
-                msgBox.setText("ATTENTION: please reduce your data number below 12000!!!\n");
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.exec();
-                return;
-            }
             for(int J=1;J<=Ndati;J++){
                 line=stream.readLine();
                 line=line.simplified();
                 QStringList List;
                 List =line.split(" ");
                 int nV=List.count();
-//                if(J==1){
-//                    printf("nV=%d\n",nV);
-//                    for(int k=0;k<nV;k++)
-//                        printf("%d->%f ",k,List.at(k).toDouble());
-//                    printf("\n");
-//                }
                 if(nV!=5){
                     List =line.split("\t");
                     nV=List.count();
                     if(nV!=5){
-                        printf("nV=%d line=%s\n",nV,line.toStdString().c_str());
-                        printf("SPADA-> ERROR reading file-nk= %s: separator char invalid\n",fnam.toStdString().c_str());
+                        qDebug()<<"nV="<<nV<<" line="<<line;
                         QMessageBox msgBox;
                         msgBox.setText("LoadFilenk-> ERROR reading file-nk="+fnam+"\n: separator char invalid or ERRn and ERRk missing");
                         msgBox.setStandardButtons(QMessageBox::Ok);
@@ -7637,14 +7608,12 @@ void ksemawc::SPADA(){
                         continue;
                     }
                 }
-                X[J]=List.at(0).toDouble();//wl
-                X[J]=X[J]*A2nm;
-                Y[J]=List.at(1).toDouble();//n
-                Z[J]=List.at(2).toDouble();//k
-                //cout << X[J]<<"\t"<<Y[J]<<"\t"<<Z[J]<<"\n";
+                X.push_back(List.at(0).toDouble()*A2nm);//wl
+                Y.push_back(List.at(1).toDouble());//n
+                Z.push_back(List.at(2).toDouble());//k
             }
             file.close();
-            if(X[1]<X[Ndati]){
+            if(X.front()<X.back()){
                 N=1;
                 STEP=1;
             }
@@ -7652,12 +7621,16 @@ void ksemawc::SPADA(){
                 N=Ndati;
                 STEP=-1;
             }
-            CONVER(X,Y,Ndati,N,STEP,7+I,1);
-            CONVER(X,Z,Ndati,N,STEP,7+I,2);
+            nkMaterials[I-1].resize(NeV);
+            CONVER(X.data(),Y.data(),Ndati,N,STEP,7+I,1);
+            CONVER(X.data(),Z.data(),Ndati,N,STEP,7+I,2);
+            X.clear();
+            Y.clear();
+            Z.clear();
         }
     }
     //file-SF load
-    if(NINT(par[23][1])==1){
+    if(nint(par[23][1])==1){
         for(int i=0;i<=6;i++){
             if(i==0){
                 if(MR!=0){
@@ -7686,63 +7659,48 @@ void ksemawc::SPADA(){
             QFile file(fnam);
             if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
                 msgErrLoad("SPADA-fnam bis",fnam);
-                printf("SPADA-> i=%d ERROR opening file-SF= %s\n",i,fnam.toStdString().c_str());
                 continue;
             }
             else{
-                printf("\tSPADA-> i=%d loading fileSF %s\n",i,fnam.toStdString().c_str());
+                qDebug()<<"\tSPADA-> i="<<i<<" loading fileSF "<<fnam;
                 QTextStream stream (&file);
                 line = stream.readLine();
                 line2 = stream.readLine();
-                printf("line= %s\n",line.toStdString().c_str());
-                printf("line2= %s\n",line2.toStdString().c_str());
                 if(line.contains("PE UV")){// file Perkin Elmer L900 - L950
-                    printf("\tfile Perkin Elmer L900 - L950\n");
+                    qDebug()<<"\tfile Perkin Elmer L900 - L950";
                     Div=100.;
                     for(int ir=1;ir<=11;ir++)
                         line = stream.readLine();
                     line3 = stream.readLine();
-                    if(line3.contains("PerkinElmer UV WinLab 5"))
+                    if(line3.contains("PerkinElmer UV WinLab 7", Qt::CaseInsensitive))
+                        ilinrim=74;
+                    else if(line3.contains("PerkinElmer UV WinLab 5"))
                         ilinrim=66;
                     else
                         ilinrim=70;
                     for(int ir=1;ir<=ilinrim;ir++)
                         line = stream.readLine();
                     stream >> rstep;
-                    STEP=NINT(rstep);
+                    STEP=nint(rstep);
                     stream >> Ndati;
                     N=Ndati;
-                    printf("Ndati=%d\n",Ndati);
-                    if(Ndati>12000){
-                        QMessageBox msgBox;
-                        msgBox.setText("ATTENTION: please reduce your data number below 12000!!!\n");
-                        msgBox.setStandardButtons(QMessageBox::Ok);
-                        msgBox.exec();
-                        return;
-                    }
+                    qDebug()<<"Ndati="<<Ndati;
                     do{
                         line = stream.readLine();
                     }while(!line.contains("#DATA"));
                     for(int j=1;j<=Ndati;j++){
-                        stream >> X[j] >> Y[j];
-                        //printf("X[%d]=%f\tY[%d]=%f\n",j,X[j],j,Y[j]);
+                        stream >> Xtmp >> Ytmp;
+                        X.push_back(Xtmp);
+                        Y.push_back(Ytmp);
                     }
                     fflush(stdout);
                 }
                 else if(line2.contains("#####SCALED")){//SCALED file
-                    printf("\tSCALED file\n");
-                    int ncolo;
-                    double xin,xfi,zz;
+                    qDebug()<<"\tSCALED file";
+                    double xin,xfi;
                     stream >> xin;
                     stream >> xfi;
                     stream >> Ndati;
-                    if(Ndati>12000){
-                        QMessageBox msgBox;
-                        msgBox.setText("ATTENTION: please reduce your data number below 12000!!!\n");
-                        msgBox.setStandardButtons(QMessageBox::Ok);
-                        msgBox.exec();
-                        return;
-                    }
                     if(xin<xfi){
                         STEP=1;
                         N=1;
@@ -7752,35 +7710,56 @@ void ksemawc::SPADA(){
                         N=Ndati;
                     }
                     if(line2.contains("#####SCALED ")){
-                        printf("\ttype: #####SCALED \n");
-                        cout << "Number of column to load (2,..,6)?\n";
-                        cin >> ncolo;
-                        if(ncolo<2) ncolo=2;
-                        if(ncolo>6) ncolo=6;
-                        for(int j=1;j<=Ndati;j++){
-                            if(ncolo==2) stream >> X[j] >> Y[j];
-                            if(ncolo==3) stream >> X[j] >> zz >> Y[j];
-                            if(ncolo==4) stream >> X[j] >> zz >> zz >> Y[j];
-                            if(ncolo==5) stream >> X[j] >> zz >> zz >> zz >> Y[j];
-                            if(ncolo==6) stream >> X[j] >> zz >> zz >> zz >> zz >> Y[j];
+                        qDebug() << "\ttype: #####SCALED";
+
+                        bool ok;
+                        int ncolo = QInputDialog::getInt(this,
+                            "Which column have to be loaded?",
+                            "Column number (2..6):",
+                            2,    // default
+                            2,    // min
+                            6,    // max
+                            1,    // step
+                            &ok);
+                        if(!ok) return;  // utente ha premuto Cancel
+
+                        for(int j=1; j<=Ndati; j++){
+                            double Xtmp, Ytmp, zz;
+                            if(ncolo==2) stream >> Xtmp >> Ytmp;
+                            if(ncolo==3) stream >> Xtmp >> zz >> Ytmp;
+                            if(ncolo==4) stream >> Xtmp >> zz >> zz >> Ytmp;
+                            if(ncolo==5) stream >> Xtmp >> zz >> zz >> zz >> Ytmp;
+                            if(ncolo==6) stream >> Xtmp >> zz >> zz >> zz >> zz >> Ytmp;
+                            X.push_back(Xtmp);
+                            Y.push_back(Ytmp);
                         }
-                        cout << "Absolute Unit (0) or not (1)?\n";
-                        cin >> ncolo;
-                        if(ncolo==0)
-                            Div=1;
-                        else
-                            Div=100.;
+
+                        int unita = QInputDialog::getInt(this,
+                            "Absolute or %?",
+                            "Absolute (0) o percent (1):",
+                            0,    // valore default
+                            0,    // minimo
+                            1,    // massimo
+                            1,    // step
+                            &ok);
+                        if(!ok) return;
+                        Div = (unita == 0) ? 1.0 : 100.0;
                     }
                     else if(line2.contains("#####SCALEDA")){
-                        printf("\ttype: #####SCALEDA\n");
-                        for(int j=1;j<=Ndati;j++)
-                            stream >> X[j] >> Y[j];
+                        qDebug("\ttype: #####SCALEDA");
+                        for(int j=1;j<=Ndati;j++){
+                            stream >> Xtmp >> Ytmp;
+                            X.push_back(Xtmp);
+                            Y.push_back(Ytmp);
+                        }
                         Div=1.;
                     }
                     else if(line2.contains("#####SCALED%")){
-                        printf("\ttype: #####SCALED%%\n");
+                        qDebug("\ttype: #####SCALED%%");
                         for(int j=1;j<=Ndati;j++){
-                            stream >> X[j] >> Y[j];
+                            stream >> Xtmp >> Ytmp;
+                            X.push_back(Xtmp);
+                            Y.push_back(Ytmp);
                             //cout<< j<<"\t"<<X[j]<<"\t"<<Y[j]<<"\n";
                         }
                         Div=100.;
@@ -7788,7 +7767,7 @@ void ksemawc::SPADA(){
                 }
                 else if(line2.contains("RTmethod[")){
                     // file Transmittance by VASE
-                    printf("\ttype VASE transmittance\n");
+                    qDebug("\ttype VASE transmittance");
                     line = stream.readLine();
                     line = stream.readLine();
                     int iL0E1=0;
@@ -7802,64 +7781,54 @@ void ksemawc::SPADA(){
                         line=line.simplified();
                         List=line.split(" ");
                         pezzo=List.at(1).toLocal8Bit().constData();
-                        X[j]=pezzo.toDouble();
+                        Xtmp=pezzo.toDouble();
                         if(iL0E1==1)
-                            X[j]=1240./X[j];
+                            Xtmp=1240./Xtmp;
+                        X.push_back(Xtmp);
                         pezzo=List.at(3).toLocal8Bit().constData();
-                        Y[j]=pezzo.toDouble();
-                        //printf("\t X[%d]=%f Y[%d]=%f\n",j,X[j],j,Y[j]);
+                        Y.push_back(pezzo.toDouble());
                     }while(!stream.atEnd());
                     Ndati=j;
-                    printf("\tNdat=%d\n",Ndati);
+                    qDebug("\tNdat=%d",Ndati);
                     Div=1.;
                     STEP=1;
                     N=1;
                 }
                 else if(line2.contains("##XYUNITS= W")){//Lamba9 or old FTIR
-                    printf("\ttype: Lambda9 or old FTIR\n");
+                    qDebug("\ttype: Lambda9 or old FTIR");
                     line = stream.readLine();
                     line = stream.readLine();
                     stream >> line >> DLAM >> ST1>> Div;
-                    printf("DLAM= %f Div= %f\n",DLAM,Div);
+                    qDebug("DLAM= %f Div= %f",DLAM,Div);
                     Div=Div*100.;
                     stream >> line >> Ndati>>ST1;
-                    printf("Ndati= %d\n",Ndati);
-                    if(Ndati>12000){
-                        QMessageBox msgBox;
-                        msgBox.setText("ATTENTION: please reduce your data number below 12000!!!\n");
-                        msgBox.setStandardButtons(QMessageBox::Ok);
-                        msgBox.exec();
-                        return;
-                    }
+                    qDebug("Ndati= %d",Ndati);
                     do{
                         line = stream.readLine();
                         line=line.simplified();
                     }while(line.isEmpty());
-                    int NRIGHE=int(Ndati/14.);
+                    int NRIGHE=static_cast<int>(Ndati/14.);
                     double DE=14.*((Ndati/14.)-NRIGHE);
                     if(DE>.5) NRIGHE++;
-                    int K;
+                    qDebug()<<"NRIGHE="<<NRIGHE<<" DE="<<DE;
                     double X1;
                     for(int J=1;J<=NRIGHE;J++){
-                        K=(J-1)*14;
                         line=stream.readLine();
                         line=line.simplified();
                         QStringList List;
                         List =line.split(" ");
                         int nV=List.count();
-                        //printf("\nnV=%d\n",nV);
+                        //qDebug()<<"nV="<<nV;
                         QString pezzo;
                         for(int iv=0;iv<nV;iv++){
                             pezzo=List.at(iv).toLocal8Bit().constData();
-                            //printf("pezzo[%d]= %s\t",iv,pezzo.toStdString().c_str());
                             if(iv==0){
                                 X1=pezzo.toDouble();
-                                //printf("\n");
                             }
                             else{
-                                X[K+iv]=X1+(iv-1)*DLAM;
-                                Y[K+iv]=pezzo.toDouble();
-                                //printf("X[%d]= %f\tY[%d]= %f\n",K+iv,X[K+iv],K+iv,Y[K+iv]);
+                                X.push_back(X1+(iv-1)*DLAM);
+                                Y.push_back(pezzo.toDouble());
+                                //qDebug()<<"X="<<X.back()<<" Y="<<Y.back();
                             }
                         }
                     }
@@ -7875,9 +7844,9 @@ void ksemawc::SPADA(){
                 else{
                     line3=stream.readLine();
                     int K;
-                    double xf,yf,X1;
+                    double xf,yf;
                     if(line3.contains("##DATA TYPE= UL")){//new file Lamba9)
-                        printf("\ttype: new Lambda9\n");
+                        qDebug("\ttype: new Lambda9");
                         for(int J=1;J<=6;J++)
                             line = stream.readLine();
                         stream >> line >> xf;
@@ -7885,23 +7854,15 @@ void ksemawc::SPADA(){
                         stream >> line >> wmin;
                         stream >> line >> wmax;
                         stream >> line >> Ndati;
-                        if(Ndati>12000){
-                            QMessageBox msgBox;
-                            msgBox.setText("ATTENTION: please reduce your data number below 12000!!!\n");
-                            msgBox.setStandardButtons(QMessageBox::Ok);
-                            msgBox.exec();
-                            return;
-                        }
-                        //printf("xf= %f\tyf= %f\twmin=%f\twmax=%f Ndati=%d\n",xf,yf,wmin,wmax,Ndati);
                         line = stream.readLine();
                         line = stream.readLine();
                         line = stream.readLine();
-                        DLAM=(wmax-wmin)/double(Ndati-1);
+                        DLAM=(wmax-wmin)/static_cast<double>(Ndati-1);
                         Div=1./yf;
-                        int NRIGHE=int(Ndati/10.);
-                        double DE=10.*((Ndati/10.)-int(Ndati/10.));
+                        int NRIGHE=static_cast<int>(Ndati/10.);
+                        double DE=10.*((Ndati/10.)-static_cast<int>(Ndati/10.));
                         if(DE>.5) NRIGHE++;
-                        int K;
+                        //int K;
                         double X1;
                         for(int J=1;J<=NRIGHE;J++){
                             K=(J-1)*10;
@@ -7911,19 +7872,15 @@ void ksemawc::SPADA(){
                             QStringList List;
                             List =line.split(" ");
                             int nV=List.count();
-                            //printf("\nnV=%d\n",nV);
                             QString pezzo;
                             for(int iv=0;iv<nV;iv++){
                                 pezzo=List.at(iv).toLocal8Bit().constData();
-                                //printf("pezzo[%d]= %s\t",iv,pezzo.toStdString().c_str());
                                 if(iv==0){
                                     X1=pezzo.toDouble();
-                                    //printf("\n");
                                 }
                                 else{
-                                    X[K+iv]=X1*xf+(iv-1)*DLAM;
-                                    Y[K+iv]=pezzo.toDouble();
-                                    //printf("X[%d]= %f\tY[%d]= %f\n",K+iv,X[K+iv],K+iv,Y[K+iv]);
+                                    X.push_back(X1*xf+(iv-1)*DLAM);
+                                    Y.push_back(pezzo.toDouble());
                                 }
                             }
                         }
@@ -7931,7 +7888,7 @@ void ksemawc::SPADA(){
                         STEP=1;
                     }
                     else if(line3.contains("##DATA TYPE= UV")){//file Lambda19
-                        printf("\ttype: Lambda19\n");
+                        qDebug("\ttype: Lambda19");
                         for(int J=1;J<=9;J++)
                             line = stream.readLine();
                         stream>>line>>xf;
@@ -7939,21 +7896,14 @@ void ksemawc::SPADA(){
                         stream>>line>>wmax;
                         stream>>line>>wmin;
                         stream>>line>>Ndati;
-                        if(Ndati>12000){
-                            QMessageBox msgBox;
-                            msgBox.setText("ATTENTION: please reduce your data number below 12000!!!\n");
-                            msgBox.setStandardButtons(QMessageBox::Ok);
-                            msgBox.exec();
-                            return;
-                        }
                         for(int i1=1;i1<=4;i1++)
                             line = stream.readLine();
                         DLAM=(wmax-wmin)/(Ndati-1);
                         Div=100./yf;
-                        int NRIGHE=int(Ndati/5.);
-                        double DE=5.*((Ndati/5.)-int(Ndati/5.));
+                        int NRIGHE=static_cast<int>(Ndati/5.);
+                        double DE=5.*((Ndati/5.)-static_cast<int>(Ndati/5.));
                         if(DE>.5) NRIGHE++;
-                        int K;
+                        //int K;
                         double X1;
                         for(int J=1;J<=NRIGHE;J++){
                             K=(J-1)*5;
@@ -7962,19 +7912,15 @@ void ksemawc::SPADA(){
                             QStringList List;
                             List =line.split(" ");
                             int nV=List.count();
-                            //printf("\nnV=%d\n",nV);
                             QString pezzo;
                             for(int iv=0;iv<nV;iv++){
                                 pezzo=List.at(iv).toLocal8Bit().constData();
-                                //printf("pezzo[%d]= %s\t",iv,pezzo.toStdString().c_str());
                                 if(iv==0){
                                     X1=pezzo.toDouble();
-                                    //printf("\n");
                                 }
                                 else{
-                                    X[K+iv]=X1*xf-(iv-1)*DLAM;
-                                    Y[K+iv]=pezzo.toDouble();
-                                    //printf("X[%d]= %f\tY[%d]= %f\n",K+iv,X[K+iv],K+iv,Y[K+iv]);
+                                    X.push_back(X1*xf-(iv-1)*DLAM);
+                                    Y.push_back(pezzo.toDouble());
                                 }
                             }
                         }
@@ -7982,7 +7928,7 @@ void ksemawc::SPADA(){
                         STEP=-1;
                     }
                     else if(line3.contains("##DATA TYPE= IN")){//new IR file
-                        printf("\ttype: new IR\n");
+                        qDebug("\ttype: new IR");
                         for(int J=1;J<=9;J++)
                             line = stream.readLine();
                         stream>>line>>DLAM;
@@ -7993,13 +7939,6 @@ void ksemawc::SPADA(){
                         stream>>line>>wmin;
                         stream>>line>>wmax;
                         stream>>line>>Ndati;
-                        if(Ndati>12000){
-                            QMessageBox msgBox;
-                            msgBox.setText("ATTENTION: please reduce your data number below 12000!!!\n");
-                            msgBox.setStandardButtons(QMessageBox::Ok);
-                            msgBox.exec();
-                            return;
-                        }
                         for(int i1=1;i1<=4;i1++)
                             line = stream.readLine();
                         Div=1./yf;
@@ -8015,18 +7954,22 @@ void ksemawc::SPADA(){
                                     pezzo=List.at(iv).toLocal8Bit().constData();
                                     K++;
                                     if(iv==0)
-                                        X[K]=pezzo.toDouble()*xf;
+                                        X.push_back(pezzo.toDouble()*xf);
                                     else{
-                                        X[K]=X[K-1]+DLAM;
-                                        Y[K]=pezzo.toDouble()*yf;
+                                        X.push_back(X.back() + DLAM);
+                                        Y.push_back(pezzo.toDouble()*yf);
                                     }
                                 }
                             }
                             else{//FTIR SPECTRUM GS
                                 if(K==0) Div=Div*100.;
-                                stream>>X1>>Y[K+1]>>Y[K+2]>>Y[K+3]>>Y[K+4];
-                                for(int iiii=1;iiii<=5;iiii++)
-                                    X[K+iiii-1]=X1*xf+(iiii-1)*DLAM;
+                                double Xt1,Yt[4];
+                                stream>>Xt1>>Yt[0]>>Yt[1]>>Yt[2]>>Yt[3];
+                                //stream>>X1>>Y[K+1]>>Y[K+2]>>Y[K+3]>>Y[K+4];
+                                for(int iiii=1;iiii<=4;iiii++){
+                                    X.push_back(Xt1*xf+(iiii-1)*DLAM);
+                                    Y.push_back(Yt[iiii-1]);
+                                }
                                 K=K+4;
                             }
                         }
@@ -8035,46 +7978,43 @@ void ksemawc::SPADA(){
                     }
                 }
                 file.close();
-                if(Ndati>12000){
+                if(Ndati<=0){
                     QMessageBox msgBox;
-                    msgBox.setText("ATTENTION: please reduce your data number below 12000!!!\n");
+                    msgBox.setText("ATTENTION: the file "+fnam+" has no data!");
                     msgBox.setStandardButtons(QMessageBox::Ok);
                     msgBox.exec();
-                    return;
+                    continue;
                 }
-                for(int L=1;L<=Ndati;L++){
+                for(int L=0;L<Ndati;L++){
                     if(IUVIR==2) X[L]=1./X[L]*1.E7;//cm^-1 -> nm
                     Y[L]=Y[L]/Div;
                 }
-                if(i==0){
-                    CONVER(X,Y,Ndati,N,STEP,6,IUVIR);
-                    rxy[6][1]=0.;
-                    rxy[6][2]=1.;
-                    rxy[6][3]=0.;
-                    rxy[6][4]=1.;
+                if(i==0){//reference mirror
+                    CONVER(X.data(),Y.data(),Ndati,N,STEP,6,IUVIR);
+                    rxy[6][3]=1.e+36;
+                    rxy[6][4]=-1.e+36;
                 }
                 else{
-                    iw=0;
-                    //printf("X[1]=%f\n",X[1]);
-                    CONVER(X,Y,Ndati,N,STEP,i,IUVIR);
+                    CONVER(X.data(),Y.data(),Ndati,N,STEP,i,IUVIR);
                     idToLineEdit["DP_RXY_"+QString::number(i)+"_"+QString::number(3)]-> setText(QString::number(rxy[i][3]));
                     idToLineEdit["DP_RXY_"+QString::number(i)+"_"+QString::number(4)]-> setText(QString::number(rxy[i][4]));
                 }
+                X.clear();
+                Y.clear();
             }
         }
     }
     //file ELI load
-    if(NINT(par[23][2])==1){
+    if(nint(par[23][2])==1){
         //int DP0cosDtanP1=ui->comboBox_DeltaPsiScale->currentIndex();
         for(int J=1;J<=4;J++){
             if(DATO[5+2*J]>0 && !NANK[11+J].contains("mate/aa999.9")){
-                printf("%s\n",NANK[11+J].toStdString().c_str());
+                qDebug()<<NANK[11+J];
                 fnam=pathroot+NANK[11+J].simplified()+".el";
-                printf("\tSPADA-> J=%d loading fileELI %s\n",J,fnam.toStdString().c_str());
+                qDebug()<<"\tSPADA-> J="<<J<<" loading fileELI "<<fnam;
                 QFile file(fnam);
                 if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
                     msgErrLoad("SPADA-fnam tris",fnam);
-                    printf("SPADA-> ERROR opening file-ELI= %s\n",fnam.toStdString().c_str());
                     continue;
                 }
                 else{
@@ -8082,7 +8022,7 @@ void ksemawc::SPADA(){
                     QString pezzo;
                     QTextStream stream (&file);
                     line = stream.readLine();
-                    cout<<line.toStdString()<<"\n";
+                    qDebug()<<line;
                     line=stream.readLine();
                     line=line.simplified();
                     if(!line.contains("VASE")){
@@ -8097,7 +8037,7 @@ void ksemawc::SPADA(){
                             do{
                                 line = stream.readLine();
                             }while(line.isEmpty());
-                            cout<<line.toStdString()<<"\n";
+                            qDebug()<<line;
                         }
                     }
                     else{
@@ -8111,14 +8051,7 @@ void ksemawc::SPADA(){
                         for(int k=0;k<NANG;k++)
                             Ndati=Ndati+EliTab[J][k][1];
                     }
-                    if(Ndati>12000){
-                        QMessageBox msgBox;
-                        msgBox.setText("ATTENTION: please reduce your data number below 12000!!!\n");
-                        msgBox.setStandardButtons(QMessageBox::Ok);
-                        msgBox.exec();
-                        return;
-                    }
-                    printf("Nang= %d  NdatiEL= %d  st4= %s\n",NANG,Ndati,line2.toStdString().c_str());
+                    qDebug()<<"Nang= "<<NANG<<" NdatiEL= "<<Ndati<<" st4= "<<line2;
                     int NDEL=0;
                     int iformat=0;
                     double TE,LAM,DE,PS,DDE,DPS;
@@ -8136,11 +8069,15 @@ void ksemawc::SPADA(){
                         iformat=5;
                     }
                     if(iformat==0){
-                        cout<<"ATTENTION: set the format of file ELI!!!"<<"\n";
+                        QMessageBox msgBox;
+                        msgBox.setText("ATTENTION: set the format of file ELI!!!");
+                        msgBox.setStandardButtons(QMessageBox::Ok);
+                        msgBox.exec();
                         return;
                     }
-                    printf("iformat=%d par[13+J][1]=%f\n",iformat,par[13+J][1]);
+                    qDebug("iformat=%d par[13+J][1]=%f",iformat,par[13+J][1]);
                     double theta2load=idToComboBox["cBteE"+QString::number(J)]->currentText().toDouble();
+                    double yOld=0.;
                     for(int I=1;I<=Ndati;I++){
                         if(iformat==1){
                             stream>>TE>>LAM>>DE>>PS>>DDE>>DPS;
@@ -8154,9 +8091,7 @@ void ksemawc::SPADA(){
                         else if(iformat==4){
                             stream>>LAM>>PS>>DE>>DPS>>DDE;
                             LAM=1240./LAM;
-                            //printf("tan(PS)= %f",PS);
                             PS=atan(PS)/deg2rad;
-                            //printf(" -> PS = %f(rad) = %f(deg)\n",PS*deg2rad,PS);
                             DE=acos(DE)/deg2rad;
                             DDE=0.04;//err Delta (deg)
                             DPS=0.02;//err Psi (deg)
@@ -8184,32 +8119,49 @@ void ksemawc::SPADA(){
                             pezzo=List.at(6).toLocal8Bit().constData();
                             DDE=pezzo.toDouble();
                         }
-                        //if(abs(TE-par[13+J][1])<=1.){//0.001
-                        if(abs(TE-theta2load)<=1.){
+                        //if(std::abs(TE-par[13+J][1])<=1.){//0.001
+                        if(std::abs(TE-theta2load)<=1.){
                             //cout<<TE<<"\t"<<LAM<<"\t"<<DE<<"\t"<<PS<<"\t"<<DDE<<"\t"<<DPS<<"\n";
+                            if(iDelCon==1){
+                                if(I==1)
+                                    yOld=DE;
+                                //qDebug("eV=%f DE=%f DE-yOld=%f (DE-yOld)/Dperiod=%f nint((DE-yOld)/Dperiod)=%d DEfinal=%f",1240./LAM,DE,yOld,(DE-yOld)/Dperiod,nint((DE-yOld)/Dperiod),DE-Dperiod*nint((DE-yOld)/Dperiod));
+                                if(std::abs((DE-yOld)/Dperiod)>1.5)
+                                    DE=DE-Dperiod*nint((DE-yOld)/Dperiod);
+                                yOld=DE;
+                            }
                             NDEL=NDEL+1;
-                            X[NDEL]=LAM;
-                            EPR[1][NDEL][1]=DE;
-                            EPR[1][NDEL][2]=DDE;
-                            EPR[2][NDEL][1]=PS;
-                            EPR[2][NDEL][2]=DPS;
+                            X.push_back(LAM);
+                            Delta.push_back(DE);
+                            ErrD.push_back(DDE);
+                            Psi.push_back(PS);
+                            ErrP.push_back(DPS);
+                            // X[NDEL]=LAM;
+                            // EPR[1][NDEL][1]=DE;
+                            // EPR[1][NDEL][2]=DDE;
+                            // EPR[2][NDEL][1]=PS;
+                            // EPR[2][NDEL][2]=DPS;
                         }
                     }
                     file.close();
-                    printf("Theta= %f  NdatEl= %d\n",theta2load,NDEL);
+                    qDebug("Theta= %f  NdatEl= %d",theta2load,NDEL);
                     if(NDEL==0)
                         return;
-                    for(int I=1;I<=2;I++){
-                        for(int II=1;II<=2;II++){
-                            for(int L=1;L<=NDEL;L++)
-                                Y[L]=EPR[I][L][II];
-                            CONVER(X,Y,NDEL,1,1,20+2*(J-1)+I,II);
-                            if(II==1){
-                                idToLineEdit["DP_RXY_"+QString::number(4+2*J+I)+"_"+QString::number(3)]-> setText(QString::number(rxy[4+2*J+I][3]));
-                                idToLineEdit["DP_RXY_"+QString::number(4+2*J+I)+"_"+QString::number(4)]-> setText(QString::number(rxy[4+2*J+I][4]));
-                            }
-                        }
-                    }
+                    int Nstart=1;
+                    STEP=1;
+                    CONVER(X.data(),Delta.data(),NDEL,Nstart,STEP,20+2*(J-1)+1,1);//Delta
+                    CONVER(X.data(),ErrD.data() ,NDEL,Nstart,STEP,20+2*(J-1)+1,2);//ErrDelta
+                    CONVER(X.data(),Psi.data()  ,NDEL,Nstart,STEP,20+2*(J-1)+2,1);//Psi
+                    CONVER(X.data(),ErrP.data() ,NDEL,Nstart,STEP,20+2*(J-1)+2,2);//ErrPsi
+                    X.clear();
+                    Delta.clear();
+                    ErrD.clear();
+                    Psi.clear();
+                    ErrP.clear();
+                    idToLineEdit["DP_RXY_"+QString::number(7+2*(J-1))+"_"+QString::number(3)]-> setText(QString::number(rxy[7+2*(J-1)][3]));
+                    idToLineEdit["DP_RXY_"+QString::number(7+2*(J-1))+"_"+QString::number(4)]-> setText(QString::number(rxy[7+2*(J-1)][4]));
+                    idToLineEdit["DP_RXY_"+QString::number(8+2*(J-1))+"_"+QString::number(3)]-> setText(QString::number(rxy[8+2*(J-1)][3]));
+                    idToLineEdit["DP_RXY_"+QString::number(8+2*(J-1))+"_"+QString::number(4)]-> setText(QString::number(rxy[8+2*(J-1)][4]));
                 }
             }
         }
@@ -8217,169 +8169,150 @@ void ksemawc::SPADA(){
     }
     par[38][3]=par[4][1];
     par[38][4]=par[4][2];
-    par[21][1]=NeV;
+    //par[21][1]=NeV;
     par[28][2]=NeV;
-    if(NINT(par[9][1])==1)
-        ui->checkBox_setPsoK -> setCheckState ( Qt::Checked );
-    printf("exit SPADA\n");
 }
 
 
-
-
-void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int IUVIR){
+void ksemawc::CONVER(double *X,double *Y,int NDATI,int N1,int STEP,int I,int IUVIR){
     //int iw=1;//verbose (0 silent, 1 verbose)
-    iw=NINT(par[18][1]);
-    printf("CONVER: NDATI=%d N1=%d STEP=%d I=%d IUVIR=%d\n",NDATI,N1,STEP,I,IUVIR);
+    iw=nint(par[18][1]);
+    qDebug("CONVER: NDATI=%d N1=%d STEP=%d I=%d IUVIR=%d",NDATI,N1,STEP,I,IUVIR);
     int ALARM=0;
-    int ns[1000];
-    double xs[500],ys[500];
-    double ymin=1.e+36;
-    double ymax=1.e-36;
     double cosDelMin=10.;
     double cosDelMax=-10.;
     double tanPsiMin=1.e+36;
     double tanPsiMax=-1.;
     double INSTR[21];
     double WL,WLa,WLb;
-    double yOld;
+
     for(int j=1;j<=20;j++){
         INSTR[j]=par[j][3];
     }
     for(int H=1;H<=NeV;H++){
-        WL=MIS[7][H][1];
+        std::vector<double> xs,ys;
+        xs.reserve(10);
+        ys.reserve(10);
+        WL=ms.lambda[H-1];
         double FACO=1.;
         if((I==3 || I==4 || I==5) && IUVIR==1){
-            if(NINT(INSTR[10])>0)
-                FACO=FACO*MIS[6][H][1];
+            if(nint(INSTR[10])>0)
+                FACO=FACO*ms.measures[5].value[H-1];
         }
 
         // points to average
         if(H>1)
-            WLa=WL-(MIS[7][H][1]-MIS[7][H-1][1])/2.;
+            WLa=WL-(ms.lambda[H-1]-ms.lambda[H-2])/2.;
         else
-            WLa=WL-(MIS[7][H+1][1]-MIS[7][H][1])/2.;
+            WLa=WL-(ms.lambda[H]-ms.lambda[H-1])/2.;
         if(H<NeV)
-            WLb=WL+(MIS[7][H+1][1]-MIS[7][H][1])/2.;
+            WLb=WL+(ms.lambda[H]-ms.lambda[H-1])/2.;
         else
-            WLb=WL+(MIS[7][H][1]-MIS[7][H-1][1])/2.;
+            WLb=WL+(ms.lambda[H-1]-ms.lambda[H-2])/2.;
         int N=N1;
-        while(X[N]<WLa && (N+STEP)<=NDATI && (N+STEP)>=1)
+        while(X[N-1]<WLa && (N+STEP)<=NDATI && (N+STEP)>=1)
             N=N+STEP;
-        if(iw==1){
-            printf("WLa= %f  WLb= %f\n",WLa,WLb);
-            printf("N= %d X[%d]= %f\n",N,N,X[N]);
-            printf("Data in [WLa , WLb]:\n");
+        if(X[N-1]>WLb && N-STEP>=1 && N-STEP<=NDATI)
+            N=N-STEP;
+        if(H==iwl2print || iw==1){
+            qDebug("\n>>> eV=%f WL= %f WLa= %f  WLb= %f",1240./WL,WL,WLa,WLb);
+            qDebug("starting-N= %d X[%d]= %f",N,N-1,X[N-1]);
+            qDebug("Data in [WLa , WLb]:");
         }
+
+        //counting data in [WLa,WLb]
         int NPM=0;
         int J=0;
-        while(X[N]>=WLa && X[N]<=WLb && N<=NDATI && N>=1){
+        do {
             NPM=NPM+1;
-            ns[J]=N;
-            xs[J]=X[N];
-            ys[J]=Y[N];
-            if(iw==1)
-                cout<<xs[J]<<"\t"<<ys[J]<<"\n";
+            xs.push_back(X[N-1]);
+            ys.push_back(Y[N-1]);
+            if(H==iwl2print ||iw==1)
+                qDebug()<<N<<xs[J]<<"\t"<<ys[J];
             J++;
             N=N+STEP;
-            if(N>NDATI ||N<1) continue;
-        }
+        }while(N<=NDATI && N>=1 && X[N-1]>=WLa && X[N-1]<=WLb);
+        if(N<NDATI && N>1)
+            N=N-STEP;
+        else if(N<=1 && STEP==-1)
+            N=2;
+        else if(N>=NDATI && STEP ==1)
+            N=NDATI-1;
 
         // check
-        if(NPM<3){
-            if(iw==1)
-                printf("... NPM= %d' < 3 -> set NPM=3\n",NPM);
-            if(NPM>=1)
-                N=ns[0];
-            else if(NPM==0){
-                NPM=1;
-                ns[0]=N;
+        if(NPM<=2){//target: X[N-1] <= WL <= X[N-1+STEP]
+            if(H==iwl2print ||iw==1)
+                qDebug("... N=%d with NPM= %d -> set NPM=2",N,NPM);
+            if(N>1 && N<NDATI){
+                bool adj=true;
+                while(adj && N<=NDATI && N>=1){
+                    if(X[N-1]>WL)
+                        N=N-STEP;
+                    if(X[N+STEP-1]<WL)
+                        N=N+STEP;
+                    if(X[N-1]<=WL && X[N-1+STEP]>=WL)
+                        adj=false;
+                    if(H==iwl2print ||iw==1)
+                        qDebug("end while adj loop: N=%d X[N-1]=%f WL=%f X[N-1+STEP]=%f adj=%b",N,X[N-1],WL,X[N-1+STEP],adj);
+                }
             }
-            if(NPM==1 && N>1 && N<NDATI && X[N+STEP]>WLb)
-                N=N-STEP;
-            while((N+STEP*2)<1 || (N+STEP*2)>NDATI)
-                N=N-STEP;
-            NPM=3;
-            for(int j=0;j<NPM;j++){
-                ns[j]=N;
-                xs[j]=X[N];
-                ys[j]=Y[N];
-                if(iw==1)
-                    cout<<xs[j]<<"\t"<<ys[j]<<"\n";
-                N=N+STEP;
+            NPM=2;
+            //ns.resize(2);
+            xs.resize(2);ys.resize(2);
+            if(N<=1){
+                if(STEP==1)
+                    N=1;
+                else
+                    N=2;
+            }else if(N>=NDATI){
+                if(STEP==1)
+                    N=NDATI-1;
+                else
+                    N=NDATI;
             }
-        }
-        else if(NPM>3 && I>=21 && NINT(par[10][2])==0){ //ellissometric measurement
-            if(iw==1)
-                cout<<"... ELLI meas -> set NPM=3!"<<"\n";
-            while(X[N+STEP]<WL)
-                N=N+STEP;
-            NPM=3;
-            for(int j=0;j<NPM;j++){
-                ns[j]=N;
-                xs[j]=X[N];
-                ys[j]=Y[N];
-
-                if(iw==1)
-                    cout<<xs[j]<<"\t"<<ys[j]<<"\n";
-                N=N+STEP;
+            for(int j=0; j<NPM; j++){
+                //ns[j]=N;
+                xs[j]=X[N-1];
+                ys[j]=Y[N-1];
+                if(H==iwl2print ||iw==1)
+                    qDebug("N=%d xs[%d]=%f ys[%d]=%f",N,j,xs[j],j,ys[j]);
+                N = N+STEP;
             }
-        }
-        // check and cure ELLI meas jump
-        if(I>=21){
-            double ysOld;
-            for(int J=0;J<NPM;J++){
-                if(J==0)
-                    ysOld=ys[J];
-                ys[J]=ys[J]-Dperiod*NINT((ys[J]-ysOld)/Dperiod);
-                ysOld=ys[J];
-            }
+            if((H==iwl2print ||iw==1) && X[N-1]<WL)
+                qDebug("ATTENTION: X[N-1]<WL !!!");
         }
 
-        // fit/interpolation
-        double a,b,c;
-        if(NPM>3){//fit
-            int mFit=NPM;
-            int nFit=3;
-            int lwa=mFit*nFit+5*nFit+mFit;
-            int iwa[nFit];
-            //int* iwa=nullptr;
-            //iwa = new int[nFit];
-            double p[nFit];
-            //double* p=nullptr;
-            //p = new double[nFit];
-            double fvec[mFit];
-            //double* fvec=nullptr;
-            //fvec = new double[mFit];
-            double wa[lwa];
-            //double* wa=nullptr;
-            //wa = new double[lwa];
-            p[2]=0.;
+        if(NPM>3 && I>=21 && nint(par[10][2])==0){ //ellissometric measurement and 3 points condition
+            if(H==iwl2print ||iw==1)
+                qDebug()<<"... ELLI meas -> set NPM=3!";
+            do{
+                N=N-STEP;
+            }while(X[N-1]>WL);
+            N=N-STEP;
+            NPM=3;
             for(int j=0;j<NPM;j++){
-                ARSE[j][1]=xs[j];
-                ARSE[j][2]=ys[j];
-                p[2]=p[2]+ys[j];
-            }
-            p[0]=0.;
-            p[1]=0.;
-            p[2]=p[2]/double(NPM);
-            double tol=sqrt(dpmpar(1));
-            int Info=lmdif1(FPAR, &pTF2, mFit, nFit, p,fvec, tol, iwa, wa, lwa);
-            if(Info<=0)
-                printf("improper input parameters\n");
-            c=p[2];
-            b=p[1];
-            a=p[0];
-            if(iw==1){
-                printf("coeff of BF parabolic:\na= %f  b= %f  c= %f\n",a,b,c);
-                for(int iii=0;iii<NPM;iii++)
-                    cout<< xs[iii]<<"\t"<<ys[iii]<<"\n";
+                //ns[j]=N;
+                xs[j]=X[N-1];
+                ys[j]=Y[N-1];
+                if(H==iwl2print ||iw==1)
+                    qDebug()<<xs[j]<<"\t"<<ys[j];
+                N=N+STEP;
             }
         }
-        else{//interpolation on 3 points
-            if(abs(xs[0]-xs[1])<.01 || abs(xs[1]-xs[2])<.01)
-                printf("ATTENTION: 2 data with same abscidssa %f %f %f\n!!!",
-                       xs[0],xs[1],xs[2]);
+
+        double a=0.,b=0.,c=0.;
+        //linear extrapolation
+        if(NPM==2){
+            a=0;
+            b=(ys[1]-ys[0])/(xs[1]-xs[0]);
+            c=-b*xs[0]+ys[0];
+            //YFIN=b*(WL-xs[0])+ys[0]
+        }
+        else if(NPM==3){//interpolation on 3 points
+            if(std::abs(xs[0]-xs[1])<.01 || std::abs(xs[1]-xs[2])<.01){
+                qDebug("ATTENTION: 2 data with same abscissa WL=%f xs[0]=%f xs[1]=%f xs[2]=%f\n!!!",
+                       WL,xs[0],xs[1],xs[2]);
+            }
             double XD1=xs[0];
             double XD2=xs[1];
             double XD3=xs[2];
@@ -8395,17 +8328,51 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
             c=XD1*XD1*(XD2*YD3-XD3*YD2);
             c=c-XD1*(XD2*XD2*YD3-XD3*XD3*YD2);
             c=(c+YD1*(XD2*XD2*XD3-XD3*XD3*XD2))/DETD;
-            if(iw==1 ){
-                printf("Coeff parabola at 3 points:\n");
-                printf("X: %f %f %f\n",XD1,XD2,XD3);
-                printf("Y: %f %f %f\n",YD1,YD2,YD3);
-                printf("a= %f  b= %f  c= %f\n",a,b,c);
-                printf("FACO=%f \n", FACO);
+            if(H==iwl2print ||iw==1 ){
+                qDebug("Coeff parabola at 3 points:");
+                qDebug("X: %f %f %f",XD1,XD2,XD3);
+                qDebug("Y: %f %f %f",YD1,YD2,YD3);
+                qDebug("a= %f  b= %f  c= %f",a,b,c);
+                qDebug("FACO=%f ", FACO);
             }
         }
+
+        // fit/interpolation
+        else{ //if(NPM>3)
+            int mFit=NPM;
+            int nFit=3;
+            int lwa=mFit*nFit+5*nFit+mFit;
+            std::vector <int> iwa(nFit);
+            std::vector <double> p(nFit),fvec(mFit),wa(lwa);
+            p[2]=0.;
+            pTF2.resize(NPM);
+            for(int j=0;j<NPM;j++){
+                pTF2[j].x = xs[j];
+                pTF2[j].y = ys[j];
+                p[2]=p[2]+ys[j];
+            }
+            p[0]=0.;
+            p[1]=0.;
+            p[2]=p[2]/static_cast<double>(NPM);
+            double tol=sqrt(dpmpar(1));
+            int Info=lmdif1(FPAR, pTF2.data(), mFit, nFit, p.data(),fvec.data(), tol, iwa.data(), wa.data(), lwa);
+            if(Info<=0)
+                qWarning("improper input parameters");
+            c=p[2];
+            b=p[1];
+            a=p[0];
+            if(H==iwl2print ||iw==1){
+                qDebug("coeff of BF parabolic:\na= %f  b= %f  c= %f",a,b,c);
+                for(int iii=0;iii<NPM;iii++)
+                    qDebug()<< xs[iii]<<"\t"<<ys[iii];
+            }
+        }
+
         double YFIN=(a*WL*WL+b*WL+c)*FACO;
-        if(I>=7 && I<=15){
-            if(YFIN<.0 && ALARM==0 && NINT(par[9][1])!=1){
+        if(H==iwl2print ||iw==1)
+            qDebug("Final: WL=%f YFIN=%f",WL,YFIN);
+        if(I>=8 && I<=15){//nk file
+            if(YFIN<.0 && ALARM==0 && nint(par[9][1])!=1){
                 if(IUVIR==1){
                     QMessageBox msgBox;
                     msgBox.setText("n-file "+NANK[I-7].simplified()+" is <0 !!!\n Do you want impose n>=0?");
@@ -8417,7 +8384,7 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
                         par[9][1]=1;
                         break;
                     }
-                    printf("n-file %s is <0 !!!\n",NANK[I-7].simplified().toStdString().c_str());
+                    qDebug()<<"n-file "<<NANK[I-7]<<" is <0 !!!";
                 }
                 else if(IUVIR==2){
                     QMessageBox msgBox;
@@ -8430,31 +8397,33 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
                         par[9][1]=1;
                         break;
                     }
-                    printf("k-file %s is <0 !!!\n",NANK[I-7].simplified().toStdString().c_str());
+                    qDebug()<<"k-file "<<NANK[I-7]<<" is <0 !!!";
                 }
                 ALARM=1;
             }
-            if(int(par[9][1])==1 && YFIN<.0)
+            if(nint(par[9][1])==1 && YFIN<.0)
                 YFIN=.0;
-            MIS[I][H][IUVIR]=YFIN;
+            int jM = I - 8;  // indice in nkMaterials: 0..7
+            if(IUVIR == 1)
+                nkMaterials[jM].n[H-1] = YFIN;
+            else
+                nkMaterials[jM].k[H-1] = YFIN;
         }
-        if(I<=6){
-            MIS[I][H][1]=YFIN;
-            double DL=MIS[7][H][2];
+        if(I<=6){//SF measurements
+            ms.measures[I-1].value[H-1] = YFIN;
+            rxy[I][3]=min(rxy[I][3],YFIN*100.);
+            rxy[I][4]=max(rxy[I][4],YFIN*100.);
+            double DL=ms.driftBaseline[H-1];
+            double errY=0;
             if(I==1 || I==2)
-                MIS[I][H][2]=MIS[I][H][1]*INSTR[3]+DL;
+                errY=YFIN*INSTR[3]+DL;
             if(I==3 || I==4 || I==5)
-                MIS[I][H][2]=MIS[I][H][1]*(INSTR[3]+INSTR[4])+DL;
+                errY=YFIN*(INSTR[3]+INSTR[4])+DL;
             if(iw==1)
-                printf("MIS[%d][%d][1]= %f\n",I,H,MIS[I][H][1]);
+                qDebug("ms.measures[%d].value[%d]= %f",I-1,H-1,YFIN);
+            ms.measures[I-1].error[H-1] = errY;
         }
-        if(I>=21 && I<=28){
-            if(iDelCon==1&&(I==21||I==23||I==25||I==27)){
-                if(H==1)
-                    yOld=YFIN;
-                YFIN=YFIN-Dperiod*NINT((YFIN-yOld)/Dperiod);
-                yOld=YFIN;
-            }
+        if(I>=21 && I<=28){//eli measurements
             if(I==21||I==23||I==25||I==27){
                 cosDelMin=min(cosDelMin,cos(YFIN*deg2rad));
                 cosDelMax=max(cosDelMax,cos(YFIN*deg2rad));
@@ -8463,23 +8432,28 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
                 tanPsiMin=min(tanPsiMin,tan(YFIN*deg2rad));
                 tanPsiMax=max(tanPsiMax,tan(YFIN*deg2rad));
             }
-            ELI[I-20][H][IUVIR]=YFIN;
+            if(IUVIR==1){
+                ms.measures[I-21+6].value[H-1] = YFIN;
+                rxy[I-14][3]=min(rxy[I-14][3],YFIN);
+                rxy[I-14][4]=max(rxy[I-14][4],YFIN);
+            }
+            else
+                ms.measures[I-21+6].error[H-1] = YFIN;
         }
-        ymin=min(ymin,YFIN);
-        ymax=max(ymax,YFIN);
         if(iw==1){
-            char ch;
-            cout<<"Go on?\n";
-            cin>> ch;
+            QMessageBox msgBox;
+            msgBox.setText("Do you want to continue step by step?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setDefaultButton(QMessageBox::Yes);
+            int ret = msgBox.exec();
+            switch (ret) {
+            case QMessageBox::No:
+                iw=0;
+                par[18][1]=0;
+            }
         }
     }
-    if(I>=1 && I<=6){
-        rxy[I][3]=ymin*100.;
-        rxy[I][4]=ymax*100.;
-    }
-    else if(I>=21 && I<=28 && IUVIR==1){
-        rxy[I-14][3]=ymin;
-        rxy[I-14][4]=ymax;
+    if(I>=21 && I<=28 && IUVIR==1){
         if(I==21||I==23||I==25||I==27){
             rxy[19][3]=min(rxy[19][3],cosDelMin);
             rxy[19][4]=max(rxy[19][4],cosDelMax);
@@ -8493,568 +8467,229 @@ void CONVER(double X[12000],double Y[12000],int NDATI,int N1,int STEP,int I,int 
 
 
 int FPAR(void *p, int m, int n, const double *x, double *fvec, int iflag){
-    //struct pointToFit2 *pTF2 = (struct pointToFit2 *)p;
-    for(int i=0;i<m;i++)
-        fvec[i]=ARSE[i][2]-x[0]*ARSE[i][1]*ARSE[i][1]-x[1]*ARSE[i][1]-x[2];
+    PointToFit2 *punti = static_cast<PointToFit2*>(p);
+    for(int i=0;i<m;i++){
+        double xi = punti[i].x;
+        double yi = punti[i].y;
+        fvec[i] = yi - (x[0] * xi * xi + x[1] * xi + x[2]);
+    }
     return(0);
 }
 
 
-void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double *Yp,double *ErrXp,double *ErrYp){
-    //int iL1B2= 1->line 2->dot & errorBar
-    //int iRD= 0->overwrite 1->redraw
-    //int iCol= color index 0->black
-    //                      1->blue
-    //                      2->cyan
-    //                      3->green
-    //                      4->magenta
-    //                      5->red
-    //                      6->yellow
-    //int ic identify the graph
-    //    ic= 1: G1_Tn
-    //    ic= 2: G2_Tp
-    //    ic= 3: G3_Rn
-    //    ic= 4: G4_Rp
-    //    ic= 5: G5_R1
-    //    ic= 6: G6_Apds
-    //    ic= 7: G7_D(elta)
-    //    ic= 8: G8_P(si)
-    //    ic= 9: G9_Af
-    //    ic=10: G10_tTR
-    //    ic=11: G11_nk
-    //    ic=12: G12_wn
-    //    ic=13: G13_wk
-    //    ic=14: G14_we1
-    //    ic=15: G15_we2
-    //    ic=16: G16_Ab
-    int graphDrift=40;
-    double Px[Ndata],Py[Ndata],Ymin=rxy[17][1],Ymax=rxy[17][2];
-    for(int i=0;i<Ndata;i++){
-        Px[i]=Xp[i];
-        Py[i]=Yp[i];
-    }
-    if(ic==13 && NINT(par[31][5]==1)){//klog plot
-        if(Ymin>0.)
-            Ymin=log10(Ymin);
-        else
-            Ymin=log10(Ymax/1.E+04);
-        Ymax=log10(Ymax);
-        for(int i=0;i<Ndata;i++){
-            double Yup=Yp[i]+ErrYp[i];
-            double Ydw=Yp[i]-ErrYp[i];
-            if(Yup<Ymin)
-                Yup=Ymin;
-            if(Ydw<Ymin)
-                Ydw=Ymin;
-            Py[i]=0.5*(log10(Yup)+log10(Ydw));
-            ErrYp[i]=0.5*(log10(Yup)-log10(Ydw));
-        }
-    }
-    if(ic==7 && NINT(par[33][5]==1) ){
-        for(int i=0;i<Ndata;i++){
-            double Yup=cos((Yp[i]+ErrYp[i])*deg2rad);
-            double Ydw=cos((Yp[i]-ErrYp[i])*deg2rad);
-            Py[i]=0.5*(Yup+Ydw);
-            ErrYp[i]=0.5*abs(Yup-Ydw);
-        }
-    }
-    if(ic==8 && NINT(par[33][5]==1) ){
-        for(int i=0;i<Ndata;i++){
-            double Yup=tan((Yp[i]+ErrYp[i])*deg2rad);
-            double Ydw=tan((Yp[i]-ErrYp[i])*deg2rad);
-            Py[i]=0.5*(Yup+Ydw);
-            ErrYp[i]=0.5*abs(Yup-Ydw);
-        }
-    }
-    if(ic<1 ||ic>16)//if(Ndata==0 || ic<1 ||ic>16)
+void ksemawc::ensureGraph(int ic, int iRD){
+    if(ic < 1 || ic > N_GRAPHS)
         return;
-    int wGhx=int(rxy[24][1]);
-    int wGhy=int(rxy[24][2]);
-    printf("PLOT: IXW[%d]=%d iL1B2=%d iRD=%d iCol=%d ic=%d Ndata=%d L1E2=%d\n",ic,IXW[ic],iL1B2,iRD,iCol,ic,Ndata,L1E2);
-    if(IXW[ic]<0){
-        if(ic==1){
-            G1_Tn=new QwtPlot();
-            G1_Tn->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker1 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G1_Tn->canvas() );
-        }
-        if(ic==2){
-            G2_Tp=new QwtPlot();
-            G2_Tp->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker2 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G2_Tp->canvas() );
-        }
-        if(ic==3){
-            G3_Rn=new QwtPlot();
-            G3_Rn->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker3 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G3_Rn->canvas() );
-        }
-        if(ic==4){
-            G4_Rp=new QwtPlot();
-            G4_Rp->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker4 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G4_Rp->canvas() );
-        }
-        if(ic==5){
-            G5_R1=new QwtPlot();
-            G5_R1->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker5 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G5_R1->canvas() );
-        }
-        if(ic==6){
-            G6_Apds=new QwtPlot();
-            G6_Apds->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker6 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G6_Apds->canvas() );
-        }
-        if(ic==7){
-            G7_D=new QwtPlot();
-            G7_D->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker7 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G7_D->canvas() );
-        }
-        if(ic==8){
-            G8_P=new QwtPlot();
-            G8_P->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker8 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G8_P->canvas() );
-        }
-        if(ic==9){
-            G9_Af=new QwtPlot();
-            G9_Af->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker9 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G9_Af->canvas() );
-        }
-        if(ic==10){
-            G10_tTR=new QwtPlot();
-            G10_tTR->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker10 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G10_tTR->canvas() );
-        }
-        if(ic==11){
-            G11_nk=new QwtPlot();
-            G11_nk->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker11 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G11_nk->canvas() );
-        }
-        if(ic==12){
-            G12_wn=new QwtPlot();
-            G12_wn->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker12 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G12_wn->canvas() );
-        }
-        if(ic==13){
-            G13_wk=new QwtPlot();
-            G13_wk->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker13 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G13_wk->canvas() );
-        }
-        if(ic==14){
-            G14_we1=new QwtPlot();
-            G14_we1->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker14 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G14_we1->canvas() );
-        }
-        if(ic==15){
-            G15_we2=new QwtPlot();
-            G15_we2->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker15 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G15_we2->canvas() );
-        }
-        if(ic==16){
-            G16_Ab=new QwtPlot();
-            G16_Ab->setGeometry(nOpenGraph*graphDrift,nOpenGraph*graphDrift,wGhx,wGhy);
-            nOpenGraph++;
-            QwtPlotPicker *m_picker16 = new QwtPlotPicker( QwtAxis::XBottom, QwtAxis::YLeft,
-                                                         QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
-                                                         G16_Ab->canvas() );
-        }
-        IXW[ic]=1;
+    //qDebug("ensureGraph: ic=%d iRD=%d",ic,iRD);
+    int wGhx = static_cast<int>(rxy[24][1]);
+    int wGhy = static_cast<int>(rxy[24][2]);
+    int graphDrift = 40;
+
+    if(m_graphs[ic] == nullptr){
+        m_graphs[ic] = new QwtPlot();
+        m_graphs[ic]->setAttribute(Qt::WA_DeleteOnClose);
+        m_graphs[ic]->setGeometry(nOpenGraph * graphDrift,
+                                  nOpenGraph * graphDrift,
+                                  wGhx, wGhy);
+        nOpenGraph++;
+        // La connect usa la copia di ic per cattura — corretta per tutti i 16
+        connect(m_graphs[ic], &QObject::destroyed, this, [this, ic]() {
+            m_graphs[ic]  = nullptr;
+            m_pickers[ic] = nullptr;
+        });
+
+        m_pickers[ic] = new QwtPlotPicker(
+            QwtAxis::XBottom, QwtAxis::YLeft,
+            QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn,
+            m_graphs[ic]->canvas());
+        m_pickers[ic]->setStateMachine(new QwtPickerDragPointMachine());
+        m_pickers[ic]->setRubberBandPen(QPen(Qt::red));
+        m_pickers[ic]->setTrackerPen(QPen(Qt::black));
     }
-    else{
-        if(ic==1 && iRD==1){
-            G1_Tn->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G1_Tn->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
+    else {
+        if(iRD == 1){
+            m_graphs[ic]->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
+            m_graphs[ic]->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve, true);
         }
-        if(ic==2 && iRD==1){
-            G2_Tp->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G2_Tp->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==3 && iRD==1){
-            G3_Rn->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G3_Rn->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==4 && iRD==1){
-            G4_Rp->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G4_Rp->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==5 && iRD==1){
-            G5_R1->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G5_R1->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==6 && iRD==1){
-            G6_Apds->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G6_Apds->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==7 && iRD==1){
-            G7_D->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G7_D->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==8 && iRD==1){
-            G8_P->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G8_P->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==9 && iRD==1){
-            G9_Af->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G9_Af->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==10 && iRD==1){
-            G10_tTR->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G10_tTR->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==11 && iRD==1){
-            G11_nk->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G11_nk->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==12 && iRD==1){
-            G12_wn->detachItems(QwtPlotItem::Rtti_PlotCurve,true);
-            G12_wn->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==13 && iRD==1){
-            G13_wk->detachItems(QwtPlotItem::Rtti_PlotCurve,true);
-            G13_wk->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==14 && iRD==1){
-            G14_we1->detachItems(QwtPlotItem::Rtti_PlotCurve,true);
-            G14_we1->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==15 && iRD==1){
-            G15_we2->detachItems(QwtPlotItem::Rtti_PlotCurve,true);
-            G15_we2->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-        if(ic==16 && iRD==1){
-            G16_Ab->detachItems(QwtPlotItem::Rtti_PlotCurve, true);
-            G16_Ab->detachItems(QwtPlotItem::Rtti_PlotIntervalCurve,true);
-        }
-    }
-    double WEmin=rxy[20][1],WEmax=rxy[20][2];
-    if(L1E2==2 && ic!=10 && ic!=11){
-        WEmin=1240./WEmin;
-        WEmax=1240./WEmax;
-        for(int i=0;i<Ndata;i++)
-            Px[i]=1240./Px[i];
-    }
-    QwtPlotCurve *dataPlot=new QwtPlotCurve(labelQwt);
-    //QwtPlotCurve *dataPlot=new QwtPlotCurve("Layer_"+QString::number(iCol));
-    //QwtPlotCurve *dataPlot=new QwtPlotCurve("dataPlot");
-    QwtPlotIntervalCurve *range_plot = new QwtPlotIntervalCurve("range");
-    dataPlot->setSamples(Px, Py, Ndata);
-    int wT=int(rxy[24][3]);
-    if(iL1B2==1){
-        dataPlot->setPen(QPen(myColor[iCol],wT,Qt::DotLine));
-    }
-    else{
-        dataPlot->setSymbol(new QwtSymbol(QwtSymbol::Ellipse, Qt::NoBrush, QPen(myColor[iCol]), QSize(2, 2)));
-        dataPlot->setStyle(QwtPlotCurve::NoCurve);
-        dataPlot->setRenderHint(QwtPlotItem::RenderAntialiased);
-        /* error bars */
-        QVector<QwtIntervalSample> range(Ndata);
-        for(int i = 0; i < Ndata; i++) {
-            range[i] = QwtIntervalSample(Px[i],Py[i]-ErrYp[i],Py[i]+ErrYp[i]);
-        }
-        QwtIntervalSymbol *errorbar = new QwtIntervalSymbol(QwtIntervalSymbol::Bar);
-        errorbar->setPen(QPen(myColor[iColor], wT));
-        errorbar->setWidth(wT);
-        range_plot->setSamples(range);
-        range_plot->setSymbol(errorbar);
-        range_plot->setStyle(QwtPlotIntervalCurve::NoCurve);
-    }
-    if(ic==1){
-        G1_Tn -> setAxisTitle(0,"Tnormal (%)");
-        if(L1E2==1)
-            G1_Tn -> setAxisTitle(2,"wavelength (nm)");
-        else
-            G1_Tn -> setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G1_Tn);
-        if(iL1B2==2)
-            range_plot->attach(G1_Tn);
-        //printf("Tn: Range X: %f %f\nRangeY: %f %f\n",WEmin,WEmax,rxy[1][1],rxy[1][2]);
-        G1_Tn->setAxisScale(0,rxy[1][1],rxy[1][2],0);
-        G1_Tn->setAxisScale(2,WEmin,WEmax,0);
-        G1_Tn->setAutoReplot();
-        G1_Tn->show();
-    }
-    else if(ic==2){
-        G2_Tp -> setAxisTitle(0,"Tpolarised (%)");
-        if(L1E2==1)
-            G2_Tp -> setAxisTitle(2,"wavelength (nm)");
-        else
-            G2_Tp -> setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G2_Tp);
-        if(iL1B2==2)
-            range_plot->attach(G2_Tp);
-        G2_Tp->setAxisScale(0,rxy[2][1],rxy[2][2],0);
-        G2_Tp->setAxisScale(2,WEmin,WEmax,0);
-        G2_Tp->setAutoReplot();
-        G2_Tp->show();
-    }
-    else if(ic==3){
-        G3_Rn -> setAxisTitle(0,"Rnormal (%)");
-        if(L1E2==1)
-            G3_Rn -> setAxisTitle(2,"wavelength (nm)");
-        else
-            G3_Rn -> setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G3_Rn);
-        if(iL1B2==2)
-            range_plot->attach(G3_Rn);
-        G3_Rn->setAxisScale(0,rxy[3][1],rxy[3][2],0);
-        G3_Rn->setAxisScale(2,WEmin,WEmax,0);
-        G3_Rn -> setAutoReplot();
-        G3_Rn->show();
-    }
-    else if(ic==4){
-        G4_Rp -> setAxisTitle(0,"Rpolarized (%)");
-        if(L1E2==1)
-            G4_Rp -> setAxisTitle(2,"wavelength (nm)");
-        else
-            G4_Rp -> setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G4_Rp);
-        if(iL1B2==2)
-            range_plot->attach(G4_Rp);
-        G4_Rp->setAxisScale(0,rxy[4][1],rxy[4][2],0);
-        G4_Rp->setAxisScale(2,WEmin,WEmax,0);
-        G4_Rp -> setAutoReplot();
-        G4_Rp->show();
-    }
-    else if(ic==5){
-        G5_R1 -> setAxisTitle(0,"R1normal (%)");
-        if(L1E2==1)
-            G5_R1 -> setAxisTitle(2,"wavelength (nm)");
-        else
-            G5_R1 -> setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G5_R1);
-        if(iL1B2==2)
-            range_plot->attach(G5_R1);
-        G5_R1->setAxisScale(0,rxy[5][1],rxy[5][2],0);
-        G5_R1->setAxisScale(2,WEmin,WEmax,0);
-        G5_R1 -> setAutoReplot();
-        G5_R1->show();
-    }
-    else if(ic==6){
-        G6_Apds -> setAxisTitle(0,"Apds");
-        if(L1E2==1)
-            G6_Apds -> setAxisTitle(2,"wavelength (nm)");
-        else
-            G6_Apds -> setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G6_Apds);
-        if(iL1B2==2)
-            range_plot->attach(G6_Apds);
-        G6_Apds->setAxisScale(0,rxy[6][1],rxy[6][2],0);
-        G6_Apds->setAxisScale(2,WEmin,WEmax,0);
-        G6_Apds -> setAutoReplot();
-        G6_Apds->show();
-    }
-    else if(ic==7){
-        if( NINT(par[33][5]==0) )
-            G7_D -> setAxisTitle(0,"Delta (deg)");
-        else
-            G7_D -> setAxisTitle(0,"cos(Delta)");
-        if(L1E2==1)
-            G7_D -> setAxisTitle(2,"wavelength (nm)");
-        else
-            G7_D -> setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G7_D);
-        if(iL1B2==2)
-            range_plot->attach(G7_D);
-        if( NINT(par[33][5]==0) )
-            G7_D->setAxisScale(0,rxy[7][1],rxy[7][2],0);
-        else
-            G7_D->setAxisScale(0,rxy[19][1],rxy[19][2],0);
-        G7_D->setAxisScale(2,WEmin,WEmax,0);
-        G7_D -> setAutoReplot();
-        G7_D->show();
-    }
-    else if(ic==8){
-        if( NINT(par[33][5]==0) )
-            G8_P -> setAxisTitle(0,"Psi (deg)");
-        else
-            G8_P -> setAxisTitle(0,"tan(Psi)");
-        if(L1E2==1)
-            G8_P -> setAxisTitle(2,"wavelength (nm)");
-        else
-            G8_P -> setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G8_P);
-        if(iL1B2==2)
-            range_plot->attach(G8_P);
-        if( NINT(par[33][5]==0) )
-            G8_P->setAxisScale(0,rxy[8][1],rxy[8][2],0);
-        else
-            G8_P->setAxisScale(0,rxy[22][1],rxy[22][2],0);
-        G8_P->setAxisScale(2,WEmin,WEmax,0);
-        G8_P -> setAutoReplot();
-        G8_P->show();
-    }
-    else if(ic==9){
-        G9_Af -> setAxisTitle(0,"Absorptance_front (%)");
-        if(L1E2==1)
-            G9_Af -> setAxisTitle(2,"wavelength (nm)");
-        else
-            G9_Af -> setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G9_Af);
-        if(iL1B2==2)
-            range_plot->attach(G9_Af);
-        G9_Af->setAxisScale(0,rxy[18][1],rxy[18][2],0);
-        G9_Af->setAxisScale(2,WEmin,WEmax,0);
-        if(labelQwt.contains("layer"))
-            G9_Af->insertLegend( new QwtLegend(), QwtPlot::RightLegend );
-        //else if(G9_Af->legend()->)
-        //    G9_Af->legend()->setVisible(false);
-        G9_Af -> setAutoReplot();
-        G9_Af->show();
-    }
-    else if(ic==10){
-        G10_tTR -> setAxisTitle(0,"Tau Rho Rho1 (%)");
-        G10_tTR -> setAxisTitle(2,"Theta (deg)");
-        dataPlot->attach(G10_tTR);
-        if(iL1B2==2)
-            range_plot->attach(G10_tTR);
-        G10_tTR->setAxisScale(0,rxy[23][1],rxy[23][2],0);
-        G10_tTR->setAxisScale(2,rxy[21][1],rxy[21][2],0);
-        G10_tTR->setAutoReplot();
-        G10_tTR->show();
-    }
-    else if(ic==11){
-        G11_nk -> setAxisTitle(0,"k");
-        G11_nk -> setAxisTitle(2,"n");
-        dataPlot->attach(G11_nk);
-        if(iL1B2==2)
-            range_plot->attach(G11_nk);
-        G11_nk->setAxisScale(0,rxy[17][1],rxy[17][2],0);
-        G11_nk->setAxisScale(2,rxy[16][1],rxy[16][2],0);
-        G11_nk -> setAutoReplot();
-        G11_nk->show();
-    }
-    else if(ic==12){
-        G12_wn->setAxisTitle(0,"n");
-        if(L1E2==1)
-            G12_wn->setAxisTitle(2,"wavelength (nm)");
-        else
-            G12_wn->setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G12_wn);
-        if(iL1B2==2)
-            range_plot->attach(G12_wn);
-        G12_wn->setAxisScale(0,rxy[16][1],rxy[16][2],0);
-        G12_wn->setAxisScale(2,WEmin,WEmax,0);
-        G12_wn->setAutoReplot();
-        G12_wn->show();
-    }
-    else if(ic==13){
-        if(NINT(par[31][5]!=1))
-            G13_wk->setAxisTitle(0,"k");
-        else
-            G13_wk->setAxisTitle(0,"log10(k)");
-        if(L1E2==1)
-            G13_wk->setAxisTitle(2,"wavelength (nm)");
-        else
-            G13_wk->setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G13_wk);
-        if(iL1B2==2)
-            range_plot->attach(G13_wk);
-        G13_wk->setAxisScale(0,Ymin,Ymax,0);
-        G13_wk->setAxisScale(2,WEmin,WEmax,0);
-        G13_wk->setAutoReplot();
-        G13_wk->show();
-    }
-    else if(ic==14){
-        G14_we1->setAxisTitle(0,"eps1");
-        if(L1E2==1)
-            G14_we1->setAxisTitle(2,"wavelength (nm)");
-        else
-            G14_we1->setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G14_we1);
-        if(iL1B2==2)
-            range_plot->attach(G14_we1);
-        G14_we1->setAxisScale(0,rxy[26][1],rxy[26][2],0);
-        G14_we1->setAxisScale(2,WEmin,WEmax,0);
-        G14_we1->setAutoReplot();
-        G14_we1->show();
-    }
-    else if(ic==15){
-        G15_we2->setAxisTitle(0,"eps2");
-        if(L1E2==1)
-            G15_we2->setAxisTitle(2,"wavelength (nm)");
-        else
-            G15_we2->setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G15_we2);
-        if(iL1B2==2)
-            range_plot->attach(G15_we2);
-        G15_we2->setAxisScale(0,rxy[27][1],rxy[27][2],0);
-        G15_we2->setAxisScale(2,WEmin,WEmax,0);
-        G15_we2->setAutoReplot();
-        G15_we2->show();
-    }
-    else if(ic==16){
-        G16_Ab -> setAxisTitle(0,"Absorptance_back (%)");
-        if(L1E2==1)
-            G16_Ab -> setAxisTitle(2,"wavelength (nm)");
-        else
-            G16_Ab -> setAxisTitle(2,"photon energy (eV)");
-        dataPlot->attach(G16_Ab);
-        if(iL1B2==2)
-            range_plot->attach(G16_Ab);
-        G16_Ab->setAxisScale(0,rxy[18][1],rxy[18][2],0);
-        G16_Ab->setAxisScale(2,WEmin,WEmax,0);
-        if(labelQwt.contains("layer"))
-            G16_Ab->insertLegend( new QwtLegend(), QwtPlot::RightLegend );
-        G16_Ab -> setAutoReplot();
-        G16_Ab->show();
+        m_graphs[ic]->raise();
+        m_graphs[ic]->activateWindow();
     }
 }
 
 
+void ksemawc::PLOTline1bar2(int iL1B2, int iRD, int iCol, int ic,int Ndata, double *Xp, double *Yp,
+                                    double *ErrXp, double *ErrYp){
+    qDebug("PLOT: iL1B2=%d iRD=%d iCol=%d ic=%d Ndata=%d L1E2=%d",iL1B2,iRD,iCol,ic,Ndata,L1E2);
+
+    // --- Trasform Y  ---
+    double Ymin = rxy[17][1], Ymax = rxy[17][2];
+    std::vector<double> Px(Ndata), Py(Ndata);
+    for(int i = 0; i < Ndata; i++){
+        Px[i] = Xp[i];
+        Py[i] = Yp[i];
+    }
+    if(ic == 13 && nint(par[31][5]) == 1){
+        if(Ymin > 0.) Ymin = log10(Ymin); else Ymin = log10(Ymax / 1.E+04);
+        Ymax = log10(Ymax);
+        for(int i = 0; i < Ndata; i++){
+            double Yup = Yp[i] + ErrYp[i];
+            double Ydw = Yp[i] - ErrYp[i];
+            if(Yup < Ymin) Yup = Ymin;
+            if(Ydw < Ymin) Ydw = Ymin;
+            Py[i]     = 0.5 * (log10(Yup) + log10(Ydw));
+            ErrYp[i]  = 0.5 * (log10(Yup) - log10(Ydw));
+        }
+    }
+    if(ic == 7 && nint(par[33][5]) == 1){
+        for(int i = 0; i < Ndata; i++){
+            double Yup = cos((Yp[i] + ErrYp[i]) * deg2rad);
+            double Ydw = cos((Yp[i] - ErrYp[i]) * deg2rad);
+            Py[i]     = 0.5 * (Yup + Ydw);
+            ErrYp[i]  = 0.5 * std::abs(Yup - Ydw);
+        }
+    }
+    if(ic == 8 && nint(par[33][5]) == 1){
+        for(int i = 0; i < Ndata; i++){
+            double Yup = tan((Yp[i] + ErrYp[i]) * deg2rad);
+            double Ydw = tan((Yp[i] - ErrYp[i]) * deg2rad);
+            Py[i]     = 0.5 * (Yup + Ydw);
+            ErrYp[i]  = 0.5 * std::abs(Yup - Ydw);
+        }
+    }
+
+    //check Graph number
+    if(ic < 1 || ic > N_GRAPHS)
+        return;
+
+    // open Graph
+    ensureGraph(ic, iRD);
+
+    // --- Trasform X ---
+    double WEmin = rxy[20][1], WEmax = rxy[20][2];
+    if(L1E2 == 2 && ic != 10 && ic != 11){
+        WEmin = 1240. / WEmin;
+        WEmax = 1240. / WEmax;
+        for(int i = 0; i < Ndata; i++)
+            Px[i] = 1240. / Px[i];
+    }
+
+    // --- Lines and error bars ---
+    QwtPlot* graph = m_graphs[ic];
+    QwtPlotCurve *dataPlot = new QwtPlotCurve(labelQwt);
+    dataPlot->setSamples(Px.data(), Py.data(), Ndata);
+    int wT = static_cast<int>(rxy[24][3]);
+    if(iL1B2 == 1){
+        dataPlot->setPen(QPen(myColor[iCol], wT, Qt::DotLine));
+    }
+    else{
+        QwtPlotIntervalCurve *range_plot = new QwtPlotIntervalCurve("range");
+        dataPlot->setSymbol(new QwtSymbol(QwtSymbol::Ellipse,
+                                          Qt::NoBrush, QPen(myColor[iCol]), QSize(2, 2)));
+        dataPlot->setStyle(QwtPlotCurve::NoCurve);
+        dataPlot->setRenderHint(QwtPlotItem::RenderAntialiased);
+        QVector<QwtIntervalSample> range(Ndata);
+        for(int i = 0; i < Ndata; i++)
+            range[i] = QwtIntervalSample(Px[i], Py[i] - ErrYp[i], Py[i] + ErrYp[i]);
+        QwtIntervalSymbol *errorbar = new QwtIntervalSymbol(QwtIntervalSymbol::Bar);
+        errorbar->setPen(QPen(myColor[iColor], wT));
+        errorbar->setWidth(wT);
+        range_plot->setSamples(new QwtIntervalSeriesData(range));
+        range_plot->setSymbol(errorbar);
+        range_plot->setStyle(QwtPlotIntervalCurve::NoCurve);
+        range_plot->attach(graph);
+    }
+
+    // --- Title axes and scale ---
+    // Tabella: yTitle, rxy_yMin_idx, rxy_yMax_idx
+    // (indici in rxy per i casi standard; i casi speciali sono gestiti sotto)
+    struct GraphMeta {
+        const char* yTitle;
+        int         rxy_y;   // indice riga di rxy per scala Y
+        bool        hasWE;   // true se usa asse WEmin/WEmax, false se usa asse proprio
+    };
+    static const GraphMeta meta[N_GRAPHS + 1] = {
+//      Y_label                     index of rxy[n][4] to set Y_range
+        {nullptr,                   0,  false}, // [0] non usato
+        {"Tnormal (%)",             1,  true }, // ic=1 Tn
+        {"Tpolarised (%)",          2,  true }, // ic=2 Tp
+        {"Rnormal (%)",             3,  true }, // ic=3 Rn
+        {"Rpolarized (%)",          4,  true }, // ic=4 Rp
+        {"R1normal (%)",            5,  true }, // ic=5 R1
+        {"Apds",                    6,  true }, // ic=6 Apds
+        {nullptr,                   7,  true }, // ic=7 Delta (dynamic title)
+        {nullptr,                   8,  true }, // ic=8 Psi   (idem )
+        {"Absorptance_front (%)",  18,  true }, // ic=9 Afront
+        {"Tau Rho Rho1 (%)",       23,  false}, // ic=10 Tau,Rho, Rho1 (X axis = Theta)
+        {"k",                      17,  false}, // ic=11 nk space
+        {"n",                      16,  true }, // ic=12 n
+        {nullptr,                  17,  true }, // ic=13 k or log(k) (dynamic title)
+        {"eps1",                   26,  true }, // ic=14 epsi1
+        {"eps2",                   27,  true }, // ic=15 epsi2
+        {"Absorptance_back (%)",   15,  true }, // Aback
+    };
+
+    const GraphMeta& m = meta[ic];
+
+    // Titolo asse Y
+    if(ic == 7){
+        graph->setAxisTitle(0, nint(par[33][5]) == 0 ? "Delta (deg)" : "cos(Delta)");
+    } else if(ic == 8){
+        graph->setAxisTitle(0, nint(par[33][5]) == 0 ? "Psi (deg)" : "tan(Psi)");
+    } else if(ic == 13){
+        graph->setAxisTitle(0, nint(par[31][5]) != 1 ? "k" : "log10(k)");
+    } else {
+        graph->setAxisTitle(0, m.yTitle);
+    }
+
+    // Title X axis
+    if(m.hasWE){
+        graph->setAxisTitle(2, L1E2 == 1 ? "wavelength (nm)" : "photon energy (eV)");
+    } else if(ic == 10){
+        graph->setAxisTitle(2, "Theta (deg)");
+    } else if(ic == 11){
+        graph->setAxisTitle(2, "n");
+    }
+
+    // Scale Y axis
+    if(ic == 7 && nint(par[33][5]) != 0)
+        graph->setAxisScale(0, rxy[19][1], rxy[19][2], 0);
+    else if(ic == 8 && nint(par[33][5]) != 0)
+        graph->setAxisScale(0, rxy[22][1], rxy[22][2], 0);
+    else if(ic == 13)
+        graph->setAxisScale(0, Ymin, Ymax, 0);
+    else
+        graph->setAxisScale(0, rxy[m.rxy_y][1], rxy[m.rxy_y][2], 0);
+
+    // Scale X axis
+    if(ic == 10)
+        graph->setAxisScale(2, rxy[21][1], rxy[21][2], 0);
+    else if(ic == 11)
+        graph->setAxisScale(2, rxy[16][1], rxy[16][2], 0);
+    else
+        graph->setAxisScale(2, WEmin, WEmax, 0);
+
+    // Attach curve
+    dataPlot->attach(graph);
+
+    // Legend (only ic 9 e 16)
+    if((ic == 9 || ic == 16) && labelQwt.contains("layer"))
+        graph->insertLegend(new QwtLegend(), QwtPlot::RightLegend);
+
+    graph->setAutoReplot();
+    graph->show();
+}
 
 
-
-void COSVNK(double VNK[17][3],int L){
+void ksemawc::COSVNK(double VNK[17][3],int L){
     // L = index of wavelenght
-    //printf("->COSVNK iWL=%d\n",L);
+    if(L==iwl2print)
+        qDebug("COSVNK @ iWL=%d WL=%f",L,ms.lambda[L-1]);
     double f2;
     for(int J=1;J<=16;J++){
-        int i1=NINT(CNK[J][1]);
+        int iForce=nint(CNK[J][0]);
+        int i1=nint(CNK[J][1]);
         SETVNK(i1,J,VNK,L,2);
-        int i2=NINT(CNK[J][4]);
-        //if(L==iwl2print) printf("-> COSVNK @ iWL=%d J=%d i1=%d i2=%d\n",L,J,i1,i2);
+        int i2=nint(CNK[J][4]);
         if(i2>=0){
             f2=pm[70+J][1];
             double n1=VNK[J][1];
@@ -9062,17 +8697,25 @@ void COSVNK(double VNK[17][3],int L){
             SETVNK(i2,J,VNK,L,5);
             double n2=VNK[J][1];
             double k2=VNK[J][2];
-            //if(L==iwl2print) printf("\t n2=%f k2=%f\n",n1,k2);
-            EMA(n1,k1,n2,k2,f2);
-            VNK[J][1]=Nema;
-            VNK[J][2]=Kema;
+            auto [nEff, kEff] = EMA(n1,k1,n2,k2,f2);
+            VNK[J][1]=nEff;
+            VNK[J][2]=kEff;
         }
-        //if(L==iwl2print) printf(" VNK[%d][1]=%f VNK[%d][2]=%f\n",J,VNK[J][1],J,VNK[J][2]);
+        if(iForce==1)
+            VNK[J][1]=CNK[J][7];
+        else if(iForce==2)
+            VNK[J][2]=CNK[J][8];
+        else if(iForce==3){
+            VNK[J][1]=CNK[J][7];
+            VNK[J][2]=CNK[J][8];
+        }
+        if(L==iwl2print)
+            qDebug("COSVNK: CNK[%d][0]=%d i1=%d i2=%d VNK[%d][1]=%f VNK[%d]=%f",J,nint(CNK[J][0]),i1,i2,J,VNK[J][1],J,VNK[J][2]);
     }
 }
 
 
-void SETVNK(int io,int J,double VNK[17][3],int L,int Kcte){
+void ksemawc::SETVNK(int io,int J,double VNK[17][3],int L,int Kcte){
     // L = index of wavelenght
     // set VNK(J,1) and VNK(J,2) given CNK(J,k)
     if(io==0){
@@ -9080,25 +8723,24 @@ void SETVNK(int io,int J,double VNK[17][3],int L,int Kcte){
         VNK[J][2]=CNK[J][Kcte+1];
     }
     else if(io>=1 && io<=7){ // 1-7 Fit options
-        double WL=MIS[7][L][1];
+        double WL=ms.lambda[L-1];
         double ev=1240./WL;
-        FDISP(io,ev);
-        VNK[J][1]=sqn;
-        VNK[J][2]=sqk;
+        auto fd = FDISP(io,ev);
+        VNK[J][1]=fd.sqn;
+        VNK[J][2]=fd.sqk;
     }
     else if(io>=8 &&io<=15){
-        VNK[J][1]=MIS[io][L][1];
-        VNK[J][2]=MIS[io][L][2];
+        VNK[J][1]=nkMaterials[io-8].n[L-1];
+        VNK[J][2]=nkMaterials[io-8].k[L-1];
     }
     else if(io==16){
         VNK[J][1]=VNK[1][1];
         VNK[J][2]=VNK[1][2];
     }
-    //if(L==iwl2print) printf("L= %d n=%f k=%f io=%d\n",L,VNK[J][1],VNK[J][2],io);
 }
 
 
-void EMA(double N,double K,double NA,double KA,double FA){
+EmaResult EMA(double N,double K,double NA,double KA,double FA){
     // Effective Medium Approximation computing
     double NE,KE;
     if(FA<0.0001){
@@ -9127,31 +8769,32 @@ void EMA(double N,double K,double NA,double KA,double FA){
             KE=KA;
         }
     }
-    Nema=NE;
-    Kema=KE;
+    return{NE, KE};
 }
 
 
-void FDISP(int iopt,double eV){
+FdispResult FDISP(int iopt,double eV){
     // nk computing by oscillators
-    //printf("->FDISP @ E=%f\n",eV);
+    //qDebug("->FDISP iopt=%d @ E=%f",iopt,eV);
     double cln2=0.693147181;
     double sqrln2=0.832554611;
+    double kVolSca=0;
     long double E3, Ex, Ey, W, KTi, r, Eb, Eh, El, derexp, derparab, TUx, TUy;
 
     // epsilon and nk by sum of oscillators
-    int noscFT=NINT(pf[iopt][1]);
+    int noscFT=nint(pf[iopt][1]);
     long double E=eV;
     long double epr=0.;
     long double epi=0.;
     long double eprj,epij;
     for(int io=2;io<=noscFT+1;io++){
-        int i=NINT(pf[iopt][io]);
-        int ifu=NINT(pm[101+(i-1)*5][1]);
-        long double C=abs(pm[102+(i-1)*5][1]);
-        long double E0=abs(pm[103+(i-1)*5][1]);
-        long double D=abs(pm[104+(i-1)*5][1]);
-        long double K=abs(pm[105+(i-1)*5][1]);
+        int i=nint(pf[iopt][io]);
+        int ifu=nint(pm[101+(i-1)*5][1]);
+        long double C=std::abs(pm[102+(i-1)*5][1]);
+        long double E0=std::abs(pm[103+(i-1)*5][1]);
+        long double D=std::abs(pm[104+(i-1)*5][1]);
+        long double K=std::abs(pm[105+(i-1)*5][1]);
+        //qDebug("i=%d ifu=%d C=%Lf E0=%Lf D=%Lf K=%Lf",i,ifu,C,E0,D,K);
         eprj=0.;
         epij=0.;
         if(ifu==1){// classic oscillator
@@ -9227,8 +8870,6 @@ void FDISP(int iopt,double eV){
             long double E3=K+E0;
             eprj=ReIndirCodyUrb(E,C,E0,E3,D);
             epij=ImIndirCodyUrb(E,C,E0,E3,D);
-            // if(eV>3.8 && eV<4.)
-            //     printf("->ifu=10 E=%Lf C=%Lf E0=%Lf E3=%Lf D=%Lf,eprj=%Lf epij=%Lf\n",E,C,E0,E3,D,eprj,epij);
         }
         else if(ifu==11){// Indirect gap Tauc with Urbach tail and K-K integral
             E3=K+E0;
@@ -9247,7 +8888,6 @@ void FDISP(int iopt,double eV){
                     Eb=(Eh+El)/2.; //bisection to find the energy for joining exponential and Tauc on th low energy side
                     derexp=C/KTi/(Eb*Eb)*(-(Eb-E0-W/2.)*(Eb-E0-W/2.)*16./(W*W)+2.)/D;
                     derparab=C/KTi/(Eb*Eb)*(32./W/W*(Eb-E0-W/2.)*((Eb-E0-W/2.)/Eb-1.)-4./Eb);
-                    //if(abs(E-3.)<0.01) printf("E=%Lf j=%d Eb=%Lf derexp=%Lf derparab=%Lf \n",E, j, Eb,derexp, derparab);
                     if (derexp>derparab) {
                         Eh=Eb;
                     }
@@ -9265,7 +8905,6 @@ void FDISP(int iopt,double eV){
                     Eb=(Eh+El)/2.; //bisection to find the energy for joining exponential and Tauc on th high energy side
                     derexp=-C/KTi/(Eb*Eb)*(-(Eb-E0-W/2.)*(Eb-E0-W/2.)*16./(W*W)+2.)/D;
                     derparab=C/KTi/(Eb*Eb)*(32./W/W*(Eb-E0-W/2.)*((Eb-E0-W/2.)/Eb-1.)-4./Eb);
-                    //if(abs(E-3.)<0.01) printf("E=%Lf j=%d Eb=%Lf derexp=%Lf derparab=%Lf \n",E, j, Eb,derexp, derparab);
                     if (derexp<derparab) {
                         El=Eb;
                     }
@@ -9299,17 +8938,15 @@ void FDISP(int iopt,double eV){
             gsl_sf_result re, im;
             int err;
             xi=sqrt(K/(E0-E-aim*D));
-            err=gsl_sf_complex_psi_e(double(real(xi)), double(imag(xi)), &re, &im );
+            err=gsl_sf_complex_psi_e(static_cast<double>(real(xi)), static_cast<double>(imag(xi)), &re, &im );
             psi=complex<double>(re.val, im.val);
-//            if(E>1.4 && E<1.6)
-//                printf("xi_re=%f xi_in=%f psi_re=%f psi_im=%f E=%Lf \n" ,double(real(xi)), double(imag(xi)),re.val,im.val,E);
             cmpxOut=due*(log(xi)-pigc/tan(pigc*xi)-(complex<long double>)psi)-uno/xi;
             xi=sqrt(K/(E0+E+aim*D));
-            err=gsl_sf_complex_psi_e(double(real(xi)), double(imag(xi)), &re, &im );
+            err=gsl_sf_complex_psi_e(static_cast<double>(real(xi)), static_cast<double>(imag(xi)), &re, &im );
             psi=complex<double>(re.val, im.val);
             cmpxOut=cmpxOut+due*(log(xi)-pigc/tan(pigc*xi)-(complex<long double>)psi)-uno/xi;
             xi=sqrt(K/E0);
-            err=gsl_sf_complex_psi_e(double(real(xi)), double(imag(xi)), &re, &im );
+            err=gsl_sf_complex_psi_e(static_cast<double>(real(xi)), static_cast<double>(imag(xi)), &re, &im );
             psi=complex<double>(re.val, im.val);
             cmpxOut=cmpxOut-due*(due*(log(xi)-pigc/tan(pigc*xi)-(complex<long double>)psi)-uno/xi);
             cmpxOut=cmpxOut*C*sqrt(K)/((E+aim*D)*(E+aim*D));
@@ -9330,14 +8967,14 @@ void FDISP(int iopt,double eV){
             eprj=ReTaucM1M2(E,C,E0,E3,D);
             epij=ImTaucM1M2(E,C,E0,E3,D);
         }
-        if(ifu==17){// Drude ionized
+        else if(ifu==17){// Drude ionized
             long double DOM=D;
             long double Etr=sqrt(2.*C/PIG)*0.75;
             if(E>Etr) DOM=D*pow(Etr/E,1.5);
             eprj=-2.*C/PIG/(DOM*DOM+E*E);
             epij= 2.*C/PIG*DOM/(pow(E,3.)+E*DOM*DOM);
         }
-        if(ifu==18){// Lorentz-Dirac oscillator
+        else if(ifu==18){// Lorentz-Dirac oscillator
             long double den=pow(E0*E0-E*E,2.)+pow(2.*E*D+E*E*E/K,2.);
             eprj=2.*C/PIG*(E0*E0-E*E)/den;
             epij=2.*C/PIG*(2.*E*D+E*E*E/K)/den;
@@ -9346,17 +8983,28 @@ void FDISP(int iopt,double eV){
 //            eprj=2.*C/PIG*((E0*E0-E*E)+E*E/K*(2.*D+E0*E0/K))/den;
 //            epij=2.*C/PIG*(2.*E*D+E*E*E/K)/den;
         }
+        else if(ifu==19){// k-oscillator for volume scattering
+            if(iShemispherical)
+                kVolSca=C*pow(E,K);
+            else
+                kVolSca=D*pow(E,K);
+            eprj=0.;
+            epij=0.;
+        }
         epr=epr+eprj;
         epi=epi+epij;
         if(isnan(eprj) || isnan(epij))
-            printf("->FDISP-ERROR: OscNumber=%d E(eV)=%f eprj=%Lf epij=%Lf\n",io-1,eV,eprj,epij);
+            qWarning("->FDISP-ERROR: iopt=%d OscNumber=%d ifu=%d E(eV)=%f eprj=%Lf epij=%Lf C=%Lf",iopt,io-1,ifu,eV,eprj,epij,C);
     }
-    EpsiR=epr;
-    EpsiI=epi;
-    sqn=sqrt(sqrt(epr*epr+epi*epi)+epr)/sqrt(2.);
-    sqk=par[11][1]*sqrt(sqrt(epr*epr+epi*epi)-epr)/sqrt(2.);//par[11][1] is the attenuation coeff of k by Fit#N
-    //printf("ioptf=%d eV=%f sqn=%f sqk=%f\n",iopt,eV,sqn,sqk);
+    double r_sqn = sqrt(sqrt(epr*epr + epi*epi) + epr) / sqrt(2.);
+    double r_sqk = par[11][1] * (sqrt(sqrt(epr*epr + epi*epi) - epr) / sqrt(2.)+kVolSca);
+    return {static_cast<double>(epr),
+            static_cast<double>(epi),
+            r_sqn,
+            r_sqk
+    };//par[11][1] is the attenuation coeff of k by Fit#N
 }
+
 
 long double I2CODYRE(long double E,long double E0,long double Ep,long double D){
     long double value=0.5/PIG*((Ep-E)*(3.*E-4.*E0+Ep)+4.*D*(E-E0)*
@@ -9364,16 +9012,19 @@ long double I2CODYRE(long double E,long double E0,long double Ep,long double D){
     return(value);
 }
 
+
 long double ICCODYRE(long double E,long double Ep,long double D){
     long double value=0.5/PIG*log(D*D+pow(E-Ep,2.));
     return(value);
 }
+
 
 long double I2CODYIM(long double E,long double E0,long double Ep,long double D){
     long double value=1./PIG*((D*D-pow(E-E0,2.))*atan2(E-Ep,D)+
                        D*(Ep-E+(E-E0)*log(D*D+pow(E-Ep,2.))));
     return(value);
 }
+
 
 long double ICCODYIM(long double E,long double Ep,long double D){
     long double value=-1./PIG*atan2(E-Ep,D);
@@ -9386,6 +9037,7 @@ long double ICTAUCRE(long double E,long double Ep,long double D){
     return(value);
 }
 
+
 long double I2TAUCRE(long double E,long double E0,long double Ep,long double D){
     long double value=(4.*D*E0*(D*D+E*E-E*E0)*atan2(E-Ep,D)+(pow(D,4.)+
                        E*E*pow(E-E0,2.)+D*D*(2.*E*E-2.*E*E0-E0*E0))*log(D*D+pow(E-Ep,2.))+
@@ -9394,11 +9046,13 @@ long double I2TAUCRE(long double E,long double E0,long double Ep,long double D){
     return(value);
 }
 
+
 long double ICTAUCIM(long double E,long double Ep,long double D){
     long double value=-((E*E-D*D)*atan2(E-Ep,D)+D*((D*D+E*E)/Ep+
                        E*log((D*D+pow(E-Ep,2.))/(Ep*Ep))))/(PIG*pow(D*D+E*E,2.));
     return(value);
 }
+
 
 long double I2TAUCIM(long double E,long double E0,long double Ep,long double D){
     long double value=-((pow(D,4.)+E*E*pow(E-E0,2.)+D*D*(2.*E*E-2.*E*E0-E0*E0))*
@@ -9406,6 +9060,7 @@ long double I2TAUCIM(long double E,long double E0,long double Ep,long double D){
                        log(Ep*Ep/(D*D+pow(E-Ep,2.)))))/(PIG*pow(D*D+E*E,2.));
     return(value);
 }
+
 
 long double DAWS(long double x){
     static int init=0;
@@ -9419,19 +9074,19 @@ long double DAWS(long double x){
     if(init==0){//c initialization
         init=1;
         for(int i=1;i<=NMAX;i++)
-            cDAW[i]=exp(-pow((2.*double(i)-1.)*H,2.));
+            cDAW[i]=exp(-pow((2.*static_cast<double>(i)-1.)*H,2.));
     }
-    if(abs(x)<0.2){// Use series expansion
+    if(std::abs(x)<0.2){// Use series expansion
         x2=x*x;
         value=x*(1.-A1*x2*(1.-A2*x2*(1.-A3*x2)));
     }
     else{// Use sampling theorem representation
-        xx=abs(x);
-        n0=2*NINT(0.5*xx/H);
-        xp=xx-double(n0)*H;
+        xx=std::abs(x);
+        n0=2*nint(0.5*xx/H);
+        xp=xx-static_cast<double>(n0)*H;
         e1=exp(2.*xp*H);
         e2=e1*e1;
-        d1=double(n0+1);
+        d1=static_cast<double>(n0+1);
         d2=d1-2.;
         sum=0.;
         for(int i=1;i<=NMAX;i++){
@@ -9445,6 +9100,7 @@ long double DAWS(long double x){
     return(value);
 }
 
+
 long double ReFdirGap(long double E,long double E0,long double D,long double x){
     complex<long double> b(E-E0,0.);
     complex<long double> dc(D,0.);
@@ -9455,6 +9111,7 @@ long double ReFdirGap(long double E,long double E0,long double D,long double x){
                     (aim*dc-b)))-sqrt(b+aim*dc)*atanh(sqrt((dc*xc+b)/(aim*dc+b))));
     return(value);
 }
+
 
 long double aImFdirGap(long double E,long double E0,long double D,long double x){
     complex<long double> b(E-E0,0.);
@@ -9486,6 +9143,7 @@ long double aImM0M3(long double E,long double E0,long double E3,long double reD)
     return(real(ctmp));
 }
 
+
 long double ReTaucL(long double E,long double E0,long double D,long double E3){
     complex<long double> aim(0.,1.);
     complex<long double> cE(E ,0.);
@@ -9510,6 +9168,7 @@ long double ReTaucL(long double E,long double E0,long double D,long double E3){
     return(real(cTmp));
 }
 
+
 long double aImTaucL(long double E,long double E0,long double D,long double E3){
     //COMPLEX aim,cE,cE0,cD,cE3,cTmp
     complex<long double> aim(0.,1.);
@@ -9528,8 +9187,8 @@ long double aImTaucL(long double E,long double E0,long double D,long double E3){
     return(real(ldv*cTmp));
 }
 
+
 long double ImDirCodyUrb(long double E,long double C,long double E0,long double E3,long double D){
-    //printf("->DirCodyUrb E=%Lf\n",E);
     long double Ex, Ey, chi2;						  
     long double KCd=PIG/16.*(E3-E0)*(E3-E0)*(2.*E0+E3-E0);
     Ex=((D+E3+E0)-sqrt(D*D+(E3-E0)*(E3-E0)))/2.;
@@ -9545,6 +9204,7 @@ long double ImDirCodyUrb(long double E,long double C,long double E0,long double 
     }
     return(chi2);
 }
+
 
 long double ReDirCodyUrb(long double E,long double C,long double E0,long double E3,long double D){
 // chi1 calculation by Kramers-Kronig integration
@@ -9565,7 +9225,7 @@ long double ReDirCodyUrb(long double E,long double C,long double E0,long double 
         Emin=Eminin;
         if (E>=Emax || E<=Emin){
             de=(Emax-Emin)/nstep;
-            n1=2*int((Emax-Emin)/de/2.); //n1 must be even
+            n1=2*static_cast<int>((Emax-Emin)/de/2.); //n1 must be even
             n2=0.;
         }
         else{
@@ -9575,14 +9235,12 @@ long double ReDirCodyUrb(long double E,long double C,long double E0,long double 
                 n1=2;
             }
             else{
-                n1=2*int((Emax-E)/de/2.); //n1 must be even
+                n1=2*static_cast<int>((Emax-E)/de/2.); //n1 must be even
             }
             de=(Emax-E)/n1;
-            n2=2*int((E-Emin)/de/2.); //n2 must be even
+            n2=2*static_cast<int>((E-Emin)/de/2.); //n2 must be even
             Emin=E-de*n2;
         }
-        //if(E>4.067 && E<4.069)
-        //    printf("Emin=%Lf Emax=%Lf n1=%d n2=%d nstep=%d\n",Emin,Emax,n1,n2,nstep);
         for(int j=1;j<=(n1+n2+1);j=j+2){
             if (n2!=0){
                 x=E+de*(j-n2);
@@ -9594,9 +9252,10 @@ long double ReDirCodyUrb(long double E,long double C,long double E0,long double 
         }
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
+    }while(std::abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
     return(chi1);
 }
+
 
 long double ImDirTaucUrb(long double E,long double C,long double E0,long double E3,long double D){
     long double Ex, Ey, chi2, q, a1,a2,a0,r;
@@ -9687,8 +9346,6 @@ long double ReDirTaucUrb(long double E,long double C,long double E0,long double 
     //Emin, Emax calculation so that alpha(Em)<1e-2 cm^-1
     Eminin=log(1.973e-7/(E0*C/KTd/(Ex*Ex)*sqrt((Ex-E0)*(E3-Ex))*exp(-Ex/D)))*D;
     Emaxin=-log(1.973e-7/(E3*C/KTd/(Ey*Ey)*sqrt((Ey-E0)*(E3-Ey))*exp(Ey/D)))*D;
-    //if(E>4.067 && E<4.069)
-    //    printf("Ex=%Lf Ey=%Lf Eminin=%Lf Emaxin=%Lf \n",Ex,Ey, Eminin, Emaxin);
 
     chi1=0.;
     do{
@@ -9698,7 +9355,7 @@ long double ReDirTaucUrb(long double E,long double C,long double E0,long double 
         Emin=Eminin;
         if (E>=Emax || E<=Emin){
             de=(Emax-Emin)/nstep;
-            n1=2*int((Emax-Emin)/de/2.); //n1 must be even
+            n1=2*static_cast<int>((Emax-Emin)/de/2.); //n1 must be even
             n2=0.;
         }
         else{
@@ -9708,10 +9365,10 @@ long double ReDirTaucUrb(long double E,long double C,long double E0,long double 
                 n1=2;
             }
             else{
-                n1=2*int((Emax-E)/de/2.); //n1 must be even
+                n1=2*static_cast<int>((Emax-E)/de/2.); //n1 must be even
             }
             de=(Emax-E)/n1;
-            n2=2*int((E-Emin)/de/2.); //n2 must be even
+            n2=2*static_cast<int>((E-Emin)/de/2.); //n2 must be even
             Emin=E-de*n2;
         }
         for(int j=1;j<=(n1+n2+1);j=j+2){
@@ -9725,10 +9382,10 @@ long double ReDirTaucUrb(long double E,long double C,long double E0,long double 
         }
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
-    //if(E>3.8 && E<4.) printf("E=%Lf chi1=%Lf chi1old=%Lf nstep=%d \n",E,chi1,chi1old, nstep);
+    }while(std::abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
     return(chi1);
 }
+
 
 long double ImIndirCodyUrb(long double E,long double C,long double E0,long double E3,long double D){
     long double Ex, Ey, chi2, W, KCi;
@@ -9769,6 +9426,7 @@ long double ImIndirCodyUrb(long double E,long double C,long double E0,long doubl
     return(chi2);
 }
 
+
 long double ReIndirCodyUrb(long double E,long double C,long double E0,long double E3,long double D){
     long double Ex, Ey, chi1, chi1old, Emin, Emax,Eminin, Emaxin,W, KCi, de, x;
     int n1=0,n2=0;
@@ -9797,7 +9455,7 @@ long double ReIndirCodyUrb(long double E,long double C,long double E0,long doubl
         Emin=Eminin;
         if (E>=Emax || E<=Emin){
             de=(Emax-Emin)/nstep;
-            n1=2*int((Emax-Emin)/de/2.); //n1 must be even
+            n1=2*static_cast<int>((Emax-Emin)/de/2.); //n1 must be even
             n2=0.;
         }
         else{
@@ -9807,10 +9465,10 @@ long double ReIndirCodyUrb(long double E,long double C,long double E0,long doubl
                 n1=2;
             }
             else{
-                n1=2*int((Emax-E)/de/2.); //n1 must be even
+                n1=2*static_cast<int>((Emax-E)/de/2.); //n1 must be even
             }
             de=(Emax-E)/n1;
-            n2=2*int((E-Emin)/de/2.); //n2 must be even
+            n2=2*static_cast<int>((E-Emin)/de/2.); //n2 must be even
             Emin=E-de*n2;
         }
         for(int j=1;j<=(n1+n2+1);j=j+2){
@@ -9824,9 +9482,10 @@ long double ReIndirCodyUrb(long double E,long double C,long double E0,long doubl
         }
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
+    }while(std::abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
     return(chi1);
 }
+
 
 long double ImIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D,long double Ex,long double Ey,long double TUx,long double TUy, long double KTi){
     long double chi2, W;
@@ -9836,7 +9495,6 @@ long double ImIndirTaucUrb(long double E,long double C,long double E0,long doubl
     }
     else if(E>Ex && E<=(E0+W/4.)){
         chi2=C*16./KTi/(W*W)/(E*E)*(E-E0)*(E-E0);
-        //if(abs(E-3.)<0.005) printf("E=%Lf Ex=%Lf E0+W/4.=%Lf \n",E, Ex,E0+W/4.);
     }
     else if(E>max(Ex,(E0+W/4.)) && E<=min(Ey,(E0+W*3./4.))){
         chi2=C/KTi/(E*E)*(-(E-E0-W/2.)*(E-E0-W/2.)*16./(W*W)+2.);
@@ -9849,6 +9507,7 @@ long double ImIndirTaucUrb(long double E,long double C,long double E0,long doubl
     }
     return(chi2);
 }
+
 
 long double ReIndirTaucUrb(long double E,long double C,long double E0,long double E3,long double D,long double Ex,long double Ey,long double TUx,long double TUy, long double KTi){
     long double chi1, chi1old, Eminin, Emaxin, Emin, Emax, de, x;
@@ -9868,7 +9527,7 @@ long double ReIndirTaucUrb(long double E,long double C,long double E0,long doubl
         Emin=Eminin;
         if (E>=Emax || E<=Emin){
             de=(Emax-Emin)/nstep;
-            n1=2*int((Emax-Emin)/de/2.); //n1 must be even
+            n1=2*static_cast<int>((Emax-Emin)/de/2.); //n1 must be even
             n2=0.;
         }
         else{
@@ -9878,10 +9537,10 @@ long double ReIndirTaucUrb(long double E,long double C,long double E0,long doubl
                 n1=2;
             }
             else{
-                n1=2*int((Emax-E)/de/2.); //n1 must be even
+                n1=2*static_cast<int>((Emax-E)/de/2.); //n1 must be even
             }
             de=(Emax-E)/n1;
-            n2=2*int((E-Emin)/de/2.); //n2 must be even
+            n2=2*static_cast<int>((E-Emin)/de/2.); //n2 must be even
             Emin=E-de*n2;
         }
         for(int j=1;j<=(n1+n2+1);j=j+2){
@@ -9895,12 +9554,12 @@ long double ReIndirTaucUrb(long double E,long double C,long double E0,long doubl
         }
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
+    }while(std::abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
     return(chi1);
 }
 
+
 long double ImCodyM1M2(long double E,long double C,long double E0,long double E3,long double D){
-    //printf("->DirCodyM1M2 E=%Lf C=%Lf E0=%Lf E3=%Lf D=%Lf E3-E0-D*2.=%Lf\n",E,C,E0,E3,D,E3-E0-D*2.);
     long double chi2,K1, EM, KCM1M2;
     K1=(E3-E0)*sqrt(E3-E0-D*2.)*sqrt(2.);
     EM=(E0+E3)/2.;
@@ -9912,10 +9571,9 @@ long double ImCodyM1M2(long double E,long double C,long double E0,long double E3
     if(E>E3 || E<E0) {
         chi2=0;
     }
-    else if (abs(E-EM)>=D) {
-        chi2=chi2-K1*sqrt(abs(E-EM)-D);
+    else if (std::abs(E-EM)>=D) {
+        chi2=chi2-K1*sqrt(std::abs(E-EM)-D);
     }
-    //printf("chi2=%Lf KCM1M2=%Lf\n",chi2,KCM1M2);
     chi2=chi2*C/KCM1M2;
     return(chi2);
 }
@@ -9936,7 +9594,7 @@ long double ReCodyM1M2(long double E,long double C,long double E0,long double E3
         Emin=Eminin;
         if (E>=Emax || E<=Emin){
             de=(Emax-Emin)/nstep;
-            n1=2*int((Emax-Emin)/de/2.); //n1 must be even
+            n1=2*static_cast<int>((Emax-Emin)/de/2.); //n1 must be even
             n2=0.;
         }
         else{
@@ -9946,10 +9604,10 @@ long double ReCodyM1M2(long double E,long double C,long double E0,long double E3
                 n1=2;
             }
             else{
-                n1=2*int((Emax-E)/de/2.); //n1 must be even
+                n1=2*static_cast<int>((Emax-E)/de/2.); //n1 must be even
             }
             de=(Emax-E)/n1;
-            n2=2*int((E-Emin)/de/2.); //n2 must be even
+            n2=2*static_cast<int>((E-Emin)/de/2.); //n2 must be even
             Emin=E-de*n2;
         }
         for(int j=1;j<=(n1+n2+1);j=j+2){
@@ -9961,13 +9619,12 @@ long double ReCodyM1M2(long double E,long double C,long double E0,long double E3
             }
             chi1=chi1+ImCodyM1M2(x,C,E0,E3,D)*x/(x*x-E*E);
         }
-//        if(E>1.998)
-//            printf("chi1=%Lf\n",chi1);
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
+    }while(std::abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
     return(chi1);
 }
+
 
 long double ImTaucM1M2(long double E,long double C,long double E0,long double E3,long double D){
     long double chi2,K1, EM, KTM1M2;
@@ -9980,8 +9637,8 @@ long double ImTaucM1M2(long double E,long double C,long double E0,long double E3
     if(E>E3 || E<E0) {
         chi2=0;
     }
-    else if (abs(E-EM)>=D) {
-        chi2=chi2-K1*sqrt(abs(E-EM)-D);
+    else if (std::abs(E-EM)>=D) {
+        chi2=chi2-K1*sqrt(std::abs(E-EM)-D);
     }
     chi2=chi2*C/KTM1M2/E/E;
     return(chi2);
@@ -10003,7 +9660,7 @@ long double ReTaucM1M2(long double E,long double C,long double E0,long double E3
         Emin=Eminin;
         if (E>=Emax || E<=Emin){
             de=(Emax-Emin)/nstep;
-            n1=2*int((Emax-Emin)/de/2.); //n1 must be even
+            n1=2*static_cast<int>((Emax-Emin)/de/2.); //n1 must be even
             n2=0.;
         }
         else{
@@ -10013,10 +9670,10 @@ long double ReTaucM1M2(long double E,long double C,long double E0,long double E3
                 n1=2;
             }
             else{
-                n1=2*int((Emax-E)/de/2.); //n1 must be even
+                n1=2*static_cast<int>((Emax-E)/de/2.); //n1 must be even
             }
             de=(Emax-E)/n1;
-            n2=2*int((E-Emin)/de/2.); //n2 must be even
+            n2=2*static_cast<int>((E-Emin)/de/2.); //n2 must be even
             Emin=E-de*n2;
         }
         for(int j=1;j<=(n1+n2+1);j=j+2){
@@ -10030,11 +9687,12 @@ long double ReTaucM1M2(long double E,long double C,long double E0,long double E3
         }
         chi1=chi1*2.*de*2./PIG;
         nstep=nstep*2;
-    }while(abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
+    }while(std::abs((chi1-chi1old)/chi1)>0.001 && nstep<801);
     return(chi1);
 }
 
-void ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
+
+void ksemawc::ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
     int ivnkdw,ivnkup;
     double VNK[17][3],vosi[6][3];
     double alfa=1.;
@@ -10059,7 +9717,7 @@ void ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
           4    Apds  /
           5    PSI   DELTA
 */    
-    double wl=MIS[7][iwl][1];//wavelength
+    double wl=ms.lambda[iwl-1];//wavelength
 
     //vot inizialization
     vot[1][1]=1.;
@@ -10074,26 +9732,20 @@ void ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
     ivnkup=9+ikind;// entrance medium; it depends of the kind of measurement
     irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
     pq=pow(irup*sin(teta),2.);// (N_entrance*sin(teta))**2.
-    // if(wl==iwl2print){
-    //     printf("pq=%f+i%f lambda=%f iwl=%d \n",real(pq), imag(pq), wl, iwl);
-    //     printf("->ASSEMBLER theta=%f ivnkup=%d n=%f k=%f\n",teta/deg2rad,ivnkup,VNK[ivnkup][1],VNK[ivnkup][2]);
-    // }
     //*** multilayer parameters
-    int Nlayer=NINT(par[51][2]);//Nlayer
+    int Nlayer=nint(par[51][2]);//Nlayer
 
     //*** loop on the interfaces = Nlayer+1
     int i=1;
     while(i<=Nlayer+1){
         int ncoe=0;
-        // if(iwl==iwl2print)
-        //     printf("|ASS> while loop with i=%d of %d interfaces\n",i,Nlayer+1);
         //*** computing R T at i interface
-        if(NINT(par[50+i][3])>1 || pm[50+i][1]>.0){//film or roughness
+        if(nint(par[50+i][3])>1 || pm[50+i][1]>.0){//film or roughness
             int ifst=i;
             //thin film
-            if(NINT(par[50+i][3])>1){//film!
+            if(nint(par[50+i][3])>1){//film!
                 ncoe=1;
-                while(ifst+ncoe<=Nlayer && NINT(par[50+ifst+ncoe][3])>1){//multilayer
+                while(ifst+ncoe<=Nlayer && nint(par[50+ifst+ncoe][3])>1){//multilayer
                     ncoe=ncoe+1;
                 }
                 BUILDER(iwl,ikind,ifst,ncoe,pq,vosi);
@@ -10101,16 +9753,10 @@ void ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
                 vot[4][1]=vosi[4][1];// save Apds
                 vot[5][1]=vosi[5][1];// save PSI
                 vot[5][2]=vosi[5][2];// salva DELTA
-                // if(iwl==iwl2print){
-                //     printf("|ASS> found N=%d film \n",ncoe);
-                //     printf("\t vosi[1][1]=%f vosi[2][1]=%f vosi[3][1]=%f\n",vosi[1][1],vosi[2][1],vosi[3][1]);
-                // }
             }
 
             //bulk with roughness
             else if(pm[50+i][1]>.0){ //rough bulk!
-                // if(iwl==iwl2print)
-                //     printf("|ASS> Found rough bulk @i=%d\n",i);
                 ncoe=1;//need to use builder
                 BUILDER(iwl,ikind,ifst,ncoe,pq,vosi);//pq was theta
                 //save the physical parameters affering to the single interface
@@ -10126,11 +9772,11 @@ void ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
             if(i==1)
                 ivnkup=9+ikind;// input medium; it depends of the kind of measurement
             else
-                ivnkup=NINT(par[50+i-1][1]);
+                ivnkup=nint(par[50+i-1][1]);
             if(i<=Nlayer)
-                ivnkdw=NINT(par[50+i][1]);
+                ivnkdw=nint(par[50+i][1]);
             else //the next medium is the exit one for SF
-                ivnkdw=9;//16
+                ivnkdw=9;
             irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
             irup2=irup*irup;
             irdw=complex<double>(VNK[ivnkdw][1],-VNK[ivnkdw][2]);
@@ -10139,14 +9785,8 @@ void ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
             mupp=irup2/mups;
             mdws=sqrt(irdw2-pq);
             mdwp=irdw2/mdws;
-            // if(iwl==iwl2print){
-            //     printf("|ASS> Ideal interface\n\t ivnkup=%d n=%f k=%f\n",ivnkup,VNK[ivnkup][1],VNK[ivnkup][2]);
-            //     printf("\t ivnkdw=%d n=%f k=%f\n",ivnkdw,VNK[ivnkdw][1],VNK[ivnkdw][2]);
-            // }
             //symmetric coating on back surface
-            if(i==Nlayer+1 && NINT(par[50+i-1][3])==1 && NINT(par[52][2])==1){ //symmetric multistrate on the rear face last layer
-                // if(iwl==iwl2print)
-                //     printf("|ASS> found symmetric coating on back surface\n");
+            if(i==Nlayer+1 && nint(par[50+i-1][3])==1 && nint(par[52][2])==1){ //symmetric multistrate on the rear face last layer
                 for(int ii=1;ii<=2;ii++){
                     vosi[1][ii]=vot[1][ii];
                     vosi[2][ii]=vot[3][ii];
@@ -10154,25 +9794,21 @@ void ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
                 }
             }
             else{
-                // if(iwl==iwl2print)
-                //     printf("|ASS> ideal interface between two media\n");
-                //vosi[1][1]=4.*real(mups)*real(mdws)/pow(abs(mups+mdws),2.);//requires transparent in out media
-                //vosi[1][2]=4.*real(mupp)*real(mdwp)/pow(abs(mupp+mdwp),2.);
-                vosi[2][1]=pow(abs((mups-mdws)/(mups+mdws)),2.);
-                vosi[2][2]=pow(abs((mupp-mdwp)/(mupp+mdwp)),2.);
+                //vosi[1][1]=4.*real(mups)*real(mdws)/pow(std::abs(mups+mdws),2.);//requires transparent in out media
+                //vosi[1][2]=4.*real(mupp)*real(mdwp)/pow(std::abs(mupp+mdwp),2.);
+                vosi[2][1]=pow(std::abs((mups-mdws)/(mups+mdws)),2.);
+                vosi[2][2]=pow(std::abs((mupp-mdwp)/(mupp+mdwp)),2.);
                 vosi[1][1]=1.-vosi[2][1];//T=1-R because A=0 at the interface
                 vosi[1][2]=1.-vosi[2][2];
                 vosi[3][1]=vosi[2][1];
                 vosi[3][2]=vosi[2][2];
                 if(i==1 && Nlayer==1){ //BARE SUBSTRATE
                     //*** Apds
-                    vot[4][1]=4.*real(irup*(conj(mdws)-irdw))/pow(abs(irup+mdws),2.);
+                    vot[4][1]=4.*real(irup*(conj(mdws)-irdw))/pow(std::abs(irup+mdws),2.);
                     //*** PSI e DELTA
                     rr=((mupp-mdwp)/(mupp+mdwp))/((mups-mdws)/(mups+mdws));
-                    vot[5][1]=atan(abs(rr))/deg2rad;//PSI
+                    vot[5][1]=atan(std::abs(rr))/deg2rad;//PSI
                     vot[5][2]=arg(rr)/deg2rad;//DELTA
-                    // if(iwl==iwl2print)
-                    //     printf("|ASS> This is the first interface -> DELTA=%f PSI=%f\n",vot[5][2],vot[5][1]);
                 }
             }
         }
@@ -10182,17 +9818,12 @@ void ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
         if(i==1)
             alfa=1.;
         else{
-            ivnkup=NINT(par[50+i-1][1]);
+            ivnkup=nint(par[50+i-1][1]);
             irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
             irup2=irup*irup;
             mups=sqrt(irup2-pq);
             alfa=exp(-4.*PIG*pm[i-1][1]/wl*imag(-mups));
         }
-        // if(iwl==iwl2print){
-        //     printf("|ASS> alfa=%f\n",alfa);
-        //     printf("|ASS> combining vosi[1][1]=%f vosi[2][1]=%f vosi[3][1]=%f with previous interface\n \tvot[1][1]=%f vot[2][1]=%f vot[3][1]=%f ...\n",
-        //            vosi[1][1],vosi[2][1],vosi[3][1],vot[1][1],vot[2][1],vot[3][1]);
-        // }
         double uguales=alfa/(1.-vot[3][1]*vosi[2][1]*alfa*alfa);
         double ugualep=alfa/(1.-vot[3][2]*vosi[2][2]*alfa*alfa);
         double ts=vot[1][1]*vosi[1][1]*uguales;
@@ -10207,36 +9838,32 @@ void ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
         vot[2][2]=rp;
         vot[3][1]=r1s;
         vot[3][2]=r1p;
-        // if(iwl==iwl2print){
-        //     printf("|ASS> ..... ts= %f rs=%f r1s=%f\n",ts,rs,r1s);
-        // }
         i=i+ncoe+1;
-        fflush(stdout);
     }
+    //if(iwl==283)
+        //qDebug("->ASS: VNK[1][1]=%f VNK[1][2]=%f vot[2][1]=%f",VNK[1][1],VNK[1][2],vot[2][1]);
 }
 
 
-
-void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi[6][3]){
+void ksemawc::BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> pq,double vosi[6][3]){
     int ivnk,NFA,iv[10]={},irougfa[11],irougms[11],iv2[10]={};
     int nu[10][3];
     //           [ i][0]=Nlayer with thickness nonuniform
     //           [ i][1]=NFAmin
     //           [ i][1]=NFAmax
-    double ds[10],gn[10],cn[10],gk[10],ck[10],ru[10],nmedio,kmedio,al[10],d[999],VNK[17][3],
+    double ds[10],gn[10],cn[10],gk[10],ck[10],ru[10],nmedio,kmedio,al[10],VNK[17][3],
             dz,BpN,zz,ApN,ApK,BpK,CpK,CpN,Rs,R1s,Rp,R1p,Ts,Tp,As,Ap,ra,Ps,Pp,dsnu[10],DELTA,PSI;
-    complex<double> ir[999],NQ,mus,mup,rhoS,rhopS,tauS,rhoP,rhopP,tauP,nq1,mus1,mup1,out[10][3],Bs,Cs,Bp,Cp,denoS,denoP;
+    std::vector<double> d;
+    complex<double> NQ,mus,mup,rhoS,rhopS,tauS,rhoP,rhopP,tauP,nq1,mus1,mup1,out[10][3],Bs,Cs,Bp,Cp,denoS,denoP;
+    std::vector<std::complex<double>> ir;
 
     // Subroutine for build-up the indicated coherent part of the multilayer and/or roughness
-    double wl=MIS[7][iwl][1];//wavelength
-
-    //if(iwl==iwl2print)
-    //    printf("->Start BUILDER with ifst=%d ncoe=%d \n",ifst,ncoe);
+    double wl=ms.lambda[iwl-1];//wavelength
 
     //layer parameters
-    int imax=NINT(par[51][2]);// N. layers
-    int nino=NINT(par[29][1]);//discretization inhomogeneity
-    int N=NINT(par[28][1]);//   discretization roughness
+    int imax=nint(par[51][2]);// N. layers
+    int nino=nint(par[29][1]);//discretization inhomogeneity
+    int N=nint(par[28][1]);//   discretization roughness
     for(int i=1;i<=9;i++){  //9 is N_layer max
         ds[i]=pm[i][1];     // layer thickness
         al[i]=par[50+i][3]; // kind of layer
@@ -10256,14 +9883,15 @@ void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi
     //refractive indices
     COSVNK(VNK,iwl);
     int ivnk1=9+ikind;
-    ir[1]=complex<double>(VNK[ivnk1][1],-VNK[ivnk1][2]);
-    d[1]=0.;
+    ir.push_back({0.,0.});//to create ir[0] which is not used
+    ir.push_back(complex<double>(VNK[ivnk1][1],-VNK[ivnk1][2]));//this is ir[1]
+    d.push_back(0.);//to create d[0] which is not used
+    d.push_back(0.);//d[1]
     if(ifst>1){
-        ivnk1=NINT(par[50+ifst-1][1]);
+        ivnk1=nint(par[50+ifst-1][1]);
         ir[1]=complex<double>(VNK[ivnk1][1],-VNK[ivnk1][2]);
     }
     NFA=1;
-    //if(iwl==iwl2print)printf("\tiNFA=%d n=%f k=%f d=%f\n",1,real(ir[1]),imag(ir[1]),d[1]);
 
     // set index vector and refractive indices
     int ims=ifst;
@@ -10272,7 +9900,7 @@ void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi
     int iDWroug=0;
     while(ims<=(ifst+ncoe-1) || (ims==ifst+ncoe && ru[ims]>0. && iDWroug==0)){
         if(ds[ims]<0.00001){
-            if(iwl==iwl2print) printf("Skip layer %d because has zero thickness\n",ims);
+            if(iwl==iwl2print) qDebug("Skip layer %d because has zero thickness",ims);
             ims++;
             continue;
         }
@@ -10280,25 +9908,22 @@ void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi
         if(ru[ims]>0.01){// add double layer for roughness
             nroug=nroug+1;//one more rough-interface
             NFA++;
-            ir[NFA]=ir[NFA-1];// same refractive index of the previous fase
-            d[NFA]=3.*ru[ims];//first half rough layer
+            ir.push_back(ir[NFA-1]);// same refractive index of the previous fase
+            d.push_back(3.*ru[ims]);//first half rough layer
             NFA++;
             irougfa[nroug]=NFA;//NFA assigned to the new layer
             irougms[nroug]=ims;//index of the concerning model-layer
-            ivnk=int(par[50+ims][1]);//to assign the complex refractive index
-            ir[NFA]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
-            d[NFA]=3.*ru[ims];//second half rough thickness
-            //if(iwl==iwl2print) printf("|BUILD> found ru[%d]=%e => additional double layer:\n NFA=%d d[%d]=%f\n NFA=%d d[%d]=%f\n",
-            //                    ims,ru[ims],NFA-1,NFA-1,d[NFA-1],NFA,NFA,d[NFA]);
+            ivnk=static_cast<int>(par[50+ims][1]);//to assign the complex refractive index
+            ir.push_back(complex<double>(VNK[ivnk][1],-VNK[ivnk][2]));
+            d.push_back(3.*ru[ims]);//second half rough thickness
             if(ims==ifst+ncoe){
                 iDWroug++;
                 continue;
             }
         }
         if(ds[ims]>0.00001){
-            if(NINT(al[ims])==3){ //inomogeneous layer
-                //if(iwl==iwl2print) printf("|BUILD> inhomogeneous layer\n");
-                ivnk=NINT(par[50+ims][1]);
+            if(nint(al[ims])==3){ //inomogeneous layer
+                ivnk=nint(par[50+ims][1]);
                 nmedio=VNK[ivnk][1];
                 kmedio=VNK[ivnk][2];
                 dz=1./real(nino);
@@ -10311,8 +9936,8 @@ void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi
                 for(int i=1;i<=nino;i++){
                     NFA=NFA+1;
                     zz=1.+dz/2.-real(i)*dz;
-                    ir[NFA]=complex<double>(ApN*zz*zz+BpN*zz+CpN,-(ApK*zz*zz+BpK*zz+CpK));
-                    d[NFA]=dz*ds[ims];
+                    ir.push_back(complex<double>(ApN*zz*zz+BpN*zz+CpN,-(ApK*zz*zz+BpK*zz+CpK)));
+                    d.push_back(dz*ds[ims]);
                 }
                 if(ru[ims]>0.)//roughness
                     ir[NFA-nino]=ir[NFA-nino+1];//nk for roughness
@@ -10321,46 +9946,38 @@ void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi
                     nu[Nnouni][0]=ims;//N layer
                     nu[Nnouni][2]=NFA;//NFA_max
                     nu[Nnouni][1]=NFA-nino+1;//NFA_min
-                    //if(iwl==iwl2print) printf("|BUILD> found d-nonuniform @ Nlayer=%d dsnu[%d]=%f NFA_min=%d NFA_max=%d\n",ims,ims,dsnu[ims],nu[Nnouni][1],nu[Nnouni][2]);
                 }
             }
-            else if(NINT(al[ims])==2){// homogeneous layer
-                //if(iwl==iwl2print) printf("|BUILD> homogeneous layer\n");
+            else if(nint(al[ims])==2){// homogeneous layer
                 NFA=NFA+1;
-                ivnk=NINT(par[50+ims][1]);
-                ir[NFA]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
-                d[NFA]=ds[ims];
-                //if(iwl==iwl2print)printf("CNK[ivnk][1]=%f\n",CNK[ivnk][1]);
-                //if(iwl==iwl2print)printf("\tNFA=%d ivnk=%d n=%f k=%f d=%f par[50+%d][1]=%f\n ",NFA,ivnk,real(ir[NFA]),imag(ir[NFA]),d[NFA],ims,par[50+ims][1]);
+                ivnk=nint(par[50+ims][1]);
+                ir.push_back(complex<double>(VNK[ivnk][1],-VNK[ivnk][2]));
+                d.push_back(ds[ims]);
                 if(dsnu[ims]>0.){//nonuniform thickness
                     Nnouni++;
                     nu[Nnouni][0]=ims;//N layer
                     nu[Nnouni][2]=NFA;//NFA_max
                     nu[Nnouni][1]=NFA;//NFA_min
-                    //if(iwl==iwl2print) printf("|BUILD> found d-nonuniform @ Nlayer=%d dsnu[%d]=%f NFA_min=%d NFA_max=%d\n",ims,ims,dsnu[ims],nu[Nnouni][1],nu[Nnouni][2]);
                 }
             }
+            // if(iwl==iwl2print)
+            //     qDebug("BUILDER: wl= %f ds[%d]=%f ir[%d]=%f+i*%f",wl,ims,ds[ims],NFA,real(ir[NFA]),imag(ir[NFA]));
         }
         ims++;
     }
     // substrate
     NFA=NFA+1;
-    //if(iwl==iwl2print) printf("|BUILD> ifst=%d ncoe=%d ims=%d imax=%d NFA=%d \n", ifst, ncoe, ims, imax, NFA);
     if(ims<=imax)
-        ivnk=NINT(par[50+ims][1]);
-    else if(imax==1 && NINT(al[1])==1)
-        ivnk=NINT(par[50+imax][1]);
+        ivnk=nint(par[50+ims][1]);
+    else if(imax==1 && nint(al[1])==1)
+        ivnk=nint(par[50+imax][1]);
     else{ //without substrate
         ivnk=9;//16
     }
-    ir[NFA]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
-    d[NFA]=0.;
-    // if(iwl==iwl2print){
-    //     printf("|BUILDER> exit medium: ims=%d NFA=%d imax=%d\n",ims,NFA,imax);
-    //     for(int i=1;i<=NFA;i++)
-    //         printf("\tiNFA=%d n=%f k=%f d=%f\n",i,real(ir[i]),imag(ir[i]),d[i]);
-    //     printf("|BUILD> nroug=%d\n",nroug);
-    // }
+    ir.push_back(complex<double>(VNK[ivnk][1],-VNK[ivnk][2]));
+    d.push_back(0.);
+    // if(iwl==iwl2print)
+    //     qDebug("BUILDER: wl=%f ds[%d]=%f ivnk=%d NFA=%d ir[%d][1]=%f+i*%f",wl,ims,ds[ims],ivnk,NFA,NFA,real(ir[NFA]),imag(ir[NFA]));
 
     //VOSI & freCoeff initialization for d-nonuniform averaging
     for(int i=0;i<6;i++){
@@ -10372,23 +9989,22 @@ void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi
     }
     int M=2*N+1;//effective discretization of rough-layer thickness & Niteration for d-nonuniform
     int Nit2=pow(M,Nnouni);
-    double Dit2=double(Nit2);
+    double Dit2=static_cast<double>(Nit2);
     for(int it2=0;it2<Nit2;it2++){//iteration over combinations of d-nonuniform
         for(int Jnu=0;Jnu<Nnouni;Jnu++){
             if(Jnu+1<Nnouni)
-                iv2[Jnu]=int(it2/pow(M,Nnouni-Jnu-1));
+                iv2[Jnu]=static_cast<int>(it2/pow(M,Nnouni-Jnu-1));
             else{
                 if(it2>0)
                     iv2[Jnu]++;
             }
             if(iv2[Jnu]+1>M)
-                iv2[Jnu]=iv[Jnu]-M*int(iv2[Jnu]/M);
+                iv2[Jnu]=iv[Jnu]-M*static_cast<int>(iv2[Jnu]/M);
             int NFAmin=nu[Jnu+1][1];
             int NFAmax=nu[Jnu+1][2];
-            double Dd=1./double(NFAmax-NFAmin+1);
+            double Dd=1./static_cast<double>(NFAmax-NFAmin+1);
             for(int NFAi=NFAmin;NFAi<=NFAmax;NFAi++){
                 d[NFAi]=ds[nu[Jnu+1][0]]*Dd*(1.+dsnu[nu[Jnu+1][0]]*(iv2[Jnu]-N)/N);
-                //if(iwl==iwl2print) printf("|BUILD> indexLoop d-nonuni it2=%d iv2[%d]=%d NFAmin=%d NFAmax=%d NFAi=%d d[%d]=%f\n",it2,Jnu,iv2[Jnu],NFAmin,NFAmax,NFAi,NFAi,d[NFAi]);
             }
         }
         // managment of roughness and Fresnel's coefficient computing
@@ -10421,34 +10037,19 @@ void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi
             double wtot=1.;
             for(int j=0;j<nroug;j++){//index assignation to each rough layer and each nonuniform thickness
                 if(j+1<nroug)
-                    iv[j]=int(it/pow(M,nroug-j-1));
+                    iv[j]=static_cast<int>(it/pow(M,nroug-j-1));
                 else{
                     if(it>0)
                         iv[j]++;
                 }
                 if(iv[j]+1>M)
-                    iv[j]=iv[j]-M*int(iv[j]/M);
-                //printf("iv[%d]=%d ",j,iv[j]);
-                ra=pow(-1.,iv[j])*dx[N][int((iv[j]+1)/2.+1)];//normalized thickness variation
-                wtot=wtot*w[N][int((iv[j]+1)/2.+1)];         //cumulative weight
+                    iv[j]=iv[j]-M*static_cast<int>(iv[j]/M);
+                ra=pow(-1.,iv[j])*dx[N][static_cast<int>((iv[j]+1)/2.+1)];//normalized thickness variation
+                wtot=wtot*w[N][static_cast<int>((iv[j]+1)/2.+1)];         //cumulative weight
                 d[irougfa[j+1]-1]=(3.+ra)*ru[irougms[j+1]];   //thickness first half rough layer
                 d[irougfa[j+1]]=(3.-ra)*ru[irougms[j+1]];//thickness seconf half rough layer
-                // if(iwl==iwl2print) {
-                //     printf("|BUILD> indexLoop rough it=%d j=%d iv[%d]=%d d[%d]=%f d[%d]=%f wtot=%f\n",
-                //            it,j,j,iv[j],irougfa[j+1]-1,d[irougfa[j+1]-1],irougfa[j+1],d[irougfa[j+1]],wtot);
-                //     //iw=1;
-                // }
             }
-            // if(iwl==iwl2print){
-            //     printf("callCALFRE with wl=%f pq=%f +%f*i\n",wl,real(pq),imag(pq));
-            //     for(int k=1;k<=NFA;k++)
-            //         printf("callCALFRE iNFA=%d n=%f k=%f d=%f\n",k,real(ir[k]),imag(ir[k]),d[k]);
-            // }
             CALFRE(NFA,wl,pq,ir,d,out);
-            // if(iwl==iwl2print){
-            //     for(int k=0;k<=7;k++)
-            //         printf("   out[%d][1]=%f + %f*i\n",k,real(out[k][1]),imag(out[k][1]));
-            // }
             iw=0;
             tauS=tauS+out[1][1]*wtot;
             rhoS=rhoS+out[2][1]*wtot;
@@ -10470,7 +10071,7 @@ void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi
             Cp=Cp+out[3][0]*wtot;
             Ps=Ps+real(out[0][1])*wtot;
             Pp=Pp+real(out[0][2])*wtot;
-            PSI=PSI+atan(abs(rhoP/rhoS))/deg2rad*wtot;
+            PSI=PSI+atan(std::abs(rhoP/rhoS))/deg2rad*wtot;
             DELTA=DELTA+arg(rhoP/rhoS)/deg2rad*wtot;
         }
         //save Fresnell coefficients
@@ -10487,7 +10088,7 @@ void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi
         freCoeff[5][1]=freCoeff[5][1]+Cp/Dit2;
 
         //save to VOSI
-        if(NINT(par[54][2])==0){ //specular SF measurements
+        if(nint(par[54][2])==0){ //specular SF measurements
             NQ=ir[NFA]*ir[NFA];
             mus=sqrt(NQ-pq);
             mup=NQ/mus;
@@ -10495,48 +10096,46 @@ void BUILDER(int iwl,int ikind,int ifst,int ncoe, complex<double> pq,double vosi
             mus1=sqrt(nq1-pq);
             mup1=nq1/mus1;
 
-            vosi[1][1]=vosi[1][1]+real(mus)/real(mus1)*pow(abs(tauS),2.)/Dit2;
-            vosi[1][2]=vosi[1][2]+real(mup)/real(mup1)*pow(abs(tauP),2.)/Dit2;
-            vosi[2][1]=vosi[2][1]+pow(abs(rhoS),2.)/Dit2;
-            vosi[2][2]=vosi[2][2]+pow(abs(rhoP),2.)/Dit2;
-            vosi[3][1]=vosi[3][1]+pow(abs(rhopS),2.)/Dit2;
-            vosi[3][2]=vosi[3][2]+pow(abs(rhopP),2.)/Dit2;
+            vosi[1][1]=vosi[1][1]+real(mus)/real(mus1)*pow(std::abs(tauS),2.)/Dit2;
+            vosi[1][2]=vosi[1][2]+real(mup)/real(mup1)*pow(std::abs(tauP),2.)/Dit2;
+            vosi[2][1]=vosi[2][1]+pow(std::abs(rhoS),2.)/Dit2;
+            vosi[2][2]=vosi[2][2]+pow(std::abs(rhoP),2.)/Dit2;
+            vosi[3][1]=vosi[3][1]+pow(std::abs(rhopS),2.)/Dit2;
+            vosi[3][2]=vosi[3][2]+pow(std::abs(rhopP),2.)/Dit2;
         }
         else{ // hemispherical SF measurements
             vosi[1][1]=vosi[1][1]+Ts/Dit2;
-            vosi[1][2]=vosi[1][2]+Tp/Dit2;
+            //vosi[1][2]=vosi[1][2]+Tp/Dit2;//Tp always direct
             vosi[2][1]=vosi[2][1]+Rs/Dit2;
-            vosi[2][2]=vosi[2][2]+Rp/Dit2;
+            //vosi[2][2]=vosi[2][2]+Rp/Dit2;//Rp always specular
             vosi[3][1]=vosi[3][1]+R1s/Dit2;
             vosi[3][2]=vosi[3][2]+R1p/Dit2;
         }
         vosi[4][1]=vosi[4][1]+As/Dit2;
         vosi[4][2]=vosi[4][2]+Ap/Dit2;
-        // vosi[5][1]=vosi[5][1]+atan(abs(rhoP/rhoS))/deg2rad/Dit2;//PSI
+        // vosi[5][1]=vosi[5][1]+atan(std::abs(rhoP/rhoS))/deg2rad/Dit2;//PSI
         // vosi[5][2]=vosi[5][2]+arg(rhoP/rhoS)/deg2rad/Dit2;//DELTA
         vosi[5][1]=vosi[5][1]+PSI/Dit2;//PSI
         vosi[5][2]=vosi[5][2]+DELTA/Dit2;//DELTA
-        // if(iwl==1wl2print){
-        //     printf("|BUILD>final output:\n DELTA=%f  PSI=%f\n",vosi[5][2],vosi[5][1]);
-        //     printf(" tauP= %f +i%f Tp=%f\n tauS= %f +i%f Ts=%f\n",
-        //        real(tauP),imag(tauP),real(mup)/real(mup1)*pow(abs(tauP),2.),real(tauS),imag(tauS),real(mus)/real(mus1)*pow(abs(tauS),2.));
-        //     printf(" rhoP= %f +i%f Rp=%f\n rhoS= %f +i%f Rs=%f\n",
-        //        real(rhoP),imag(rhoP),pow(abs(rhoP),2.),real(rhoP),imag(rhoP),pow(abs(rhoP),2.));
-        //     printf(" rho1P= %f +i%f R1p=%f\n rho1S= %f +i%f R1s=%f\n",
-        //        real(rhopP),imag(rhopP),pow(abs(rhopP),2.),real(rhopS),imag(rhopS),pow(abs(rhopS),2.));
+        // if(iwl==iwl2print){
+        //     qDebug("|BUILD>final output:\n DELTA=%f  PSI=%f\n",vosi[5][2],vosi[5][1]);
+        //     qDebug(" tauP= %f +i%f Tp=%f\n tauS= %f +i%f Ts=%f\n",
+        //        real(tauP),imag(tauP),real(mup)/real(mup1)*pow(std::abs(tauP),2.),real(tauS),imag(tauS),real(mus)/real(mus1)*pow(std::abs(tauS),2.));
+        //     qDebug(" rhoP= %f +i%f Rp=%f\n rhoS= %f +i%f Rs=%f\n",
+        //        real(rhoP),imag(rhoP),pow(std::abs(rhoP),2.),real(rhoP),imag(rhoP),pow(std::abs(rhoP),2.));
+        //     qDebug(" rho1P= %f +i%f R1p=%f\n rho1S= %f +i%f R1s=%f\n",
+        //        real(rhopP),imag(rhopP),pow(std::abs(rhopP),2.),real(rhopS),imag(rhopS),pow(std::abs(rhopS),2.));
         //     fflush(stdout);
         // }
     }
 }
 
 
-void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],double d[999],complex<double> out[10][3]){
+void CALFRE(int NFAin,double wl,complex<double> pq,const std::vector<std::complex<double>>& IR,std::vector<double> d,complex<double> out[10][3]){
     complex<double> SC[3][3],PC[3][3],MUS,MUP,NQ,CI,DELTA,C,S,B,BP,CP,deno,nq1,mus1,mup1,
             rhoS,rhopS,tauS,rhoP,rhopP,tauP;
     complex<double> a11,a12,a21,a22,b11,b12,b21,b22;
     CI=complex<double>(0.,1.);
-
-    //if(iw==1) printf("-> |CALFRE> NFAin=%d wl=%f\n",NFAin,wl);
 
 //check if a layer absorbs completely the light. In that case this layer becomes the exit medium
     int NFA=NFAin;
@@ -10545,14 +10144,10 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
         MUS=sqrt(NQ-pq);
         MUP=NQ/MUS;
         DELTA=2.*PIG*d[I]*MUS/wl;
-        if(abs(imag(DELTA))>ABSmax) {
+        if(std::abs(imag(DELTA))>ABSmax) {
             NFA=I;
             break;
         }
-//        if(wl>11820. && wl<11850.){
-//            printf("pq=%f+i%f theta[%d]=%f k[%d]=%f k_enhanced[%d]=%f \n",real(pq), imag(pq), I,atan(sqrt(real(pq))/real(MUS))/deg2rad, I, imag(IR[I]),I, imag(MUS));
-//            printf("n*sin(theta)[%d]=%f+i%f \n",I,real(IR[I]*sin(acos(MUS/IR[I]))), imag(IR[I]*sin(acos(MUS/IR[I]))));
-//        }
     }
 
     //Computing the characteristic matrix and Fresnel's coefficients
@@ -10573,6 +10168,8 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
         DELTA=2.*PIG*d[I]*MUS/wl;
         C=cos(DELTA);
         S=sin(DELTA)*CI;
+        //if(nint(wl)==2500)
+        //    qDebug("CALFRE: wl=%f IR[%d]=%f-i*%f d[%d]=%f",wl,I,real(IR[I]),imag(IR[I]),I,d[I]);
 
         //s-pol
         a11=SC[1][1];
@@ -10601,10 +10198,6 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
         PC[1][2]=a11*b12+a12*b22;
         PC[2][1]=a21*b11+a22*b21;
         PC[2][2]=a21*b12+a22*b22;
-        // if(abs(SC[1][1])>1.E+06 || abs(SC[1][2])>1.E+06){
-        //     printf("CALFRE @wl=%f & I=%d SC[1][1]=%f +%f*i SC[1][2]=%f +%f*i\n",wl,I,real(SC[1][1]),imag(SC[1][1]),real(SC[1][2]),imag(SC[1][2]));
-        //     printf("|NQ|=%f |MUS|=%f |DELTA|=%f\n",abs(NQ),abs(MUS),abs(imag(DELTA)));
-        // }
     }
     NQ=IR[NFA]*IR[NFA];
     MUS=sqrt(NQ-pq);
@@ -10612,6 +10205,8 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
     nq1=IR[1]*IR[1];
     mus1=sqrt(nq1-pq);
     mup1=nq1/mus1;
+    //if(nint(wl)==2500)
+    //    qDebug("CALFRE: wl=%f IR[%d]=%f+i*%f mus1=%f+i%f mup1=%f+i*%f",wl,NFA,real(IR[NFA]),imag(IR[NFA]),real(mus1),imag(mus1),real(mup1),imag(mup1));
 
     //Fresnel's coefficient and R R1 T A
 //  polarization-s
@@ -10625,10 +10220,10 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
     rhoS=(mus1*B-C)/deno;
     tauS=2.*mus1/deno;
     rhopS=(MUS*BP-CP)/(MUS*BP+CP);
-    double Rs=pow(abs(rhoS),2.);
-    double R1s=pow(abs(rhopS),2.);
-    double Ts=real(MUS)/real(mus1)*pow(abs(tauS),2.);
-    double As=4.*real(mus1)*real(B*conj(C)-MUS)/pow(abs(deno),2.);
+    double Rs=pow(std::abs(rhoS),2.);
+    double R1s=pow(std::abs(rhopS),2.);
+    double Ts=real(MUS)/real(mus1)*pow(std::abs(tauS),2.);
+    double As=4.*real(mus1)*real(B*conj(C)-MUS)/pow(std::abs(deno),2.);
     out[0][0]=B;
     out[1][0]=C;
     out[0][1]=real(B*conj(C));//Poynting vector s-pol
@@ -10644,16 +10239,16 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
     rhoP=(mup1*B-C)/deno;
     tauP=2.*mup1/deno;
     rhopP=(MUP*BP-CP)/(MUP*BP+CP);
-    double Rp=pow(abs(rhoP),2.);
-    double R1p=pow(abs(rhopP),2.);
-    double Tp=real(MUP)/real(mup1)*pow(abs(tauP),2.);
-    double Ap=4.*real(mup1)*real(B*conj(C)-MUP)/pow(abs(deno),2.);
+    double Rp=pow(std::abs(rhoP),2.);
+    double R1p=pow(std::abs(rhopP),2.);
+    double Tp=real(MUP)/real(mup1)*pow(std::abs(tauP),2.);
+    double Ap=4.*real(mup1)*real(B*conj(C)-MUP)/pow(std::abs(deno),2.);
     out[2][0]=B;
     out[3][0]=C;
     out[0][2]=real(B*conj(C));//Poynting vector p-pol
 
     // PSI & DELTA
-    double PSI=atan(abs(rhoP/rhoS))/deg2rad;
+    double PSI=atan(std::abs(rhoP/rhoS))/deg2rad;
     double DEL=atan2(-imag(rhoP/rhoS),-real(rhoP/rhoS))/deg2rad;//periodicity 2*pig
 
     // save to OUT
@@ -10682,23 +10277,14 @@ void CALFRE(int NFAin,double wl,complex<double> pq,complex<double> IR[999],doubl
         out[4][2]=0.;
         out[7][2]=1.-Rp;
     }
-    // if(iw==1){
-    //     printf(" tauP= %f +i%f Tp=%f\n tauS= %f +i%f Ts=%f\n",
-    //        real(tauP),imag(tauP),real(MUP)/real(mup1)*pow(abs(tauP),2.),real(tauS),imag(tauS),real(MUS)/real(mus1)*pow(abs(tauS),2.));
-    //     printf(" rhoP= %f +i%f Rp=%f\n rhoS= %f +i%f Rs=%f\n",
-    //        real(rhoP),imag(rhoP),pow(abs(rhoP),2.),real(rhoP),imag(rhoP),pow(abs(rhoP),2.));
-    //     printf(" rho1P= %f +i%f R1p=%f\n rho1S= %f +i%f R1s=%f\n",
-    //        real(rhopP),imag(rhopP),pow(abs(rhopP),2.),real(rhopS),imag(rhopS),pow(abs(rhopS),2.));
-    //     fflush(stdout);
-    // }
 }
 
 
-
-int SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp){
+int ksemawc::SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp){
     int Ndat=0;
     int ikind=0,ivot=0,IPD=0;
     double tetar=0.,KCL,vot[6][3];
+    int iSpec0Hemi1=nint(par[54][2]);
     //   iWL= wl index
 
     // set type and input medium
@@ -10736,71 +10322,74 @@ int SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp){
         ikind=3;
         tetar=pm[86][1];
         ivot=5;
-        IPD=imis-int(imis/2.)*2;
+        IPD=imis-static_cast<int>(imis/2.)*2;
     }
     else if(imis==9 || imis==10){
         ikind=4;
         tetar=pm[87][1];
         ivot=5;
-        IPD=imis-int(imis/2.)*2;
+        IPD=imis-static_cast<int>(imis/2.)*2;
     }
     else if(imis==11 ||imis==12){
         ikind=5;
         tetar=pm[88][1];
         ivot=5;
-        IPD=imis-int(imis/2.)*2;
+        IPD=imis-static_cast<int>(imis/2.)*2;
     }
     else if(imis==13||imis==14){
         ikind=6;
         tetar=pm[89][1];
         ivot=5;
-        IPD=imis-int(imis/2.)*2;
+        IPD=imis-static_cast<int>(imis/2.)*2;
     }
-    int s1p2=NINT(par[27][2]);
-    double LAM=MIS[7][iWL][1];
-    printf("-> SOLVE: imis=%d ikind=%d iWL=%d s1p2=%d teta=%f\n",imis,ikind,iWL,s1p2,tetar);
+    iShemispherical=false;
+    if(imis==1 || imis==3 ||imis==5)
+        if(iSpec0Hemi1==1)
+            iShemispherical=true;
+    if(imis==2 || imis==4)
+        par[54][2]=0.;
+    int s1p2=nint(par[27][2]);
+    qDebug("-> SOLVE: imis=%d ikind=%d iWL=%d s1p2=%d teta=%f",imis,ikind,iWL,s1p2,tetar);
     tetar=tetar*deg2rad;
     double Dn=(par[1][2]-par[1][1])/100.;//n-step
     double Dk=(par[2][2]-par[2][1])/500.;//k-step
     double k1,FM,FMold=1.E+10;
-    CNK[1][1]=0;//nk are unknown
     for(int iN=0;iN<101;iN++){
-        CNK[1][2]=par[1][1]+iN*Dn;
+        CNK[1][7]=par[1][1]+iN*Dn;
         FMold=1.E+10;
         for(int iK=0;iK<501;iK++){
             KCL=par[2][1]+iK*Dk;
-            CNK[1][3]=KCL;
+            CNK[1][8]=KCL;
             ASSEMBLER(iWL,ikind,tetar,vot);
             if(imis<=6)
-                FM=abs(MIS[imis][iWL][1]-vot[ivot][s1p2])/MIS[imis][iWL][2];
+                FM=std::abs(ms.measures[imis-1].value[iWL-1]-vot[ivot][s1p2])/ms.measures[imis-1].error[iWL-1];
             else
-                FM=abs(sin(deg2rad*(ELI[imis-6][iWL][1]-vot[ivot][IPD+1])/2.))/(deg2rad*ELI[imis-6][iWL][2]);
+                FM=std::abs(sin(deg2rad*(ms.measures[imis-1].value[iWL-1]-vot[ivot][IPD+1])/2.))/(deg2rad*ms.measures[imis-1].error[iWL-1]);
             if(FM<=1. && FMold>1.){
                 k1=KCL;
-                //printf("k1=%f ",KCL);
             }
             else if(FM>1. && FMold<=1.){
-                Xp[Ndat]=CNK[1][2];
+                Xp[Ndat]=CNK[1][7];
                 Yp[Ndat]=0.5*(k1+KCL);
                 ErrYp[Ndat]=0.5*(KCL-k1);
                 if(ErrYp[Ndat]<Dk/4.)
                     ErrYp[Ndat]=Dk/4.;
-                //printf("Ndat=%d Xp=%f Yp=%f ErrYp=%f ",Ndat,Xp[Ndat],Yp[Ndat],ErrYp[Ndat]);
                 Ndat++;
             }
-            //printf("n=%f k=%f FM=%f FMold=%f\n",CNK[1][2],CNK[1][3],FM,FMold);
             FMold=FM;
         }
     }
+    par[54][2]=iSpec0Hemi1;
     return(Ndat);
 }
 
 
-double FMER(double k){
-    int iWL=NINT(par[24][2]);
-    int s1p2=NINT(par[27][2]);
+double ksemawc::FMER(double k){
+    int iWL=nint(par[24][2]);
+    int s1p2=nint(par[27][2]);
+    int iSpec0Hemi1=nint(par[54][2]);
     double teta[6];
-    CNK[1][3]=k;
+    CNK[1][8]=k;
     teta[1]=par[6][1];
     teta[2]=pm[86][1];
     teta[3]=pm[87][1];
@@ -10809,43 +10398,55 @@ double FMER(double k){
     for(int i=1;i<=5;i++)
         teta[i]=teta[i]*deg2rad;
     double vot[6][3];
-    double wl=MIS[7][iWL][1];
     double FM=.0;
     int NMIS=0;
     if(DATO[1]==2 || DATO[3]==2 ||DATO[5]==2){
+        if(iSpec0Hemi1==1)
+            iShemispherical=true;
+        else
+            iShemispherical=false;
         ASSEMBLER(iWL,1,0.,vot);
         for(int i=1;i<=3;i++){
             int j=2*i-1;
             if(DATO[j]==2){
-                FM=FM+pow((vot[i][s1p2]-MIS[j][iWL][1])/MIS[j][iWL][2],2.);
+                FM=FM+pow((vot[i][s1p2]-ms.measures[j-1].value[iWL-1])/ms.measures[j-1].error[iWL-1],2.);
                 NMIS++;
             }
         }
     }
     if(DATO[2]==2 || DATO[4]==2){
+        int iSpec0Hemi1=nint(par[54][2]);
+        par[54][2]=0;//Tp and Rp are always direct/specular
+        iShemispherical=false;
         ASSEMBLER(iWL,1,teta[1],vot);
+        par[54][2]=iSpec0Hemi1;
         for(int i=1;i<=2;i++){
             int j=2*i;
             if(DATO[j]==2){
-                FM=FM+pow((vot[i][s1p2]-MIS[j][iWL][1])/MIS[j][iWL][2],2.);
+                FM=FM+pow((vot[i][s1p2]-ms.measures[j-1].value[iWL-1])/ms.measures[j-1].error[iWL-1],2.);
                 NMIS++;
             }
         }
     }
     if(DATO[6]==2){
+        if(iSpec0Hemi1==1)
+            iShemispherical=true;
+        else
+            iShemispherical=false;
         ASSEMBLER(iWL,2,0.,vot);
-        FM=FM+pow(vot[4][1]-MIS[6][iWL][1],2.);
+        FM=FM+pow(vot[4][1]-ms.measures[5].value[iWL-1],2.);
         NMIS++;
     }
     for(int I=1;I<=4;I++){
+        iShemispherical=false;
         if(DATO[5+2*I]==2 || DATO[6+2*I]==2){
             ASSEMBLER(iWL,I+2,teta[1+I],vot);
-            double DE=ELI[5+2*I-6][iWL][1];
+            double DE=ms.measures[6+2*(I-1)].value[iWL-1];
             double DC=vot[5][2];//Delta;
-            double DDE=ELI[5+2*I-6][iWL][2]*deg2rad;
-            double PE=ELI[6+2*I-6][iWL][1];
+            double DDE=ms.measures[6+2*(I-1)].error[iWL-1]*deg2rad;
+            double PE=ms.measures[7+2*(I-1)].value[iWL-1];
             double PC=vot[5][1];//PSI
-            double DP=ELI[6+2*I-6][iWL][2];
+            double DP=ms.measures[7+2*(I-1)].error[iWL-1];
             double DFMD=pow((cos(DC*deg2rad)-cos(DE*deg2rad))/DDE,2.);
             double DFMP=pow((PC-PE)/DP,2.);
             if(DATO[5+2*I]==2){
@@ -10860,22 +10461,24 @@ double FMER(double k){
     }
     if(NMIS>0)
         FM=FM/NMIS;
+    //qDebug("FM=%f",FM);
     return(FM);
 }
 
 
-int FSQ(void *p, int m, int n, const double *x, double *fvec, int iflag){
+int ksemawc::FSQ(void *p, int m, int n, const double *x, double *fvec, int iflag){
     /* calculate the functions at x and return the values in fvec[0] through fvec[m-1] */
     //struct pointToFit2 *pTF2 = (struct pointToFit2 *)p;
-    int ioptf=NINT(pm[100][1]);// FIT#
+    ksemawc* self = static_cast<ksemawc*>(p);
+
+    int ioptf=nint(pm[100][1]);
     // addressing fit-parameters to PM
     for(int i=0;i<n;i++){
-        int ip=NINT(pm[i+1][3]);
+        int ip=nint(pm[i+1][3]);
         pm[ip][1]=x[i];
     }
 
     // computing fvec for n fit
-    int md=NINT(SOL[1][1]);
     int j=-1;
     double chi2=0.;
     double fredeg=real(m-n);
@@ -10883,47 +10486,51 @@ int FSQ(void *p, int m, int n, const double *x, double *fvec, int iflag){
     double erykMIN=(rxy[17][2]-rxy[17][1])/1.e4;
     double ere1MIN=(rxy[26][2]-rxy[26][1])/1.e4;
     double ere2MIN=(rxy[27][2]-rxy[27][1])/1.e4;
-    double wl,ev,y,ery;
-    for(int i=1;i<=md;i++){
-        if(NINT(SOL[i][6])==1){//the data is enabled
-            wl=SOL[i][1];
-            ev=1240./wl;
-            FDISP(ioptf,ev);
-            if(NINT(par[32][5])<=1){
+    double wl,eV,y,ery,nVal,kVal,epsR,epsI;
+    int md=Sol.size();
+    for(int i=0;i<md;i++){
+        if(nint(Sol[i][0])==1){//the data is enabled
+            wl=Sol[i][1];
+            eV=1240./wl;
+            auto fd=FDISP(ioptf,eV);
+            nVal=fd.sqn;
+            kVal=fd.sqk;
+            if(nint(par[32][5])<=1){
                 j++;
-                y=SOL[i][2];
-                ery=SOL[i][4];
+                y=Sol[i][2];
+                ery=Sol[i][4];
                 if(ery<erynMIN) ery=erynMIN;
-                fvec[j]=(y-sqn)/ery;
+                fvec[j]=(y-nVal)/ery;
                 chi2=chi2+pow(fvec[j],2.)/fredeg;
             }
-            if(NINT(par[32][5])==1){
+            if(nint(par[32][5])==1){
                 j++;
-                y=SOL[i][3];
-                ery=SOL[i][5];
+                y=Sol[i][3];
+                ery=Sol[i][5];
                 if(ery<erykMIN) ery=erykMIN;
-                fvec[j]=(y-sqk)/ery;
+                fvec[j]=(y-kVal)/ery;
                 chi2=chi2+pow(fvec[j],2.)/fredeg;
             }
-            if(NINT(par[32][5])==2){
+            if(nint(par[32][5])==2){
+                epsR=nVal*nVal-kVal*kVal;
+                epsI=2.*nVal*kVal;
                 j++;
-                ery=2.*(SOL[i][2]*SOL[i][4]+SOL[i][3]*SOL[i][5]);
+                ery=2.*(Sol[i][2]*Sol[i][4]+Sol[i][3]*Sol[i][5]);
                 if(ery<ere1MIN) ery=ere1MIN;
-                fvec[j]=((SOL[i][2]*SOL[i][2]-SOL[i][3]*SOL[i][3])-EpsiR)/ery;
+                fvec[j]=((Sol[i][2]*Sol[i][2]-Sol[i][3]*Sol[i][3])-epsR)/ery;
                 chi2=chi2+pow(fvec[j],2.)/fredeg;
                 j++;
-                ery=2.*(SOL[i][4]*SOL[i][3]+SOL[i][2]*SOL[i][5]);
+                ery=2.*(Sol[i][4]*Sol[i][3]+Sol[i][2]*Sol[i][5]);
                 if(ery<ere2MIN) ery=ere2MIN;
-                fvec[j]=(2.*SOL[i][2]*SOL[i][3]-EpsiI)/ery;;
+                fvec[j]=(2.*Sol[i][2]*Sol[i][3]-epsI)/ery;;
                 chi2=chi2+pow(fvec[j],2.)/fredeg;
             }
         }
     }
     // monitor values
-    printf("|FSQ> chi2=%.9g\t",chi2);
+    qDebug("|FSQ> chi2=%.9g\t",chi2);
 //    for(int i=0;i<n;i++)
-//        printf("p[%d]=%.9g\t",i,x[i]);
-    printf("\n");
+//        qDebug("p[%d]=%.9g\t",i,x[i]);
     if(iRecChi2==1){
         QFile fchi2(filechi2);
         if(fchi2.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)){
@@ -10944,53 +10551,48 @@ int FSQ(void *p, int m, int n, const double *x, double *fvec, int iflag){
 }
 
 
-int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
+int ksemawc::FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
     //***** Function to fit selected experimental measurements
-    //****
-    int ioptf=NINT(pm[100][1]);// set FIT#
+    ksemawc* self = static_cast<ksemawc*>(p);
+
+    CNK[1][0]=0;//n-unknown by the chosen option
     int mwl=NeV;
-    int s1p2=NINT(par[27][2]);
+    int s1p2=nint(par[27][2]);
+    int iSpec0Hemi1=nint(par[54][2]);
     double vot[6][3];
     double te=0.;
     // addressing fit parameter onto PM
     int ip;
     for(int i=1;i<=n;i++){
-        ip=NINT(pm[i][3]);
+        ip=nint(pm[i][3]);
         pm[ip][1]=x[i-1];
-        if(iw>0) printf("|FSEM> p[%d]=%f\n",i,x[i-1]);
+        if(iw>0) qDebug("|FSEM> p[%d]=%f",i,x[i-1]);
     }
     double chi2=.0;
-    double fredeg=double(m-n);
+    double fredeg=static_cast<double>(m-n);
     //computing fvec
     int ivec=0;
-    double wl,ev;
     for(int i=1;i<=mwl;i++){
-        wl=MIS[7][i][1];
-        ev=1240./wl;
         par[24][2]=i;
-        if(ioptf<1 || ioptf>7){
-            FDISP(ioptf,ev);
-            MIS[16][i][1]=sqn;
-            CNK[1][2]=sqn;
-            MIS[16][i][2]=sqk;
-            CNK[1][3]=sqk;
-        }
-        CNK[1][1]=ioptf;
         //computing Tn Rn R1
         if(DATO[1]==2 || DATO[3]==2 || DATO[5]==2){
-            ASSEMBLER(i,1,0.,vot);
+            if(iSpec0Hemi1==1)
+                iShemispherical=true;
+            else
+                iShemispherical=false;
+            self->ASSEMBLER(i,1,0.,vot);
             if(DATO[1]==2){
-                fvec[ivec]=(MIS[1][i][1]-vot[1][s1p2])/MIS[1][i][2];
+                fvec[ivec]=(self->ms.measures[0].value[i-1]-vot[1][s1p2])/self->ms.measures[0].error[i-1];
                 chi2=chi2+pow(fvec[ivec],2.)/fredeg;
                 ivec++;
             }
             if(DATO[3]==2){
-                fvec[ivec]=(MIS[3][i][1]-vot[2][s1p2])/MIS[3][i][2];
+                fvec[ivec]=(self->ms.measures[2].value[i-1]-vot[2][s1p2])/self->ms.measures[2].error[i-1];
                 chi2=chi2+pow(fvec[ivec],2.)/fredeg;
                 ivec++;
             }
             if(DATO[5]==2){
-                fvec[ivec]=(MIS[5][i][1]-vot[3][s1p2])/MIS[5][i][2];
+                fvec[ivec]=(self->ms.measures[4].value[i-1]-vot[3][s1p2])/self->ms.measures[4].error[i-1];
                 chi2=chi2+pow(fvec[ivec],2.)/fredeg;
                 ivec++;
             }
@@ -10998,33 +10600,35 @@ int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
         //computing Tp Rp
         if(DATO[2]==2 || DATO[4]==2){
             te=par[6][1]*deg2rad;
-            ASSEMBLER(i,1,te,vot);
+            par[54][2]=0;//Tp and Rp are always direct/specular
+            iShemispherical=false;
+            self->ASSEMBLER(i,1,te,vot);
+            par[54][2]=iSpec0Hemi1;
             if(DATO[2]==2){
-                fvec[ivec]=(MIS[2][i][1]-vot[1][s1p2])/MIS[2][i][2];
+                fvec[ivec]=(self->ms.measures[1].value[i-1]-vot[1][s1p2])/self->ms.measures[1].error[i-1];
                 chi2=chi2+pow(fvec[ivec],2.)/fredeg;
                 ivec++;
             }
             if(DATO[4]==2){
-                fvec[ivec]=(MIS[4][i][1]-vot[2][s1p2])/MIS[4][i][2];
+                fvec[ivec]=(self->ms.measures[3].value[i-1]-vot[2][s1p2])/self->ms.measures[3].error[i-1];
                 chi2=chi2+pow(fvec[ivec],2.)/fredeg;
                 ivec++;
             }
         }
         //computing PSI DELTA
+        iShemispherical=false;
         for(int j=1;j<=4;j++){
             if(DATO[7+2*(j-1)]==2 || DATO[8+2*(j-1)]==2){
                 te=pm[85+j][1]*deg2rad;
-                ASSEMBLER(i,2+j,te,vot);
+                self->ASSEMBLER(i,2+j,te,vot);
                 if(DATO[7+2*(j-1)]==2){//DELTA
-                    //double Der=abs(cos((ELI[1+2*(j-1)][i][1]+ELI[1+2*(j-1)][i][2])*deg2rad)-cos((ELI[1+2*(j-1)][i][1]-ELI[1+2*(j-1)][i][2])*deg2rad));
-                    //fvec[ivec]=(cos(ELI[1+2*(j-1)][i][1]*deg2rad)-cos(vot[5][2]*deg2rad))/Der;
-                    double offset=NINT((ELI[1+2*(j-1)][i][1]-vot[5][2])/Dperiod)*Dperiod;
-                    fvec[ivec]=(ELI[1+2*(j-1)][i][1]-vot[5][2]-offset)/ELI[1+2*(j-1)][i][2];
+                    double offset=nint((self->ms.measures[6+2*(j-1)].value[i-1]-vot[5][2])/Dperiod)*Dperiod;
+                    fvec[ivec]=(self->ms.measures[6+2*(j-1)].value[i-1]-vot[5][2]-offset)/self->ms.measures[6+2*(j-1)].error[i-1];
                     chi2=chi2+pow(fvec[ivec],2.)/fredeg;
                     ivec++;
                 }
                 if(DATO[8+2*(j-1)]==2){//PSI
-                    fvec[ivec]=(ELI[2+2*(j-1)][i][1]-vot[5][1])/ELI[2+2*(j-1)][i][2];
+                    fvec[ivec]=(self->ms.measures[7+2*(j-1)].value[i-1]-vot[5][1])/self->ms.measures[7+2*(j-1)].error[i-1];
                     chi2=chi2+pow(fvec[ivec],2.)/fredeg;
                     ivec++;
                 }
@@ -11032,10 +10636,9 @@ int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
         }
     }
     // monitor values
-    printf("|FSEM> ioptf=%d chi2=%.9g\t",ioptf,chi2);
+    qDebug("|FSEM> chi2=%.9g\t",chi2);
 //    for(int i=0;i<n;i++)
-//        printf("p[%d]=%.9g\t",i,x[i]);
-    printf("\n");
+//        qDebug("p[%d]=%.9g\t",i,x[i]);
     if(iRecChi2==1){
         QFile fchi2(filechi2);
         if (fchi2.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)){
@@ -11056,15 +10659,17 @@ int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag){
 }
 
 
-int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag){
+int ksemawc::FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag){
     //***** Subroutine of IbridOne: computing k from T given n
-    //****
-    int ioptf=NINT(pm[100][1]);// set FIT#
+    ksemawc* self = static_cast<ksemawc*>(p);
+
+
+    CNK[1][0]=2;//k-unknown will bet set to forced values
     int mwl=NeV;
-    int s1p2=NINT(par[27][2]);
-    double vot[6][3];
+    int s1p2=nint(par[27][2]);
+    int iSpec0Hemi1=nint(par[54][2]);
+    double vot[6][3],VNK[17][3];
     double te=0.;
-    double FM;
     if(DATO[4]==2)
         te=par[6][1]*deg2rad;
     else if(DATO[8]==2)
@@ -11078,31 +10683,30 @@ int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag){
     // addressing fit parameter onto PM
     int ip;
     for(int i=1;i<=n;i++){
-        ip=NINT(pm[i][3]);
+        ip=nint(pm[i][3]);
         pm[ip][1]=x[i-1];
-        if(iw>0) printf("|FRCK> p[%d]=%f\n",i,x[i-1]);
+        if(iw>0) qDebug("|FRCK> p[%d]=%f",i,x[i-1]);
     }
     double chi2=.0;
-    double fredeg=double(m-n);
+    double fredeg=static_cast<double>(m-n);
     //computing fvec
     int ivec=0;
-    double wl,ev;
+    double wl;
     for(int i=1;i<=mwl;i++){
-        wl=MIS[7][i][1];
-        ev=1240./wl;
+        wl=self->ms.lambda[i-1];
         par[24][2]=i;
-        FDISP(ioptf,ev);
-        MIS[16][i][1]=sqn;
-        CNK[1][2]=sqn;
-        CNK[1][3]=MIS[16][i][2];
+        self->COSVNK(VNK,i);
+        self-> nkSol.n[i-1]=VNK[1][1];
+        CNK[1][7]=VNK[1][1];
+        CNK[1][8]=self->nkSol.k[i-1];
         // computing k from T
         //DELTA_k
         double Trasm=1.,dt,dlim,tol;;
-        if(NINT(par[50+NINT(par[53][2])][3])==1){//incoherent layer
-            if(DATO[1]>0) Trasm=MIS[1][i][1];
-            if(DATO[2]>0) Trasm=MIS[2][i][1];
-            double dinco=pm[NINT(par[53][2])][1];
-            if(iw==1) printf("Trasm = %f\n",Trasm);
+        if(nint(par[50+nint(par[53][2])][3])==1){//incoherent layer
+            if(DATO[1]>0) Trasm=self->ms.measures[0].value[i-1];
+            if(DATO[2]>0) Trasm=self->ms.measures[1].value[i-1];
+            double dinco=pm[nint(par[53][2])][1];
+            if(iw==1) qDebug("Trasm = %f",Trasm);
             dt=-0.1*wl/4./3.14/dinco*log(Trasm);
             dlim=1.e-10;//dlim
         }
@@ -11111,65 +10715,69 @@ int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag){
             dlim=1.e-5;//dlim
         }
         tol=dt/1000.;//tol
-        double k=CNK[1][3];
-        FM=FindRoot(&DELTAT,k,dt,dlim,tol);
-        //printf("k_ini= %f dt=%f tol=%f k_fin=%f\n",k,dt,tol,CNK[1][3]);
-        //printf("FM= %f\n",FM);
-        MIS[16][i][2]=CNK[1][3];
+        double k=CNK[1][8];
+        //FindRoot([this](double k){ return DELTAT(k); },k,dt,dlim,tol);
+        double result = self->FindRoot([self](double k) {
+                return self->DELTAT(k);
+            }, k, dt, dlim, tol);
+        self->nkSol.k[i-1]=CNK[1][8];
         //computing R
         if(DATO[3]==2 || DATO[5]==2){
-            ASSEMBLER(i,1,0.,vot);
+            if(iSpec0Hemi1==1)
+                iShemispherical=true;
+            else
+                iShemispherical=false;
+            self->ASSEMBLER(i,1,0.,vot);
             if(DATO[3]==2){
-                fvec[ivec]=(MIS[3][i][1]-vot[2][s1p2])/MIS[3][i][2];
+                fvec[ivec]=(self->ms.measures[2].value[i-1]-vot[2][s1p2])/self->ms.measures[2].error[i-1];
                 chi2=chi2+pow(fvec[ivec],2.)/fredeg;
                 ivec++;
             }
             if(DATO[5]==2){
-                fvec[ivec]=(MIS[5][i][1]-vot[3][s1p2])/MIS[5][i][2];
+                fvec[ivec]=(self->ms.measures[4].value[i-1]-vot[3][s1p2])/self->ms.measures[4].error[i-1];
                 chi2=chi2+pow(fvec[ivec],2.)/fredeg;
                 ivec++;
             }
         }
+        par[54][2]=0;//Tp and Rp and ELI are always direct/specular
+        iShemispherical=false;
         if(DATO[4]==2){
-            ASSEMBLER(i,1,te,vot);
-            fvec[ivec]=(MIS[4][i][1]-vot[2][s1p2])/MIS[4][i][2];
+            self->ASSEMBLER(i,1,te,vot);
+            fvec[ivec]=(self->ms.measures[3].value[i-1]-vot[2][s1p2])/self->ms.measures[3].error[i-1];
             chi2=chi2+pow(fvec[ivec],2.)/fredeg;
             ivec++;
         }
         if(DATO[8]==2){
-            ASSEMBLER(i,1,te,vot);
-            fvec[ivec]=(ELI[2][i][1]-vot[5][1])/ELI[2][i][2];
+            self->ASSEMBLER(i,1,te,vot);
+            fvec[ivec]=(self->ms.measures[7].value[i-1]-vot[5][1])/self->ms.measures[7].error[i-1];
             chi2=chi2+pow(fvec[ivec],2.)/fredeg;
             ivec++;
         }
         if(DATO[10]==2){
-            ASSEMBLER(i,1,te,vot);
-            fvec[ivec]=(ELI[4][i][1]-vot[5][1])/ELI[4][i][2];
+            self->ASSEMBLER(i,1,te,vot);
+            fvec[ivec]=(self->ms.measures[9].value[i-1]-vot[5][1])/self->ms.measures[9].error[i-1];
             chi2=chi2+pow(fvec[ivec],2.)/fredeg;
             ivec++;
         }
         if(DATO[12]==2){
-            ASSEMBLER(i,1,te,vot);
-            fvec[ivec]=(ELI[6][i][1]-vot[5][1])/ELI[6][i][2];
+            self->ASSEMBLER(i,1,te,vot);
+            fvec[ivec]=(self->ms.measures[11].value[i-1]-vot[5][1])/self->ms.measures[11].error[i-1];
             chi2=chi2+pow(fvec[ivec],2.)/fredeg;
             ivec++;
         }
         if(DATO[14]==2){
-            ASSEMBLER(i,1,te,vot);
-            fvec[ivec]=(ELI[8][i][1]-vot[5][1])/ELI[8][i][2];
+            self->ASSEMBLER(i,1,te,vot);
+            fvec[ivec]=(self->ms.measures[13].value[i-1]-vot[5][1])/self->ms.measures[13].error[i-1];
             chi2=chi2+pow(fvec[ivec],2.)/fredeg;
             ivec++;
         }
-        //printf("wl=%f n=%f k=%f chi2=%f\n",wl,CNK[1][2],CNK[1][3],chi2);
-        //printf("continue?\n");
-        //char rispo;
-        //cin>>rispo;
+        par[54][2]=iSpec0Hemi1;
     }
+    CNK[1][0]=0;//nk-unknown by the chosen option
     // monitor values
-    printf("|FRCK> chi2=%g\t",chi2);
-    for(int i=0;i<n;i++)
-        printf("p[%d]=%g\t",i,x[i]);
-    printf("\n");
+    // qDebug("|FRCK> chi2=%g\t",chi2);
+    // for(int i=0;i<n;i++)
+    //     qDebug("p[%d]=%g\t",i,x[i]);
     if(iRecChi2==1){
         QFile fchi2(filechi2);
         if (fchi2.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append)){
@@ -11189,34 +10797,40 @@ int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag){
     return(0);
 }
 
-double DELTAT(double k){
+
+double ksemawc::DELTAT(double k){
     //subroutine for computing the difference Texp and Tcalc
     int s1p2=1;
+    int iSpec0Hemi1=par[54][2];
     double texp=0.,tcalc,te=0.,vot[6][3];
-    int iwl=NINT(par[24][2]);
+    int iwl=nint(par[24][2]);
     if(DATO[1]==2){
-        texp=MIS[1][iwl][1];
+        texp=ms.measures[0].value[iwl-1];
         te=0.;
         s1p2=1;
+        if(iSpec0Hemi1==1)
+            iShemispherical=true;
+        else
+            iShemispherical=false;
     }
     else if(DATO[2]==2){
-        texp=MIS[2][iwl][1];
+        texp=ms.measures[1].value[iwl-1];
         te=par[6][1]*deg2rad;
-        s1p2=NINT(par[27][2]);
+        s1p2=nint(par[27][2]);
+        par[54][2]=0;//Tp and Rp are always direct/specular
+        iShemispherical=false;
     }
-    CNK[1][2]=sqn;
-    CNK[1][3]=k;
+    //CNK[1][2]=sqn;
+    CNK[1][8]=k;
     ASSEMBLER(iwl,1,te,vot);
+    par[54][2]=iSpec0Hemi1;
     tcalc=vot[1][s1p2];
     double dT=tcalc-texp;
-    //        printf("|DELTAT> wl = %f  iwl = %d  Texp = %f\n",wl,iwl,texp);
-    //        printf("\t n = %f  k = %f\n",CNK[1][2],k);
-    //        printf("\t Tcalc = %f  dT=%f\n",tcalc,dT);
     return(dT);
 }
 
 
-double FindRoot(double (*FT)(double),double t,double dt,double dlim,double tol){
+double ksemawc::FindRoot(std::function<double(double)> FT,double t,double dt,double dlim,double tol){
     int iWarning=0;
     double t0,d1,d0;
     //char ch;
@@ -11230,31 +10844,31 @@ double FindRoot(double (*FT)(double),double t,double dt,double dlim,double tol){
     int imi=0;
     int ilim=1000;
     if(iWarning==1)
-        printf("\n FindRoot: t=%e dt=%e dlim=%e\n",t,dt,dlim);
-    if(abs(d1) <= dlim) istop=1;
+        qDebug("\n FindRoot: t=%e dt=%e dlim=%e",t,dt,dlim);
+    if(std::abs(d1) <= dlim) istop=1;
     while(istop == 0){
         t=t+dt;
         d1=FT(t);
         if(iWarning==1){
-            printf("t: %e -> %e dt=%e\td: %e -> %e DELTAd=%e\n",t0,t,dt,d0,d1,d1-d0);
+            qDebug("t: %e -> %e dt=%e\td: %e -> %e DELTAd=%e",t0,t,dt,d0,d1,d1-d0);
             //           cout << "To continue press a key & enter: ";
             //           cin  >> ch;
         }
-        if(abs(d1) <= dlim){
+        if(std::abs(d1) <= dlim){
             istop=1;
-            //    printf("  STOP per raggiunto limite precisione!\n");
+            //    qDebug("  STOP per raggiunto limite precisione!\n");
         }
-        else if(d0*d1 <.0 && abs(d1) >= (10.*abs(d0))){
+        else if(d0*d1 <.0 && std::abs(d1) >= (10.*std::abs(d0))){
             t=t0;
             d1=d0;
             dt=dt/10.;
-            //    printf("dt decimato = %e\n",dt);
-            if(abs(dt) <= dlim){
+            //    qDebug("dt decimato = %e\n",dt);
+            if(std::abs(dt) <= dlim){
                 istop=1;
-                //      printf(" STOP per raggiunto limite precisione!\n");
+                //      qDebug(" STOP per raggiunto limite precisione!\n");
             }
         }
-        else if(d0*d1 <.0 && abs(d1) < (10.*abs(d0))) {// Brent
+        else if(d0*d1 <.0 && std::abs(d1) < (10.*std::abs(d0))) {// Brent
             double a=t;
             double b=t0;
             double c=b;
@@ -11273,7 +10887,7 @@ double FindRoot(double (*FT)(double),double t,double dt,double dlim,double tol){
                     d=b-a;
                     e=d;
                 }
-                if(abs(fc) < abs(fb)){
+                if(std::abs(fc) < std::abs(fb)){
                     a=b;
                     b=c;
                     c=a;
@@ -11281,23 +10895,23 @@ double FindRoot(double (*FT)(double),double t,double dt,double dlim,double tol){
                     fb=fc;
                     fc=fa;
                 }
-                //      printf("\nBrent: N_iteration=%d \n",iter);
+                //      qDebug("\nBrent: N_iteration=%d \n",iter);
                 //   "a,b,c=",a,b,c
                 //   "fa,fb,fc=",fa,fb,fc
-                tol1=2.*eps*abs(b)+0.5*tol; // Convergence check.
+                tol1=2.*eps*std::abs(b)+0.5*tol; // Convergence check.
                 xm=.5*(c-b);
-                if(abs(xm)<=tol1 || fb==0. || iter>=itmax){
-                    //	printf("eps=%e tol=%e tol1=%e \n xm=%e\n",eps,tol,tol1,xm);
+                if(std::abs(xm)<=tol1 || fb==0. || iter>=itmax){
+                    //	qDebug("eps=%e tol=%e tol1=%e \n xm=%e\n",eps,tol,tol1,xm);
                     t=b;
                     d1=fb;
                     istop=1;
                     //        if(iter<itmax)
-                    //          printf("STOP per raggiunto limite di precisione\n");
+                    //          qDebug("STOP per raggiunto limite di precisione\n");
                     //        else
-                    //          printf("STOP per raggiunto N.max iterazioni\n");
+                    //          dDebug("STOP per raggiunto N.max iterazioni\n");
                 }
                 if(istop==0){
-                    if(abs(e)>=tol1 && abs(fa)>abs(fb)){
+                    if(std::abs(e)>=tol1 && std::abs(fa)>std::abs(fb)){
                         ss=fb/fa; //Attempt inverse quadratic interpolation.
                         if(a==c){
                             pp=2.*xm*ss;
@@ -11310,26 +10924,26 @@ double FindRoot(double (*FT)(double),double t,double dt,double dlim,double tol){
                             q=(q-1.)*(rr-1.)*(ss-1.);
                         }
                         if(pp>0.) q=-q; //Check whether in bounds.
-                        pp=abs(pp);
-                        if(2.*pp<min(3.*xm*q-abs(tol1*q),abs(e*q))){
+                        pp=std::abs(pp);
+                        if(2.*pp<min(3.*xm*q-std::abs(tol1*q),std::abs(e*q))){
                             e=d; //Accept interpolation.
                             d=pp/q;
-                            //            printf("...quadratic interpolation...\n");
+                            //            qDebug("...quadratic interpolation...\n");
                         }
                         else{
-                            //            printf("...bisection..\n");
+                            //            qDebug("...bisection..\n");
                             d=xm; //Interpolation failed, use bisection.
                             e=d;
                         }
                     }
                     else{ //Bounds decreasing too slowly, use bisection.
-                        //          printf("...bisection to speed up..\n");
+                        //          qDebug("...bisection to speed up..\n");
                         d=xm;
                         e=d;
                     }
                     a=b; //Move last best guess to a.
                     fa=fb;
-                    if(abs(d)>tol1) //Evaluate new trial root.
+                    if(std::abs(d)>tol1) //Evaluate new trial root.
                         b=b+d;
                     else{
                         if(xm>0)
@@ -11339,27 +10953,27 @@ double FindRoot(double (*FT)(double),double t,double dt,double dlim,double tol){
                     }
                     t=b;
                     fb=FT(t);
-                    //        printf("'b=%e,fb=%e \n",b,fb);
+                    //        qDebug("'b=%e,fb=%e \n",b,fb);
                 }
             }
         }
-        else if(abs(d1)<abs(d0)) {
-            //      printf("  -> better\n");
+        else if(std::abs(d1)<std::abs(d0)) {
+            //      qDebug("  -> better\n");
             t0=t;
             d0=d1;
             irif=0;
             imi=imi+1;
         }
-        else if(abs(d1)>abs(d0) && d0*d1>0.){
-            //      printf("  -> worst\n");
+        else if(std::abs(d1)>std::abs(d0) && d0*d1>0.){
+            //      qDebug("  -> worst\n");
             t=t0;
             dt=-dt;
             irif=irif+1;
             imi=0;
             if(irif>2){
-                if(abs(d0-d1)>0.3*dlim){
+                if(std::abs(d0-d1)>0.3*dlim){
                     dt=dt/2.;
-                    //          printf("step->step/2 !\n");
+                    //          qDebug("step->step/2 !\n");
                 }
                 else
                     irif=ilim+10;
@@ -11369,27 +10983,16 @@ double FindRoot(double (*FT)(double),double t,double dt,double dlim,double tol){
         else
             inul=inul+1;
         if(irif>ilim || imi>ilim || inul>ilim){
-            //      printf("C0: irif o imi o inul > 1000! -> stop\n");
+            //      qDebug("C0: irif o imi o inul > 1000! -> stop\n");
             istop=1;
         }
     }
     d1=FT(t);
     if(iWarning==1)
-        printf("Root -> t=%e d1=%e\n",t,d1);
+        qDebug("Root -> t=%e d1=%e",t,d1);
     //   std::cout << "To continue press a key & enter: ";
     //   std::cin  >> ch;
     return(d1);
-}
-
-
-
-int NINT(double x){
-    int n;
-    if(x>=0.)
-        n=int(x+0.5);
-    else
-        n=int(x-0.5);
-    return(n);
 }
 
 
@@ -11400,21 +11003,19 @@ void nextColor(){
 }
 
 
-
-void MATINV(int n, int np, double **as, double **b){
+bool MATINV(int n, int np, double **as, double **b){
     /* subroutine for computing the inverse matrix by subroutines given by Numerical Recipe
       n = dimension of the matrix to be inverted
       np = max dimension of matrices used in called subroutine
       as(n,n) = matrix to be inverted
       b(n,n) = inverted matrix
     */
-    //printf("-> MATINV\n");
-    int indx[np];
-    double y[np][np];
-    double **a;
-    a=new double *[np];
-    for(int i=0;i<np;i++)
-        a[i]=new double[np];
+    //qDebug("-> MATINV\n");
+    std::vector<int> indx(n);
+    std::vector<std::vector<double>> y(np, std::vector<double>(np, 0.0));
+    std::vector<std::vector<double>> a(np, std::vector<double>(np, 0.0));
+    std::vector<double*> a_ptr(np);
+    for(int i=0; i<np; i++) a_ptr[i] = a[i].data();
 
     // copy as-matrix into a-matrix that will be lost
     for(int i=0;i<n;i++){
@@ -11429,15 +11030,14 @@ void MATINV(int n, int np, double **as, double **b){
         y[i][i]=1.;
     }
     double d=0;
-    ludcmp(np,a,n,indx,d);// Decompose the matrix just once.
-    if(NINT(par[11][2])==1)
-        return;
-    double *yCol;
-    yCol=new double [n];
+    bool berr=ludcmp(np,a_ptr.data(),n,indx.data(),d);// Decompose the matrix just once.
+    if(!berr)
+        return(false);
+    std::vector<double> yCol(n);
     for(int j=0;j<n;j++){//  Find inverse by columns.
         for(int j2=0;j2<n;j2++)
             yCol[j2]=y[j2][j];
-        lubksb(np,a,n,indx,yCol);
+        lubksb(np,a_ptr.data(),n,indx.data(),yCol.data());
         for(int j2=0;j2<n;j2++)
             y[j2][j]=yCol[j2];
     }
@@ -11450,12 +11050,8 @@ void MATINV(int n, int np, double **as, double **b){
             b[ii][jj]=y[ii][jj];
         }
     }
-    //printf("\tMATINV completed\n");
-    //fflush(stdout);
-    return;
+    return(true);
 }
-
-
 
 
 void lubksb(int np,double **a,int n, int *indx,double *b){
@@ -11469,7 +11065,7 @@ void lubksb(int np,double **a,int n, int *indx,double *b){
 *** account the possibility that b will begin with many zero elements,
 *** so it is e cient for use in matrix inversion.
 */
-    //printf("-> lubksb\n");
+    //qDebug("-> lubksb\n");
     int i,ii,j,ll;
     double sum;
     ii=0;
@@ -11501,9 +11097,7 @@ void lubksb(int np,double **a,int n, int *indx,double *b){
 }
 
 
-
-void ludcmp(int np,double **a,int n,int *indx,double d){
-    int NMAX=500;
+bool ludcmp(int np,double **a,int n,int *indx,double& d){
     double TINY=1.0e-20;
     /*  From "Numerical recipe"
 *** Largest expected n, and a small number.
@@ -11516,18 +11110,18 @@ void ludcmp(int np,double **a,int n,int *indx,double d){
 *** was even or odd,respectively. This routine is used in combination with
 *** lubksb to solve linear equations or invert a matrix.
 */
-    //printf("-> ludcmp\n");
+    //qDebug("-> ludcmp\n");
     int i,imax,j,k;
-    double aamax,dum,sum,vv[NMAX];// vv stores the implicit scaling of each row.
+    double aamax,dum,sum;// vv stores the implicit scaling of each row.
+    std::vector<double> vv(n);
     d=1.;// No row interchanges yet.
     for(i=0;i<n;i++){// Loop over rows to get the implicit scaling information.
         aamax=0.;
         for(j=0;j<n;j++)
-            if(abs(a[i][j])>aamax) aamax=abs(a[i][j]);
+            if(std::abs(a[i][j])>aamax) aamax=std::abs(a[i][j]);
         if(aamax==0.){
-            printf("singular matrix in ludcmp!!!!\n");
-            par[11][2]=1.;
-            return;
+            qWarning("singular matrix in ludcmp!!!!");
+            return(false);
         }
         vv[i]=1./aamax;//Save the scaling.
     }
@@ -11544,7 +11138,7 @@ void ludcmp(int np,double **a,int n,int *indx,double d){
             for(k=0;k<j-1;k++)
                 sum=sum-a[i][k]*a[k][j];
             a[i][j]=sum;
-            dum=vv[i]*abs(sum);// Figure of merit for the pivot.
+            dum=vv[i]*std::abs(sum);// Figure of merit for the pivot.
             if(dum>=aamax){// Is it better than the best so far?
                 imax=i;
                 aamax=dum;
@@ -11570,190 +11164,5 @@ void ludcmp(int np,double **a,int n,int *indx,double d){
                 a[i][j]=a[i][j]*dum;
         }
     }//! Go back for the next column in the reduction.
-    return;
+    return(true);
 }
-
-
-
-/*void AbsLayInco(double atten, double Ra, double R1a, double Rb){
-    //absorptance of a not coherent layer
-    double uguale=(1.-R1a*Rb*atten*atten);
-    Vservice[0]=(1.-Ra)*(1.-atten)*(1.+Rb*atten)/uguale;//Absorptance
-    Vservice[1]=(1.-Ra)*atten/uguale;//Transmittance at the entrance of the "b" interface
-    return;
-}
-*/
-
-
-//save oscillator parameters at any value change
-void ksemawc::on_LEpm_102_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_103_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_104_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_105_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_107_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_108_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_109_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_110_1_textChanged(const QString &arg1) {SaveSetting(2);}
-
-void ksemawc::on_LEpm_112_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_113_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_114_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_115_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_117_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_118_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_119_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_120_1_textChanged(const QString &arg1) {SaveSetting(2);}
-
-void ksemawc::on_LEpm_122_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_123_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_124_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_125_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_127_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_128_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_129_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_130_1_textChanged(const QString &arg1) {SaveSetting(2);}
-
-void ksemawc::on_LEpm_132_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_133_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_134_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_135_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_137_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_138_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_139_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_140_1_textChanged(const QString &arg1) {SaveSetting(2);}
-
-void ksemawc::on_LEpm_142_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_143_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_144_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_145_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_147_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_148_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_149_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_150_1_textChanged(const QString &arg1) {SaveSetting(2);}
-
-void ksemawc::on_LEpm_152_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_153_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_154_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_155_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_157_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_158_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_159_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_160_1_textChanged(const QString &arg1) {SaveSetting(2);}
-
-void ksemawc::on_LEpm_162_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_163_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_164_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_165_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_167_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_168_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_169_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_170_1_textChanged(const QString &arg1) {SaveSetting(2);}
-
-void ksemawc::on_LEpm_172_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_173_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_174_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_175_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_177_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_178_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_179_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_180_1_textChanged(const QString &arg1) {SaveSetting(2);}
-
-void ksemawc::on_LEpm_182_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_183_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_184_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_185_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_187_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_188_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_189_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_190_1_textChanged(const QString &arg1) {SaveSetting(2);}
-
-void ksemawc::on_LEpm_192_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_193_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_194_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_195_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_197_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_198_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_199_1_textChanged(const QString &arg1) {SaveSetting(2);}
-void ksemawc::on_LEpm_200_1_textChanged(const QString &arg1) {SaveSetting(2);}
-
-//save model parameters at any value change
-void ksemawc::on_dSB_PM_1_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_2_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_3_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_4_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_5_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_6_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_7_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_8_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_9_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-
-void ksemawc::on_dSB_PM_51_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_52_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_53_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_54_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_55_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_56_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_57_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_58_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_59_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-
-void ksemawc::on_dSB_PM_91_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_92_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_93_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_94_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_95_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_96_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_97_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_98_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_99_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-
-void ksemawc::on_dSB_PM_11_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_12_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_13_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_14_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_15_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_16_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_17_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_18_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_19_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-
-void ksemawc::on_dSB_PM_61_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_62_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_63_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_64_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_65_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_66_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_67_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_68_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_69_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-
-void ksemawc::on_dSB_PM_21_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_22_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_23_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_24_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_25_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_26_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_27_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_28_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_29_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-
-void ksemawc::on_dSB_PM_31_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_32_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_33_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_34_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_35_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_36_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_37_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_38_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_39_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-
-void ksemawc::on_dSB_PM_41_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_42_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_43_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_44_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_45_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_46_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_47_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_48_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-void ksemawc::on_dSB_PM_49_1_valueChanged(const QString &arg1) {SaveSetting(1);}
-

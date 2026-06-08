@@ -3,7 +3,7 @@
 # This file may be used under the terms of the 3-clause BSD License
 ######################################################################
 
-QWT_ROOT = C:\Qwt-6.2.0
+QWT_ROOT = C:\Qwt-6.3.0
 include( $${QWT_ROOT}/qwtconfig.pri )
 include( $${QWT_ROOT}/qwtbuild.pri )
 include( $${QWT_ROOT}/qwtfunctions.pri )

@@ -29,6 +29,13 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 */
 #ifndef KSEMAWC_H
 #define KSEMAWC_H
+
+#include <complex>
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+#include <qwt_series_data.h>
+#include <gsl/gsl_math.h>
+#include <qwt_plot_picker.h>
 #include <qwt_picker_machine.h>
 
 #include "ui_ksemawc.h"
@@ -39,25 +46,144 @@ class Plot;
 class QPolygon;
 using namespace std;
 
+struct PointToFit2 {
+    double x;
+    double y;
+};
+
+// ─── Contants ───────────────────────────────────────────────────────────────
+static constexpr int N_MEAS   = 20;
+//static constexpr int N_GRAPHS = 16;
+
+// ─── MeasureType ────────────────────────────────────────────────────────────
+enum class MeasureType {
+    None = 0,
+    TransmittanceNormal,
+    TransmittancePolarised,
+    ReflectanceNormal,
+    ReflectancePolarised,
+    ReflectanceBack,
+    Absorptance,
+    Delta1, Psi1,
+    Delta2, Psi2,
+    Delta3, Psi3,
+    Delta4, Psi4
+};
+
+// ─── MeasureData ────────────────────────────────────────────────────────────
+struct MeasureData {
+    MeasureType         type     = MeasureType::None;
+    QString             filename;
+    double              angle    = 0.0;
+    std::vector<double> value;
+    std::vector<double> error;
+
+    bool isActive() const { return type != MeasureType::None; }
+    bool isValid()  const { return isActive() && !filename.isEmpty() && !value.empty(); }
+};
+
+// ─── MeasureSet ─────────────────────────────────────────────────────────────
+struct MeasureSet {
+    std::vector<double>             lambda;
+    std::vector<double>             driftBaseline;
+    std::array<MeasureData, N_MEAS> measures;
+
+    int  nPoints() const { return static_cast<int>(lambda.size()); }
+
+    void resize(int Nwl){
+        lambda.assign(Nwl, 0.0);
+        driftBaseline.assign(Nwl, 0.0);
+        for(auto& m : measures){
+            m.value.assign(Nwl, 0.0);
+            m.error.assign(Nwl, 0.0);
+        }
+    }
+};
+
+// ─── NkData ─────────────────────────────────────────────────────────────────
+struct NkData {
+    QString             filename;
+    std::vector<double> n;
+    std::vector<double> k;
+
+    bool isLoaded() const { return !filename.isEmpty() && !n.empty(); }
+
+    void resize(int Nwl){
+        n.assign(Nwl, 0.0);
+        k.assign(Nwl, 0.0);
+    }
+};
+
+// ─── NkReference ────────────────────────────────────────────────────────────
+struct NkReference {
+    QString             filename;
+    std::vector<double> lambda;
+    std::vector<double> n;
+    std::vector<double> k;
+    std::vector<double> err_n;
+    std::vector<double> err_k;
+
+    bool isLoaded() const { return !filename.isEmpty() && !n.empty(); }
+};
+
+// ─── NkSolution ─────────────────────────────────────────────────────────────
+struct NkSolution {
+    std::vector<double> n;
+    std::vector<double> k;
+
+    void resize(int Nwl){
+        n.assign(Nwl, 0.0);
+        k.assign(Nwl, 0.0);
+    }
+};
+
+// Results of Effective Medium Approximation
+struct EmaResult {
+    double n;   // refrative index effective
+    double k;   // extinction coefficinet effective
+};
+
+// Results oscillators
+struct FdispResult {
+    double epsiR;  // real part of electrical permittivity
+    double epsiI;  // imaginary part of electrical permittivity
+    double sqn;    // n computed from complex electrical permittivity
+    double sqk;    // k computed from electrical permittivity
+};
+
 namespace Ui{
 class ksemawc;
 }
-
 
 class ksemawc : public QWidget//, private Ui::ksemawcDLG
 {
     Q_OBJECT
 
- 
 private:
+    MeasureSet              ms;
+    std::vector<NkData>     nkMaterials;
+    NkReference             nkRef;
+    NkSolution              nkSol;
+    std::vector<PointToFit2> pTF2;
+
+    bool m_guiIsMuted = false; // setGuiMute is not active
+    void setGuiMute(bool mute);
     void Setnk(int ifile);
     void Clrnk(int ifile);
     void updateMatenk(int, QString);
     void ReadSetting(QString);
+
     Ui::ksemawc *ui;
-    QwtPlotPicker* m_picker;
+
+    static constexpr int N_GRAPHS = 16;
+    QwtPlot*        m_graphs[N_GRAPHS + 1]={};   // index 1..16, [0] not used
+    QwtPlotPicker*  m_pickers[N_GRAPHS + 1]={};  // idem
+
+    void ensureGraph(int ic, int iRD);
+
+    QwtPlotPicker* m_picker= nullptr;
+    QwtPlotPicker* d_picker= nullptr;
     QwtPickerClickPointMachine* picker_m;
-    QwtPlotPicker* d_picker;
 
 public:
     ksemawc(QWidget *parent=0);    
@@ -65,271 +191,102 @@ public:
     QMap<QString, QCheckBox*> idToCheckBox;
     QMap<QString, QLineEdit*> idToLineEdit;
     QMap<QString, QDoubleSpinBox*> idToDoubleSpinBox;
+    bool isGuiMuted() const { return m_guiIsMuted; }// To know the state of setGuiMute
 
 public Q_SLOTS:
-     void LoadProject();
-     void SaveProject();
-     void LoadFilenk();
-     void ClrFnk();
-     void Clrfn();
-     void SaveFnk();
-     void SaveSetting(int iCall);
-     void mDwUp(int iLayer, int Dw1UpM1);
-     void callSetSample();
-     void setSample();
-     void listMeas(const QString &);
-     void pwTn (const int &);
-     void pwTp (const int &);
-     void pwRn (const int &);
-     void pwRp (const int &);
-     void pwR1 (const int &);
-     void pwApds (const int &);
-     void pwEj(int j);
-     void pwSubEj(int j);
-     void MCRange ();
-     void listOsc();
-     void tabChanged();
-     void setTabSim();
-     void PanFitEnable();
-     void PanFitPar();
-     void PanFitChoice();
-     void AdjTheta();
-     void AdjRoughMax();
-     void RefreshModel();
-     void SetModel(const int &);
-     void closeEvent ( QCloseEvent * event );
-     void PlotMENK();
-     void PlotME();
-     void PlotNK(int iRD);
-     void Simula();
-     void CalcMis(double mc[15][1000]);
-     void PlotAve();
-     void PlotTexturized();
-     void searchNK();
-     void RefTrackG();
-     void NumericalSearch();
-     void FitN();
-     void FitNK();
-     void FitE1E2();
-     void FitSelExpMeas();
-     void IbridPlotFit();
-     void IbridFit();
-     void IbridOne();
-     void setStop();
-     void IbridOneStore();
-     void IbridKernel(QString r);
-     void ClearTempIbri();
-     void StoreFitSet();
-     void GoBest();
-     void GoPrevious();
-     void GoNext();
-     void rangeWL();
-     void refreshFitPar();
-     void saveNKsim();
-     void saveSim();
-     void PlotAbsEL();
-     void setOscN(int k);
-     void manageLEwl();
-     void setMat(int nM);
-     void setEMA(int nM);
-     void setRifMir();
-     void SPADA();
-     void selectNsol();
-     void drawPolygon(QPointF pos);
-     void setKindOsc1();
-     void setKindOsc2();
-     void setKindOsc3();
-     void setKindOsc4();
-     void setKindOsc5();
-     void setKindOsc6();
-     void setKindOsc7();
-     void setKindOsc8();
-     void setKindOsc9();
-     void setKindOsc10();
-     void setKindOsc11();
-     void setKindOsc12();
-     void setKindOsc13();
-     void setKindOsc14();
-     void setKindOsc15();
-     void setKindOsc16();
-     void setKindOsc17();
-     void setKindOsc18();
-     void setKindOsc19();
-     void setKindOsc20();
-     void setFontDia();
-     void msgErrLoad(QString where, QString fnERR);
-     void setRangeEli();
-     void readRangeEli();
- private Q_SLOTS:
-     void on_LEpm_102_1_textChanged(const QString &arg1);
-     void on_LEpm_103_1_textChanged(const QString &arg1);
-     void on_LEpm_104_1_textChanged(const QString &arg1);
-     void on_LEpm_105_1_textChanged(const QString &arg1);
-     void on_LEpm_107_1_textChanged(const QString &arg1);
-     void on_LEpm_108_1_textChanged(const QString &arg1);
-     void on_LEpm_109_1_textChanged(const QString &arg1);
-     void on_LEpm_110_1_textChanged(const QString &arg1);
+    void PLOTline1bar2(int iL1B2,int iRD,int iCol,int ic,int Ndata,double *Xp,double *Yp,double *ErrXp,double *ErrYp);
+    void about();
+    void LoadProject();
+    void SaveProject();
+    void LoadFilenk();
+    void ClrFnk();
+    void Clrfn();
+    void SaveFnk();
+    void SaveSetting(int iCall);
+    void mDwUp(int iLayer, int Dw1UpM1);
+    void callSetSample();
+    void setSample();
+    void listMeas();
+    void pwTn ();
+    void pwTp ();
+    void pwRn ();
+    void pwRp ();
+    void pwR1 ();
+    void pwApds ();
+    void pwEj(int j);
+    void pwSubEj(int j);
+    void MCRange();
+    void listOsc();
+    void loadNKmodel();
+    void saveNKmodel();
+    void tabChanged();
+    void setTabSim();
+    void PanFitEnable();
+    void PanFitPar();
+    void PanFitChoice();
+    void AdjTheta();
+    void AdjRoughMax();
+    void RefreshModel();
+    void SetModel(const int &);
+    void closeEvent ( QCloseEvent * event );
+    void PlotMENK();
+    void PlotME();
+    void PlotNK(int iRD);
+    void Simula();
+    void CalcMis(std::vector<std::vector<double>>& mc);
+    void PlotAve();
+    void PlotTexturized();
+    void searchNK();
+    void RefTrackG();
+    void NumericalSearch();
+    void FitN();
+    void FitNK();
+    void FitE1E2();
+    void FitSelExpMeas();
+    void IbridPlotFit();
+    void IbridFit();
+    void IbridOne();
+    void setStop();
+    void IbridOneStore();
+    void IbridKernel(QString r);
+    void ClearTempIbri();
+    void StoreFitSet();
+    void GoBest();
+    void GoPrevious();
+    void GoNext();
+    void rangeWL();
+    void refreshFitPar();
+    void saveNKsim();
+    void saveSim();
+    void PlotAbsEL();
+    void setOscN(int k);
+    void manageLEwl();
+    void setMat(int nM);
+    void setEMA(int nM);
+    void setRifMir();
+    void SPADA();
+    void CONVER(double *X,double *Y,int NDATI,int N1,int STEP,int I,int IUVIR);
+    void selectNsol();
+    void drawPolygon(QPointF pos);
+    void setKindOsc(int N);
+    void setFontDia();
+    void msgErrLoad(QString where, QString fnERR);
+    void setRangeEli();
+    void readRangeEli();
+    void reset();
+    void SETVNK(int io,int J,double VNK[17][3],int L,int Kcte);
+    void COSVNK(double VNK[17][3],int L);
+    void ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]);
+    void BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> pq,double vosi[6][3]);
+    int SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp);
+    double FMER(double k);
+    static int FSEM(void *p, int m, int n, const double *x, double *fvec, int iflag);
+    static int FRCK(void *p, int m, int n, const double *x, double *fvec, int iflag);
+    double DELTAT(double k);
+    double FindRoot(std::function<double(double)> f,double t,double dt,double dlim,double tol);
+    static int FSQ(void *p, int m, int n, const double *x, double *fvec, int iflag);
+private Q_SLOTS:
 
-     void on_LEpm_112_1_textChanged(const QString &arg1);
-     void on_LEpm_113_1_textChanged(const QString &arg1);
-     void on_LEpm_114_1_textChanged(const QString &arg1);
-     void on_LEpm_115_1_textChanged(const QString &arg1);
-     void on_LEpm_117_1_textChanged(const QString &arg1);
-     void on_LEpm_118_1_textChanged(const QString &arg1);
-     void on_LEpm_119_1_textChanged(const QString &arg1);
-     void on_LEpm_120_1_textChanged(const QString &arg1);
-
-     void on_LEpm_122_1_textChanged(const QString &arg1);
-     void on_LEpm_123_1_textChanged(const QString &arg1);
-     void on_LEpm_124_1_textChanged(const QString &arg1);
-     void on_LEpm_125_1_textChanged(const QString &arg1);
-     void on_LEpm_127_1_textChanged(const QString &arg1);
-     void on_LEpm_128_1_textChanged(const QString &arg1);
-     void on_LEpm_129_1_textChanged(const QString &arg1);
-     void on_LEpm_130_1_textChanged(const QString &arg1);
-
-     void on_LEpm_132_1_textChanged(const QString &arg1);
-     void on_LEpm_133_1_textChanged(const QString &arg1);
-     void on_LEpm_134_1_textChanged(const QString &arg1);
-     void on_LEpm_135_1_textChanged(const QString &arg1);
-     void on_LEpm_137_1_textChanged(const QString &arg1);
-     void on_LEpm_138_1_textChanged(const QString &arg1);
-     void on_LEpm_139_1_textChanged(const QString &arg1);
-     void on_LEpm_140_1_textChanged(const QString &arg1);
-
-     void on_LEpm_142_1_textChanged(const QString &arg1);
-     void on_LEpm_143_1_textChanged(const QString &arg1);
-     void on_LEpm_144_1_textChanged(const QString &arg1);
-     void on_LEpm_145_1_textChanged(const QString &arg1);
-     void on_LEpm_147_1_textChanged(const QString &arg1);
-     void on_LEpm_148_1_textChanged(const QString &arg1);
-     void on_LEpm_149_1_textChanged(const QString &arg1);
-     void on_LEpm_150_1_textChanged(const QString &arg1);
-
-     void on_LEpm_152_1_textChanged(const QString &arg1);
-     void on_LEpm_153_1_textChanged(const QString &arg1);
-     void on_LEpm_154_1_textChanged(const QString &arg1);
-     void on_LEpm_155_1_textChanged(const QString &arg1);
-     void on_LEpm_157_1_textChanged(const QString &arg1);
-     void on_LEpm_158_1_textChanged(const QString &arg1);
-     void on_LEpm_159_1_textChanged(const QString &arg1);
-     void on_LEpm_160_1_textChanged(const QString &arg1);
-
-     void on_LEpm_162_1_textChanged(const QString &arg1);
-     void on_LEpm_163_1_textChanged(const QString &arg1);
-     void on_LEpm_164_1_textChanged(const QString &arg1);
-     void on_LEpm_165_1_textChanged(const QString &arg1);
-     void on_LEpm_167_1_textChanged(const QString &arg1);
-     void on_LEpm_168_1_textChanged(const QString &arg1);
-     void on_LEpm_169_1_textChanged(const QString &arg1);
-     void on_LEpm_170_1_textChanged(const QString &arg1);
-
-     void on_LEpm_172_1_textChanged(const QString &arg1);
-     void on_LEpm_173_1_textChanged(const QString &arg1);
-     void on_LEpm_174_1_textChanged(const QString &arg1);
-     void on_LEpm_175_1_textChanged(const QString &arg1);
-     void on_LEpm_177_1_textChanged(const QString &arg1);
-     void on_LEpm_178_1_textChanged(const QString &arg1);
-     void on_LEpm_179_1_textChanged(const QString &arg1);
-     void on_LEpm_180_1_textChanged(const QString &arg1);
-
-     void on_LEpm_182_1_textChanged(const QString &arg1);
-     void on_LEpm_183_1_textChanged(const QString &arg1);
-     void on_LEpm_184_1_textChanged(const QString &arg1);
-     void on_LEpm_185_1_textChanged(const QString &arg1);
-     void on_LEpm_187_1_textChanged(const QString &arg1);
-     void on_LEpm_188_1_textChanged(const QString &arg1);
-     void on_LEpm_189_1_textChanged(const QString &arg1);
-     void on_LEpm_190_1_textChanged(const QString &arg1);
-
-     void on_LEpm_192_1_textChanged(const QString &arg1);
-     void on_LEpm_193_1_textChanged(const QString &arg1);
-     void on_LEpm_194_1_textChanged(const QString &arg1);
-     void on_LEpm_195_1_textChanged(const QString &arg1);
-     void on_LEpm_197_1_textChanged(const QString &arg1);
-     void on_LEpm_198_1_textChanged(const QString &arg1);
-     void on_LEpm_199_1_textChanged(const QString &arg1);
-     void on_LEpm_200_1_textChanged(const QString &arg1);
-
-     void on_dSB_PM_1_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_2_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_3_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_4_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_5_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_6_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_7_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_8_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_9_1_valueChanged(const QString &arg1);
-
-     void on_dSB_PM_51_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_52_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_53_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_54_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_55_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_56_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_57_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_58_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_59_1_valueChanged(const QString &arg1);
-
-     void on_dSB_PM_91_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_92_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_93_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_94_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_95_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_96_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_97_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_98_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_99_1_valueChanged(const QString &arg1);
-
-     void on_dSB_PM_11_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_12_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_13_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_14_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_15_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_16_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_17_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_18_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_19_1_valueChanged(const QString &arg1);
-
-     void on_dSB_PM_61_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_62_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_63_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_64_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_65_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_66_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_67_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_68_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_69_1_valueChanged(const QString &arg1);
-
-     void on_dSB_PM_21_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_22_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_23_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_24_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_25_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_26_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_27_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_28_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_29_1_valueChanged(const QString &arg1);
-
-     void on_dSB_PM_31_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_32_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_33_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_34_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_35_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_36_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_37_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_38_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_39_1_valueChanged(const QString &arg1);
-
-     void on_dSB_PM_41_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_42_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_43_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_44_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_45_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_46_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_47_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_48_1_valueChanged(const QString &arg1);
-     void on_dSB_PM_49_1_valueChanged(const QString &arg1);
 };
 
 #endif

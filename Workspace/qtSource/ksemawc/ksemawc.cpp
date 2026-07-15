@@ -7,9 +7,20 @@ Porting to Windows and advanced oscillators by
              email: alberto.mittiga@enea.it
 
 
-kSEMAW is a workspace for the analysis of
+kSEMAWc — C++/Qt5 port of kSEMAW
+Workspace for the analysis of
 Spectrophotometric (SP), Ellipsometric (ELI) and
 Photothermal Deflection Spectroscopy (PDS) measurements
+
+Milestones of version history:
+  v0.9.6 First public release: kernel wrote in FORTRAN and GUI based on C++/Qt4 (Montecchi)
+  v1.0.0 Complete rewrite in C++ (Montecchi) and MS Windows executable (Mittiga)
+  v2.x   Additional features (Montecchi) and new physical oscillators (Mittiga)
+  v3.x   Improvements of loading and processing of ellipsometric spectra
+  v4.0   Modern C++ refactoring and new pseudo-oscillator Volumetric-scattering
+  v5.0   With the help of ClaudeCode, materials extended to 99 (user 1-99, special media 100-103),
+         NK files extended to 99, [EXTRA_NK_V2] + [EXTRA_CNK_V2] file
+         blocks, sB_nmat/sB_nnk computed from loaded data
 
 
    Copyright (C) 2026  Marco Montecchi
@@ -70,8 +81,8 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C     [34][1-    4]........{/}
 //C     [35][1-    4]... standard-spectrum_for_weighting , S1P2U3 , / , /
 //C
-//C     [51-60][1]      pointer to VNK -> nk layer #j=1,9
-//C         [51][2]     Nlayer [max 9]
+//C     [51-60][1]      pointer to VNK (material index for each layer)
+//C         [51][2]     Nlayer [max N_LAYER_MAX=20, hard max N_LAYER_HARD_MAX=99]
 //C         [52][2]     symmetric multilayer on the back face of the last layer of Nlayer:
 //C                     0 = no, 1 = yes
 //C         [53][2]     pointer to the unknown layer
@@ -156,31 +167,46 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C
 //C
 //C
-//c **** pm[201][6] generalized multilayer & oscillators ****
-//c        [i][1] = parameter value
-//c        [i][2] = managment in data-fit: 0 -> constant
-//c                                        j -> P[j] where P is a fit parameter
-//c        [j][3] = pointer P: P[j] = PM[int(PM[j][3])][1]
-//c        [i][4] = ERROR
-//c        [i][5] = global correlation
+//c **** per-layer parameter arrays (split from the original flat pm[201][6]) ****
 //c
-//c   1- 9 thickness
-//c  11-19 Dn/<n> n-gradient
-//c  21-29 n-curvature
-//c  31-39 Dk/<k> k-gradient
-//c  41-49 k-curvature
-//c  51-59 roughness
-//c  61-69 slope_Dn/<n> in 1/eV
-//c  71-85 f-EMA
-//c  86-89 ThetaEli_1, ThetaEli_2,ThetaEli_3,ThetaEli_4
-//c  91-99 nonunifornity of thickness (%)
-//c 100  Fit# used in data-fit [1,2 ...,7]
-//c 101  fdisp#1
-//c 102  C1
-//c 103  E1
-//c 104  D1
-//c 105  K1
-//c etc etc up to the 20th oscillator
+//c  Each array has shape [N_LAYER_HARD_MAX+1][6] (1-based, index 0 unused):
+//c    pmD [i]  thickness            layer i
+//c    pmDn[i]  Dn/<n>  n-gradient   layer i
+//c    pmNc[i]  n-curvature          layer i
+//c    pmDk[i]  Dk/<k>  k-gradient   layer i
+//c    pmKc[i]  k-curvature          layer i
+//c    pmRg[i]  roughness            layer i
+//c    pmSd[i]  slope_Dn/<n> in 1/eV layer i
+//c    pmNu[i]  non-uniformity (%)   layer i
+//c    pmFe[j]  f-EMA fraction       material j  (index 1..N_CNK_HARD_MAX)
+//c    pmTe[j]  ThetaEli             angle j     (index 1..4)
+//c    pmOs[k]  oscillator params    (index 0..N_OSC_MAX*5)
+//c
+//c  All arrays store [col][1]=value, [col][2]=fit-link, [col][3]=ppm-ptr,
+//c                   [col][4]=error,  [col][5]=global-corr
+//c
+//c  pmAt(ip): uniform flat ip index → pointer into named arrays.
+//c  Used by the fit-parameter system (ppm[]). ip encoding (v5.2+):
+//c
+//c  Layer parameters — all 99 layers, 8 properties:
+//c    ip = 1 + prop*99 + (layer-1),   layer=1..99,  prop=0..7
+//c    prop  0=D      ip   1.. 99     pmD [1..99]
+//c    prop  1=Dn     ip 100..198     pmDn[1..99]
+//c    prop  2=Nc     ip 199..297     pmNc[1..99]
+//c    prop  3=Dk     ip 298..396     pmDk[1..99]
+//c    prop  4=Kc     ip 397..495     pmKc[1..99]
+//c    prop  5=Rg     ip 496..594     pmRg[1..99]
+//c    prop  6=Sd     ip 595..693     pmSd[1..99]
+//c    prop  7=Nu     ip 694..792     pmNu[1..99]
+//c
+//c  Material / oscillator params:
+//c    ip 793..891  f-EMA fraction  pmFe[1..99]     (ip = 792 + material)
+//c    ip 892..895  ThetaEli 1..4   pmTe[1..4]      (ip = 891 + angle)
+//c    ip 896       Fit#            pmOs[0]
+//c    ip 897..996  oscillator params pmOs[1..100]   (ip = 896 + pmOs-index)
+//c
+//c  migrateIp(old_ip): converts any old encoding (stride-10, v4 layers 10-20,
+//c  v5.1 layers 21-99) to the current uniform encoding.
 //C
 //C
 //C
@@ -210,8 +236,12 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C       i=13: Psi4
 //C
 //C  NK-known data are stored in
-//C      nkMaterials[k].n[iwl] with k=0,...,7
-//C      nkMaterials[k].k[iwl]
+//C      nkMaterials[k].n[iwl] with k=0,...,N_CNK_USER_MAX-1 (0..98): one slot per nk file
+//C      nkMaterials[k].k[iwl]                  (sized N_CNK_USER_MAX=99 in SPADA)
+//C      nk file #f (f=1..99) lives in nkMaterials[f-1]; its nSrc code is 7+f, so
+//C      the slot is nkMaterials[nSrc-8]. This range (nSrc 8..106) is disjoint from the
+//C      special input/output media cnk[100..103] (output/input SF, input PDS, input ELI)
+//C      and from the ELI CONVER dispatch codes 107..114, so there is no overlap.
 //C
 //C  with the common wavelenght set stored in ms.lambda[iwl]
 //C
@@ -225,27 +255,37 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 //C   NANK[16]     : nome "mate/aa999.9" ksemaw project
 //C
 //C
-//C  The istructions on how to assign nk values to each layer are in:
-//C   CNK[17][9]
-//C   CNK[J][K]: managment matrix of VNK[J][H]
-//C       J=1    <-> VNK[1][1 o 2]    = n,k working
-//C       J=2..8 <-> VNK[2..8][1 o 2] = n,k known
-//C       J=9    <-> VNK[9][1 o 2]    = n,k exit  medium SF
-//C       J=10   <-> VNK[10][1 o 2]   = n,k input medium SF
-//C       J=11   <-> VNK[11][1 o 2]   = n,k input medium PDS
-//C       J=12   <-> VNK[12][1 o 2]   = n,k input medium PSI,DELTA #1
-//C       J=13   <-> VNK[13][1 o 2]   = n,k input medium PSI,DELTA #2
-//C       J=14   <-> VNK[14][1 o 2]   = n,k input medium PSI,DELTA #3
-//C       J=15   <-> VNK[15][1 o 2]   = n,k input medium PSI,DELTA #4
-//C       J=16   <->
-//C    CNK[J][0]=0 -> VNK[J][k]=VNK[J][k]
-//C              1 -> VNK[J][1]=CNK[J][7] VNK[J][2]=VNK[J][2]
-//C              2 -> VNK[J][1]=VNK[J][1] VNK[J][2]=CNK[J][8]
-//C              3 -> VNK[J][1]=CNK[J][7] VNK[J][2]=CNK[J][8]
-//C    CNK[J][1 and 4]=0       =>  n,k cte  n=CNK[J][2 and 5]  k=CNK[J][3 and 6]
-//C    CNK[J][1 and 4]=1..5    =>  n,k by  Fit#
-//C    CNK[J][1 and 4]=8..15   =>  n,k by file-nk loaded in nkMaterials[K]
-//C    CNK[J][1 and 4]=16      =>  n,k Material#1
+//C  The instructions on how to assign n,k values to each layer are in:
+//C   cnk[J]  (struct MaterialCNK, see ksemawc.h)
+//C   J = 1 .. N_CNK_USER_MAX  (1..99)  : user materials
+//C   J = N_CNK_SPEC_START .. N_CNK_MAX (100..103) : special input/output media:
+//C       J=100 <-> output medium SF
+//C       J=101 <-> input  medium SF
+//C       J=102 <-> input  medium PDS
+//C       J=103 <-> input  medium ELI
+//C
+//C   VNK[J][0..2] is built from cnk[J] by SETVNK for J=1..N_CNK_MAX:
+//C       VNK[J][0] unused
+//C       VNK[J][1] = n (real part)
+//C       VNK[J][2] = k (imaginary part)
+//C
+//C   cnk[J].nSrc selects the n,k source (= combo index in the GUI):
+//C       0        => constant: n=cnk[J].nConst, k=cnk[J].kConst
+//C       1..7     => oscillator model (Fit# 1-7)
+//C       8..7+N   => NK file: nkMaterials[nSrc-8]  (N = N_CNK_USER_MAX = 99,
+//C                   so valid nSrc range for NK files is 8..106)
+//C
+//C   cnk[J].emaSrc < 0  => no EMA
+//C   cnk[J].emaSrc >= 0 => EMA mixture: second material = emaSrc,
+//C                          fill fraction = pmFe[J][1]
+//C                          For J=1..20:  pmFe[J][1] stored in pmOs[70+J][1]
+//C                          For J=21..N_CNK_MAX: pmFe[J][1] stored directly
+//C
+//C   cnk[J].forceMode:
+//C       0 => no override
+//C       1 => force n = cnk[J].nForced
+//C       2 => force k = cnk[J].kForced
+//C       3 => force both n and k
 //C
 //C
 //C    rxy[30][4]: managment matrix of plots
@@ -295,6 +335,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 
 
 #include "ksemawc.h"
+#include <QListView>
 #include <QDebug>
 #include <cstdio>
 #include <cstdlib>
@@ -307,6 +348,7 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QTimer>
 #include <unistd.h>
 #include <cminpack.h>
 #include <QtGlobal>
@@ -321,11 +363,10 @@ Photothermal Deflection Spectroscopy (PDS) measurements
 #include <qwt_interval.h>
 #include <qwt_plot_intervalcurve.h>
 #include <qwt_interval_symbol.h>
-#include <QwtPickerMachine>
 #include <qwt_picker_machine.h>
 #include <qwt_picker.h>
 #include <qwt_plot_picker.h>
-#include <QwtPlotZoomer>
+#include <qwt_plot_zoomer.h>
 #include <QDateTime>
 #include <QPen>
 #include <QGraphicsPolygonItem>
@@ -358,7 +399,7 @@ const double Dperiod=180.;//period of DELTA
 
 //global variables
 QString fnproject,pathroot,fileStore,fileStore0,fStdSpect,fRefMir,fNKsim,fMisSim,filechi2,lastAction,fileStoreSpjName,caller;
-QString info,fnk[9],fnSample,fnTn,fnTp,fnRn,fnRp,fnR1,fnApds,fnE1,fnE2,fnE3,fnE4,fnFnk,ParFitLab[14],NANK[17];
+QString info,fnk[N_CNK_USER_MAX+1],fnSample,fnTn,fnTp,fnRn,fnRp,fnR1,fnApds,fnE1,fnE2,fnE3,fnE4,fnFnk,ParFitLab[14],NANK[17];
 
 QPolygonF polygonF;
 QColor myColor[7]={Qt::black,Qt::blue,Qt::cyan,Qt::green,Qt::magenta,Qt::red,Qt::yellow};
@@ -366,7 +407,7 @@ QString labelQwt;//label to use in absorptance plot
 int iColor=0;
 int iSelected=0;//used to stop recursive n-selection by polygon
 
-int ink,lastIndex,ifn,npp,ppm[18],nPar,nlayer,lastTab,DATO[15],iw=0,L1E2=2,iRecChi2=0;
+int ink,lastIndex,ifn,npp,ppm[N_FIT_MAX+1],nPar,nlayer,lastTab,DATO[15],iw=0,L1E2=2,iRecChi2=0;
 int ifirstcall=0;//used to initialize fit
 int ifirstWarning=0;//used to warn about A= 1-T-R<0
 int jobtot=0;
@@ -376,8 +417,181 @@ int iDelCon=0;
 int iNewSample=0;
 int iwl2print=0;//index of WL at which print when it is due
 
-//attention, the index [0] is not used make save the FORTRAN style
-double pf[8][22],pm[201][6],par[61][6],CNK[17][9],rxy[31][5];
+//attention, the index [0] is not used (FORTRAN-style 1-based indexing)
+double pf[8][22],par[50+N_LAYER_HARD_MAX+1][6],rxy[31][5];
+MaterialCNK cnk[N_CNK_HARD_MAX+1]; // 1-based: cnk[1..N_CNK_MAX] user+special media
+
+// pm[] split into named per-property arrays (index 1..N_LAYER_HARD_MAX)
+double pmD [N_LAYER_HARD_MAX+1][6]; // thickness
+double pmDn[N_LAYER_HARD_MAX+1][6]; // Dn/<n>  gradient
+double pmNc[N_LAYER_HARD_MAX+1][6]; // n-curvature
+double pmDk[N_LAYER_HARD_MAX+1][6]; // Dk/<k>
+double pmKc[N_LAYER_HARD_MAX+1][6]; // k-curvature
+double pmRg[N_LAYER_HARD_MAX+1][6]; // roughness
+double pmSd[N_LAYER_HARD_MAX+1][6]; // slope_Dn
+double pmNu[N_LAYER_HARD_MAX+1][6]; // non-uniformity
+double pmFe[N_CNK_HARD_MAX+1][6]; // f-EMA fraction  (index 1..N_CNK_HARD_MAX)
+double pmTe[5][6];              // ThetaEli         (index 1..4)
+double pmOs[N_OSC_MAX*5+1][6]; // oscillators: pmOs[iC+(k-1)*5] for osc k, param iC
+
+// Uniform ip encoding — all layers 1..N_LAYER_HARD_MAX treated identically:
+//   Layer params (8 props × 99 layers): ip = 1 + prop*99 + (layer-1),  ip 1..792
+//     prop 0=D, 1=Dn, 2=Nc, 3=Dk, 4=Kc, 5=Rg, 6=Sd, 7=Nu
+//   EMA fraction material 1..99:        ip = 792 + material,           ip 793..891
+//   ThetaEli angle 1..4:                ip = 891 + angle,              ip 892..895
+//   Fit# (pmOs[0]):                     ip = 896
+//   Oscillator params (20×5=100):       ip = 896 + pmOs-index,         ip 897..996
+static inline double* pmAt(int ip) {
+    if (ip >= 1 && ip <= 792) {
+        int prop  = (ip-1) / 99;
+        int layer = (ip-1) % 99 + 1;
+        switch(prop) {
+            case 0: return pmD[layer];
+            case 1: return pmDn[layer];
+            case 2: return pmNc[layer];
+            case 3: return pmDk[layer];
+            case 4: return pmKc[layer];
+            case 5: return pmRg[layer];
+            case 6: return pmSd[layer];
+            case 7: return pmNu[layer];
+        }
+    }
+    if (ip >= 793 && ip <= 891) return pmFe[ip-792];   // EMA mat 1..99
+    if (ip >= 892 && ip <= 895) return pmTe[ip-891];   // ThetaEli 1..4
+    if (ip == 896)               return pmOs[0];         // Fit#
+    if (ip >= 897 && ip <= 996)  return pmOs[ip-896];   // oscillator params
+    static double dummy[6]{};
+    return dummy;
+}
+
+// Migrate ip from any old encoding to the current uniform encoding.
+// Called once at project load for each ppm[] value stored in par[35+i][5].
+static int migrateIp(int old_ip) {
+    if (old_ip <= 0) return 0;
+    // stride-10 layers 1-9
+    if (old_ip >= 1  && old_ip <= 9)   return 1 + 0*99 + (old_ip-1);    // D
+    if (old_ip >= 11 && old_ip <= 19)  return 1 + 1*99 + (old_ip-11);   // Dn
+    if (old_ip >= 21 && old_ip <= 29)  return 1 + 2*99 + (old_ip-21);   // Nc
+    if (old_ip >= 31 && old_ip <= 39)  return 1 + 3*99 + (old_ip-31);   // Dk
+    if (old_ip >= 41 && old_ip <= 49)  return 1 + 4*99 + (old_ip-41);   // Kc
+    if (old_ip >= 51 && old_ip <= 59)  return 1 + 5*99 + (old_ip-51);   // Rg
+    if (old_ip >= 61 && old_ip <= 69)  return 1 + 6*99 + (old_ip-61);   // Sd
+    if (old_ip >= 71 && old_ip <= 85)  return 792 + (old_ip-70);         // EMA mat 1-15
+    if (old_ip >= 86 && old_ip <= 89)  return 891 + (old_ip-85);         // ThetaEli 1-4
+    if (old_ip == 90)                   return 792 + 20;                   // EMA mat 20
+    if (old_ip >= 91 && old_ip <= 99)  return 1 + 7*99 + (old_ip-91);   // Nu layers 1-9
+    if (old_ip == 100)                  return 896;                        // Fit#
+    if (old_ip >= 101 && old_ip <= 200) return 896 + (old_ip-100);        // oscillators
+    if (old_ip >= 201 && old_ip <= 288) {                                  // layers 10-20
+        int off=old_ip-201, prop=off/11, lyr=off%11+10;
+        return 1 + prop*99 + (lyr-1);
+    }
+    if (old_ip >= 289 && old_ip <= 920) {                                  // layers 21-99
+        int off=old_ip-289, prop=off/79, lyr=off%79+21;
+        return 1 + prop*99 + (lyr-1);
+    }
+    return old_ip; // already in current encoding or unknown
+}
+
+// The pm[1..200] block in .spj files always uses this fixed legacy encoding,
+// regardless of file age. Layers 1-9 + EMA 1-15/20 + ThetaEli + oscillators.
+// Layers 10-99 are NOT covered here — [STACK_V2] is authoritative for those.
+static inline double* pmAtLegacy(int ip) {
+    if (ip >= 1  && ip <=  9) return pmD[ip];
+    if (ip >= 11 && ip <= 19) return pmDn[ip-10];
+    if (ip >= 21 && ip <= 29) return pmNc[ip-20];
+    if (ip >= 31 && ip <= 39) return pmDk[ip-30];
+    if (ip >= 41 && ip <= 49) return pmKc[ip-40];
+    if (ip >= 51 && ip <= 59) return pmRg[ip-50];
+    if (ip >= 61 && ip <= 69) return pmSd[ip-60];
+    if (ip >= 71 && ip <= 85) return pmFe[ip-70];   // EMA mat 1..15
+    if (ip >= 86 && ip <= 89) return pmTe[ip-85];   // ThetaEli 1..4
+    if (ip == 90)              return pmFe[20];       // EMA mat 20
+    if (ip >= 91 && ip <= 99) return pmNu[ip-90];   // Nu layers 1-9
+    if (ip == 100)             return pmOs[0];        // Fit#
+    if (ip >= 101 && ip <= 200) return pmOs[ip-100]; // oscillators (20×5)
+    static double dummy[6]{};
+    return dummy;
+}
+
+// Build a Stack from the current global pm-arrays and par[50+i] for i=1..n.
+// Called from ReadSetting after all pm data and the [EXTRA] block are loaded.
+static Stack stackFromPm(int n){
+    n = std::min(n, N_LAYER_HARD_MAX);
+    Stack s;
+    s.layers.resize(n);
+    auto loadLP = [](LayerParam& lp, double (*arr)[6], int row){
+        lp.value      = arr[row][1];
+        lp.error      = arr[row][2];
+        lp.globalCorr = arr[row][3];
+        lp.fitIndex   = static_cast<int>(arr[row][4]);
+    };
+    for(int i = 1; i <= n; i++){
+        Layer& l        = s.layers[i-1];
+        l.materialIndex = nint(par[50+i][1]);
+        l.type          = nint(par[50+i][3]) - 1;
+        int mi          = l.materialIndex;
+        l.materialEMA   = (mi >= 1 && mi <= N_CNK_MAX) ? nint(cnk[mi].emaSrc) : -1;
+        loadLP(l.thickness,      pmD,  i);
+        loadLP(l.nGrad,          pmDn, i);
+        loadLP(l.nCurv,          pmNc, i);
+        loadLP(l.kGrad,          pmDk, i);
+        loadLP(l.kCurv,          pmKc, i);
+        loadLP(l.roughness,      pmRg, i);
+        loadLP(l.slopeNGrad,     pmSd, i);
+        loadLP(l.nonUniformity,  pmNu, i);
+        if(mi >= 1 && mi <= N_CNK_MAX)
+            loadLP(l.fEMA, pmFe, mi);
+    }
+    return s;
+}
+
+// Sync pm-arrays and par[50+i] from the Stack (inverse of stackFromPm).
+static void stackToPm(const Stack& s){
+    auto saveLP = [](double (*arr)[6], int row, const LayerParam& lp){
+        arr[row][1] = lp.value;
+        arr[row][2] = lp.error;
+        arr[row][3] = lp.globalCorr;
+        arr[row][4] = static_cast<double>(lp.fitIndex);
+    };
+    for(int i = 1; i <= std::min(s.nLayers(), N_LAYER_HARD_MAX); i++){
+        const Layer& l = s.layers[i-1];
+        par[50+i][1] = l.materialIndex;
+        par[50+i][3] = l.type + 1;
+        saveLP(pmD,  i, l.thickness);
+        saveLP(pmDn, i, l.nGrad);
+        saveLP(pmNc, i, l.nCurv);
+        saveLP(pmDk, i, l.kGrad);
+        saveLP(pmKc, i, l.kCurv);
+        saveLP(pmRg, i, l.roughness);
+        saveLP(pmSd, i, l.slopeNGrad);
+        saveLP(pmNu, i, l.nonUniformity);
+    }
+}
+
+// Value-only inverse of stackToPm(): copy the per-layer scalar VALUES from the
+// legacy pm* arrays back into the modern Stack. The fit-parameter editor in the
+// Data Analysis tab writes new layer values into the pm* arrays via pmAt(), but
+// the simulation engine (CalcMis) reads layer thickness/roughness/gradients from
+// stack.layers[], so without this sync the edited layer fit values are ignored
+// on "Simulate!" (oscillator params live in pmOs[], read directly by the engine,
+// hence they already worked). Only column [1]=value is copied: columns [2..4]
+// carry incompatible meanings between the two subsystems (fit-link in the pm/fit
+// convention vs error/globalCorr/fitIndex in stackToPm's saveLP).
+static void pmValuesToStack(Stack& s){
+    for(int i = 1; i <= std::min(s.nLayers(), N_LAYER_HARD_MAX); i++){
+        Layer& l = s.layers[i-1];
+        l.thickness.value     = pmD [i][1];
+        l.nGrad.value         = pmDn[i][1];
+        l.nCurv.value         = pmNc[i][1];
+        l.kGrad.value         = pmDk[i][1];
+        l.kCurv.value         = pmKc[i][1];
+        l.roughness.value     = pmRg[i][1];
+        l.slopeNGrad.value    = pmSd[i][1];
+        l.nonUniformity.value = pmNu[i][1];
+    }
+}
+
 std::vector<std::array<double,6>> Sol;// solutions from the search algorithm
 double Vservice[3];//for transporting
 double ABSmax=20.;//max value of abs(imag(DELTA)), beyond the layer is considered as exit medium
@@ -457,12 +671,54 @@ void lubksb(int np,double **a,int n,int *indx,double *b);
 bool ludcmp(int np,double **a,int n,int *indx,double& d);
 void nextColor();
 
+// ── Layer widget name helpers ────────────────────────────────────────────────
+// Layers 1-9  : old stride-10 scheme  (dSB_PM_${base+i}_1, comB_PAR_5${i}_N)
+// Layers 10-20: semantic scheme       (dSB_L${i}_${prop}_1, comB_L${i}_N)
+namespace {
+    QString wD  (int i){ return i<=9 ? "dSB_PM_"+QString::number(i)+"_1"     : "dSB_L"+QString::number(i)+"_D_1";  }
+    QString wNu (int i){ return i<=9 ? "dSB_PM_"+QString::number(90+i)+"_1"  : "dSB_L"+QString::number(i)+"_Nu_1"; }
+    QString wRg (int i){ return i<=9 ? "dSB_PM_"+QString::number(50+i)+"_1"  : "dSB_L"+QString::number(i)+"_Rg_1"; }
+    QString wDn (int i){ return i<=9 ? "dSB_PM_"+QString::number(10+i)+"_1"  : "dSB_L"+QString::number(i)+"_Dn_1"; }
+    QString wNc (int i){ return i<=9 ? "dSB_PM_"+QString::number(20+i)+"_1"  : "dSB_L"+QString::number(i)+"_Nc_1"; }
+    QString wDk (int i){ return i<=9 ? "dSB_PM_"+QString::number(30+i)+"_1"  : "dSB_L"+QString::number(i)+"_Dk_1"; }
+    QString wKc (int i){ return i<=9 ? "dSB_PM_"+QString::number(40+i)+"_1"  : "dSB_L"+QString::number(i)+"_Kc_1"; }
+    QString wSd (int i){ return i<=9 ? "dSB_PM_"+QString::number(60+i)+"_1"  : "dSB_L"+QString::number(i)+"_Sd_1"; }
+    QString wCB1(int i){ return i<=9 ? "comB_PAR_5"+QString::number(i)+"_1"  : "comB_L"+QString::number(i)+"_1";   }
+    QString wCB3(int i){ return i<=9 ? "comB_PAR_5"+QString::number(i)+"_3"  : "comB_L"+QString::number(i)+"_3";   }
+    QString wBtn(const char* dir, int i){ return QString(dir)+QString::number(i); }
+    // Copy src over dst with Qt only (no shell). The previous shell "copy"/"cp"
+    // route via system() broke on paths containing '+' (cmd.exe COPY reads '+' as the
+    // file-concatenation operator) or spaces. QFile::copy won't overwrite, so remove
+    // the destination first. Returns true on success.
+    bool copyFileOverwrite(const QString& src, const QString& dst){
+        if(QFile::exists(dst) && !QFile::remove(dst))
+            return false;
+        return QFile::copy(src, dst);
+    }
+    // EMA spinbox key: materials 1-15 have static .ui widgets "dSB_PM_{70+i}_1"
+    // (dSB_PM_71..85); materials 16+ are created dynamically and MUST use
+    // "dSB_EMA_{i}_1". Reusing "dSB_PM_{70+i}_1" for i>=16 would clash with existing
+    // static widgets: ThetaEli angles dSB_PM_86..89 (i=16..19) and layer-Nu
+    // dSB_PM_91..99 (i=21..29). The clash silently overwrote the idToDoubleSpinBox
+    // entry for the ThetaEli widgets, so saving the model zeroed the fitted angles.
+    QString emaKey(int i){ return i<=15 ? "dSB_PM_"+QString::number(70+i)+"_1" : "dSB_EMA_"+QString::number(i)+"_1"; }
+
+    // ip-encoding for PanFit: n2=0(Nu),1(D),2(Dn),3(Nc),4(Dk),5(Kc),6(Rg),7(Sd)
+    // Uniform encoding — all layers 1..N_LAYER_HARD_MAX treated identically
+    inline int ipLayer(int n1, int n2){
+        int prop = (n2==0) ? 7 : (n2-1);   // D=0,Dn=1,Nc=2,Dk=3,Kc=4,Rg=5,Sd=6,Nu=7
+        return 1 + prop*99 + (n1-1);
+    }
+}
+
 ksemawc::ksemawc(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ksemawc)
 {
     //setupUi(this); // this sets up GUI
     ui->setupUi(this);
+    // default cnk[i].emaSrc=-1 means "no EMA" for all rows
+    for(int i=1;i<=N_CNK_MAX;i++) cnk[i].emaSrc=-1.;
 
 //    const QByteArray value = qgetenv("USER");
 //    QString uName=QString::fromLocal8Bit(value);
@@ -490,6 +746,7 @@ ksemawc::ksemawc(QWidget *parent) :
     connect( ui->pBclearnk6, &QPushButton::clicked, this, [this]() {Clrnk(6);});
     connect( ui->pBclearnk7, &QPushButton::clicked, this, [this]() {Clrnk(7);});
     connect( ui->pBclearnk8, &QPushButton::clicked, this, [this]() {Clrnk(8);});
+    connect( ui->sB_nnk, QOverload<int>::of(&QSpinBox::valueChanged), this, &ksemawc::updateNkRows);
     connect( ui->pBsetSample,SIGNAL( clicked() ), this, SLOT(callSetSample()));
     connect( ui->pBclearFn,SIGNAL( clicked() ), this, SLOT(Clrfn()));
     connect( ui->lineEdit_sample,SIGNAL(textChanged(QString)),this, SLOT(listMeas()));
@@ -694,6 +951,18 @@ ksemawc::ksemawc(QWidget *parent) :
     connect(ui->pBmUp7, &QPushButton::clicked, this, [this]() {mDwUp(7,-1);});
     connect(ui->pBmUp8, &QPushButton::clicked, this, [this]() {mDwUp(8,-1);});
     connect(ui->pBmUp9, &QPushButton::clicked, this, [this]() {mDwUp(9,-1);});
+
+    // ── Register layer 1-9 buttons in idToPushButton ─────────────────────────
+    idToPushButton["pBmDw1"]=ui->pBmDw1; idToPushButton["pBmUp1"]=ui->pBmUp1;
+    idToPushButton["pBmDw2"]=ui->pBmDw2; idToPushButton["pBmUp2"]=ui->pBmUp2;
+    idToPushButton["pBmDw3"]=ui->pBmDw3; idToPushButton["pBmUp3"]=ui->pBmUp3;
+    idToPushButton["pBmDw4"]=ui->pBmDw4; idToPushButton["pBmUp4"]=ui->pBmUp4;
+    idToPushButton["pBmDw5"]=ui->pBmDw5; idToPushButton["pBmUp5"]=ui->pBmUp5;
+    idToPushButton["pBmDw6"]=ui->pBmDw6; idToPushButton["pBmUp6"]=ui->pBmUp6;
+    idToPushButton["pBmDw7"]=ui->pBmDw7; idToPushButton["pBmUp7"]=ui->pBmUp7;
+    idToPushButton["pBmDw8"]=ui->pBmDw8; idToPushButton["pBmUp8"]=ui->pBmUp8;
+    idToPushButton["pBmDw9"]=ui->pBmDw9; idToPushButton["pBmUp9"]=ui->pBmUp9;
+
     connect(ui->pushButton_saveSim, SIGNAL( clicked() ), this, SLOT(saveSim()));
     connect(ui->pushButton_saveNKsim,SIGNAL( clicked() ), this, SLOT(saveNKsim()));
     connect(ui->pushButton_PlotAbsEL,SIGNAL( clicked() ),this, SLOT(PlotAbsEL()));
@@ -752,6 +1021,7 @@ ksemawc::ksemawc(QWidget *parent) :
     }
 
     setGuiMute(true);
+    qApp->installEventFilter(this);
 
     // parameter initialization
     QDir dir;  //current directory
@@ -821,40 +1091,40 @@ ksemawc::ksemawc(QWidget *parent) :
     par[41][5]=109;   //D2
     par[42][5]=112;   //C3
     // initialization of CNK which pilot VNK setting
-    for(int i=1;i<=16;i++){
-        CNK[i][0]=0.;//no forced
-        CNK[i][1]=.0;//option "constant nk"
-        CNK[i][2]=1.;//n1 value
-        CNK[i][3]=.0;//k1 value
-        CNK[i][4]=-1.;//No EMA
-        CNK[i][5]=1.;//n2 value
-        CNK[i][6]=.0;//k2 value
-        CNK[i][7]=1.;//n forced
-        CNK[i][8]=.0;//k forced
+    for(int i=1;i<=N_CNK_MAX;i++){
+        cnk[i].forceMode=0.;//no forced
+        cnk[i].nSrc=.0;//option "constant nk"
+        cnk[i].nConst=1.;//n1 value
+        cnk[i].kConst=.0;//k1 value
+        cnk[i].emaSrc=-1.;//No EMA
+        cnk[i].n2Const=1.;//n2 value
+        cnk[i].k2Const=.0;//k2 value
+        cnk[i].nForced=1.;//n forced
+        cnk[i].kForced=.0;//k forced
     }
-    // initialization of model parameters pm
-    for(int i=1;i<=200;i++){
+    // initialization of model parameters pm (uniform encoding, ip 1..996)
+    for(int i=1;i<=996;i++){
         for(int j=1;j<=5;j++){
-            pm[i][j]=0.;
+            pmAt(i)[j]=0.;
         }
     }
-    pm[86][1]=-1.;
-    pm[87][1]=-1.;
-    pm[88][1]=-1.;
-    pm[89][1]=-1.;
-    pm[100][1]=1;    //option FT#1
-    pm[101][1]=2.;   //quantistic homogeneous oscillator in UV
-    pm[102][1]=0.;   //C1    "          "
-    pm[103][1]=5.0;  //E1    "          "
-    pm[104][1]=0.04; //D1    "          "
-    pm[105][1]=0.;   //K1    "          "
-    pm[106][1]=2.;   //quantistic homogeneous oscillator in IR
-    pm[107][1]=0.;   //C2
-    pm[108][1]=0.3;  //E2    "          "
-    pm[109][1]=0.005;//D2    "          "
-    pm[110][1]=0.;   //K2    "          "
-    pm[111][1]=4.;   //FLAT term
-    pm[112][1]=1.5;  //C3    "          "
+    pmTe[1][1]=-1.;
+    pmTe[2][1]=-1.;
+    pmTe[3][1]=-1.;
+    pmTe[4][1]=-1.;
+    pmOs[0][1]=1;    //option FT#1
+    pmOs[1][1]=2.;   //quantistic homogeneous oscillator in UV
+    pmOs[2][1]=0.;   //C1    "          "
+    pmOs[3][1]=5.0;  //E1    "          "
+    pmOs[4][1]=0.04; //D1    "          "
+    pmOs[5][1]=0.;   //K1    "          "
+    pmOs[6][1]=2.;   //quantistic homogeneous oscillator in IR
+    pmOs[7][1]=0.;   //C2
+    pmOs[8][1]=0.3;  //E2    "          "
+    pmOs[9][1]=0.005;//D2    "          "
+    pmOs[10][1]=0.;   //K2    "          "
+    pmOs[11][1]=4.;   //FLAT term
+    pmOs[12][1]=1.5;  //C3    "          "
     //graphic parameters
     for(int i=1;i<=6;i++){//spectrophotometric spectra
         rxy[i][1]=.0;  //Ymin
@@ -940,6 +1210,9 @@ ksemawc::ksemawc(QWidget *parent) :
     idToComboBox["cBParFit_15"] = ui->cBParFit_15;
     idToComboBox["cBParFit_16"] = ui->cBParFit_16;
     idToComboBox["cBParFit_17"] = ui->cBParFit_17;
+    // store the fit-parameter grid for ensureFitRow (dynamic rows 18+)
+    m_fitGrid = findChild<QGridLayout*>("gridLayout_10");
+    ui->sB_PAR_34_5->setMaximum(N_FIT_MAX);
     idToComboBox["cB_cnk1a"] = ui->cB_cnk1a;
     idToComboBox["cB_cnk1b"] = ui->cB_cnk1b;
     idToComboBox["cB_cnk2a"] = ui->cB_cnk2a;
@@ -1002,6 +1275,108 @@ ksemawc::ksemawc(QWidget *parent) :
     idToComboBox["comB_PAR_57_3"] = ui->comB_PAR_57_3;
     idToComboBox["comB_PAR_58_3"] = ui->comB_PAR_58_3;
     idToComboBox["comB_PAR_59_3"] = ui->comB_PAR_59_3;
+
+    // ── Create widget rows for layers 10..N_LAYER_MAX ─────────────────────────
+    {
+        QGridLayout* layerGrid = findChild<QGridLayout*>("gridLayout_8");
+        QComboBox*   kindRef   = idToComboBox["comB_PAR_51_3"];
+        QComboBox*   matRef    = idToComboBox["comB_PAR_51_1"];
+        QWidget*     gw        = layerGrid ? layerGrid->parentWidget() : this;
+        for(int i=10; i<=N_LAYER_MAX; i++){
+            // Layer number label (col 0 = first)
+            QLabel* numLbl = new QLabel(QString::number(i), gw);
+            numLbl->setAlignment(Qt::AlignCenter);
+            numLbl->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            if(layerGrid) layerGrid->addWidget(numLbl, i, 0);
+
+            // Kind combo (col 1)
+            QComboBox* cbK = new QComboBox(gw);
+            cbK->setObjectName(wCB3(i)); cbK->setEnabled(false);
+            cbK->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            for(int j=0; j<kindRef->count(); j++) cbK->addItem(kindRef->itemText(j));
+            if(layerGrid) layerGrid->addWidget(cbK, i, 1);
+
+            // Up/Down buttons (col 2, 3)
+            QPushButton* btnUp = new QPushButton("up", gw);
+            btnUp->setObjectName("pBmUp"+QString::number(i));
+            btnUp->setEnabled(false);
+            btnUp->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            btnUp->setMaximumWidth(60);
+            if(layerGrid) layerGrid->addWidget(btnUp, i, 2);
+
+            QPushButton* btnDw = new QPushButton("dw", gw);
+            btnDw->setObjectName("pBmDw"+QString::number(i));
+            btnDw->setEnabled(false);
+            btnDw->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            btnDw->setMaximumWidth(60);
+            if(layerGrid) layerGrid->addWidget(btnDw, i, 3);
+
+            // Spinboxes
+            auto mkDSB = [&](const QString& nm, int col, int dec, double mn, double mx) -> QDoubleSpinBox* {
+                QDoubleSpinBox* sb = new QDoubleSpinBox(gw);
+                sb->setObjectName(nm); sb->setEnabled(false);
+                sb->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+                sb->setDecimals(dec); sb->setMinimum(mn); sb->setMaximum(mx);
+                if(layerGrid) layerGrid->addWidget(sb, i, col);
+                return sb;
+            };
+            QDoubleSpinBox* sbD  = mkDSB(wD(i),  5,  2,     0.0,  1e9);
+            QDoubleSpinBox* sbNu = mkDSB(wNu(i), 6,  4,     0.0,  1.0);
+            QDoubleSpinBox* sbRg = mkDSB(wRg(i), 7,  1,     0.0,  1000.0);
+            QDoubleSpinBox* sbDn = mkDSB(wDn(i), 8,  4,   -10.0,  10.0);
+            QDoubleSpinBox* sbSd = mkDSB(wSd(i), 9,  3, -1000.0,  1000.0);
+            QDoubleSpinBox* sbNc = mkDSB(wNc(i), 10, 4,   -10.0,  10.0);
+            QDoubleSpinBox* sbDk = mkDSB(wDk(i), 11, 4,   -10.0,  10.0);
+            QDoubleSpinBox* sbKc = mkDSB(wKc(i), 12, 4,   -10.0,  10.0);
+
+            // Material combo (col 13)
+            QComboBox* cbM = new QComboBox(gw);
+            cbM->setObjectName(wCB1(i)); cbM->setEnabled(false);
+            cbM->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            for(int j=0; j<matRef->count(); j++) cbM->addItem(matRef->itemText(j));
+            if(layerGrid) layerGrid->addWidget(cbM, i, 13);
+
+            // Register in maps
+            idToComboBox[wCB3(i)]             = cbK;
+            idToComboBox[wCB1(i)]             = cbM;
+            idToPushButton["pBmUp"+QString::number(i)] = btnUp;
+            idToPushButton["pBmDw"+QString::number(i)] = btnDw;
+            idToDoubleSpinBox[wD(i)]  = sbD;
+            idToDoubleSpinBox[wNu(i)] = sbNu;
+            idToDoubleSpinBox[wRg(i)] = sbRg;
+            idToDoubleSpinBox[wDn(i)] = sbDn;
+            idToDoubleSpinBox[wSd(i)] = sbSd;
+            idToDoubleSpinBox[wNc(i)] = sbNc;
+            idToDoubleSpinBox[wDk(i)] = sbDk;
+            idToDoubleSpinBox[wKc(i)] = sbKc;
+
+            // Connect signals
+            connect(cbK,   QOverload<int>::of(&QComboBox::currentIndexChanged),    this, &ksemawc::RefreshModel);
+            connect(sbRg,  QOverload<double>::of(&QDoubleSpinBox::valueChanged),  this, &ksemawc::AdjRoughMax);
+            connect(btnDw, &QPushButton::clicked, this, [this,i](){ mDwUp(i,  1); });
+            connect(btnUp, &QPushButton::clicked, this, [this,i](){ mDwUp(i, -1); });
+        }
+        // Layer-number labels: header in row 0, then one per row 1-9 (col 0 = first)
+        if(layerGrid){
+            QLabel* hdr = new QLabel("#", gw);
+            hdr->setAlignment(Qt::AlignCenter);
+            hdr->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            layerGrid->addWidget(hdr, 0, 0);
+            for(int i=1; i<=9; i++){
+                QLabel* lbl = new QLabel(QString::number(i), gw);
+                lbl->setAlignment(Qt::AlignCenter);
+                lbl->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+                layerGrid->addWidget(lbl, i, 0);
+            }
+        }
+        // Spacer in row N_LAYER_MAX+1: assorbe lo spazio residuo mantenendo le righe alla loro altezza naturale
+        if(layerGrid)
+            layerGrid->setRowStretch(N_LAYER_MAX+1, 1);
+        m_layerGrid   = layerGrid;
+        m_maxLayerRow = N_LAYER_MAX;
+    }
+    ui->sB_PAR_51_2->setMaximum(N_LAYER_HARD_MAX);
+
     idToComboBox["cBpm_101_1"] = ui->cBpm_101_1;
     idToComboBox["cBpm_106_1"] = ui->cBpm_106_1;
     idToComboBox["cBpm_111_1"] = ui->cBpm_111_1;
@@ -1150,6 +1525,80 @@ ksemawc::ksemawc(QWidget *parent) :
     idToLineEdit["WLmaxNK7"]=ui->WLmaxNK7;
     idToLineEdit["WLminNK8"]=ui->WLminNK8;
     idToLineEdit["WLmaxNK8"]=ui->WLmaxNK8;
+    // Register nk rows 1-8 buttons in idToPushButton for uniform access in updateNkRows
+    for(int i=1;i<=8;i++){
+        idToPushButton["pBnk"+QString::number(i)]      = findChild<QPushButton*>("pBnk"+QString::number(i));
+        idToPushButton["pBclearnk"+QString::number(i)] = findChild<QPushButton*>("pBclearnk"+QString::number(i));
+    }
+    // Create nk rows 9-20 programmatically
+    {
+        QGridLayout* nkGrid = findChild<QGridLayout*>("gridLayout_4");
+        QWidget*     gw     = nkGrid ? nkGrid->parentWidget() : this;
+        for(int i=9; i<=N_CNK_USER_MAX; i++){
+            QString si = QString::number(i);
+            QPushButton* btnLoad = new QPushButton("Load nk_"+si, gw);
+            btnLoad->setObjectName("pBnk"+si);
+            btnLoad->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            if(nkGrid) nkGrid->addWidget(btnLoad, i-1, 0);
+
+            QLineEdit* lePath = new QLineEdit("mate/aa999.9", gw);
+            lePath->setObjectName("lineEdit"+si);
+            lePath->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            lePath->setMinimumWidth(200);
+            if(nkGrid) nkGrid->addWidget(lePath, i-1, 1);
+
+            QPushButton* btnClr = new QPushButton("Clear", gw);
+            btnClr->setObjectName("pBclearnk"+si);
+            btnClr->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            if(nkGrid) nkGrid->addWidget(btnClr, i-1, 2);
+
+            QLineEdit* leInfo = new QLineEdit(gw);
+            leInfo->setObjectName("lineEdit_infoNK_"+si);
+            leInfo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+            leInfo->setReadOnly(true);
+            if(nkGrid) nkGrid->addWidget(leInfo, i-1, 3);
+
+            QLineEdit* leMin = new QLineEdit(gw);
+            leMin->setObjectName("WLminNK"+si);
+            leMin->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            leMin->setReadOnly(true);
+            if(nkGrid) nkGrid->addWidget(leMin, i-1, 4);
+
+            QLineEdit* leMax = new QLineEdit(gw);
+            leMax->setObjectName("WLmaxNK"+si);
+            leMax->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            leMax->setReadOnly(true);
+            if(nkGrid) nkGrid->addWidget(leMax, i-1, 5);
+
+            idToPushButton["pBnk"+si]          = btnLoad;
+            idToPushButton["pBclearnk"+si]      = btnClr;
+            idToLineEdit["lineEdit"+si]          = lePath;
+            idToLineEdit["lineEdit_infoNK_"+si]  = leInfo;
+            idToLineEdit["WLminNK"+si]           = leMin;
+            idToLineEdit["WLmaxNK"+si]           = leMax;
+
+            connect(btnLoad, &QPushButton::clicked, this, [this,i](){ Setnk(i); });
+            connect(btnClr,  &QPushButton::clicked, this, [this,i](){ Clrnk(i); });
+        }
+        // Spacer absorbs leftover space keeping row heights uniform
+        if(nkGrid) nkGrid->setRowStretch(N_CNK_USER_MAX, 1);
+    }
+    // The .ui statically appends a trailing "Material#1" item to cB_cnk2a..15a (it lets a
+    // material reuse material #1's n,k). Strip it here so the nk-9..99 slots land at
+    // contiguous indices 8..106 in every combo; it is re-appended uniformly at the trailing
+    // index NSRC_MATREF1 for all material #2+ source combos below.
+    for(int i=1;i<=15;i++){
+        QComboBox* ca=idToComboBox["cB_cnk"+QString::number(i)+"a"];
+        int mref=ca->findText("Material#1");
+        if(mref>=0) ca->removeItem(mref);
+    }
+    // Add nk-9..nk-N_CNK_USER_MAX to all static cB_cnk combos 1-15 (currently have items 0..15)
+    for(int i=1;i<=15;i++){
+        for(int j=9;j<=N_CNK_USER_MAX;j++){
+            idToComboBox["cB_cnk"+QString::number(i)+"a"]->addItem("nk-"+QString::number(j));
+            idToComboBox["cB_cnk"+QString::number(i)+"b"]->addItem("nk-"+QString::number(j));
+        }
+    }
     idToLineEdit["WLmin1"]=ui->WLmin1;
     idToLineEdit["WLmax1"]=ui->WLmax1;
     idToLineEdit["WLmin2"]=ui->WLmin2;
@@ -1702,28 +2151,208 @@ ksemawc::ksemawc(QWidget *parent) :
     qDebug()<<"setting-file exists! "<<usnam;
     if (settings.status() == QSettings::NoError && settings.status() != QSettings::FormatError && settings.status() !=QSettings::AccessError){
         restoreGeometry(settings.value("geometry").toByteArray());
-        QVariant fontFamily=settings.value("fontFamily",QString());
-        int fontSize = settings.value("pointSize", int()).toInt();
-        bool fontIsBold = settings.value("bold", true).toBool();
-        bool fontIsItalic = settings.value("italic", false).toBool();
-        //cout << "font= "  << (fontFamily.toString()).toStdString()<<"\n";
-        //cout << "size = " << fontSize<<"\n";
-        //cout << "bold = " << fontIsBold<<"\n";
-        //cout << "italic= "<<fontIsItalic<<"\n";
-        QFont font;
-        font.setFamily(fontFamily.toString());
-        font.setPointSize(fontSize);
-        font.setBold(fontIsBold);
-        font.setItalic(fontIsItalic);
-        const QWidgetList allWidgets = QApplication::allWidgets();
-        for (QWidget *widget : allWidgets){
-            widget->setFont(font);
-            widget->update();
+        QString fontFamily=settings.value("fontFamily",QString()).toString();
+        int fontSize = settings.value("pointSize", 0).toInt();
+        //apply the stored font only if the user actually chose one via setFontDia,
+        //otherwise the widgets keep the fonts coming from the .ui
+        if(!fontFamily.isEmpty() && fontSize > 0){
+            QFont font;
+            font.setFamily(fontFamily);
+            font.setPointSize(fontSize);
+            font.setBold(settings.value("bold", false).toBool());
+            font.setItalic(settings.value("italic", false).toBool());
+            const QWidgetList allWidgets = QApplication::allWidgets();
+            for (QWidget *widget : allWidgets){
+                widget->setFont(font);
+                widget->update();
+            }
+            QCoreApplication::processEvents();
         }
-        QCoreApplication::processEvents();
+    }
+
+    // Hide nk rows 2-N_CNK_USER_MAX — updateNkRows will reveal them
+    for(int i=2; i<=N_CNK_USER_MAX; i++){
+        idToPushButton["pBnk"+QString::number(i)]->setVisible(false);
+        idToPushButton["pBclearnk"+QString::number(i)]->setVisible(false);
+        idToLineEdit["lineEdit"+QString::number(i)]->setVisible(false);
+        idToLineEdit["lineEdit_infoNK_"+QString::number(i)]->setVisible(false);
+        idToLineEdit["WLminNK"+QString::number(i)]->setVisible(false);
+        idToLineEdit["WLmaxNK"+QString::number(i)]->setVisible(false);
+    }
+    // Hide all layer rows except row 1 — SetModel will reveal them as needed
+    for(int i=2; i<=N_LAYER_MAX; i++){
+        idToComboBox[wCB3(i)]->setVisible(false);
+        idToComboBox[wCB1(i)]->setVisible(false);
+        idToDoubleSpinBox[wD(i)]->setVisible(false);
+        idToDoubleSpinBox[wDn(i)]->setVisible(false);
+        idToDoubleSpinBox[wNc(i)]->setVisible(false);
+        idToDoubleSpinBox[wDk(i)]->setVisible(false);
+        idToDoubleSpinBox[wKc(i)]->setVisible(false);
+        idToDoubleSpinBox[wRg(i)]->setVisible(false);
+        idToDoubleSpinBox[wSd(i)]->setVisible(false);
+        idToDoubleSpinBox[wNu(i)]->setVisible(false);
+        idToPushButton["pBmUp"+QString::number(i)]->setVisible(false);
+        idToPushButton["pBmDw"+QString::number(i)]->setVisible(false);
+        if(m_layerGrid)
+            if(auto* it = m_layerGrid->itemAtPosition(i, 0))
+                if(auto* lbl = qobject_cast<QLabel*>(it->widget()))
+                    lbl->setVisible(false);
+    }
+
+    // Add Material #10-N_CNK_USER_MAX to all wCB1 layer material combos (items #1-9 in .ui)
+    for(int i=1; i<=N_LAYER_MAX; i++){
+        QComboBox* cb=idToComboBox[wCB1(i)];
+        for(int m=10; m<=N_CNK_USER_MAX; m++)
+            cb->addItem("Material #"+QString::number(m));
+    }
+
+    // Create CNK rows 16-20 (user materials) inside scrollArea_mater,
+    // rows 21-24 (special media) in a separate panel always visible below it
+    {
+        QGridLayout* cnkGrid = findChild<QGridLayout*>("gridLayout_11");
+        QWidget* gwScroll = cnkGrid ? cnkGrid->parentWidget() : this;
+        QComboBox* aRef = idToComboBox["cB_cnk1a"];
+
+        // Build the special-media panel and insert it after scrollArea_mater
+        QScrollArea* sa_mater = findChild<QScrollArea*>("scrollArea_mater");
+        QGridLayout* specGrid = nullptr;
+        QWidget* specWidget = nullptr;
+        if(sa_mater && sa_mater->parentWidget()){
+            specWidget = new QWidget(sa_mater->parentWidget());
+            specGrid = new QGridLayout(specWidget);
+            specGrid->setContentsMargins(0,0,0,0);
+            if(cnkGrid){
+                specGrid->setHorizontalSpacing(cnkGrid->horizontalSpacing());
+                specGrid->setVerticalSpacing(cnkGrid->verticalSpacing());
+            }
+            auto* parentBox = qobject_cast<QBoxLayout*>(sa_mater->parentWidget()->layout());
+            if(parentBox){
+                // btnSpec is defined statically in the .ui as the last item of the
+                // Sample Model tab layout (right after scrollArea_mater); reuse it and
+                // insert the special-media panel right after it.
+                QPushButton* btnSpec = findChild<QPushButton*>("pushButton_setIOmedia");
+                int btnIdx = -1;
+                if(btnSpec){
+                    for(int k=0; k<parentBox->count(); k++){
+                        if(parentBox->itemAt(k)->widget() == btnSpec){ btnIdx=k; break; }
+                    }
+                }
+                if(btnIdx >= 0)
+                    parentBox->insertWidget(btnIdx+1, specWidget);
+                else
+                    parentBox->addWidget(specWidget);
+                specWidget->setVisible(false);
+                if(btnSpec)
+                    connect(btnSpec, &QPushButton::clicked, this, [specWidget](){
+                        specWidget->setVisible(!specWidget->isVisible());
+                    });
+            }
+        }
+
+        // Shared lambda: create all widgets for one CNK material row
+        // (aRef already has nk-9..N_CNK_USER_MAX items at this point)
+        auto makeCnkRow = [&](int i, QGridLayout* grid, QWidget* gw, int gridRow, const QString& label){
+            QString si = QString::number(i);
+            QLabel* lbl = new QLabel(label, gw);
+            lbl->setMinimumWidth(72); lbl->setMaximumWidth(100);
+            if(grid) grid->addWidget(lbl, gridRow, 0);
+            QComboBox* ca = new QComboBox(gw);
+            ca->setObjectName("cB_cnk"+si+"a");
+            ca->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+            ca->setMinimumWidth(120);
+            if(aRef) for(int j=0;j<aRef->count();j++) ca->addItem(aRef->itemText(j));
+            if(grid) grid->addWidget(ca, gridRow, 1);
+            idToComboBox["cB_cnk"+si+"a"] = ca;
+            connect(ca, qOverload<int>(&QComboBox::currentIndexChanged), this, [this,i](){ setMat(i); });
+            auto makeLe = [&](const QString& name, const QString& defVal, int col, bool enabled=true) -> QLineEdit* {
+                QLineEdit* le = new QLineEdit(defVal, gw);
+                le->setObjectName(name);
+                le->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+                le->setMinimumWidth(60); le->setMaximumWidth(100);
+                le->setEnabled(enabled);
+                if(grid) grid->addWidget(le, gridRow, col);
+                return le;
+            };
+            idToLineEdit["LEcnk"+si+"_2"] = makeLe("LEcnk"+si+"_2","1",2);
+            idToLineEdit["LEcnk"+si+"_3"] = makeLe("LEcnk"+si+"_3","0",3);
+            QCheckBox* ema = new QCheckBox("EMA", gw);
+            ema->setObjectName("cB_EMA_"+si);
+            ema->setChecked(false);
+            ema->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            ema->setMaximumWidth(100);
+            if(grid) grid->addWidget(ema, gridRow, 4);
+            idToCheckBox["cB_EMA_"+si] = ema;
+            connect(ema, &QCheckBox::stateChanged, this, [this,i](){ setEMA(i); });
+            QDoubleSpinBox* dsb = new QDoubleSpinBox(gw);
+            dsb->setObjectName(emaKey(i));
+            dsb->setEnabled(false);
+            dsb->setMaximum(1.0); dsb->setSingleStep(0.01); dsb->setDecimals(3);
+            dsb->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            if(grid) grid->addWidget(dsb, gridRow, 5);
+            idToDoubleSpinBox[emaKey(i)] = dsb;
+            QComboBox* cb = new QComboBox(gw);
+            cb->setObjectName("cB_cnk"+si+"b");
+            cb->setEnabled(false);
+            cb->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            if(aRef) for(int j=0;j<aRef->count();j++) cb->addItem(aRef->itemText(j));
+            cb->setCurrentIndex(-1);
+            if(grid) grid->addWidget(cb, gridRow, 6);
+            idToComboBox["cB_cnk"+si+"b"] = cb;
+            connect(cb, qOverload<int>(&QComboBox::currentIndexChanged), this, [this,i](){ setEMA(i); });
+            idToLineEdit["LEcnk"+si+"_5"] = makeLe("LEcnk"+si+"_5","1",7,false);
+            idToLineEdit["LEcnk"+si+"_6"] = makeLe("LEcnk"+si+"_6","0",8,false);
+        };
+        // User materials 16..N_CNK_USER_MAX in cnkGrid (row = i-1)
+        QWidget* gwSc = gwScroll ? gwScroll : this;
+        for(int i=16; i<=N_CNK_USER_MAX; i++)
+            makeCnkRow(i, cnkGrid, gwSc, i-1, "Material #"+QString::number(i));
+        if(cnkGrid) cnkGrid->setRowStretch(N_CNK_USER_MAX, 1);
+        m_cnkGrid = cnkGrid;
+        // Special media N_CNK_SPEC_START..N_CNK_MAX in specGrid (rows 0-3)
+        if(specGrid && specWidget){
+            static const QStringList specLabels = {"output SF","input SF","input PDS","input ELI"};
+            for(int idx=0; idx<4; idx++)
+                makeCnkRow(N_CNK_SPEC_START+idx, specGrid, specWidget, idx, specLabels[idx]);
+        }
+    }
+    // Append the "Material#1" source option to every material #2+ source combo so a
+    // material can reuse material #1's (the unknown's) n,k. It lands at the trailing index
+    // NSRC_MATREF1 (=107), well clear of the nk-file slots, so it never collides with them.
+    for(int i=2;i<=N_CNK_MAX;i++){
+        QComboBox* ca=idToComboBox.value("cB_cnk"+QString::number(i)+"a",nullptr);
+        if(ca) ca->addItem("Material#1");
+    }
+    connect(ui->sB_nmat, QOverload<int>::of(&QSpinBox::valueChanged), this, &ksemawc::updateMatRows);
+    // NK items for combos 16..N_CNK_MAX already included via aRef copy in makeCnkRow
+
+    // scrollArea_layers and scrollArea_mater both carry Expanding size policy with
+    // verstretch=1 in the .ui, so they share the tab's vertical space equally and grow
+    // with the window. (Previously scrollArea_layers was capped via setMaximumHeight to
+    // show only 8 layer rows, which prevented it from adapting to the available space.)
+
+    // CNK rows 1-15 come from the .ui, where the EMA-source combo holds items and therefore
+    // starts on index 0, while cnk[i].emaSrc is initialised to -1 (= no EMA). SaveSetting
+    // reads emaSrc back from that combo, so an untouched row would switch EMA on by itself.
+    // Put the static rows in the same "no EMA" state the dynamic ones get in makeCnkRow.
+    for(int i=1;i<=15;i++){
+        idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setCurrentIndex(-1);
+        idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setEnabled(false);
+        idToCheckBox["cB_EMA_"+QString::number(i)]    -> setChecked(false);
+        idToDoubleSpinBox[emaKey(i)]                  -> setEnabled(false);
     }
 
     setGuiMute(false);
+
+    if(qApp->platformName()=="offscreen"){
+        QTimer::singleShot(200, this, [this](){
+            caller="initialization";
+            ReadSetting(pathroot+"ZnSe/ZnSe.2.Spj");
+            SPADA();
+            Simula();
+            qApp->quit();
+        });
+        return;
+    }
 
     //make your choice
     QMessageBox msgBox;
@@ -1758,6 +2387,9 @@ ksemawc::ksemawc(QWidget *parent) :
         break;
 
     case QMessageBox::RejectRole:
+        SetModel(ui->sB_PAR_51_2->value());
+        updateMatRows(ui->sB_nmat->value());
+        updateNkRows(ui->sB_nnk->value());
         break;
 
     case QMessageBox::DestructiveRole:
@@ -1773,7 +2405,7 @@ void ksemawc::about(){
     QMessageBox::about(this, "kSEMAWc",
                        "<b>kSEMAWc</b> <br>"
                        "Spectro-Ellipsometric Measurement Analysis Workbench<br>"
-                       "Version 4.0 — 5 June 2026<br><br>"
+                       "Version 5.0 — 15 July 2026<br><br>"
                        "Main author: Marco Montecchi, ENEA (Italy)<br>"
                        "email: marco.montecchi@enea.it<br><br>"
                        "Porting to Windows and advanced oscillators by<br>"
@@ -1795,29 +2427,9 @@ void ksemawc::closeEvent ( QCloseEvent * event )
     }
 
     //save project in default
-    QString command;
-    int ierr;
-    if (IS_POSIX){
-        command="cp "+fileStore+" "+fileStore0;
-        ierr=system((command.toStdString()).c_str());}
-    else{
-        command="copy "+fileStore+" "+fileStore0;
-        QStringList List;
-        List =command.split("/");
-        int nV=List.count();
-        QString commandw;
-        QString pezzo;
-        for(int iv=0;iv<nV;iv++){
-            pezzo=List.at(iv).toLocal8Bit().constData();
-            if(iv==0){
-                commandw=pezzo;
-            }
-            else{
-                commandw=commandw+"\\"+pezzo;
-            }
-        }
-        ierr=system((commandw.toStdString()).c_str());
-    }
+    // Use QFile::copy (cross-platform, no shell): the shell "copy"/"cp" route broke on
+    // paths containing '+' (cmd.exe COPY treats '+' as the concat operator) or spaces.
+    int ierr = copyFileOverwrite(fileStore, fileStore0) ? 0 : 1;
     if(ierr != 0){
         msgErrLoad("SaveProject",fnproject);
         qWarning()<<"Error copying project!!!";
@@ -1842,20 +2454,163 @@ void ksemawc::setFontDia(){
             widget->update();
         }
         QCoreApplication::processEvents();
-    } else {
-        // the user canceled the dialog; font is set to the initial
-        // value, in this case Helvetica [Cronyx], 10
+        //save the choice
+        QSettings settings("ksemawc","ksemawc");
+        settings.setValue("fontFamily", font.family());
+        settings.setValue("pointSize", font.pointSize());
+        settings.setValue("bold", font.bold());
+        settings.setValue("italic", font.italic());
     }
-    //cout << "fontFamily= "  << font.family().toStdString()<<"\n";
-    //cout << "size = " << font.pointSize()<<"\n";
-    //cout << "bold = " << font.bold()<<"\n";
-    //cout << "italic = " << font.italic()<<"\n";
-    //save the choice
-    QSettings settings("ksemawc","ksemawc");
-    settings.setValue("fontFamily", font.family());
-    settings.setValue("pointSize", font.pointSize());
-    settings.setValue("bold", font.bold());
-    settings.setValue("italic", font.italic());
+    // if the user canceled the dialog nothing is applied nor stored
+}
+
+
+void ksemawc::ensureLayerRow(int i){
+    if(!m_layerGrid || i <= m_maxLayerRow) return;
+    QComboBox* kindRef = idToComboBox[wCB3(1)];
+    QComboBox* matRef  = idToComboBox[wCB1(1)];
+    QWidget*   gw      = m_layerGrid->parentWidget();
+    for(int r = m_maxLayerRow+1; r <= i; r++){
+        QLabel* numLbl = new QLabel(QString::number(r), gw);
+        numLbl->setAlignment(Qt::AlignCenter);
+        numLbl->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+        m_layerGrid->addWidget(numLbl, r, 0);
+
+        QComboBox* cbK = new QComboBox(gw);
+        cbK->setObjectName(wCB3(r)); cbK->setEnabled(false);
+        cbK->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+        for(int j=0; j<kindRef->count(); j++) cbK->addItem(kindRef->itemText(j));
+        m_layerGrid->addWidget(cbK, r, 1);
+
+        QPushButton* btnUp = new QPushButton("up", gw);
+        btnUp->setObjectName("pBmUp"+QString::number(r));
+        btnUp->setEnabled(false);
+        btnUp->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+        btnUp->setMaximumWidth(60);
+        m_layerGrid->addWidget(btnUp, r, 2);
+
+        QPushButton* btnDw = new QPushButton("dw", gw);
+        btnDw->setObjectName("pBmDw"+QString::number(r));
+        btnDw->setEnabled(false);
+        btnDw->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+        btnDw->setMaximumWidth(60);
+        m_layerGrid->addWidget(btnDw, r, 3);
+
+        auto mkDSB = [&](const QString& nm, int col, int dec, double mn, double mx) -> QDoubleSpinBox* {
+            QDoubleSpinBox* sb = new QDoubleSpinBox(gw);
+            sb->setObjectName(nm); sb->setEnabled(false);
+            sb->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+            sb->setDecimals(dec); sb->setMinimum(mn); sb->setMaximum(mx);
+            m_layerGrid->addWidget(sb, r, col);
+            return sb;
+        };
+        QDoubleSpinBox* sbD  = mkDSB(wD(r),  5,  2,     0.0,  1e9);
+        QDoubleSpinBox* sbNu = mkDSB(wNu(r), 6,  4,     0.0,  1.0);
+        QDoubleSpinBox* sbRg = mkDSB(wRg(r), 7,  1,     0.0,  1000.0);
+        QDoubleSpinBox* sbDn = mkDSB(wDn(r), 8,  4,   -10.0,  10.0);
+        QDoubleSpinBox* sbSd = mkDSB(wSd(r), 9,  3, -1000.0,  1000.0);
+        QDoubleSpinBox* sbNc = mkDSB(wNc(r), 10, 4,   -10.0,  10.0);
+        QDoubleSpinBox* sbDk = mkDSB(wDk(r), 11, 4,   -10.0,  10.0);
+        QDoubleSpinBox* sbKc = mkDSB(wKc(r), 12, 4,   -10.0,  10.0);
+
+        QComboBox* cbM = new QComboBox(gw);
+        cbM->setObjectName(wCB1(r)); cbM->setEnabled(false);
+        cbM->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+        for(int j=0; j<matRef->count(); j++) cbM->addItem(matRef->itemText(j));
+        { int nm = ui->sB_nmat->value();
+          for(int j = 0; j < cbM->count(); j++) if(auto* lv=qobject_cast<QListView*>(cbM->view())) lv->setRowHidden(j, j >= nm); }
+        m_layerGrid->addWidget(cbM, r, 13);
+
+        idToComboBox[wCB3(r)]                      = cbK;
+        idToComboBox[wCB1(r)]                      = cbM;
+        idToPushButton["pBmUp"+QString::number(r)] = btnUp;
+        idToPushButton["pBmDw"+QString::number(r)] = btnDw;
+        idToDoubleSpinBox[wD(r)]  = sbD;
+        idToDoubleSpinBox[wNu(r)] = sbNu;
+        idToDoubleSpinBox[wRg(r)] = sbRg;
+        idToDoubleSpinBox[wDn(r)] = sbDn;
+        idToDoubleSpinBox[wSd(r)] = sbSd;
+        idToDoubleSpinBox[wNc(r)] = sbNc;
+        idToDoubleSpinBox[wDk(r)] = sbDk;
+        idToDoubleSpinBox[wKc(r)] = sbKc;
+
+        connect(cbK,   QOverload<int>::of(&QComboBox::currentIndexChanged),   this, &ksemawc::RefreshModel);
+        connect(sbRg,  QOverload<double>::of(&QDoubleSpinBox::valueChanged),  this, &ksemawc::AdjRoughMax);
+        connect(btnDw, &QPushButton::clicked, this, [this,r](){ mDwUp(r,  1); });
+        connect(btnUp, &QPushButton::clicked, this, [this,r](){ mDwUp(r, -1); });
+
+        m_layerGrid->setRowStretch(r,   0);
+        m_layerGrid->setRowStretch(r+1, 1);
+    }
+    m_maxLayerRow = i;
+}
+
+
+void ksemawc::ensureFitRow(int j){
+    if(!m_fitGrid || j <= m_maxFitRow) return;
+    QWidget* gw = m_fitGrid->parentWidget();
+    for(int r = m_maxFitRow+1; r <= j; r++){
+        QString sr = QString::number(r);
+
+        // col 0: enable checkbox
+        QCheckBox* chk = new QCheckBox(gw);
+        chk->setEnabled(false);
+        chk->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+        idToCheckBox["chBeParFit_"+sr] = chk;
+        m_fitGrid->addWidget(chk, r, 0);
+        connect(chk, &QCheckBox::stateChanged, this, &ksemawc::PanFitEnable);
+
+        // col 1: parameter selector combobox
+        QComboBox* cb = new QComboBox(gw);
+        cb->addItem("none");
+        cb->setEnabled(true);
+        cb->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+        cb->setMinimumWidth(140);
+        idToComboBox["cBParFit_"+sr] = cb;
+        m_fitGrid->addWidget(cb, r, 1);
+        connect(cb, qOverload<int>(&QComboBox::currentIndexChanged), this, &ksemawc::PanFitChoice);
+
+        // col 2: value
+        QLineEdit* leV = new QLineEdit(gw);
+        leV->setEnabled(false);
+        leV->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+        idToLineEdit["DPparFitV_"+sr] = leV;
+        m_fitGrid->addWidget(leV, r, 2);
+
+        // col 3: error
+        QLineEdit* leE = new QLineEdit(gw);
+        leE->setEnabled(false);
+        leE->setReadOnly(true);
+        leE->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+        idToLineEdit["DPparFitErr_"+sr] = leE;
+        m_fitGrid->addWidget(leE, r, 3);
+
+        // col 4: global correlation
+        QLineEdit* leG = new QLineEdit(gw);
+        leG->setEnabled(false);
+        leG->setReadOnly(true);
+        leG->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+        idToLineEdit["DPparFitGC_"+sr] = leG;
+        m_fitGrid->addWidget(leG, r, 4);
+    }
+    m_maxFitRow = j;
+}
+
+
+bool ksemawc::eventFilter(QObject* obj, QEvent* event){
+    if(event->type() == QEvent::Show)
+        if(auto* mb = qobject_cast<QMessageBox*>(obj)){
+            mb->setStyleSheet(
+                "QMessageBox        { background-color: #ffffc8; }"
+                "QMessageBox QLabel { background-color: #ffffc8; }"
+            );
+            mb->raise();
+            //Wayland forbids an application to activate its own windows: requestActivate()
+            //would just print a warning. Modal dialogs get the focus from the compositor anyway.
+            if(!QApplication::platformName().startsWith("wayland"))
+                mb->activateWindow();
+        }
+    return QWidget::eventFilter(obj, event);
 }
 
 
@@ -1887,14 +2642,14 @@ void ksemawc::LoadProject(){
     ui->tabWidget -> setCurrentIndex(0);
     setGuiMute(true);
     //thetaEli reset
-    pm[86][1]=0.;
-    pm[87][1]=0.;
-    pm[88][1]=0.;
-    pm[89][1]=0.;
-    // reset of pm - model parameters
-    for(int i=1;i<=200;i++){
+    pmTe[1][1]=0.;
+    pmTe[2][1]=0.;
+    pmTe[3][1]=0.;
+    pmTe[4][1]=0.;
+    // reset of pm - model parameters (uniform encoding, ip 1..996)
+    for(int i=1;i<=996;i++){
         for(int j=1;j<=5;j++){
-            pm[i][j]=0.;
+            pmAt(i)[j]=0.;
         }
     }
     //reset oscillator list
@@ -1912,7 +2667,7 @@ void ksemawc::LoadProject(){
         idToLineEdit["LEpm_"+QString::number(100+5+(k-1)*5)+"_1"] -> setEnabled(false);
     }
     //reset panel fit
-    for(int j=1;j<=17;j++){
+    for(int j=1;j<=m_maxFitRow;j++){
         idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(false);
         idToComboBox["cBParFit_"+QString::number(j)] -> clear();
         idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
@@ -1937,7 +2692,7 @@ void ksemawc::LoadProject(){
 void ksemawc::ReadSetting(QString filename){
     qDebug()<<"-> ReadSetting from "<<filename;
     setGuiMute(true);
-    for(int i=1;i<=8;i++)
+    for(int i=1;i<=N_CNK_USER_MAX;i++)
         Clrnk(i);
     ClrFnk();
     Clrfn();
@@ -1969,10 +2724,17 @@ void ksemawc::ReadSetting(QString filename){
     QTextStream stream ( &file );
     QString line,line2,lab;
     int irx=30;
+    // "ufip" in the header marks a file whose fit-parameter pointers (ppm / par[35+i][5])
+    // are already stored in the uniform ip encoding (v5.2+); such values must NOT be run
+    // through migrateIp(), whose legacy ranges (e.g. 289..920 = old layers 21-99) would
+    // mangle them. Files without the marker keep the legacy best-effort migration.
+    bool uniformIpFile=false;
     line = stream.readLine();
     if(line.contains("iVspj=1")){
         if(line.contains("nm"))
             a2nm=1;
+        if(line.contains("ufip"))
+            uniformIpFile=true;
         line = stream.readLine();
     }
     else{
@@ -1983,6 +2745,7 @@ void ksemawc::ReadSetting(QString filename){
     line2=fnproject.section(pathroot, 1, 1);
     ui->lineEdit_P -> setText(line2);
 
+    int nnkLoaded=1;
     for(int i=1;i<=8;i++){
         line = stream.readLine();
         NANK[i]=line.simplified();
@@ -1991,9 +2754,12 @@ void ksemawc::ReadSetting(QString filename){
         ifn=0;
         if(!NANK[i].contains("mate/aa999.9")){
             ifn=1;
+            nnkLoaded=i;
             Setnk(i);
         }
     }
+    ui->sB_nnk->setValue(nnkLoaded);
+    updateNkRows(nnkLoaded);
 
     //nk-solutions
     line = stream.readLine();
@@ -2029,6 +2795,15 @@ void ksemawc::ReadSetting(QString filename){
     fnE4=pathroot+line.simplified()+".el";
     line2=fnE4.section('.', 1, 1);//N. mis el
     par[30][4]=line2.toDouble();
+    // The ellipsometric measurement number derived from the file name (above) is the
+    // reliable source for BOTH old and new projects: the save routine always writes
+    // NANK[12..15] = sample+"."+misNumber. Preserve it here because the PAR-block read
+    // below overwrites par[27..30][4]: in old projects (pre-oscillator-fit format) that
+    // slot held -1, which clobbered the right value and pushed the ELI measurements into
+    // the wrong rows (ELI-3/ELI-4) leaving ELI-1/ELI-2 unselectable.
+    int nMisEfn[5];
+    for(int k=1;k<=4;k++)
+        nMisEfn[k]=nint(par[26+k][4]);
 
     // setGuiMute(false);
     if(fnSample.isEmpty() || fnSample.contains("mate/aa999")){
@@ -2095,17 +2870,17 @@ void ksemawc::ReadSetting(QString filename){
         fflush(stdout);
         for(int j=1;j<=nV;j++){
             pezzo=List0.at(j-1).toLocal8Bit().constData();
-            CNK[i][j]=pezzo.toDouble();
+            cnk[i].col(j)=pezzo.toDouble();
         }
         if(nV==3){//old project
-            if(CNK[i][1]<=17){
-                CNK[i][4]=-1.;
+            if(cnk[i].nSrc<=17){
+                cnk[i].emaSrc=-1.;
             }
             else{
-                int i1=nint(CNK[i][1]/1000.);
-                int i2=nint((CNK[i][1]-i1*1000.)/10.);
-                CNK[i][1]=i1;
-                CNK[i][4]=i2;
+                int i1=nint(cnk[i].nSrc/1000.);
+                int i2=nint((cnk[i].nSrc-i1*1000.)/10.);
+                cnk[i].nSrc=i1;
+                cnk[i].emaSrc=i2;
             }
         }
     }
@@ -2117,25 +2892,27 @@ void ksemawc::ReadSetting(QString filename){
         }
     }
     //qDebug("After read par: par[27][4]=%f",par[27][4]);
+    // Restore the file-name-derived ELI measurement numbers clobbered by the PAR read.
+    for(int k=1;k<=4;k++)
+        par[26+k][4]=nMisEfn[k];
     par[4][1]=par[4][1]*a2nm;//WLmin in nm
     par[4][2]=par[4][2]*a2nm;//WLmax in nm
     double WLmin=par[4][1];
     double WLmax=par[4][2];
-    if(!fnE1.contains("mate/aa999")){
-        int i=nint(par[27][4])-1;
-        ui->cBmis7 ->setCurrentIndex(i);
-    }
-    if(!fnE2.contains("mate/aa999")){
-        int i=nint(par[28][4])-1;
-        ui->cBmis9 ->setCurrentIndex(i);
-    }
-    if(!fnE3.contains("mate/aa999")){
-        int i=nint(par[29][4])-1;
-        ui->cBmis11 ->setCurrentIndex(i);
-    }
-    if(!fnE4.contains("mate/aa999")){
-        int i=nint(par[30][4])-1;
-        ui->cBmis13 ->setCurrentIndex(i);
+    // Select the combo item matching the measurement number (findText, not index n-1:
+    // the combo only lists existing .el files, so number != position in general).
+    // For unused rows (fnE = mate/aa999) deselect explicitly: listMeas() leaves every
+    // ELI combo defaulted to index 0, so without this the unused rows would still feed
+    // a measurement to pwEj() and load it into ELI-3/ELI-4.
+    const QString cBmisEli[5]={"","cBmis7","cBmis9","cBmis11","cBmis13"};
+    const QString fnEli[5]={"",fnE1,fnE2,fnE3,fnE4};
+    for(int k=1;k<=4;k++){
+        if(fnEli[k].contains("mate/aa999")){
+            idToComboBox[cBmisEli[k]]->setCurrentIndex(-1);
+            continue;
+        }
+        int idx=idToComboBox[cBmisEli[k]]->findText(QString::number(nMisEfn[k]),Qt::MatchExactly);
+        idToComboBox[cBmisEli[k]]->setCurrentIndex(idx);
     }
 
     int JJ=1,Jitem=-1,nMis;
@@ -2174,7 +2951,11 @@ void ksemawc::ReadSetting(QString filename){
             int iCount=idToComboBox["cBmis"+QString::number(i)] -> count();
             for(int ii=0;ii<iCount;ii++){
                 QString Lcb=idToComboBox["cBmis"+QString::number(i)] -> itemText(ii);
-                if(Lcb.contains(QString::number(nMis)))
+                // item is "<v|i><digit>" (SP) or "<number>" (ELI): match the trailing number
+                // EXACTLY. contains() matched substrings, so nMis=1 wrongly hit "10","11",...
+                int p=Lcb.size();
+                while(p>0 && Lcb.at(p-1).isDigit()) p--;
+                if(p<Lcb.size() && Lcb.mid(p).toInt()==nMis)
                     idToComboBox["cBmis"+QString::number(i)] -> setCurrentIndex(ii);
             }
             //idToComboBox["cBmis"+QString::number(i)] -> setCurrentIndex(nMis);
@@ -2202,6 +2983,11 @@ void ksemawc::ReadSetting(QString filename){
                 pwEj(4);
             Jitem=idToComboBox["cBteE"+QString::number(JJ-6)] -> findText(QString::number(par[13+JJ-6][1]),Qt::MatchExactly);
             if(Jitem>=0) idToComboBox["cBteE"+QString::number(JJ-6)] ->setCurrentIndex(Jitem);
+            // Signals are muted during load, so changing cBteE above does not fire
+            // pwSubEj via its connection; call it explicitly so the simulation-tab
+            // angle (dSB_PM_8x_1) and WL range follow the selected theta instead of
+            // staying on the first theta set by the earlier pwEj() call.
+            pwSubEj(JJ-6);
             i++;//PSI
             if(nint(par[i][4])==-1){
                 idToCheckBox["checkB_mis"+QString::number(i)+"_2"] -> setCheckState ( Qt::Checked );
@@ -2320,6 +3106,7 @@ void ksemawc::ReadSetting(QString filename){
         ui->checkB_PAR_54_2 -> setCheckState ( Qt::Checked );
     ui->DP_PAR_55_2 -> setText(QString::number(par[55][2]));
     npp=nint(par[34][5]);//N par fit
+    if(npp>N_FIT_MAX) npp=N_FIT_MAX;//clamp legacy/hand-edited files: ppm[] is sized N_FIT_MAX+1 and the fit kernel caps at nparmax=N_FIT_MAX
     ui->cB_PAR_35_2 -> setCurrentIndex(nint(par[35][2]-1.));
     nPar=nint(par[35][5]);//N par enabled for fit
     ui->sB_PAR_34_5 -> setValue(npp);
@@ -2347,67 +3134,68 @@ void ksemawc::ReadSetting(QString filename){
     ui->comboBox_average->setCurrentIndex(nint(par[35][1]));//set std spectrum
 
     for(int i=1;i<=npp;i++)
-        ppm[i]=nint(par[35+i][5]);
+        ppm[i]= uniformIpFile ? nint(par[35+i][5]) : migrateIp(nint(par[35+i][5]));
+    ensureFitRow(npp);   // create widget rows if saved project had more than current m_maxFitRow
 
-    //PM
+    //PM — legacy encoding: layers 1-9, EMA 1-15/20, ThetaEli, oscillators
     for(int i=1;i<=200;i++){
         for(int j=1;j<=5;j++){
-            stream>> pm[i][j];
+            stream>> pmAtLegacy(i)[j];
         }
     }
-    if(a2nm<1.){//Angstrom -> nm
+    if(a2nm<1.){//Angstrom -> nm (layers 1-9; layers 10-99 handled in [EXTRA]/[STACK_V2])
         for(int i=1;i<=9;i++){
-            pm[i][1]=pm[i][1]*a2nm;//thickness
-            pm[50+i][1]=pm[50+i][1]*a2nm;//roughness
+            pmD[i][1]*=a2nm;
+            pmRg[i][1]*=a2nm;
         }
     }
     if(old0new1<2){//renormalization of oscillator coeff for old project
         for(int i=1;i<=20;i++){
-            if(pm[101+(i-1)*5][1]==1){//Lorentz
-                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*PIG/2.;
-                pm[104+(i-1)*5][1]=pm[104+(i-1)*5][1]/2.;
+            if(pmOs[1+(i-1)*5][1]==1){//Lorentz
+                pmOs[2+(i-1)*5][1]=pmOs[2+(i-1)*5][1]*PIG/2.;
+                pmOs[4+(i-1)*5][1]=pmOs[4+(i-1)*5][1]/2.;
             }
-            else if(pm[101+(i-1)*5][1]==2){//Quantum
-                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*PIG*pm[104+(i-1)*5][1]*pm[103+(i-1)*5][1];
+            else if(pmOs[1+(i-1)*5][1]==2){//Quantum
+                pmOs[2+(i-1)*5][1]=pmOs[2+(i-1)*5][1]*PIG*pmOs[4+(i-1)*5][1]*pmOs[3+(i-1)*5][1];
             }
-            else if(pm[101+(i-1)*5][1]==3){//Inhomo
+            else if(pmOs[1+(i-1)*5][1]==3){//Inhomo
                 double sqrln2=0.832554611;
-                long double E0=std::abs(pm[103+(i-1)*5][1]);
-                long double D=std::abs(pm[104+(i-1)*5][1]);
+                long double E0=std::abs(pmOs[3+(i-1)*5][1]);
+                long double D=std::abs(pmOs[4+(i-1)*5][1]);
                 long double Kinho=pow((D/sqrln2),2.)/2*exp(-pow(E0*sqrln2/D,2.))+
                                     E0*D/sqrln2/2.*sqrt(PIG)*erfcl(-E0*sqrln2/D);
-                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*Kinho;
+                pmOs[2+(i-1)*5][1]=pmOs[2+(i-1)*5][1]*Kinho;
             }
-            else if(pm[101+(i-1)*5][1]==5){//Drude
-                double E0=std::abs(pm[103+(i-1)*5][1]);
-                pm[102+(i-1)*5][1]=E0*E0*PIG/2.;
-                pm[103+(i-1)*5][1]=0.;
+            else if(pmOs[1+(i-1)*5][1]==5){//Drude
+                double E0=std::abs(pmOs[3+(i-1)*5][1]);
+                pmOs[2+(i-1)*5][1]=E0*E0*PIG/2.;
+                pmOs[3+(i-1)*5][1]=0.;
             }
-            else if(pm[101+(i-1)*5][1]==6){//Indirect-Cody
-                double E0=std::abs(pm[103+(i-1)*5][1]);
-                double De=std::abs(pm[105+(i-1)*5][1]);
+            else if(pmOs[1+(i-1)*5][1]==6){//Indirect-Cody
+                double E0=std::abs(pmOs[3+(i-1)*5][1]);
+                double De=std::abs(pmOs[5+(i-1)*5][1]);
                 double KCi=E0*De+De*De/2.;
-                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KCi;
+                pmOs[2+(i-1)*5][1]=pmOs[2+(i-1)*5][1]*KCi;
             }
-            else if(pm[101+(i-1)*5][1]==7){//Indirect-Tauc
-                double E0=std::abs(pm[103+(i-1)*5][1]);
-                double De=std::abs(pm[105+(i-1)*5][1]);
+            else if(pmOs[1+(i-1)*5][1]==7){//Indirect-Tauc
+                double E0=std::abs(pmOs[3+(i-1)*5][1]);
+                double De=std::abs(pmOs[5+(i-1)*5][1]);
                 double r=E0/De;
                 double KTi=2.*(8.*r*r*log((4.*r+1.)/(4.*r)) + 8.*pow((r+1.),2.)*log((4.*r+4.)/(4.*r+3.))
                            - (1.+8.*r*(r+1.))*log((4.*r+3.)/(4.*r+1.)) );
-                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KTi;
+                pmOs[2+(i-1)*5][1]=pmOs[2+(i-1)*5][1]*KTi;
             }
-            else if(pm[101+(i-1)*5][1]==8){//Direct-Cody
-                double E0=std::abs(pm[103+(i-1)*5][1]);
-                double K=std::abs(pm[105+(i-1)*5][1]);
+            else if(pmOs[1+(i-1)*5][1]==8){//Direct-Cody
+                double E0=std::abs(pmOs[3+(i-1)*5][1]);
+                double K=std::abs(pmOs[5+(i-1)*5][1]);
                 double KCd=PIG/16.*K*K*(2.*E0+K);
-                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KCd*PIG;
+                pmOs[2+(i-1)*5][1]=pmOs[2+(i-1)*5][1]*KCd*PIG;
             }
-            else if(pm[101+(i-1)*5][1]==9){//Direct-Tauc
-                double E0=std::abs(pm[103+(i-1)*5][1]);
-                double K=std::abs(pm[105+(i-1)*5][1]);
+            else if(pmOs[1+(i-1)*5][1]==9){//Direct-Tauc
+                double E0=std::abs(pmOs[3+(i-1)*5][1]);
+                double K=std::abs(pmOs[5+(i-1)*5][1]);
                 double KTd=PIG/2.*(2.*E0+K-2.*sqrt(E0*(E0+K)));
-                pm[102+(i-1)*5][1]=pm[102+(i-1)*5][1]*KTd;
+                pmOs[2+(i-1)*5][1]=pmOs[2+(i-1)*5][1]*KTd;
             }
         }
     }
@@ -2418,73 +3206,294 @@ void ksemawc::ReadSetting(QString filename){
             stream>> pf[j][i];
         }
     }
+    //EXTRA — optional block for layers 10..N_LAYER_MAX (absent in v1 files)
+    {
+        QString tag;
+        while(!stream.atEnd()){
+            tag=stream.readLine().simplified();
+            if(!tag.isEmpty()) break;
+        }
+        // The extended blocks below ([EXTRA_NK]/[EXTRA_NK_V2]/[EXTRA_CNK*]/[STACK_V2]) are
+        // written by BOTH modern files (which have NO leading [EXTRA]) and legacy files
+        // (which store layers 10-20 in an [EXTRA] block first). Enter for either tag: read
+        // the legacy layers only when [EXTRA] is actually present, then fall through to the
+        // extended-block parsing. (Gating all of this on [EXTRA] dropped file-nk 9+, CNK
+        // 16+ and [STACK_V2] from every modern project on reload.)
+        if(tag=="[EXTRA]" || tag=="[EXTRA_NK]"){
+            QString tag2;
+            if(tag=="[EXTRA]"){
+            for(int i=10;i<=N_LAYER_MAX;i++){
+                for(int j=1;j<=5;j++) stream>> par[50+i][j];
+            }
+            for(int i=10;i<=N_LAYER_MAX;i++){
+                for(int j=1;j<=5;j++) stream>> pmD[i][j];
+            }
+            for(int i=10;i<=N_LAYER_MAX;i++){
+                for(int j=1;j<=5;j++) stream>> pmDn[i][j];
+            }
+            for(int i=10;i<=N_LAYER_MAX;i++){
+                for(int j=1;j<=5;j++) stream>> pmNc[i][j];
+            }
+            for(int i=10;i<=N_LAYER_MAX;i++){
+                for(int j=1;j<=5;j++) stream>> pmDk[i][j];
+            }
+            for(int i=10;i<=N_LAYER_MAX;i++){
+                for(int j=1;j<=5;j++) stream>> pmKc[i][j];
+            }
+            for(int i=10;i<=N_LAYER_MAX;i++){
+                for(int j=1;j<=5;j++) stream>> pmRg[i][j];
+            }
+            for(int i=10;i<=N_LAYER_MAX;i++){
+                for(int j=1;j<=5;j++) stream>> pmSd[i][j];
+            }
+            for(int i=10;i<=N_LAYER_MAX;i++){
+                for(int j=1;j<=5;j++) stream>> pmNu[i][j];
+            }
+            if(a2nm<1.){
+                for(int i=10;i<=N_LAYER_MAX;i++){
+                    pmD[i][1]*=a2nm;
+                    pmRg[i][1]*=a2nm;
+                }
+            }
+                // legacy [EXTRA] held layers 10-20; advance to the next tag (the first
+                // extended-block header, the same one a modern file starts at directly).
+                while(!stream.atEnd()){
+                    tag2=stream.readLine().simplified();
+                    if(!tag2.isEmpty()) break;
+                }
+            }
+            else
+                tag2=tag;   // modern file: tag is already the first extended block
+            {
+                bool hasExtraCnk=false;
+                if(tag2=="[EXTRA_NK]"){
+                    int nnk=1;
+                    { QString ln=stream.readLine().simplified(); QTextStream ls(&ln); ls >> nnk; }
+                    ui->sB_nnk->setValue(nnk);
+                    updateNkRows(nnk);
+                    // NK files 9-20 (always present in EXTRA_NK for backward compat)
+                    for(int i=9;i<=20;i++){
+                        QString line=stream.readLine().simplified();
+                        fnk[i]=pathroot+line+".nk";
+                        idToLineEdit["lineEdit"+QString::number(i)]->setText(line);
+                        if(!line.contains("mate/aa999"))
+                            Setnk(i);
+                    }
+                    // Read next tag (may be [EXTRA_NK_V2], [EXTRA_CNK], [EXTRA_CNK_V2])
+                    QString tag3;
+                    while(!stream.atEnd()){
+                        tag3=stream.readLine().simplified();
+                        if(!tag3.isEmpty()) break;
+                    }
+                    // Optional [EXTRA_NK_V2]: NK files 21..N_CNK_USER_MAX
+                    if(tag3=="[EXTRA_NK_V2]"){
+                        int nkV2=0; stream>>nkV2; stream.readLine();
+                        for(int i=21; i<21+nkV2 && i<=N_CNK_USER_MAX; i++){
+                            QString line=stream.readLine().simplified();
+                            fnk[i]=pathroot+line+".nk";
+                            idToLineEdit["lineEdit"+QString::number(i)]->setText(line);
+                            if(!line.contains("mate/aa999"))
+                                Setnk(i);
+                        }
+                        while(!stream.atEnd()){
+                            tag3=stream.readLine().simplified();
+                            if(!tag3.isEmpty()) break;
+                        }
+                    }
+                    if(tag3=="[EXTRA_CNK]"){
+                        hasExtraCnk=true;
+                        // v5.0 format: 9 entries for materials 16-24 (special at 21-24)
+                        for(int i=16;i<=24;i++){
+                            for(int j=1;j<=6;j++) stream >> cnk[i].col(j);
+                            stream.readLine();
+                        }
+                        // v5.0→v5.1 migration: special media 21-24 → 100-103
+                        for(int j=1;j<=6;j++){
+                            cnk[100].col(j)=cnk[21].col(j);
+                            cnk[101].col(j)=cnk[22].col(j);
+                            cnk[102].col(j)=cnk[23].col(j);
+                            cnk[103].col(j)=cnk[24].col(j);
+                        }
+                        for(int i=21;i<=24;i++) cnk[i]=MaterialCNK(); // slots 21-24 now user materials: reset
+                        // remap layer material indices 21-24 → 100-103
+                        for(int i=1;i<=N_LAYER_MAX;i++){
+                            int m=nint(par[50+i][1]);
+                            if(m>=21&&m<=24) par[50+i][1]=m+79; // 21→100,22→101,23→102,24→103
+                        }
+                    } else if(tag3=="[EXTRA_CNK_V2]"){
+                        hasExtraCnk=true;
+                        // v5.1 format: count + entries starting at 16
+                        int cnt=0; stream>>cnt; stream.readLine();
+                        for(int i=16; i<16+cnt && i<=N_CNK_MAX; i++){
+                            for(int j=1;j<=6;j++) stream >> cnk[i].col(j);
+                            stream.readLine();
+                        }
+                    }
+                    // [STACK_V2] or legacy [EXTRA2] detection
+                    if(hasExtraCnk){
+                        QString tagE2;
+                        while(!stream.atEnd()){
+                            tagE2=stream.readLine().simplified();
+                            if(!tagE2.isEmpty()) break;
+                        }
+                        if(tagE2=="[EXTRA2]"){
+                            // legacy: stores only layers N_LAYER_MAX+1..n
+                            int nExtra2=0; stream >> nExtra2;
+                            int iEnd=std::min(N_LAYER_MAX+nExtra2, N_LAYER_HARD_MAX);
+                            for(int i=N_LAYER_MAX+1;i<=iEnd;i++){
+                                for(int j=1;j<=5;j++) stream>> par[50+i][j];
+                            }
+                            double (*pmPtrs[8])[6]={pmD,pmDn,pmNc,pmDk,pmKc,pmRg,pmSd,pmNu};
+                            for(int a=0;a<8;a++){
+                                for(int i=N_LAYER_MAX+1;i<=iEnd;i++){
+                                    for(int j=1;j<=5;j++) stream>> pmPtrs[a][i][j];
+                                }
+                            }
+                        } else if(tagE2=="[STACK_V2]"){
+                            // v5.0+: unified block for ALL layers 1..N
+                            int N=0; stream >> N;
+                            N=std::min(N, N_LAYER_HARD_MAX);
+                            double (*pmPtrs[8])[6]={pmD,pmDn,pmNc,pmDk,pmKc,pmRg,pmSd,pmNu};
+                            for(int i=1;i<=N;i++){
+                                int matIdx=0, ltype=0;
+                                stream >> matIdx >> ltype;
+                                par[50+i][1]=matIdx;
+                                par[50+i][3]=ltype;
+                                for(int a=0;a<8;a++)
+                                    for(int j=1;j<=4;j++)
+                                        stream >> pmPtrs[a][i][j];
+                            }
+                        }
+                    }
+                }
+                if(!hasExtraCnk){
+                    // very old format: CNK[9..12] held special media → migrate to CNK[100..103]
+                    for(int j=1;j<=6;j++){
+                        cnk[100].col(j)=cnk[9].col(j);
+                        cnk[101].col(j)=cnk[10].col(j);
+                        cnk[102].col(j)=cnk[11].col(j);
+                        cnk[103].col(j)=cnk[12].col(j);
+                    }
+                    // clear old slots (now available as user materials 9-12)
+                    for(int i=9;i<=15;i++) cnk[i]=MaterialCNK();
+                    // remap layer material indices 9-12 → 100-103
+                    for(int i=1;i<=N_LAYER_MAX;i++){
+                        int m=nint(par[50+i][1]);
+                        if(m>=9 && m<=12) par[50+i][1]=m+91; // 9→100,10→101,11→102,12→103
+                    }
+                }
+                if(!hasExtraCnk){
+                    // old format: CNK[9..12] held special media → migrate to CNK[21..24]
+                    for(int j=1;j<=6;j++){
+                        cnk[21].col(j)=cnk[9].col(j);
+                        cnk[22].col(j)=cnk[10].col(j);
+                        cnk[23].col(j)=cnk[11].col(j);
+                        cnk[24].col(j)=cnk[12].col(j);
+                    }
+                    // clear old slots (now user materials 9-12)
+                    for(int i=9;i<=15;i++)
+                        for(int j=1;j<=6;j++) cnk[i].col(j)=0.;
+                    // remap layer material indices that used old special media slots
+                    for(int i=1;i<=N_LAYER_MAX;i++){
+                        int m=nint(par[50+i][1]);
+                        if(m>=9 && m<=12) par[50+i][1]=m+12; // 9→21,10→22,11→23,12→24
+                    }
+                }
+            }
+        }
+    }
     file.close();
+
+    // Phase 1 (v5.0): populate Stack in parallel with pm-arrays; assert consistency.
+    stack = stackFromPm(nlayer);
+    Q_ASSERT(stack.nLayers() == nlayer);
+    for(int i = 0; i < nlayer; i++){
+        Q_ASSERT(stack.layers[i].thickness.value     == pmD [i+1][1]);
+        Q_ASSERT(stack.layers[i].roughness.value     == pmRg[i+1][1]);
+        Q_ASSERT(stack.layers[i].nonUniformity.value == pmNu[i+1][1]);
+        Q_ASSERT(stack.layers[i].materialIndex       == nint(par[51+i][1]));
+    }
+
     //inserimento valori cnk
     double f2=0.;
-    for(int i=1;i<=15;i++){
-        idToComboBox["cB_cnk"+QString::number(i)+"a"] -> setCurrentIndex(nint(CNK[i][1]));
-        if(nint(CNK[i][1])==0){
+    for(int i=1;i<=N_CNK_MAX;i++){
+        idToComboBox["cB_cnk"+QString::number(i)+"a"] -> setCurrentIndex(nint(cnk[i].nSrc));
+        if(nint(cnk[i].nSrc)==0){
             idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setEnabled(true);
             idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> setEnabled(true);
-            idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setText(QString::number(CNK[i][2]));
-            idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> setText(QString::number(CNK[i][3]));
+            idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setText(QString::number(cnk[i].nConst));
+            idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> setText(QString::number(cnk[i].kConst));
         }
         else{
             idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> setEnabled(false);
             idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> setEnabled(false);
         }
-        if(nint(CNK[i][4])<0.){
+        if(nint(cnk[i].emaSrc)<0.){
             idToCheckBox["cB_EMA_"+QString::number(i)] -> setCheckState ( Qt::Unchecked );
             idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setCurrentIndex(-1);
             idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setEnabled(false);
             idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> setEnabled(false);
             idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(70+i)+"_1"] -> setEnabled(false);
+            idToDoubleSpinBox[emaKey(i)] -> setEnabled(false);
         }
         else{
             idToCheckBox["cB_EMA_"+QString::number(i)] -> setCheckState ( Qt::Checked );
             idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setEnabled(true);
-            idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setCurrentIndex(nint(CNK[i][4]));
-            if(nint(CNK[i][4])==0){
+            idToComboBox["cB_cnk"+QString::number(i)+"b"] -> setCurrentIndex(nint(cnk[i].emaSrc));
+            if(nint(cnk[i].emaSrc)==0){
                 idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> setEnabled(true);
                 idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> setEnabled(true);
-                idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> setText(QString::number(CNK[i][5]));
-                idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> setText(QString::number(CNK[i][6]));
+                idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> setText(QString::number(cnk[i].n2Const));
+                idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> setText(QString::number(cnk[i].k2Const));
             }
             else{
                 idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> setEnabled(false);
                 idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> setEnabled(false);
             }
-            f2=pm[70+i][1];
-            idToDoubleSpinBox["dSB_PM_"+QString::number(70+i)+"_1"] -> setEnabled(true);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(70+i)+"_1"] -> setValue(f2);
+            f2=pmFe[i][1];
+            idToDoubleSpinBox[emaKey(i)] -> setEnabled(true);
+            idToDoubleSpinBox[emaKey(i)] -> setValue(f2);
         }
+    }
+    // Compute nmat from cnk data: highest material index (2-N_CNK_USER_MAX) with non-default settings.
+    // Default = constant nk (nSrc==0), n=1, k=0, no EMA.  Works for both old and new files.
+    {
+        int nmat = 1;
+        for(int i = 2; i <= N_CNK_USER_MAX; i++){
+            const bool isDefault = (nint(cnk[i].nSrc) == 0 &&
+                                    std::abs(cnk[i].nConst - 1.0) < 1e-9 &&
+                                    std::abs(cnk[i].kConst)       < 1e-9 &&
+                                    cnk[i].emaSrc < 0.0);
+            if(!isDefault) nmat = i;
+        }
+        ui->sB_nmat->setValue(nmat);
+        updateMatRows(nmat);
     }
     //aggiornamento valori PanFit
     for(int i=1;i<=npp;i++){
         state=idToCheckBox["chBeParFit_"+QString::number(i)]-> checkState();
         int ip=nint(ppm[i]);
-        if(ip>100)
-            pm[ip][1]=std::abs(pm[ip][1]);
+        if(ip>=897 && ip<=996)//oscillator params (uniform ip encoding v5.2)
+            pmAt(ip)[1]=std::abs(pmAt(ip)[1]);
         idToLineEdit["DPparFitV_"+QString::number(i)] -> setEnabled(true);
         idToLineEdit["DPparFitErr_"+QString::number(i)] -> setEnabled(true);
         idToLineEdit["DPparFitGC_"+QString::number(i)] -> setEnabled(true);
-        idToLineEdit["DPparFitV_"+QString::number(i)] -> setText(QString::number(pm[ip][1]));
+        idToLineEdit["DPparFitV_"+QString::number(i)] -> setText(QString::number(pmAt(ip)[1]));
         if( state == Qt::Checked ){
-            idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(pm[ip][4]));
-            idToLineEdit["DPparFitGC_"+QString::number(i)] -> setText(QString::number(pm[ip][5]));
+            idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(pmAt(ip)[4]));
+            idToLineEdit["DPparFitGC_"+QString::number(i)] -> setText(QString::number(pmAt(ip)[5]));
         }
         else{
             idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(0));
             idToLineEdit["DPparFitGC_"+QString::number(i)] -> setText(QString::number(0));
         }
     }
-    for(int i=npp+1;i<=17;i++){
+    for(int i=npp+1;i<=m_maxFitRow;i++){
         idToLineEdit["DPparFitV_"+QString::number(i)] -> setEnabled(false);
         idToLineEdit["DPparFitErr_"+QString::number(i)] -> setEnabled(false);
         idToLineEdit["DPparFitGC_"+QString::number(i)] -> setEnabled(false);
     }
-    ui->cB_cnk1a -> setCurrentIndex(nint(pm[100][1]));//fit option
+    ui->cB_cnk1a -> setCurrentIndex(nint(pmOs[0][1]));//fit option
     ui->sB_PAR_51_2 -> setValue(nlayer);
     setGuiMute(false);
     qDebug()<<"ReadSetting completed. Now call setRifMir MCRange, SetModel, ListOsc, PanFitPar";
@@ -2555,18 +3564,18 @@ void ksemawc::AdjTheta(){
 
 void ksemawc::AdjRoughMax(){
     double d,dUP,rghMax;
-    for(int i=1;i<10;i++){
-        int iKind=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] ->currentIndex();
+    for(int i=1;i<=N_LAYER_MAX;i++){
+        int iKind=idToComboBox[wCB3(i)] ->currentIndex();
         if(iKind>0){
-            d=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] ->value();
+            d=idToDoubleSpinBox[wD(i)] ->value();
             dUP=d;
             if(i>1)
-               dUP=idToDoubleSpinBox["dSB_PM_"+QString::number(i-1)+"_1"] ->value();
+               dUP=idToDoubleSpinBox[wD(i-1)] ->value();
             rghMax=min(d/3.,dUP/3.);
-            idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] ->setMaximum(rghMax);
+            idToDoubleSpinBox[wRg(i)] ->setMaximum(rghMax);
         }
         else
-            idToDoubleSpinBox["dSB_PM_5"+QString::number(i)+"_1"] ->setMaximum(100.);
+            idToDoubleSpinBox[wRg(i)] ->setMaximum(100.);
     }
 }
 
@@ -2612,7 +3621,7 @@ void ksemawc::readRangeEli(){
 void ksemawc::SaveProject(){
     SaveSetting(-1);
     int ierr;
-    QString command,subfnproject,sample;
+    QString subfnproject,sample;
     subfnproject=ui->lineEdit_P -> text();
     if(subfnproject.contains("mate/aa999.9")){
         sample=ui->lineEdit_sample-> text();
@@ -2632,28 +3641,8 @@ void ksemawc::SaveProject(){
     subfnproject=fnproject.section(pathroot, 1, 1);
     if(fnproject!=".Spj"){
         ui->lineEdit_P -> setText(subfnproject);
-        if (IS_POSIX) {
-            command="cp "+fileStore+" "+fnproject;
-            ierr=system((command.toStdString()).c_str());}
-        else
-        {
-            command="copy "+fileStore+" "+fnproject;
-            QStringList List;
-            List =command.split("/");
-            int nV=List.count();
-            QString commandw;
-            QString pezzo;
-            for(int iv=0;iv<nV;iv++){
-                pezzo=List.at(iv).toLocal8Bit().constData();
-                if(iv==0){
-                    commandw=pezzo;
-                }
-                else{
-                    commandw=commandw+"\\"+pezzo;
-                }
-            }
-            ierr=system((commandw.toStdString()).c_str());
-        }
+        // QFile::copy (no shell) — safe with '+'/spaces/long names in fnproject.
+        ierr = copyFileOverwrite(fileStore, fnproject) ? 0 : 1;
         if(ierr != 0){
             msgErrLoad("SaveProject",fnproject);
             qWarning()<<"Error copying project!!!";
@@ -2683,38 +3672,41 @@ void ksemawc::SaveSetting(int iCall){
             par[9][1]=1.;
         else
             par[9][1]=0.;
-        for(int i=1;i<=9;i++){
-            if(i <= nlayer){
-                par[50+i][1]=idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> currentIndex();
-                par[50+i][1]++;
-                par[50+i][3]=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
-                par[50+i][3]++;
-                pm[i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> value();
-                pm[50+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> value();
-                pm[90+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> value();
-                if(nint(par[50+i][3])==1){
-                    pm[i][1]=pm[i][1]/1.E-6;//mm->nm
-                } else if(nint(par[50+i][3])==3){
-                    pm[10+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> value();
-                    pm[20+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> value();
-                    pm[30+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> value();
-                    pm[40+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> value();
-                    pm[60+i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> value();
-                }
+        for(int i=1;i<=stack.nLayers();i++){
+            Layer& l        = stack.layers[i-1];
+            l.materialIndex = idToComboBox[wCB1(i)]->currentIndex() + 1;
+            l.type          = idToComboBox[wCB3(i)]->currentIndex();
+            l.roughness.value     = idToDoubleSpinBox[wRg(i)]->value();
+            l.nonUniformity.value = idToDoubleSpinBox[wNu(i)]->value();
+            if(l.type == 0){
+                l.thickness.value = idToDoubleSpinBox[wD(i)]->value() / 1.E-6; // mm→nm
+            } else {
+                l.thickness.value = idToDoubleSpinBox[wD(i)]->value();
+            }
+            if(l.type == 2){
+                l.nGrad.value      = idToDoubleSpinBox[wDn(i)]->value();
+                l.nCurv.value      = idToDoubleSpinBox[wNc(i)]->value();
+                l.kGrad.value      = idToDoubleSpinBox[wDk(i)]->value();
+                l.kCurv.value      = idToDoubleSpinBox[wKc(i)]->value();
+                l.slopeNGrad.value = idToDoubleSpinBox[wSd(i)]->value();
             }
         }
+        stackToPm(stack);
+        // The dSB_PM_71..89 widgets are named in the legacy pm convention
+        // (fEMA materials 1-15 → pmFe, ThetaEli 1-4 → pmTe); use pmAtLegacy so
+        // they land in the right arrays, not in pmD[71..89] as plain pmAt would.
         for(int i=71;i<=89;i++)
-            pm[i][1]=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> value();//save f2 and ThetaEli values
+            pmAtLegacy(i)[1]=idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> value();//save f2 and ThetaEli values
         //refresh PanFit values
         for(int i=1;i<=npp;i++){
             state=idToCheckBox["chBeParFit_"+QString::number(i)]-> checkState();
             int ip=nint(ppm[i]);
-            if(ip>100 && ip <=200)
-                pm[ip][1]=std::abs(pm[ip][1]);
-            idToLineEdit["DPparFitV_"+QString::number(i)] -> setText(QString::number(pm[ip][1]));
+            if(ip>=897 && ip<=996)//oscillator params (uniform ip encoding v5.2)
+                pmAt(ip)[1]=std::abs(pmAt(ip)[1]);
+            idToLineEdit["DPparFitV_"+QString::number(i)] -> setText(QString::number(pmAt(ip)[1]));
             if( state == Qt::Checked ){
-                idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(pm[ip][4]));
-                idToLineEdit["DPparFitGC_"+QString::number(i)] -> setText(QString::number(pm[ip][5]));
+                idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(pmAt(ip)[4]));
+                idToLineEdit["DPparFitGC_"+QString::number(i)] -> setText(QString::number(pmAt(ip)[5]));
             }
             else{
                 idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(0));
@@ -2736,10 +3728,9 @@ void ksemawc::SaveSetting(int iCall){
         int n,n1,n2,ip,jpf;
         QString Lj,Valore;
         Qt::CheckState state;
-        n=17;
-        npp=17;
+        { int nMax=ui->sB_PAR_34_5->value(); n=nMax; npp=nMax; }
         jpf=0;
-        for(int j=1;j<=17;j++){
+        for(int j=1;j<=npp;j++){
             Lj=idToComboBox["cBParFit_"+QString::number(j)] -> currentText();
             state=idToCheckBox["chBeParFit_"+QString::number(j)]-> checkState();
             if(Lj=="none"){
@@ -2757,42 +3748,40 @@ void ksemawc::SaveSetting(int iCall){
                 do{
                     n2++;
                 } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive));
-                if(n2==0)
-                    ip=90+n1;//dnonuni
-                else if(1<=n2 && n2<=7)//film parameters
-                    ip=10*(n2-1)+n1;
+                if(n2==0 || (1<=n2 && n2<=7))//film parameters
+                    ip=ipLayer(n1,n2);
                 else if(8<=n2 && n2<=11)//oscillator parameters
-                    ip=100+(n1-1)*5+(n2-7)+1;
+                    ip = 896 + (n1-1)*5 + (n2-7) + 1;
                 else if(n2==12)//fEMA
-                    ip=70+Lj.at(5).digitValue();
+                    ip = 792 + Lj.mid(5).toInt();
                 else if(n2==13)//Theta
-                    ip=85+Lj.at(6).digitValue();
+                    ip = 891 + Lj.at(6).digitValue();
 
                 ppm[j]=ip;
                 Valore=idToLineEdit["DPparFitV_"+QString::number(j)] -> text();
-                pm[ip][1]=Valore.toDouble();
+                pmAt(ip)[1]=Valore.toDouble();
 
                 //check value
-                if((ip>0 && ip<10) || (ip>50 && ip<60) || ip>100)//thickness or roughness or oscillator
-                    if(pm[ip][1]<.0)
-                        pm[ip][1]=0.;
-                if((ip>=71 && ip<=85) || (ip>=91 && ip<=99)){//fEMA or d_nonuni
-                    if(pm[ip][1]<.0)
-                        pm[ip][1]=0.;
-                    if(pm[ip][1]>1.)
-                        pm[ip][1]=1.;
+                if((ip>=1 && ip<=99) || (ip>=496 && ip<=594) || (ip>=897 && ip<=996))//D, Rg, oscillators
+                    if(pmAt(ip)[1]<.0)
+                        pmAt(ip)[1]=0.;
+                if(ip>=694 && ip<=891){//Nu (694-792) + EMA fractions (793-891)
+                    if(pmAt(ip)[1]<.0)
+                        pmAt(ip)[1]=0.;
+                    if(pmAt(ip)[1]>1.)
+                        pmAt(ip)[1]=1.;
                 }
-                idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pm[ip][1]));//eventually correct the value
+                idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pmAt(ip)[1]));//eventually correct the value
 
-                //qDebug()<<"\tSavePanFit:  j="<<j<<" n1="<<n1<<" n2="<<n2<<" ip="<<ip<<" pm["<<ip<<"][1]="<<pm[ip][1];
+                //qDebug()<<"\tSavePanFit:  j="<<j<<" n1="<<n1<<" n2="<<n2<<" ip="<<ip<<" pm["<<ip<<"][1]="<<pmAt(ip)[1];
                 if( state == Qt::Unchecked ){
-                    pm[ip][2]=0;
+                    pmAt(ip)[2]=0;
                     n--;
                 }
                 else{
                     jpf++;
-                    pm[ip][2]=jpf;
-                    pm[jpf][3]=ip;
+                    pmAt(ip)[2]=jpf;
+                    pmAt(jpf)[3]=ip;
                 }
             }
         }
@@ -2812,6 +3801,10 @@ void ksemawc::SaveSetting(int iCall){
         }
         ui->sB_PAR_35_5 -> setValue(n);
         ui->sB_PAR_34_5 -> setValue(npp);
+        // Propagate the just-edited layer fit values (pmD/pmRg/pmDn/...) into
+        // stack.layers[] so the simulation engine actually uses them; SetModel
+        // then refreshes the Model-tab widgets from the updated stack.
+        pmValuesToStack(stack);
         SetModel(nlayer);
         listOsc();
     }
@@ -2824,7 +3817,7 @@ void ksemawc::SaveSetting(int iCall){
         return;
     }
     QTextStream out(&file);
-    out << "iVspj=1nm" << "\n";
+    out << "iVspj=1nm ufip" << "\n";// "ufip" = ppm stored in uniform ip encoding (see ReadSetting)
     stringa=ui->lineEdit_infoP -> text();
     out << stringa.simplified() << "\n";
     //file nk
@@ -2870,10 +3863,14 @@ void ksemawc::SaveSetting(int iCall){
         NANK[12]=stringa+"."+lab;
         out << stringa+"."+lab << "\n";
         par[27][4]=lab.toDouble();
-        if(pm[86][1]<1.)
-            ui->dSB_PM_86_1-> setValue(ui->cBteE1 -> currentText().toDouble());
+        // Use the stored ThetaEli only if it is a refined value of the selected file
+        // angle; if unset (<1) or far from it (stale/corrupt pmTe, e.g. projects saved
+        // with the angle widget wrongly at 1), fall back to the reliable combo angle.
+        double th1=ui->cBteE1 -> currentText().toDouble();
+        if(pmTe[1][1]<1. || std::abs(pmTe[1][1]-th1)>5.)
+            ui->dSB_PM_86_1-> setValue(th1);
         else
-            ui->dSB_PM_86_1-> setValue(pm[86][1]);
+            ui->dSB_PM_86_1-> setValue(pmTe[1][1]);
     }
     lab=ui->cBmis9 -> currentText();
     state=ui->checkB_mis9_1->checkState();
@@ -2883,10 +3880,11 @@ void ksemawc::SaveSetting(int iCall){
         NANK[13]=stringa+"."+lab;
         out << stringa+"."+lab << "\n";
         par[28][4]=lab.toDouble();
-        if(pm[87][1]<1.)
-            ui->dSB_PM_87_1-> setValue(ui->cBteE2 -> currentText().toDouble());
+        double th2=ui->cBteE2 -> currentText().toDouble();
+        if(pmTe[2][1]<1. || std::abs(pmTe[2][1]-th2)>5.)
+            ui->dSB_PM_87_1-> setValue(th2);
         else
-            ui->dSB_PM_87_1-> setValue(pm[87][1]);
+            ui->dSB_PM_87_1-> setValue(pmTe[2][1]);
     }
     lab=ui->cBmis11 -> currentText();
     state=ui->checkB_mis11_1->checkState();
@@ -2896,10 +3894,11 @@ void ksemawc::SaveSetting(int iCall){
         NANK[14]=stringa+"."+lab;
         out << stringa+"."+lab << "\n";
         par[29][4]=lab.toDouble();
-        if(pm[88][1]<1.)
-            ui->dSB_PM_88_1-> setValue(ui->cBteE3 -> currentText().toDouble());
+        double th3=ui->cBteE3 -> currentText().toDouble();
+        if(pmTe[3][1]<1. || std::abs(pmTe[3][1]-th3)>5.)
+            ui->dSB_PM_88_1-> setValue(th3);
         else
-            ui->dSB_PM_88_1-> setValue(pm[88][1]);
+            ui->dSB_PM_88_1-> setValue(pmTe[3][1]);
     }
     lab=ui->cBmis13 -> currentText();
     state=ui->checkB_mis13_1->checkState();
@@ -2909,10 +3908,11 @@ void ksemawc::SaveSetting(int iCall){
         NANK[15]=stringa+"."+lab;
         out << stringa+"."+lab << "\n";
         par[30][4]=lab.toDouble();
-        if(pm[89][1]<1.)
-            ui->dSB_PM_89_1-> setValue(ui->cBteE4 -> currentText().toDouble());
+        double th4=ui->cBteE4 -> currentText().toDouble();
+        if(pmTe[4][1]<1. || std::abs(pmTe[4][1]-th4)>5.)
+            ui->dSB_PM_89_1-> setValue(th4);
         else
-            ui->dSB_PM_89_1-> setValue(pm[89][1]);
+            ui->dSB_PM_89_1-> setValue(pmTe[4][1]);
     }
     //qDebug("saving par[27][4]=%f",par[27][4]);
     //RXY
@@ -2944,15 +3944,19 @@ void ksemawc::SaveSetting(int iCall){
         }
     }
     //CNK
-    for(int i=1;i<=15;i++){
-        CNK[i][1]=idToComboBox["cB_cnk"+QString::number(i)+"a"] -> currentIndex();
-        CNK[i][2]=idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> text().toDouble();
-        CNK[i][3]=idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> text().toDouble();
-        CNK[i][4]=idToComboBox["cB_cnk"+QString::number(i)+"b"] -> currentIndex();
-        CNK[i][5]=idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> text().toDouble();
-        CNK[i][6]=idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> text().toDouble();
-        f2=idToDoubleSpinBox["dSB_PM_"+QString::number(70+i)+"_1"] -> value();
-        pm[70+i][1]=f2;
+    for(int i=1;i<=N_CNK_MAX;i++){
+        cnk[i].nSrc=idToComboBox["cB_cnk"+QString::number(i)+"a"] -> currentIndex();
+        cnk[i].nConst=idToLineEdit["LEcnk"+QString::number(i)+"_2"] -> text().toDouble();
+        cnk[i].kConst=idToLineEdit["LEcnk"+QString::number(i)+"_3"] -> text().toDouble();
+        // The EMA checkbox is the switch: only when it is ticked does the source combo
+        // decide the 2nd material. Reading the combo unconditionally let a leftover index
+        // (never cleared, e.g. a row the user never touched) turn EMA on behind his back.
+        const bool emaOn=(idToCheckBox["cB_EMA_"+QString::number(i)] -> checkState()==Qt::Checked);
+        cnk[i].emaSrc=emaOn ? idToComboBox["cB_cnk"+QString::number(i)+"b"] -> currentIndex() : -1.;
+        cnk[i].n2Const=idToLineEdit["LEcnk"+QString::number(i)+"_5"] -> text().toDouble();
+        cnk[i].k2Const=idToLineEdit["LEcnk"+QString::number(i)+"_6"] -> text().toDouble();
+        f2=idToDoubleSpinBox[emaKey(i)] -> value();
+        pmFe[i][1]=f2;
     }
     //PAR
     //  setting measurements
@@ -3063,10 +4067,10 @@ void ksemawc::SaveSetting(int iCall){
         par[13][2]=1.;
         iDelCon=1;
     }
-    pm[86][1]=ui->dSB_PM_86_1 -> value();
-    pm[87][1]=ui->dSB_PM_87_1 -> value();
-    pm[88][1]=ui->dSB_PM_88_1 -> value();
-    pm[89][1]=ui->dSB_PM_89_1 -> value();
+    pmTe[1][1]=ui->dSB_PM_86_1 -> value();
+    pmTe[2][1]=ui->dSB_PM_87_1 -> value();
+    pmTe[3][1]=ui->dSB_PM_88_1 -> value();
+    pmTe[4][1]=ui->dSB_PM_89_1 -> value();
     state=ui->checkB_par_18_1 -> checkState ( );//verboso
     if(state==Qt::Unchecked)
         par[18][1]=0;
@@ -3109,11 +4113,11 @@ void ksemawc::SaveSetting(int iCall){
         par[54][2]=0;
     else
         par[54][2]=1;
-    for(int i=1;i<=9;i++){
+    for(int i=1;i<=N_LAYER_MAX;i++){
         if(i<=nlayer){
-            par[50+i][1]=idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> currentIndex();
+            par[50+i][1]=idToComboBox[wCB1(i)] -> currentIndex();
             par[50+i][1]++;
-            par[50+i][3]=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
+            par[50+i][3]=idToComboBox[wCB3(i)] -> currentIndex();
             par[50+i][3]++;
             if(nint(par[50+i][1])==1) par[53][2]=i;//puntatore strato incognito
         }
@@ -3130,7 +4134,7 @@ void ksemawc::SaveSetting(int iCall){
     par[35][5]=nPar;
     par[51][2]=nlayer;
 
-    pm[100][1]=ui->cB_cnk1a -> currentIndex();//fit option
+    pmOs[0][1]=ui->cB_cnk1a -> currentIndex();//fit option
 
     //save rxy
     for(int i=1;i<=30;i++){
@@ -3142,7 +4146,7 @@ void ksemawc::SaveSetting(int iCall){
     //save cnk
     for(int i=1;i<=15;i++){
         for(int j=1;j<=6;j++){
-            out << QString::number(CNK[i][j],'g',7) << "\t";
+            out << QString::number(cnk[i].col(j),'g',7) << "\t";
         }
         out << "\n";
     }
@@ -3153,10 +4157,10 @@ void ksemawc::SaveSetting(int iCall){
         }
         out << "\n";
     }
-    //save pm
+    //save pm — legacy encoding: layers 1-9, EMA 1-15/20, ThetaEli, oscillators
     for(int i=1;i<=200;i++){
         for(int j=1;j<=5;j++){
-            out << QString::number(pm[i][j],'g',7) << "\t";
+            out << QString::number(pmAtLegacy(i)[j],'g',7) << "\t";
         }
         out << "\n";
     }
@@ -3166,6 +4170,38 @@ void ksemawc::SaveSetting(int iCall){
             out << QString::number(pf[j][i],'g',7) <<"\t";
         }
         out << "\n";
+    }
+    //save extra nk files 9-20 (v5.1: 9-20 in EXTRA_NK, 21-99 in EXTRA_NK_V2)
+    out << "[EXTRA_NK]\n";
+    out << ui->sB_nnk->value() << "\n";
+    for(int i=9;i<=20;i++){
+        out << idToLineEdit["lineEdit"+QString::number(i)]->text() << "\n";
+    }
+    // NK files 21-N_CNK_USER_MAX in separate block for backward compat
+    out << "[EXTRA_NK_V2]\n" << (N_CNK_USER_MAX-20) << "\n";
+    for(int i=21;i<=N_CNK_USER_MAX;i++){
+        out << idToLineEdit["lineEdit"+QString::number(i)]->text() << "\n";
+    }
+    // save all CNK rows 16-N_CNK_MAX (user 16-99 + special 100-103)
+    int cnkSaveN = N_CNK_MAX - 16 + 1;  // 88
+    out << "[EXTRA_CNK_V2]\n" << cnkSaveN << "\n";
+    for(int i=16;i<=N_CNK_MAX;i++){
+        for(int j=1;j<=6;j++)
+            out << QString::number(cnk[i].col(j),'g',7) << "\t";
+        out << "\n";
+    }
+    // [STACK_V2]: unified clean storage for all layers (v5.0+, replaces legacy [EXTRA2])
+    {
+        int N = std::min(stack.nLayers(), N_LAYER_HARD_MAX);
+        out << "[STACK_V2]\n" << N << "\n";
+        double (*pmPtrs[8])[6] = {pmD, pmDn, pmNc, pmDk, pmKc, pmRg, pmSd, pmNu};
+        for(int i = 1; i <= N; i++){
+            out << stack.layers[i-1].materialIndex << "\t" << (stack.layers[i-1].type + 1);
+            for(int a = 0; a < 8; a++)
+                for(int j = 1; j <= 4; j++)
+                    out << "\t" << QString::number(pmPtrs[a][i][j], 'g', 7);
+            out << "\n";
+        }
     }
     file.close();
     qDebug()<<"exit from SaveSetting";
@@ -3239,21 +4275,16 @@ void ksemawc::LoadFilenk(){
         List =line.split(" ");
         int nV=List.count();
         if(nV!=5){
-            List=line.split("\t");
+            List=line.split("\t");//retry with tab separator
             nV=List.count();
             if(nV!=5){
-                List=line.split(" ");
-                nV=List.count();
-                if(nV!=5){
-                    qDebug()<<"nV="<<nV<<" line="<<line;
-                    qWarning()<<"LoadFilenk-> ERROR reading file-nk= "<<fnam<<": separator char invalid";
-                    QMessageBox msgBox;
-                    msgBox.setText("LoadFilenk-> ERROR reading file-nk="+fnam+"\n: separator char invalid or ERRn and ERRk missing");
-                    msgBox.setStandardButtons(QMessageBox::Ok);
-                    msgBox.exec();
-                    return;
-                    continue;
-                }
+                qDebug()<<"nV="<<nV<<" line="<<line;
+                qWarning()<<"LoadFilenk-> ERROR reading file-nk= "<<fnam<<": separator char invalid";
+                QMessageBox msgBox;
+                msgBox.setText("LoadFilenk-> ERROR reading file-nk="+fnam+"\n: separator char invalid or ERRn and ERRk missing");
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.exec();
+                return;
             }
         }
         for(int kk=1;kk<=nV;kk++)
@@ -3292,7 +4323,7 @@ void ksemawc::LoadFilenk(){
     while(i<N){
         if(NKNEW[i][4]<=.0)
             NKNEW[i][4]=0.001*NKNEW[i][2];//set minimal n-error
-        if(Sol[i][5]<=0.){//set minimal k-error
+        if(NKNEW[i][5]<=0.){//set minimal k-error  (was Sol[i][5]: unsorted row; must test the sorted row like NKNEW[i][4] above)
             if(NKNEW[i][3]>0.)
                 NKNEW[i][5]=0.001*NKNEW[i][3];
             else
@@ -3452,25 +4483,11 @@ void ksemawc::Setnk(int ifile){
 
 
 void ksemawc::mDwUp(int iLayer, int Dw1UpM1){
-    double tmp1=par[50+iLayer][1];
-    double tmp3=par[50+iLayer][3];
-    par[50+iLayer][1]=par[50+iLayer+Dw1UpM1][1];
-    par[50+iLayer][3]=par[50+iLayer+Dw1UpM1][3];
-    par[50+iLayer+Dw1UpM1][1]=tmp1;
-    par[50+iLayer+Dw1UpM1][3]=tmp3;
-    tmp1=par[90+iLayer][1];
-    tmp3=par[90+iLayer][3];
-    par[90+iLayer][1]=par[90+iLayer+Dw1UpM1][1];
-    par[90+iLayer][3]=par[90+iLayer+Dw1UpM1][3];
-    par[90+iLayer+Dw1UpM1][1]=tmp1;
-    par[90+iLayer+Dw1UpM1][3]=tmp3;
-    for(int j=0;j<=6;j++){
-        for(int k=1;k<=5;k++){
-            double tmp=pm[10*j+iLayer][k];
-            pm[10*j+iLayer][k]=pm[10*j+iLayer+Dw1UpM1][k];
-            pm[10*j+iLayer+Dw1UpM1][k]=tmp;
-        }
-    }
+    if(Dw1UpM1 == 1)
+        stack.moveDown(iLayer - 1);  // 0-based index
+    else
+        stack.moveUp(iLayer - 1);
+    stackToPm(stack);
     SetModel(nlayer);
 }
 
@@ -3594,17 +4611,28 @@ void ksemawc::listMeas(){
         }
     }
     if(iNewSample==1){
-        //assign incremental theta if same measurement
+        // After a fresh manual data load all four ELI rows default to the first
+        // measurement file (listMeas selects index 0 in every cBmis7/9/11/13).
+        // Spread the angles (theta) of that file across consecutive rows
+        // (ELI-1 -> 1st theta, ELI-2 -> 2nd theta, ...) and DESELECT the rows that
+        // have no theta left. Otherwise every row reloads the same file at theta 0,
+        // duplicating the data into ELI-3/ELI-4. The number of active rows must
+        // equal the number of angles in the file. (Rows pointing to a different
+        // measurement are left untouched: the user selected those manually.)
+        QString labRef=ui->cBmis7->currentText();
+        int nThetaRef=ui->cBteE1->count();
+        int iThetaPre=ui->cBteE1->currentIndex();
         for(int j=2;j<=4;j++){
-            int nELIpre=idToComboBox["cBmis"+QString::number(5+2*(j-1))]->currentIndex();
-            int nEli=idToComboBox["cBmis"+QString::number(5+2*j)]->currentIndex();
-            if(nELIpre>=0 && nEli==nELIpre){
-                int nTheta=idToComboBox["cBteE"+QString::number(j)] -> count();
-                int iThetaPre=idToComboBox["cBteE"+QString::number(j-1)] -> currentIndex();
-                int iTheta=idToComboBox["cBteE"+QString::number(j)] -> currentIndex();
-                if(iTheta<=iThetaPre && iThetaPre<nTheta-1)
-                    idToComboBox["cBteE"+QString::number(j)] -> setCurrentIndex(iThetaPre+1);
+            QString lab=idToComboBox["cBmis"+QString::number(5+2*j)]->currentText();
+            if(labRef.isEmpty() || lab!=labRef)
+                continue;//different (manually chosen) measurement: keep as is
+            int iThetaNext=iThetaPre+1;
+            if(iThetaNext<nThetaRef){
+                idToComboBox["cBteE"+QString::number(j)]->setCurrentIndex(iThetaNext);
+                iThetaPre=iThetaNext;
             }
+            else
+                idToComboBox["cBmis"+QString::number(5+2*j)]->setCurrentIndex(-1);
         }
         iNewSample=0;
     }
@@ -3795,7 +4823,7 @@ void ksemawc::pwEj(int j){
                 EliTab[j][0][0]=ntel;
                 for(i=0;i<ntel;i++){
                     stream >> theta >> ndat >> wmin >> wmax;
-                    EliTab[j][ntel][0]=theta;
+                    EliTab[j][i][0]=theta;//per-theta row is 0-based [i] (was constant [ntel]); matches data rows below and the VASE branch
                     EliTab[j][i][1]=ndat;
                     EliTab[j][i][2]=wmin;
                     EliTab[j][i][3]=wmax;
@@ -3908,7 +4936,7 @@ void ksemawc::pwSubEj(int j){
         qDebug()<<"\t->pwSubEj("<<j<<") ntel="<<ntel<<" index="<<index;
         double theta=idToComboBox["cBteE"+QString::number(j)] -> currentText().toDouble();
         idToDoubleSpinBox["dSB_PM_"+QString::number(85+j)+"_1"]->setValue(theta);
-        pm[85+j][1]=theta;
+        pmTe[j][1]=theta;
         double wmin=EliTab[j][index][2];
         double wmax=EliTab[j][index][3];
         idToLineEdit["WLmin"+QString::number(5+2*j)]-> setText(QString::number(wmin));
@@ -4014,6 +5042,9 @@ void ksemawc::updateMatenk(int index, QString newName){
         idToComboBox["cB_cnk"+QString::number(i)+"a"]-> setItemText(index,newName);
         idToComboBox["cB_cnk"+QString::number(i)+"b"]-> setItemText(index,newName);
     }
+    // Renaming items can clear the popup view's row-hidden flags, so re-assert
+    // the nk-file filter to keep only the loaded nk files visible.
+    updateNkRows(ui->sB_nnk->value());
 }
 
 
@@ -4041,7 +5072,9 @@ void previewFile(QString filename, QString lab,QString& info,double& wmin,double
             for(i=0;i<6;i++) line = stream.readLine();
             info = stream.readLine();
             for(i=0;i<5;i++) line = stream.readLine();
-            if(line.contains("PerkinElmer UV WinLab 7", Qt::CaseInsensitive))
+            if(line.contains("PerkinElmer UV WinLab 7.1", Qt::CaseInsensitive))
+                ilinrim=69;
+            else if(line.contains("PerkinElmer UV WinLab 7.4", Qt::CaseInsensitive))
                 ilinrim=73;
             else if(line.contains("PerkinElmer UV WinLab 5", Qt::CaseInsensitive))
                 ilinrim=65;
@@ -4152,144 +5185,166 @@ void ksemawc::SetModel(const int &){
     int Dnl=nlayer-nlayerOld;
     qDebug()<<"-> SetModel with Dnl="<<Dnl;
     setGuiMute(true);
-    if(Dnl>0){
-        for(int i=0;i<nlayerOld;i++){
-            par[50+nlayer-i][1]=par[50+nlayerOld-i][1];
-            par[50+nlayer-i][3]=par[50+nlayerOld-i][3];
-            for(int j=0;j<=7;j++){
-                if(j==7) j=9;
-                for(int k=1;k<=5;k++)
-                    pm[10*j+nlayer-i][k]=pm[10*j+nlayerOld-i][k];
-            }
-        }
+    if(nlayer != stack.nLayers()){
+        if(Dnl > 0)
+            stack.layers.insert(stack.layers.begin(), Dnl, Layer{});
+        else if(Dnl < 0)
+            stack.layers.erase(stack.layers.begin(), stack.layers.begin() + (-Dnl));
+        stackToPm(stack);
     }
-    else{
-        for(int i=1;i<=nlayer;i++){
-            par[50+i][1]=par[50+i-Dnl][1];
-            par[50+i][3]=par[50+i-Dnl][3];
-            for(int j=0;j<=7;j++){
-                if(j==7) j=9;
-                for(int k=1;k<=5;k++)
-                    pm[10*j+i][k]=pm[10*j+i-Dnl][k];
-            }
-        }
+    // Enable/disable Up/Down buttons based on nlayer
+    for(int i=1; i<=N_LAYER_MAX; i++){
+        idToPushButton["pBmDw"+QString::number(i)]->setEnabled(false);
+        idToPushButton["pBmUp"+QString::number(i)]->setEnabled(false);
     }
-    ui->pBmDw1->setEnabled(false);
-    ui->pBmDw2->setEnabled(false);
-    ui->pBmUp2->setEnabled(false);
-    ui->pBmDw3->setEnabled(false);
-    ui->pBmUp3->setEnabled(false);
-    ui->pBmDw4->setEnabled(false);
-    ui->pBmUp4->setEnabled(false);
-    ui->pBmDw5->setEnabled(false);
-    ui->pBmUp5->setEnabled(false);
-    ui->pBmDw6->setEnabled(false);
-    ui->pBmUp6->setEnabled(false);
-    ui->pBmDw7->setEnabled(false);
-    ui->pBmUp7->setEnabled(false);
-    ui->pBmDw8->setEnabled(false);
-    ui->pBmUp8->setEnabled(false);
-    ui->pBmDw9->setEnabled(false);
-    ui->pBmUp9->setEnabled(false);
-    if(nlayer>0)
-        ui->pBmDw1->setEnabled(true);
-    if(nlayer>1){
-        if(nlayer>2) ui->pBmDw2->setEnabled(true);
-        ui->pBmUp2->setEnabled(true);
+    idToPushButton["pBmDw1"]->setEnabled(nlayer > 0);
+    for(int i=2; i<=N_LAYER_MAX; i++){
+        idToPushButton["pBmUp"+QString::number(i)]->setEnabled(nlayer >= i);
+        idToPushButton["pBmDw"+QString::number(i)]->setEnabled(nlayer > i);
     }
-    if(nlayer>2){
-        if(nlayer>3) ui->pBmDw3->setEnabled(true);
-        ui->pBmUp3->setEnabled(true);
-    }
-    if(nlayer>3){
-        if(nlayer>4) ui->pBmDw4->setEnabled(true);
-        ui->pBmUp4->setEnabled(true);
-    }
-    if(nlayer>4){
-        if(nlayer>5) ui->pBmDw5->setEnabled(true);
-        ui->pBmUp5->setEnabled(true);
-    }
-    if(nlayer>5){
-        if(nlayer>6) ui->pBmDw6->setEnabled(true);
-        ui->pBmUp6->setEnabled(true);
-    }
-    if(nlayer>6){
-        if(nlayer>7) ui->pBmDw7->setEnabled(true);
-        ui->pBmUp7->setEnabled(true);
-    }
-    if(nlayer>7){
-        if(nlayer>8) ui->pBmDw8->setEnabled(true);
-        ui->pBmUp8->setEnabled(true);
-    }
-    if(nlayer>8){
-        ui->pBmUp9->setEnabled(true);
-    }
-    for(int i=1;i<=9;i++){
-        if(i <= nlayer){
-            if(nint(par[50+i][3])<1 || nint(par[50+i][3])>5) par[50+i][3]=1.;
-            if(nint(par[50+i][1])<1 || nint(par[50+i][1])>9) par[50+i][1]=1.;
-            idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> setEnabled(true);
-            idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> setEnabled(true);
-            idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> setCurrentIndex(nint(par[50+i][1])-1);
-            idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> setCurrentIndex(nint(par[50+i][3])-1);
-            if(nint(par[50+i][3])==1){
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setValue(pm[i][1]*1.E-6);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
-            } else if(nint(par[50+i][3])==2){
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setValue(pm[i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
-            } else if(nint(par[50+i][3])==3){
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"]    -> setValue(pm[i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setValue(pm[10+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setValue(pm[20+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setValue(pm[30+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setValue(pm[40+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setValue(pm[60+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
+    {
+        int nL = stack.nLayers();
+        ensureLayerRow(nL);
+        int nLoop = std::max(m_maxLayerRow, nL);
+    for(int i=1;i<=nLoop;i++){
+        bool vis=(i<=nL);
+        idToComboBox[wCB3(i)]->setVisible(vis);
+        idToComboBox[wCB1(i)]->setVisible(vis);
+        idToDoubleSpinBox[wD(i)]->setVisible(vis);
+        idToDoubleSpinBox[wDn(i)]->setVisible(vis);
+        idToDoubleSpinBox[wNc(i)]->setVisible(vis);
+        idToDoubleSpinBox[wDk(i)]->setVisible(vis);
+        idToDoubleSpinBox[wKc(i)]->setVisible(vis);
+        idToDoubleSpinBox[wRg(i)]->setVisible(vis);
+        idToDoubleSpinBox[wSd(i)]->setVisible(vis);
+        idToDoubleSpinBox[wNu(i)]->setVisible(vis);
+        idToPushButton["pBmUp"+QString::number(i)]->setVisible(vis);
+        idToPushButton["pBmDw"+QString::number(i)]->setVisible(vis);
+        if(m_layerGrid)
+            if(auto* it = m_layerGrid->itemAtPosition(i, 0))
+                if(auto* lbl = qobject_cast<QLabel*>(it->widget()))
+                    lbl->setVisible(vis);
+        if(i <= nL){
+            Layer& l = stack.layers[i-1];
+            if(l.type < 0 || l.type > 4) l.type = 0;
+            if(l.materialIndex < 1 || l.materialIndex > N_CNK_MAX) l.materialIndex = 1;
+            idToComboBox[wCB1(i)]->setEnabled(true);
+            idToComboBox[wCB3(i)]->setEnabled(true);
+            idToComboBox[wCB1(i)]->setCurrentIndex(l.materialIndex - 1);
+            idToComboBox[wCB3(i)]->setCurrentIndex(l.type);
+            if(l.type == 0){
+                idToDoubleSpinBox[wD(i)]  ->setEnabled(true);
+                idToDoubleSpinBox[wD(i)]  ->setValue(l.thickness.value * 1.E-6);
+                idToDoubleSpinBox[wDn(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wNc(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wDk(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wKc(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wSd(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wRg(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wRg(i)] ->setValue(l.roughness.value);
+                idToDoubleSpinBox[wNu(i)] ->setEnabled(false);
+            } else if(l.type == 1){
+                idToDoubleSpinBox[wD(i)]  ->setEnabled(true);
+                idToDoubleSpinBox[wD(i)]  ->setValue(l.thickness.value);
+                idToDoubleSpinBox[wDn(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wNc(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wDk(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wKc(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wSd(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wRg(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wRg(i)] ->setValue(l.roughness.value);
+                idToDoubleSpinBox[wNu(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wNu(i)] ->setValue(l.nonUniformity.value);
+            } else if(l.type == 2){
+                idToDoubleSpinBox[wD(i)]  ->setEnabled(true);
+                idToDoubleSpinBox[wDn(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wNc(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wDk(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wKc(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wRg(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wSd(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wNu(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wD(i)]  ->setValue(l.thickness.value);
+                idToDoubleSpinBox[wDn(i)] ->setValue(l.nGrad.value);
+                idToDoubleSpinBox[wNc(i)] ->setValue(l.nCurv.value);
+                idToDoubleSpinBox[wDk(i)] ->setValue(l.kGrad.value);
+                idToDoubleSpinBox[wKc(i)] ->setValue(l.kCurv.value);
+                idToDoubleSpinBox[wRg(i)] ->setValue(l.roughness.value);
+                idToDoubleSpinBox[wSd(i)] ->setValue(l.slopeNGrad.value);
+                idToDoubleSpinBox[wNu(i)] ->setValue(l.nonUniformity.value);
             }
         } else{
-            idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> setEnabled(false);
-            idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
+            idToComboBox[wCB1(i)]->setEnabled(false);
+            idToComboBox[wCB3(i)]->setEnabled(false);
+            idToDoubleSpinBox[wD(i)]  ->setEnabled(false);
+            idToDoubleSpinBox[wDn(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wNc(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wDk(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wKc(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wRg(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wSd(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wNu(i)] ->setEnabled(false);
         }
     }
-    //refresh f2 values
-    for(int i=71;i<=85;i++)
-        idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
+    } // end nLoop block
+    //refresh EMA fraction — all user materials + special media
+    for(int i=1;i<=N_CNK_MAX;i++)
+        idToDoubleSpinBox[emaKey(i)] -> setValue(pmFe[i][1]);
     setGuiMute(false);
+}
+
+
+void ksemawc::updateNkRows(int n){
+    for(int i=1; i<=N_CNK_USER_MAX; i++){
+        bool vis=(i<=n);
+        idToPushButton["pBnk"+QString::number(i)]->setVisible(vis);
+        idToPushButton["pBclearnk"+QString::number(i)]->setVisible(vis);
+        idToLineEdit["lineEdit"+QString::number(i)]->setVisible(vis);
+        idToLineEdit["lineEdit_infoNK_"+QString::number(i)]->setVisible(vis);
+        idToLineEdit["WLminNK"+QString::number(i)]->setVisible(vis);
+        idToLineEdit["WLmaxNK"+QString::number(i)]->setVisible(vis);
+    }
+    // Filter NK-file items in all material source combos (cB_cnk{i}a and cB_cnk{i}b).
+    // Items 0-7 = "constant nk" + "Fit #1-7": always visible.
+    // Item k >= 8 = "nk-(k-7)": visible only if k-7 <= n (file actually loaded).
+    const QString suffixes[2] = {"a", "b"};
+    for(int i = 1; i <= N_CNK_MAX; i++){
+        QString si = QString::number(i);
+        for(const QString& suf : suffixes){
+            QComboBox* cb = idToComboBox.value("cB_cnk"+si+suf, nullptr);
+            if(!cb) continue;
+            for(int k = 8; k < cb->count(); k++){
+                // "Material#1" is a trailing non-nk source option (index NSRC_MATREF1):
+                // always keep it visible, only the unloaded nk-file slots get hidden.
+                bool hide = (k - 7 > n) && cb->itemText(k) != "Material#1";
+                if(auto* lv = qobject_cast<QListView*>(cb->view()))
+                    lv->setRowHidden(k, hide);
+            }
+        }
+    }
+}
+
+
+void ksemawc::updateMatRows(int n){
+    if(!m_cnkGrid) return;
+    // Row 0 of m_cnkGrid = column-header row (always visible).
+    // Rows 1..N_CNK_USER_MAX-1 correspond to materials 2..N_CNK_USER_MAX.
+    for(int r = 1; r <= N_CNK_USER_MAX-1; r++){
+        bool vis = (r < n);   // visible when material (r+1) <= n
+        for(int c = 0; c <= 8; c++){
+            auto* item = m_cnkGrid->itemAtPosition(r, c);
+            if(item && item->widget()) item->widget()->setVisible(vis);
+        }
+    }
+    // Filter layer material combos: show only items 0..n-1 (Materials #1..#n)
+    for(int i = 1; i <= m_maxLayerRow; i++){
+        QComboBox* cb = idToComboBox.value(wCB1(i), nullptr);
+        if(!cb) continue;
+        for(int j = 0; j < cb->count(); j++)
+            if(auto* lv=qobject_cast<QListView*>(cb->view())) lv->setRowHidden(j, j >= n);
+        if(cb->isEnabled() && cb->currentIndex() >= n)
+            cb->setCurrentIndex(n - 1);
+    }
 }
 
 
@@ -4297,69 +5352,66 @@ void ksemawc::RefreshModel(){
     if(isGuiMuted())
         return;
     qDebug()<<"-> RefreshModel";
-    for(int i=1;i<=9;i++){
-        if(i <= nlayer){
-            par[50+i][3]=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
-            par[50+i][3]++;
-            par[50+i][1]=idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> currentIndex();
-            par[50+i][1]++;
-            if(nint(par[50+i][3])==1){
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
-                //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]*1.E-6);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
-                //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[50+i][1]);
-            } else if(nint(par[50+i][3])==2){
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
-                //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
-            } else if(nint(par[50+i][3])==3){
-                idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(true);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(true);
-                //     idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setValue(pm[10+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setValue(pm[20+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setValue(pm[30+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setValue(pm[40+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setValue(pm[50+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setValue(pm[60+i][1]);
-                idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setValue(pm[90+i][1]);
+    for(int i=1;i<=std::max(m_maxLayerRow, stack.nLayers());i++){
+        if(i <= stack.nLayers()){
+            Layer& l        = stack.layers[i-1];
+            l.type          = idToComboBox[wCB3(i)]->currentIndex();
+            l.materialIndex = idToComboBox[wCB1(i)]->currentIndex() + 1;
+            par[50+i][1]    = l.materialIndex;
+            par[50+i][3]    = l.type + 1;
+            if(l.type == 0){
+                idToDoubleSpinBox[wD(i)]  ->setEnabled(true);
+                idToDoubleSpinBox[wDn(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wNc(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wDk(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wKc(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wSd(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wRg(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wNu(i)] ->setEnabled(false);
+            } else if(l.type == 1){
+                idToDoubleSpinBox[wD(i)]  ->setEnabled(true);
+                idToDoubleSpinBox[wDn(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wNc(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wDk(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wKc(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wSd(i)] ->setEnabled(false);
+                idToDoubleSpinBox[wRg(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wRg(i)] ->setValue(l.roughness.value);
+                idToDoubleSpinBox[wNu(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wNu(i)] ->setValue(l.nonUniformity.value);
+            } else if(l.type == 2){
+                idToDoubleSpinBox[wD(i)]  ->setEnabled(true);
+                idToDoubleSpinBox[wDn(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wNc(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wDk(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wKc(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wRg(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wSd(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wNu(i)] ->setEnabled(true);
+                idToDoubleSpinBox[wDn(i)] ->setValue(l.nGrad.value);
+                idToDoubleSpinBox[wNc(i)] ->setValue(l.nCurv.value);
+                idToDoubleSpinBox[wDk(i)] ->setValue(l.kGrad.value);
+                idToDoubleSpinBox[wKc(i)] ->setValue(l.kCurv.value);
+                idToDoubleSpinBox[wRg(i)] ->setValue(l.roughness.value);
+                idToDoubleSpinBox[wSd(i)] ->setValue(l.slopeNGrad.value);
+                idToDoubleSpinBox[wNu(i)] ->setValue(l.nonUniformity.value);
             }
         } else{
-            idToComboBox["comB_PAR_5"+QString::number(i)+"_1"] -> setEnabled(false);
-            idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(10+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(20+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(30+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(40+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(50+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(60+i)+"_1"] -> setEnabled(false);
-            idToDoubleSpinBox["dSB_PM_"+QString::number(90+i)+"_1"] -> setEnabled(false);
+            idToComboBox[wCB1(i)]->setEnabled(false);
+            idToComboBox[wCB3(i)]->setEnabled(false);
+            idToDoubleSpinBox[wD(i)]  ->setEnabled(false);
+            idToDoubleSpinBox[wDn(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wNc(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wDk(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wKc(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wRg(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wSd(i)] ->setEnabled(false);
+            idToDoubleSpinBox[wNu(i)] ->setEnabled(false);
         }
     }
-    //refresh f2 values
-    for(int i=71;i<=85;i++)
-        idToDoubleSpinBox["dSB_PM_"+QString::number(i)+"_1"] -> setValue(pm[i][1]);
+    //refresh EMA fraction — all user materials + special media
+    for(int i=1;i<=N_CNK_MAX;i++)
+        idToDoubleSpinBox[emaKey(i)] -> setValue(pmFe[i][1]);
 }
 
 
@@ -4381,7 +5433,7 @@ void ksemawc::setEMA(int nM){
     state=idToCheckBox["cB_EMA_"+QString::number(nM)] -> checkState();
     qDebug()<<"->setEMA called by checkBox "<<nM;
     idToComboBox["cB_cnk"+QString::number(nM)+"b"] -> setEnabled(state==Qt::Checked);
-    idToDoubleSpinBox["dSB_PM_"+QString::number(70+nM)+"_1"] -> setEnabled(state==Qt::Checked);
+    idToDoubleSpinBox[emaKey(nM)] -> setEnabled(state==Qt::Checked);
     if(state!=Qt::Checked)
         idToComboBox["cB_cnk"+QString::number(nM)+"b"] ->setCurrentIndex(-1);
     int curI=idToComboBox["cB_cnk"+QString::number(nM)+"b"] ->currentIndex();
@@ -4393,10 +5445,12 @@ void ksemawc::setEMA(int nM){
 void ksemawc::setKindOsc(int N) {
     if(isGuiMuted())
         return;
-    int pmIdx = 101 + 5 * (N - 1);
+    int pmIdx = 101 + 5 * (N - 1);   // legacy index: only used to build the widget name
     QString name = QString("cBpm_%1_1").arg(pmIdx);
     QComboBox* w = findChild<QComboBox*>(name);
-    if (w) pm[pmIdx][1] = w->currentIndex() + 1;
+    // Oscillator kind storage is pmOs[1+5*(N-1)] (what listOsc reads); pmAt(pmIdx)
+    // under the uniform ip encoding would resolve to a layer gradient, not here.
+    if (w) pmOs[1 + 5 * (N - 1)][1] = w->currentIndex() + 1;
     listOsc();
 }
 
@@ -4453,10 +5507,10 @@ void ksemawc::listOsc(){
                 if(nint(pf[ioptFit][i])==k)iok=1;
             }
             if(iok==1){
-                int ifu=nint(pm[100+1+(k-1)*5][1]);
+                int ifu=nint(pmOs[1+(k-1)*5][1]);
                 idToCheckBox["cBosc_"+QString::number(k)]-> setCheckState ( Qt::Checked );
                 idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setEnabled(true);
-                idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setCurrentIndex(nint(pm[100+1+(k-1)*5][1])-1);
+                idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setCurrentIndex(nint(pmOs[1+(k-1)*5][1])-1);
                 //idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setSizeAdjustPolicy(QComboBox::AdjustToContents);
                 for(int iC=2;iC<=5;iC++){
                     idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setEnabled(true);
@@ -4485,7 +5539,7 @@ void ksemawc::listOsc(){
                 for(int iC=2;iC<=5;iC++){
                     QString content=idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> text();
                     if(content!="unused")
-                       idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setText(QString::number(std::abs(pm[100+iC+(k-1)*5][1])));
+                       idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setText(QString::number(std::abs(pmOs[iC+(k-1)*5][1])));
                 }
             }
             else{
@@ -4508,7 +5562,7 @@ void ksemawc::listOsc(){
 
 
 void ksemawc::saveNKmodel(){
-    int iok2,iCase=0;
+    int iok2;
     int ioptFit=ui->cB_cnk1a -> currentIndex();
     qDebug()<<"->saveOscModel ioptFit="<<ioptFit;
     if(ioptFit>0 && ioptFit<8){
@@ -4539,27 +5593,7 @@ void ksemawc::saveNKmodel(){
             qWarning()<<"IONK-> ERROR opening file= "<<fn;
             return;
         }
-        int iok=1;
-        if( iCase==1 && file.exists() ){
-            QMessageBox msgBox;
-            msgBox.setText("The file already exist!");
-            msgBox.setInformativeText("Do you want to save anyway?");
-            msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::No);
-            msgBox.setDefaultButton(QMessageBox::Save);
-            int ret = msgBox.exec();
-            switch (ret) {
-            case QMessageBox::Save:
-                // Save was clicked
-                iok=1;
-                break;
-            case QMessageBox::No:
-                // Cancel was clicked
-                iok=0;
-                file.close();
-                break;
-            }
-        }
-        if(iok==1){
+        {// (overwrite confirmation removed: it was dead code — iCase was always 0; getSaveFileName already confirms overwrite)
             QTextStream stream (&file);
             stream<<line<<"\n";
             for(int k=1;k<=20;k++){
@@ -4570,7 +5604,7 @@ void ksemawc::saveNKmodel(){
                 if(iok2==1){
                     stream<<k<<"\t";//#Osc
                     for(int J=1;J<=5;J++)
-                        stream<<pm[100+J+(k-1)*5][1]<<"\t";//Osc kind and parameter
+                        stream<<pmOs[J+(k-1)*5][1]<<"\t";//Osc kind and parameter
                     stream<<"\n";
                 }
             }
@@ -4601,7 +5635,10 @@ void ksemawc::loadNKmodel(){
     if (!file.open (QIODevice::ReadOnly | QIODevice::Text))
         return;
     setGuiMute(true);
+    // Loading a model REPLACES the current one: clear every oscillator first, so that
+    // oscillators absent from the file do not survive into the loaded model.
     for(int k=1;k<=20;k++){
+        idToCheckBox["cBosc_"+QString::number(k)]-> setCheckState ( Qt::Unchecked );
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setEnabled(false);
         idToLineEdit["LEpm_"+QString::number(100+2+(k-1)*5)+"_1"] -> setEnabled(false);
         idToLineEdit["LEpm_"+QString::number(100+3+(k-1)*5)+"_1"] -> setEnabled(false);
@@ -4616,21 +5653,23 @@ void ksemawc::loadNKmodel(){
     do{
         line=stream.readLine();
         line=line.simplified();
+        if(line.isEmpty())
+            continue;//tolerate blank lines (e.g. a trailing one)
         QStringList List;
         List =line.split(" ");
         int nV=List.count();
         if(nV!=6){
             qDebug("Error: expectet 6 values at line, but found %d",nV);
-            return;
+            break;//give up on the malformed line, but keep what was read and restore the GUI
         }
         int OscN=nint(List.at(0).toDouble());
         for(int J=1;J<=5;J++)
-            pm[100+J+(OscN-1)*5][1]=List.at(J).toDouble();
-        int ifu=nint(pm[100+1+(OscN-1)*5][1]);
+            pmOs[J+(OscN-1)*5][1]=List.at(J).toDouble();
+        int ifu=nint(pmOs[1+(OscN-1)*5][1]);
         int k=OscN;
         idToCheckBox["cBosc_"+QString::number(k)]-> setCheckState ( Qt::Checked );
         idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setEnabled(true);
-        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setCurrentIndex(nint(pm[100+1+(k-1)*5][1])-1);
+        idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setCurrentIndex(nint(pmOs[1+(k-1)*5][1])-1);
         //idToComboBox["cBpm_"+QString::number(100+1+(k-1)*5)+"_1"] -> setSizeAdjustPolicy(QComboBox::AdjustToContents);
         for(int iC=2;iC<=5;iC++){
             idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setEnabled(true);
@@ -4659,11 +5698,17 @@ void ksemawc::loadNKmodel(){
         for(int iC=2;iC<=5;iC++){
             QString content=idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> text();
             if(content!="unused")
-               idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setText(QString::number(std::abs(pm[100+iC+(k-1)*5][1])));
+               idToLineEdit["LEpm_"+QString::number(100+iC+(k-1)*5)+"_1"] -> setText(QString::number(std::abs(pmOs[iC+(k-1)*5][1])));
         }
     }while(!stream.atEnd());
     file.close();
     setGuiMute(false);
+    // The checkboxes were ticked with the GUI muted, so setOscN() bailed out and
+    // pf[ioptFit][] still lists the oscillators of the PREVIOUS model. Rebuild it from
+    // the widgets, otherwise saveNKmodel() — which iterates over pf — writes back only
+    // the oscillators that happened to be in the old list.
+    setTabSim();
+    listOsc();
 }
 
 
@@ -4687,7 +5732,7 @@ void ksemawc::rangeWL(){
 void ksemawc::saveNKsim(){
     qDebug()<<"->saveNKsim with lastAction="<<lastAction;
     int ierr,iok=1;
-    QString command,sample,fn2s;
+    QString sample,fn2s;
     sample=ui->lineEdit_sample-> text();
     if(sample.contains("mate/aa999.9"))
         sample="";
@@ -4719,29 +5764,8 @@ void ksemawc::saveNKsim(){
     if(iok==1){
         qDebug()<< "fNKsim= "<<fNKsim;
         qDebug()<< "fn2s= "<<fn2s;
-        //ierr=system((command.toStdString()).c_str());
-        if (IS_POSIX) {
-            command="cp "+fNKsim+" "+fn2s;
-            ierr=system((command.toStdString()).c_str());}
-        else
-        {
-            command="copy "+fNKsim+" "+fn2s;
-            QStringList List;
-            List =command.split("/");
-            int nV=List.count();
-            QString commandw;
-            QString pezzo;
-            for(int iv=0;iv<nV;iv++){
-                pezzo=List.at(iv).toLocal8Bit().constData();
-                if(iv==0){
-                    commandw=pezzo;
-                }
-                else{
-                    commandw=commandw+"\\"+pezzo;
-                }
-            }
-            ierr=system((commandw.toStdString()).c_str());
-        }
+        // QFile::copy (no shell) — safe with '+'/spaces/long names in fn2s.
+        ierr = copyFileOverwrite(fNKsim, fn2s) ? 0 : 1;
         if(ierr != 0)
             qWarning()<<"Error copying NKsim!!!";
         else
@@ -4752,7 +5776,7 @@ void ksemawc::saveNKsim(){
 
 void ksemawc::saveSim(){
     int ierr,iok=1;
-    QString command, fn2s;
+    QString fn2s;
     fn2s = QFileDialog::getSaveFileName(
                 this,
                 "Filename to save",
@@ -4780,29 +5804,8 @@ void ksemawc::saveSim(){
     if(iok==1){
         qDebug()<< "fMisSim= "<<fMisSim;
         qDebug()<< "fn2s= "<<fn2s;
-        //ierr=system((command.toStdString()).c_str());
-        if (IS_POSIX) {
-            command="cp "+fMisSim+" "+fn2s;
-            ierr=system((command.toStdString()).c_str());}
-        else
-        {
-            command="copy "+fMisSim+" "+fn2s;
-            QStringList List;
-            List =command.split("/");
-            int nV=List.count();
-            QString commandw;
-            QString pezzo;
-            for(int iv=0;iv<nV;iv++){
-                pezzo=List.at(iv).toLocal8Bit().constData();
-                if(iv==0){
-                    commandw=pezzo;
-                }
-                else{
-                    commandw=commandw+"\\"+pezzo;
-                }
-            }
-            ierr=system((commandw.toStdString()).c_str());
-        }
+        // QFile::copy (no shell) — safe with '+'/spaces/long names in fn2s.
+        ierr = copyFileOverwrite(fMisSim, fn2s) ? 0 : 1;
         if(ierr != 0){
             qWarning()<<"Error copying MisSim.dat!!!";
             msgErrLoad("saveSim","Error copying MisSim.dat!!!");
@@ -4889,17 +5892,17 @@ void ksemawc::setTabSim(){
             state=idToCheckBox["cBosc_"+QString::number(i)]-> checkState();
             if( state == Qt::Checked ) {
                 pf[ioptFit][j]=i;
-                pm[100+1+(i-1)*5][1]=idToComboBox["cBpm_"+QString::number(100+1+(i-1)*5)+"_1"] -> currentIndex();
-                pm[100+1+(i-1)*5][1]++;
+                pmOs[1+(i-1)*5][1]=idToComboBox["cBpm_"+QString::number(100+1+(i-1)*5)+"_1"] -> currentIndex();
+                pmOs[1+(i-1)*5][1]++;
                 for(int ii=2;ii<6;ii++){
                     QString content=idToLineEdit["LEpm_"+QString::number(100+ii+(i-1)*5)+"_1"] -> text();
                     if(content!="unused")
-                        pm[100+ii+(i-1)*5][1]=content.toDouble();
+                        pmOs[ii+(i-1)*5][1]=content.toDouble();
                 }
-                if(pm[100+1+(i-1)*5][1]==15 || pm[100+1+(i-1)*5][1]==16){
-                    if(pm[100+4+(i-1)*5][1]>pm[100+5+(i-1)*5][1]*0.45){
-                        pm[100+4+(i-1)*5][1]=pm[100+5+(i-1)*5][1]*0.45;
-                        idToLineEdit["LEpm_"+QString::number(100+4+(i-1)*5)+"_1"] -> setText(QString::number(pm[100+4+(i-1)*5][1]));
+                if(pmOs[1+(i-1)*5][1]==15 || pmOs[1+(i-1)*5][1]==16){
+                    if(pmOs[4+(i-1)*5][1]>pmOs[5+(i-1)*5][1]*0.45){
+                        pmOs[4+(i-1)*5][1]=pmOs[5+(i-1)*5][1]*0.45;
+                        idToLineEdit["LEpm_"+QString::number(100+4+(i-1)*5)+"_1"] -> setText(QString::number(pmOs[4+(i-1)*5][1]));
                     }
                 }
                 j++;
@@ -4912,7 +5915,7 @@ void ksemawc::setTabSim(){
 
 
 void ksemawc::refreshFitPar(){
-    int icoherent,klim,ivp,n_fresh,iDecine,ilayer,iosc,Jcombo,ip;
+    int icoherent,klim,ivp,n_fresh,iosc,Jcombo,ip;
     setGuiMute(true);
     qDebug()<<"-> refreshFitPar";
     fflush(stdout);
@@ -4920,12 +5923,12 @@ void ksemawc::refreshFitPar(){
     n_fresh=0;
     QString Lj,Lparametro;
     //setting the parameter choice
-    for(int j=1;j<=17;j++){
+    for(int j=1;j<=m_maxFitRow;j++){
         idToComboBox["cBParFit_"+QString::number(j)] -> clear();
         idToComboBox["cBParFit_"+QString::number(j)] -> addItem("none");
     }
     for(int i=1;i<=nlayer;i++){//layers
-        icoherent=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
+        icoherent=idToComboBox[wCB3(i)] -> currentIndex();
         Lj="L"+QString::number(i);
         if(icoherent==0)
             klim=-1;
@@ -4941,7 +5944,7 @@ void ksemawc::refreshFitPar(){
             }
         }
     }
-    for(int i=1;i<=15;i++){//EMA
+    for(int i=1;i<=N_CNK_USER_MAX;i++){//EMA
         Qt::CheckState state=idToCheckBox["cB_EMA_"+QString::number(i)]->checkState();
         if(state==Qt::Checked){
             for(int j=1;j<=npp;j++)
@@ -4975,31 +5978,31 @@ void ksemawc::refreshFitPar(){
     }
 
     //setting the parameter value
-    for(int j=1;j<=17;j++){
+    for(int j=1;j<=m_maxFitRow;j++){
         if(j<=npp){
             //if(lastTab != itab){
-            ivp=nint(pm[ppm[j]][2]);
+            ivp=nint(pmAt(nint(ppm[j]))[2]);
             ip=ppm[j];
-            if(ip<=69 || (ip>=91 && ip<=99)){
-                iDecine=static_cast<int>(static_cast<double>(ip)/10.);
-                ilayer=ip-iDecine*10;
-                if(iDecine==9)
-                    iDecine=-1;
-                Lparametro="L"+QString::number(ilayer)+ParFitLab[iDecine+1];
+            if(ip >= 1 && ip <= 792){              // layer parameter
+                int prop = (ip-1)/99;
+                int n1   = (ip-1)%99 + 1;
+                int n2   = (prop==7) ? 0 : prop+1;
+                Lparametro = "L"+QString::number(n1)+ParFitLab[n2];
             }
-            else if(ip>=71 && ip<=85){//EMA
-                Lparametro=ParFitLab[12]+QString::number(ip-70);
+            else if(ip >= 793 && ip <= 891){       // EMA mat 1..99
+                Lparametro = ParFitLab[12]+QString::number(ip-792);
             }
-            else if(ip>=86 && ip<=89){//ThetaEli
-                Lparametro=ParFitLab[13]+QString::number(ip-85);
+            else if(ip >= 892 && ip <= 895){       // ThetaEli 1..4
+                Lparametro = ParFitLab[13]+QString::number(ip-891);
             }
-            else{
-                iosc=static_cast<int>(static_cast<double>(ip-101)/5.)+1;
-                Lparametro="O"+QString::number(iosc)+ParFitLab[7+ip-101-5*(iosc-1)];
+            else if(ip >= 897 && ip <= 996){       // oscillator params
+                int param0 = ip-897;
+                iosc = param0/5 + 1;
+                Lparametro = "O"+QString::number(iosc)+ParFitLab[7+param0%5];
             }
             Jcombo=idToComboBox["cBParFit_"+QString::number(j)] -> findText(Lparametro);
             if(Jcombo>=0) idToComboBox["cBParFit_"+QString::number(j)] -> setCurrentIndex(Jcombo);
-            idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pm[ip][1]));
+            idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pmAt(ip)[1]));
             idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(true);
             if(ivp==0){
                 idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState ( Qt::Unchecked );
@@ -5011,8 +6014,8 @@ void ksemawc::refreshFitPar(){
                 idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(true);
                 idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(true);
                 n_fresh++;
-                idToLineEdit["DPparFitErr_"+QString::number(j)] -> setText(QString::number(pm[ip][4]));
-                idToLineEdit["DPparFitGC_"+QString::number(j)] -> setText(QString::number(pm[ip][5]));
+                idToLineEdit["DPparFitErr_"+QString::number(j)] -> setText(QString::number(pmAt(ip)[4]));
+                idToLineEdit["DPparFitGC_"+QString::number(j)] -> setText(QString::number(pmAt(ip)[5]));
             }
         }
         else{
@@ -5043,10 +6046,13 @@ void ksemawc::PanFitEnable(){
     QString Lj,Valore;
     if(itab==3 && itab==lastTab){
         fflush(stdout);
-        for(int j=1;j<=17;j++){
+        for(int j=1;j<=m_maxFitRow;j++){
             if(j<=npp){
                 idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(true);
                 idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(true);
+                Lj=idToComboBox["cBParFit_"+QString::number(j)] -> currentText();
+                if(Lj=="none")// unassigned row: cannot be a fit parameter (mirror PanFitChoice) — must uncheck before n_fresh
+                    idToCheckBox["chBeParFit_"+QString::number(j)] -> setCheckState( Qt::Unchecked );
                 state=idToCheckBox["chBeParFit_"+QString::number(j)]-> checkState();
                 if( state == Qt::Checked ){
                     n_fresh++;
@@ -5057,46 +6063,50 @@ void ksemawc::PanFitEnable(){
                     idToLineEdit["DPparFitErr_"+QString::number(j)] -> setEnabled(false);
                     idToLineEdit["DPparFitGC_"+QString::number(j)] -> setEnabled(false);
                 }
-                Lj=idToComboBox["cBParFit_"+QString::number(j)] -> currentText();
                 ip=0;
-                if(Lj.at(0)=='L'){
-                    n1=(Lj.at(1)).digitValue();
-                    n2=-1;
-                    do{
-                        n2++;
-                    } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<7);
-                    if(n2==0)
-                        ip=90+n1;
-                    else
-                        ip=10*(n2-1)+n1;
+                if(Lj=="none"){
+                    ppm[j]=0;// nothing to write: leave parameter arrays untouched (avoids corrupting ThetaEli via bogus ip=893)
                 }
-                else if(Lj.at(0)=='f'){
-                    ip=70+Lj.at(5).digitValue();
-                }
-                else if(Lj.at(0)=='T')
-                    ip=85+Lj.at(6).digitValue();
                 else{
-                    n1=(Lj.at(1)).digitValue();
-                    if(Lj.at(2).isNumber()) {
-                        n1=n1*10;
-                        n1=n1+((Lj.at(2)).digitValue());
+                    if(Lj.at(0)=='L'){
+                        n1=(Lj.at(1)).digitValue();
+                        if(Lj.size()>2 && Lj.at(2).isDigit()){
+                            n1=n1*10+Lj.at(2).digitValue();
+                        }
+                        n2=-1;
+                        do{
+                            n2++;
+                        } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<7);
+                        ip=ipLayer(n1,n2);
                     }
-                    n2=6;
-                    do{
-                        n2++;
-                    } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<=12);
-                    ip=100+(n1-1)*5+(n2-7)+1;
-                }
-                ppm[j]=ip;
-                Valore=idToLineEdit["DPparFitV_"+QString::number(j)] -> text();
-                pm[ip][1]=Valore.toDouble();
-                if(ip>100)
-                    pm[ip][1]=std::abs(pm[ip][1]);
-                if( state == Qt::Unchecked )
-                    pm[ip][2]=0;
-                else{
-                    pm[ip][2]=j;
-                    pm[n_fresh][3]=ip;
+                    else if(Lj.at(0)=='f'){
+                        ip = 792 + Lj.mid(5).toInt();  // "fEMA_" = 5 chars
+                    }
+                    else if(Lj.at(0)=='T')
+                        ip = 891 + Lj.at(6).digitValue();  // "Theta_" = 6 chars
+                    else{
+                        n1=(Lj.at(1)).digitValue();
+                        if(Lj.at(2).isNumber()) {
+                            n1=n1*10;
+                            n1=n1+((Lj.at(2)).digitValue());
+                        }
+                        n2=6;
+                        do{
+                            n2++;
+                        } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<=12);
+                        ip = 896 + (n1-1)*5 + (n2-7) + 1;
+                    }
+                    ppm[j]=ip;
+                    Valore=idToLineEdit["DPparFitV_"+QString::number(j)] -> text();
+                    pmAt(ip)[1]=Valore.toDouble();
+                    if(ip>=897 && ip<=996)//oscillator params (uniform ip encoding v5.2)
+                        pmAt(ip)[1]=std::abs(pmAt(ip)[1]);
+                    if( state == Qt::Unchecked )
+                        pmAt(ip)[2]=0;
+                    else{
+                        pmAt(ip)[2]=j;
+                        pmAt(n_fresh)[3]=ip;
+                    }
                 }
             }
             else{
@@ -5126,6 +6136,7 @@ void ksemawc::PanFitPar(){
     //state = Qt::Checked;
     QString Lj;
     if(itab==3 && itab==lastTab){
+        ensureFitRow(nppNew);   // create widget rows if nppNew > m_maxFitRow
         if(nppNew > npp){
             for(int j=npp+1;j<=nppNew;j++){//enable and initialize new parameters
                 idToCheckBox["chBeParFit_"+QString::number(j)] -> setEnabled(true);
@@ -5137,7 +6148,7 @@ void ksemawc::PanFitPar(){
                 idToLineEdit["DPparFitV_"+QString::number(j)] -> setEnabled(true);
             }
             for(int i=1;i<=nlayer;i++){//add avilable layer parameters
-                icoherent=idToComboBox["comB_PAR_5"+QString::number(i)+"_3"] -> currentIndex();
+                icoherent=idToComboBox[wCB3(i)] -> currentIndex();
                 Lj="L"+QString::number(i);
                 if(icoherent==0) //bulk
                     klim=-1;
@@ -5237,22 +6248,20 @@ void ksemawc::PanFitChoice(){
                 do{
                     n2++;
                 } while(!Lj.contains(ParFitLab[n2],Qt::CaseSensitive) && n2<=12);
-                if(n2==0)
-                    ip=90+n1;
-                else if(1<=n2 && n2<=7)
-                    ip=10*(n2-1)+n1;
+                if(n2==0 || (1<=n2 && n2<=7))
+                    ip=ipLayer(n1,n2);
                 else if(8<=n2 && n2<=11)
-                    ip=100+(n1-1)*5+(n2-7)+1;
+                    ip = 896 + (n1-1)*5 + (n2-7) + 1;
                 else if(n2==12)
-                    ip=70+Lj.at(5).digitValue();
+                    ip = 792 + Lj.mid(5).toInt();
                 else if(n2==13)
-                    ip=85+Lj.at(6).digitValue();
-                if(1<=ip && ip<=200){
-                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pm[ip][1]));
+                    ip = 891 + Lj.at(6).digitValue();
+                if(1<=ip && ip<=996){
+                    idToLineEdit["DPparFitV_"+QString::number(j)] -> setText(QString::number(pmAt(ip)[1]));
                     state=idToCheckBox["chBeParFit_"+QString::number(j)]-> checkState();
                     if( state == Qt::Checked ){
-                        idToLineEdit["DPparFitErr_"+QString::number(j)] -> setText(QString::number(pm[ip][4]));
-                        idToLineEdit["DPparFitGC_"+QString::number(j)] -> setText(QString::number(pm[ip][5]));
+                        idToLineEdit["DPparFitErr_"+QString::number(j)] -> setText(QString::number(pmAt(ip)[4]));
+                        idToLineEdit["DPparFitGC_"+QString::number(j)] -> setText(QString::number(pmAt(ip)[5]));
                     }
                     else{
                         idToLineEdit["DPparFitErr_"+QString::number(j)] -> clear();
@@ -5399,14 +6408,20 @@ void ksemawc::PlotME(){
 
     stream0<<"wl(nm)\tTn\tTp\tRn\tRp\tR1\tAPDS\tDEL_1\tPSI_1\tDEL_2\tPSI_2\tDEL_3\tPSI_3\tDEL_4\tPSI_4"<<"\n";
     stream1<<"wl(nm)\teTn\teTp\teRn\teRp\teR1\teAPDS\teDEL_1\tePSI_1\teDEL_2\tePSI_2\teDEL_3\tePSI_3\teDEL_4\tePSI_4"<<"\n";
-    stream2<<"wl(nm)\tn1\tk1\tn2\tk2\tn3\tk3\tn4\tk4\tn5\tk5\tn6\tk6\tn7\tk7\tn8\tk8"<<"\n";
+    // Export every loaded nk material (no fixed 8-pair cap: a project may use up to N_CNK_USER_MAX).
+    int nNkExport=0;
+    for(int j=0;j<N_CNK_USER_MAX;j++)
+        if(nkMaterials[j].isLoaded()) nNkExport=j+1;//highest loaded slot; keeps column j <-> material j+1
+    stream2<<"wl(nm)";
+    for(int j=1;j<=nNkExport;j++) stream2<<"\tn"<<j<<"\tk"<<j;
+    stream2<<"\n";
     for(int i=0;i<NeV;i++){
         stream0<<QString::number(ms.lambda[i])<<"\t";
         for(int j=0;j<14;j++) stream0<<QString::number(ms.measures[j].value[i],'f',7)<<"\t";
         stream1<<QString::number(ms.lambda[i])<<"\t";
         for(int j=0;j<14;j++) stream1<<QString::number(ms.measures[j].error[i],'f',7)<<"\t";
         stream2<<QString::number(ms.lambda[i])<<"\t";
-        for(int j=0;j<7;j++)  stream2<<QString::number(nkMaterials[j].n[i],'f',7)<<"\t"<<QString::number(nkMaterials[j].k[i],'f',7)<<"\t";
+        for(int j=0;j<nNkExport;j++) stream2<<QString::number(nkMaterials[j].n[i],'f',7)<<"\t"<<QString::number(nkMaterials[j].k[i],'f',7)<<"\t";
         stream0<<"\n";
         stream1<<"\n";
         stream2<<"\n";
@@ -5536,7 +6551,7 @@ void ksemawc::Simula(){
                 par[ic][4]=1.;
                 idToCheckBox["checkB_mis"+QString::number(ic)+"_3"] -> setEnabled(true);
                 for(int i=1;i<=NeV;i++){
-                    ms.measures[ic-1].value[i]=mc[ic][i];
+                    ms.measures[ic-1].value[i-1]=mc[ic][i];//value/error are 0-based (size NeV); mc is 1-based (size NeV+1)
                     if(ic<=6){
                         double DL=ms.driftBaseline[i-1];
                         if(ic==1 || ic==2)
@@ -5545,7 +6560,7 @@ void ksemawc::Simula(){
                             ms.measures[ic-1].error[i-1]=ms.measures[ic-1].value[i-1]*(INSTR[3]+INSTR[4])+DL;
                     }
                     else if(ic>=7 && ic<=14)
-                        ms.measures[ic-1].error[i]=0.01;
+                        ms.measures[ic-1].error[i-1]=0.01;
                 }
             }
         }
@@ -5659,7 +6674,7 @@ void ksemawc::Simula(){
 
 
 void ksemawc::CalcMis(std::vector<std::vector<double>>& mc){
-    qDebug("->CalcMis with CNK[1][0]=%d",nint(CNK[1][0]));
+    qDebug("->CalcMis with cnk[1].forceMode=%d",nint(cnk[1].forceMode));
     nextColor();
     int s1p2u3=ui->cB_PAR_35_2 ->currentIndex();
     s1p2u3++;
@@ -5671,7 +6686,7 @@ void ksemawc::CalcMis(std::vector<std::vector<double>>& mc){
         par[54][2]=1;
     int iSpec0Hemi1=par[54][2];
     int nwl=NeV;
-    double teta[6],wl,VNK[17][3],vot[6][3],delOld[4],del=0.;
+    double teta[6],wl,VNK[N_CNK_HARD_MAX+1][3],vot[6][3],delOld[4],del=0.;
     std::vector <double> Xp(nwl),Yp(nwl),ErrXp(nwl),ErrYp(nwl),nn(nwl),kk(nwl),e1(nwl),e2(nwl);
     fill_n(ErrXp.data(), nwl, 0.);
     fill_n(ErrYp.data(), nwl, 0.);
@@ -5809,7 +6824,7 @@ void ksemawc::CalcMis(std::vector<std::vector<double>>& mc){
             SIMchi2=SIMchi2+FM;
         }
     }
-    ui->lineEdit_SIMchi2->setText("chi2= "+QString::number(SIMchi2/nMIS));
+    ui->lineEdit_SIMchi2->setText("chi2= "+QString::number(nMIS>0. ? SIMchi2/nMIS : 0.));//guard nMIS==0 (no enabled measurement -> NaN)
     if(DATO[1]!=0 && DATO[3]!=0){
         for(int i=1;i<=NeV;i++){
             Yp[i-1]=(1.-mc[1][i]-mc[3][i])*100.;
@@ -6008,7 +7023,7 @@ void ksemawc::PlotAve(){
     QTextStream out(&file2);
     out<<" Teta(deg)  Tau  Rho  Rho1"<<"\n";
     out<<NT;
-    for(int i=1;i<=NT;i++)
+    for(int i=0;i<NT;i++)//0-based: tet/tau/... are filled tet[I-1] for I=1..NT (indices 0..NT-1)
         out<< tet[i]<<"\t"<<tau[i]<<"\t"<<rho[i]<<"\t"<<rho1[i]<<"\n";
     file2.close();
     qInfo()<<"Data vs theta saved in: expo/ThetaRhoVStheta.dat";
@@ -6031,15 +7046,15 @@ void ksemawc::PlotAbsEL(){
     std::vector<std::vector<std::complex<long double>>> Cp(NeV+1, std::vector<std::complex<long double>>(11, 0.0));
     complex<double> irup,irdw,irup2,irdw2,mups,mupp,mdws,mdwp,pq,ir[10], NQ, MUS, DELTA;
     int icol,ivnkdw,ivnkup,s1p2u3, LastMedium,ivnk;
-    double VNK[17][3];
+    double VNK[N_CNK_HARD_MAX+1][3];
     SaveSetting(-1);
 
     s1p2u3=nint(par[35][2]);
     double teta=par[6][1]*deg2rad;
     int iFirstCoe=1;
     int Nlayers=nint(par[51][2]);
-    ivnkdw=9;//output media for SF measurements
-    ivnkup=10;//refractive index of input medium for SF measurements
+    ivnkdw=CNK_OUT_SF;//output medium for SF measurements
+    ivnkup=CNK_IN_SF; //refractive index of input medium for SF measurements
     int iRD=1;//redraw the Absorptance plot
 
     qDebug() << "plot Abs at each layer of " << QString::number(nint(par[51][2]))<<" at theta="<<par[6][1]<<" with polarization "<<s1p2u3<<" Nlayers="<<Nlayers<<" ivnkdw="<<ivnkdw;
@@ -6066,7 +7081,7 @@ void ksemawc::PlotAbsEL(){
             ir[j]=complex<double>(VNK[ivnk][1],-VNK[ivnk][2]);
             NQ=ir[j]*ir[j];
             MUS=sqrt(NQ-pq);
-            DELTA=2.*PIG*pm[j][1]*MUS/wwl[i];
+            DELTA=2.*PIG*pmAt(j)[1]*MUS/wwl[i];
             if(std::abs(imag(DELTA))>ABSmax) {
                 //if(i==iwl2print)
                 LastMediumAtWl[i]=j;
@@ -6091,7 +7106,7 @@ void ksemawc::PlotAbsEL(){
         COSVNK(VNK,i);
 
         //set last medium
-        ivnkdw=9;
+        ivnkdw=CNK_OUT_SF;
         LastMedium=LastMediumAtWl[i];
         if(LastMedium<Nlayers+1){
             ivnkdw=nint(par[50+LastMedium][1]);
@@ -6120,7 +7135,7 @@ void ksemawc::PlotAbsEL(){
                 mupp=irup2/mups;
                 mdws=sqrt(irdw2-pq);
                 mdwp=irdw2/mdws;
-                double atten=exp(-4.*PIG*pm[1][1]/wwl[i]*imag(-mdws));
+                double atten=exp(-4.*PIG*pmD[1][1]/wwl[i]*imag(-mdws));
                 double RaS=pow(std::abs((mups-mdws)/(mups+mdws)),2.);
                 double RaP=pow(std::abs((mupp-mdwp)/(mupp+mdwp)),2.);
                 //double TaS=1.-RaS;//T=1-R because A=0 at the interface
@@ -6129,7 +7144,7 @@ void ksemawc::PlotAbsEL(){
                 //double R1aP=RaP;
                 if(i==iwl2print){
                     qDebug()<<"The first layer is inchoerent with first interface:";
-                    qDebug()<<"nUP="<<VNK[ivnkup][1]<<" kUP="<<VNK[ivnkup][2]<<" nDW="<<VNK[ivnkdw][1]<<" kDW="<<VNK[ivnkdw][2]<<" d="<<pm[1][1];
+                    qDebug()<<"nUP="<<VNK[ivnkup][1]<<" kUP="<<VNK[ivnkup][2]<<" nDW="<<VNK[ivnkdw][1]<<" kDW="<<VNK[ivnkdw][2]<<" d="<<pmD[1][1];
                     qDebug()<<"atten="<<atten<<" RaS="<<RaS<<" RaP="<<RaP;
                     qDebug()<<"2nd interface: call BUILDER: iFirstLayer=2 ncoe="<<Nlayers-1;
                 }
@@ -6261,7 +7276,7 @@ void ksemawc::PlotTexturized(){
     qDebug()<<"->Plot texturized";
     AdjRoughMax();
     SaveSetting(-1);
-    double wl,VNK[17][3],vot[6][3];
+    double wl,VNK[N_CNK_HARD_MAX+1][3],vot[6][3];
     std::vector <double> Xp(NeV),Atext(NeV),Rtext(NeV),Ttext(NeV),ErrXp(NeV),ErrYp(NeV);
     fill_n(ErrXp.data(), NeV, 0.);
     fill_n(ErrYp.data(), NeV, 0.);
@@ -6322,7 +7337,7 @@ void ksemawc::searchNK(){
     qDebug()<<"->searchNK @ WL= "<<WL;
     SaveSetting(-1);
     PLOTline1bar2(1,1,iCol,11,0,Xp.data(),Yp.data(),ErrXp.data(),ErrYp.data());//erase plot
-    CNK[1][0]=3;//nk-uncknown will be set to forced values
+    cnk[1].forceMode=3;//nk-uncknown will be set to forced values
     for(int imis=1;imis<=14;imis++){
         if(DATO[imis]==2){
             if(imis<=6){
@@ -6341,7 +7356,7 @@ void ksemawc::searchNK(){
             }
         }
     }
-    CNK[1][0]=0;//nk-uncknown by the chosen option
+    cnk[1].forceMode=0;//nk-uncknown by the chosen option
 }
 
 
@@ -6416,10 +7431,10 @@ void ksemawc::NumericalSearch(){
     par[2][1]=rxy[17][1];//kMin
     par[2][2]=rxy[17][2];//kMax
     par[6][1]=ui->dSB_PAR_6_1->value();
-    pm[86][1]=ui->dSB_PM_86_1->value();
-    pm[87][1]=ui->dSB_PM_87_1->value();
-    pm[88][1]=ui->dSB_PM_88_1->value();
-    pm[89][1]=ui->dSB_PM_89_1->value();
+    pmTe[1][1]=ui->dSB_PM_86_1->value();
+    pmTe[2][1]=ui->dSB_PM_87_1->value();
+    pmTe[3][1]=ui->dSB_PM_88_1->value();
+    pmTe[4][1]=ui->dSB_PM_89_1->value();
     int IL1=1;
     int IL2=NeV;
     Sol.clear();//reset Sol
@@ -6435,7 +7450,7 @@ void ksemawc::NumericalSearch(){
         if(nint(par[50+nint(par[53][2])][3])==1){
             if(DATO[1]>0) Trasm=ms.measures[0].value[IL-1];
             if(DATO[2]>0) Trasm=ms.measures[1].value[IL-1];
-            double dinco=pm[nint(par[53][2])][1];
+            double dinco=pmD[nint(par[53][2])][1];
             if(iw==3) qDebug()<<"Trasm = "<<Trasm;
             dt=-0.1*lam/4./3.14/dinco*log(Trasm);
             dlim=1.e-10;
@@ -6450,32 +7465,32 @@ void ksemawc::NumericalSearch(){
         for(int i=0;i<101;i++){
             n=par[1][1]+i*Dn;
             if(calN1K2NK3==3){//searching nk mathematical solutions
-                CNK[1][0]=3;//nk-uncknown will be set to forced values
-                CNK[1][7]=n;
-                CNK[1][8]=k;
+                cnk[1].forceMode=3;//nk-uncknown will be set to forced values
+                cnk[1].nForced=n;
+                cnk[1].kForced=k;
                 double dt=0.001*std::abs(rxy[17][2]-rxy[17][1]);
                 FM=FindRoot([this](double k){ return FMER(k); },k,dt,dlim,tol);
-                k=CNK[1][8];
+                k=cnk[1].kForced;
             }
             else if(calN1K2NK3==1){//n calculation with k=k_simulation
-                double VNK[17][3];
-                CNK[1][0]=1;//n-unknown will be set to forced value
+                double VNK[N_CNK_HARD_MAX+1][3];
+                cnk[1].forceMode=1;//n-unknown will be set to forced value
                 COSVNK(VNK,IL);
                 k=VNK[1][2];
-                CNK[1][7]=n;
+                cnk[1].nForced=n;
                 FM=FMER(k);
             }
             else if(calN1K2NK3==2){//k calculation with n=n_simulation
-                double VNK[17][3];
-                CNK[1][0]=2;//k-unknown will be set to forced value
+                double VNK[N_CNK_HARD_MAX+1][3];
+                cnk[1].forceMode=2;//k-unknown will be set to forced value
                 COSVNK(VNK,IL);
                 n=VNK[1][1];
-                CNK[1][8]=k;
+                cnk[1].kForced=k;
                 double dt=0.001*std::abs(rxy[17][2]-rxy[17][1]);
                 FM=FindRoot([this](double k){ return FMER(k); },k,dt,dlim,tol);
                 if(IL==iwl2print)
-                    qDebug("IL=%d FM=%f n=%f k_fin=%f",IL,FM,n,CNK[1][3]);
-                k=CNK[1][8];
+                    qDebug("IL=%d FM=%f n=%f k_fin=%f",IL,FM,n,cnk[1].kConst);
+                k=cnk[1].kForced;
                 Sol.emplace_back(std::array<double, 6>{1., lam, n, k, n*0.001, 0.});
                 double Dk=k/100.;//error evaluation
                 do{
@@ -6524,7 +7539,7 @@ void ksemawc::NumericalSearch(){
     }
     nextColor();
     PlotNK(0);
-    CNK[1][0]=0;//nk-unknown by the chosen option
+    cnk[1].forceMode=0;//nk-unknown by the chosen option
 }
 
 
@@ -6605,8 +7620,8 @@ void ksemawc::drawPolygon(QPointF pos){
         }
     }
     Sol.clear();//reset Sol
-    Sol.resize(newN);
-    for(int I=0;I<newN;I++){
+    Sol.resize(newN+1);//newN is the last filled index (= #kept-1); size must be newN+1 (and 0 when nothing kept)
+    for(int I=0;I<=newN;I++){
         for(int k=1;k<=5;k++)
             Sol[I][k]=NKNEW[I][k];
         Sol[I][0]=1;
@@ -6722,6 +7737,7 @@ void ksemawc::IbridKernel(QString rc){
     PanFitEnable();
     // data number
     qDebug()<<"-> IbridKernel with rc="<<rc;
+    iDelCon=(ui->checkBox_deltaConnect->checkState()==Qt::Checked)?1:0;//refresh global from GUI (was stale from last Read/SaveSetting), cf. CalcMis
     ui->lineEdit_chi2Best->setStyleSheet("background-color: white;");
     int mwl=NeV;//SF and ELI
     int mwla=NeV;//enabled wavelengths
@@ -6744,7 +7760,7 @@ void ksemawc::IbridKernel(QString rc){
     std::vector<std::vector<double>> PsiMat(mwl, std::vector<double>(4, 0.0));
     std::vector<std::vector<double>> DelMat(mwl, std::vector<double>(4, 0.0));
     std::vector <double> wwl(mwl),kk(mwl),nn(mwl),e1(mwl),e2(mwl),tn(mwl),tp(mwl),rn(mwl),rp(mwl),r1(mwl),ErrXp(mwl),ErrYp(mwl),
-            ncent(mwl),ndev(mwl),kcent(mwl),kdev(mwl),psi(mwl),delta(mwl),ps(NeV);
+            ncent(mwl),ndev(mwl),kcent(mwl),kdev(mwl),psi(mwl),delta(mwl),ps(std::max(NeV,997));
     double chi2ini=1.E+09;
     par[38][1]=1.e+20;
     par[38][2]=0.;
@@ -6779,8 +7795,8 @@ void ksemawc::IbridKernel(QString rc){
     //double* p=nullptr;
     //p = new double[n];
     for(int i=1;i<=n;i++){
-        int ipm=nint(pm[i][3]);
-        p[i-1]=pm[ipm][1];
+        int ipm=nint(pmAt(i)[3]);
+        p[i-1]=pmAt(ipm)[1];
     }
     if(ifirstcall==0){// IbridKernel has been called
         ifirstcall++;
@@ -6812,13 +7828,13 @@ void ksemawc::IbridKernel(QString rc){
                         ms.measures[i+5].value[ii-1]=elis[i][ii];//idem
                 }
                 for(int i=1;i<=n;i++){
-                    int ip=nint(pm[i][3]);
-                    p[i-1]=pst[i][1];//central value (jie=0)
-                    pm[ip][1]=p[i-1];
-                    if(pst[i][2]>.0)
-                        pm[ip][4]=sqrt(pst[i][2]);//error = deviation rms
+                    int ip=nint(pmAt(i)[3]);
+                    p[i-1]=pst[i-1][1];//central value (jie=0) — pst is stored 0-based (see jie==0 / accumulo branches)
+                    pmAt(ip)[1]=p[i-1];
+                    if(pst[i-1][2]>.0)
+                        pmAt(ip)[4]=sqrt(pst[i-1][2]);//error = deviation rms
                     else
-                        pm[ip][4]=0.;
+                        pmAt(ip)[4]=0.;
                 }
                 for(int i=0;i<NeV;i++){
                     //store central value of solution
@@ -6967,14 +7983,14 @@ void ksemawc::IbridKernel(QString rc){
                     m=2*mda;
                 int npfit=n;
                 for(int ipf=npfit;ipf>=1;ipf--){
-                    int ipm=nint(pm[ipf][3]);
+                    int ipm=nint(pmAt(ipf)[3]);
                     qDebug("ipf = %d ipm = %d",ipf,ipm);
                     if(ipm<100){
-                        pm[ipm][2]=.0;
+                        pmAt(ipm)[2]=.0;
                         for(int iii=ipf;iii<=n;iii++){
-                            pm[iii][3]=pm[iii+1][3];// move 1 step down
-                            pm[iii][4]=pm[iii+1][4];
-                            pm[iii][5]=pm[iii+1][5];
+                            pmAt(iii)[3]=pmAt(iii+1)[3];// move 1 step down
+                            pmAt(iii)[4]=pmAt(iii+1)[4];
+                            pmAt(iii)[5]=pmAt(iii+1)[5];
                         }
                         n=n-1;
                         qDebug("n = %d",n);
@@ -7003,7 +8019,7 @@ void ksemawc::IbridKernel(QString rc){
             }
 
             //Fit, compute jac & cov matrices, err. e corr.
-            fredeg=static_cast<double>(m-n);
+            fredeg=static_cast<double>(m>n?m-n:1);//guard m==n (avoid /0)
             par[56][2]=fredeg;
             ifit=1;
             QFile fchi2(filechi2);
@@ -7078,19 +8094,19 @@ void ksemawc::IbridKernel(QString rc){
             //fnorm=enorm(m,fvec);
             qDebug("BF: chi2= %.9g",chi2fin);
             for(int i=1;i<=n;i++){
-                int ip=nint(pm[i][3]);
-                pm[ip][1]=p[i-1];
+                int ip=nint(pmAt(i)[3]);
+                pmAt(ip)[1]=p[i-1];
                 //check value
-                if((ip>0 && ip<10) || (ip>50 && ip<60) || ip>100)//thickness or roughness or oscillator
-                    if(pm[ip][1]<.0)
-                        pm[ip][1]=0.;
-                if((ip>=71 && ip<=85) || (ip>=91 && ip<=99)){//fEMA or d_nonuni
-                    if(pm[ip][1]<.0)
-                        pm[ip][1]=0.;
-                    if(pm[ip][1]>1.)
-                        pm[ip][1]=1.;
+                if((ip>=1 && ip<=99) || (ip>=496 && ip<=594) || (ip>=897 && ip<=996))//D, Rg, oscillators
+                    if(pmAt(ip)[1]<.0)
+                        pmAt(ip)[1]=0.;
+                if(ip>=694 && ip<=891){//Nu (694-792) + EMA fractions (793-891)
+                    if(pmAt(ip)[1]<.0)
+                        pmAt(ip)[1]=0.;
+                    if(pmAt(ip)[1]>1.)
+                        pmAt(ip)[1]=1.;
                 }
-                pm[ip][4]=.0;
+                pmAt(ip)[4]=.0;
                 qDebug("\tp[%d]=pm[%d][1]=%.9g",i-1,ip,p[i-1]);
             }
             if(ifit==1){//write Info fit
@@ -7122,8 +8138,8 @@ void ksemawc::IbridKernel(QString rc){
 
             if(m>0 && ieon==0){
                 //computing jabobiana fjac
-                for(int i=1;i<=200;i++)//save actual status
-                    ps[i]=pm[i][1];
+                for(int i=1;i<=996;i++)//save actual status
+                    ps[i]=pmAt(i)[1];
                 //int iflag=2;
                 double epsfcn=100.*tol;//0.;
                 qDebug("epsfcn=%e",epsfcn);
@@ -7133,10 +8149,10 @@ void ksemawc::IbridKernel(QString rc){
                     fdjac2(FSEM,this,m,n,p.data(),fvec.data(),FJAC.data(),m,epsfcn,wa.data());
                 else if(r=="i" && n>0)
                     fdjac2(FRCK,this,m,n,p.data(),fvec.data(),FJAC.data(),m,epsfcn,wa.data());
-                for(int i=1;i<=200;i++)//return to best fit
-                    pm[i][1]=ps[i];
+                for(int i=1;i<=996;i++)//return to best fit
+                    pmAt(i)[1]=ps[i];
                 for(int i=1;i<=n;i++){
-                    p[i-1]=pm[nint(pm[i][3])][1];
+                    p[i-1]=pmAt(nint(pmAt(i)[3]))[1];
                 }
 
                 //computing matrix inv covar (fjac_trasposta)*(fjac)
@@ -7164,7 +8180,7 @@ void ksemawc::IbridKernel(QString rc){
                     //computing errors at 99% of confidency
                     for(int i=1;i<=n;i++){
                         if(cov[i-1][i-1]<1.e3){
-                            pm[nint(pm[i][3])][4]=sqrt(std::abs(6.635*cov[i-1][i-1]));
+                            pmAt(nint(pmAt(i)[3]))[4]=sqrt(std::abs(6.635*cov[i-1][i-1]));
                         }
                     }
                     fflush(stdout);
@@ -7173,11 +8189,11 @@ void ksemawc::IbridKernel(QString rc){
                     if(n>1){
                         for(int i=1;i<=n;i++){
                             if(1.-1./(cov[i-1][i-1]*cinv[i-1][i-1])>0.)
-                                pm[nint(pm[i][3])][5]=sqrt(1.-1./(cov[i-1][i-1]*cinv[i-1][i-1]));
+                                pmAt(nint(pmAt(i)[3]))[5]=sqrt(1.-1./(cov[i-1][i-1]*cinv[i-1][i-1]));
                             else
-                                pm[nint(pm[i][3])][5]=1.;
-                            if(pm[nint(pm[i][3])][5]>1.)
-                                pm[nint(pm[i][3])][5]=1.;
+                                pmAt(nint(pmAt(i)[3]))[5]=1.;
+                            if(pmAt(nint(pmAt(i)[3]))[5]>1.)
+                                pmAt(nint(pmAt(i)[3]))[5]=1.;
                         }
                     }
                 }
@@ -7186,20 +8202,20 @@ void ksemawc::IbridKernel(QString rc){
                 for(int i=1;i<=npp;i++){
                     state=idToCheckBox["chBeParFit_"+QString::number(i)]-> checkState();
                     int ip=nint(ppm[i]);
-                    //check value
-                    if((ip>0 && ip<10) || (ip>50 && ip<60) || ip>100)//thickness or roughness or oscillator
-                        if(pm[ip][1]<.0)
-                            pm[ip][1]=0.;
-                    if((ip>=71 && ip<=85) || (ip>=91 && ip<=99)){//fEMA or d_nonuni
-                        if(pm[ip][1]<.0)
-                            pm[ip][1]=0.;
-                        if(pm[ip][1]>1.)
-                            pm[ip][1]=1.;
+                    //check value (uniform ip encoding v5.2)
+                    if((ip>=1 && ip<=99) || (ip>=496 && ip<=594) || (ip>=897 && ip<=996))//D, Rg, oscillators
+                        if(pmAt(ip)[1]<.0)
+                            pmAt(ip)[1]=0.;
+                    if(ip>=694 && ip<=891){//Nu (694-792) + EMA fractions (793-891)
+                        if(pmAt(ip)[1]<.0)
+                            pmAt(ip)[1]=0.;
+                        if(pmAt(ip)[1]>1.)
+                            pmAt(ip)[1]=1.;
                     }
-                    idToLineEdit["DPparFitV_"+QString::number(i)] -> setText(QString::number(pm[ip][1]));
+                    idToLineEdit["DPparFitV_"+QString::number(i)] -> setText(QString::number(pmAt(ip)[1]));
                     if( state == Qt::Checked ){
-                        idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(pm[ip][4]));
-                        idToLineEdit["DPparFitGC_"+QString::number(i)] -> setText(QString::number(pm[ip][5]));
+                        idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(pmAt(ip)[4]));
+                        idToLineEdit["DPparFitGC_"+QString::number(i)] -> setText(QString::number(pmAt(ip)[5]));
                     }
                     else{
                         idToLineEdit["DPparFitErr_"+QString::number(i)] -> setText(QString::number(0));
@@ -7210,30 +8226,34 @@ void ksemawc::IbridKernel(QString rc){
         }
 
         if(r=="f" || r=="fsem" || r=="i" || r=="g"){
+            // The best-fit values were written back into the pm* arrays (and the
+            // jacobian pass restored them from ps[]); propagate them into stack
+            // so the recomputed curves use the fitted layer parameters.
+            pmValuesToStack(stack);
             //refresh plots
             nextColor();
             double ymin=1.e6;
             double ymax=-1.e6;
             double chi2=.0;
-            double delOld[4],del,delDiff[4]={0},VNK[17][3];
+            double delOld[4],del,delDiff[4]={0},VNK[N_CNK_HARD_MAX+1][3];
             qDebug()<<"r="<<r;
             for(int i=1;i<=mwl;i++){
                 par[24][2]=i;//iWL
                 double wl=ms.lambda[i-1];
-                CNK[1][0]=0;//nk-unknown by the chosen option
+                cnk[1].forceMode=0;//nk-unknown by the chosen option
                 COSVNK(VNK,i);
-                CNK[1][7]=VNK[1][1];
-                CNK[1][8]=VNK[1][2];
+                cnk[1].nForced=VNK[1][1];
+                cnk[1].kForced=VNK[1][2];
                 nkSol.n[i-1]=VNK[1][1];
                 if(r=="i" || r=="g"){//IbridOne, compute k with best-fit parameters
-                    CNK[1][0]=2;//k-unknown will be set to forced value
+                    cnk[1].forceMode=2;//k-unknown will be set to forced value
                     par[24][2]=i;
                     nkSol.n[i-1]=VNK[1][1];
                     double Trasm=1.,dt,dlim,tol;
                     if(nint(par[50+nint(par[53][2])][3])==1){
                         if(DATO[1]>0) Trasm=ms.measures[0].value[i-1];
                         if(DATO[2]>0) Trasm=ms.measures[1].value[i-1];
-                        double dinco=pm[nint(par[53][2])][1];
+                        double dinco=pmD[nint(par[53][2])][1];
                         dt=-0.1*wl/4./3.14/dinco*log(Trasm);
                         dlim=1.e-10;
                         if(iw>0)
@@ -7244,11 +8264,11 @@ void ksemawc::IbridKernel(QString rc){
                         dlim=1.e-5;
                     }
                     tol=dt/1000.;
-                    CNK[1][0]=2;//k-unknown will bet set to forced values
-                    double k=CNK[1][8];
+                    cnk[1].forceMode=2;//k-unknown will bet set to forced values
+                    double k=cnk[1].kForced;
                     FindRoot([this](double k){ return DELTAT(k); },k,dt,dlim,tol);
-                    nkSol.k[i-1]=CNK[1][8];
-                    CNK[1][0]=0;
+                    nkSol.k[i-1]=cnk[1].kForced;
+                    cnk[1].forceMode=0;
                 }
                 else if(r=="f" || r=="fsem"){
                     nkSol.n[i-1]=VNK[1][1];
@@ -7264,10 +8284,10 @@ void ksemawc::IbridKernel(QString rc){
                 ErrXp[i-1]=0.;
                 ErrYp[i-1]=0.;
                 if(r=="f" || r=="fsem"){
-                    CNK[1][0]=0;//nk-unknown by the chosen option
+                    cnk[1].forceMode=0;//nk-unknown by the chosen option
                 }
                 else if(r=="i" || r=="g"){
-                    CNK[1][0]=2;//k-unknown set to forced value
+                    cnk[1].forceMode=2;//k-unknown set to forced value
                 }
 
                 //computing Tn Rn R1
@@ -7302,7 +8322,7 @@ void ksemawc::IbridKernel(QString rc){
                 }
                 for(int ieli=0;ieli<4;ieli++){
                     if(DATO[7+2*ieli]==2 ||DATO[8+2*ieli]==2){
-                        te=pm[86+ieli][1]*deg2rad;;//par[14+ieli][1]*deg2rad;
+                        te=pmTe[1+ieli][1]*deg2rad;;//par[14+ieli][1]*deg2rad;
                         iShemispherical=false;
                         ASSEMBLER(i,1,te,vot);
                         del=vot[5][2];//Delta
@@ -7319,7 +8339,7 @@ void ksemawc::IbridKernel(QString rc){
                             delDiff[ieli]=delDiff[ieli]+(del-ms.measures[6+2*ieli].value[i-1])/mwl;
                     }
                 }
-                CNK[1][0]=0;
+                cnk[1].forceMode=0;
             }
             for(int ieli=0;ieli<4;ieli++){
                 if(DATO[7+2*ieli]>0)
@@ -7477,7 +8497,7 @@ void ksemawc::SPADA(){
 
     // Fase 1 — resize strutture nuove
     ms.resize(NeV);
-    nkMaterials.resize(8);   // per ora fisso, diventerà dinamico in Fase 3
+    nkMaterials.resize(N_CNK_USER_MAX);
     for(auto& nk : nkMaterials)
         nk.resize(NeV);
     nkSol.resize(NeV);
@@ -7567,11 +8587,15 @@ void ksemawc::SPADA(){
             ms.driftBaseline[L-1]=errBL;
         }
     }
-    //file-nk load
-    for(int I=1;I<=8;I++){
-        fnam=pathroot+NANK[I].simplified();
-        if(!fnam.contains("mate/aa999.9")){
-            fnam=fnam+".nk";
+    //file-nk load (materials 1..N_CNK_USER_MAX). fnk[] holds the full path (with
+    // ".nk") for EVERY nk slot, while the legacy NANK[] only stores slots 1..8.
+    // The engine supports N_CNK_USER_MAX nk materials (SETVNK reads io=8..7+N_CNK_USER_MAX,
+    // nkMaterials sized N_CNK_USER_MAX), so iterate over fnk[] up to N_CNK_USER_MAX —
+    // otherwise files 9.. (e.g. one assigned to a Material) are never loaded and the
+    // simulation reads an empty nkMaterials slot -> absurd results.
+    for(int I=1;I<=N_CNK_USER_MAX;I++){
+        fnam=fnk[I];
+        if(!fnam.contains("mate/aa999.9") && !fnam.isEmpty()){
             qDebug()<<"\tSPADA-> load file-nk "<<fnam;
             QFile file(fnam);
             if(!file.open(QIODevice::ReadOnly | QIODevice::Text)){
@@ -7672,7 +8696,9 @@ void ksemawc::SPADA(){
                     for(int ir=1;ir<=11;ir++)
                         line = stream.readLine();
                     line3 = stream.readLine();
-                    if(line3.contains("PerkinElmer UV WinLab 7", Qt::CaseInsensitive))
+                    if(line3.contains("PerkinElmer UV WinLab 7.1", Qt::CaseInsensitive))
+                        ilinrim=70;
+                    else if(line3.contains("PerkinElmer UV WinLab 7.4", Qt::CaseInsensitive))
                         ilinrim=74;
                     else if(line3.contains("PerkinElmer UV WinLab 5"))
                         ilinrim=66;
@@ -8149,10 +9175,10 @@ void ksemawc::SPADA(){
                         return;
                     int Nstart=1;
                     STEP=1;
-                    CONVER(X.data(),Delta.data(),NDEL,Nstart,STEP,20+2*(J-1)+1,1);//Delta
-                    CONVER(X.data(),ErrD.data() ,NDEL,Nstart,STEP,20+2*(J-1)+1,2);//ErrDelta
-                    CONVER(X.data(),Psi.data()  ,NDEL,Nstart,STEP,20+2*(J-1)+2,1);//Psi
-                    CONVER(X.data(),ErrP.data() ,NDEL,Nstart,STEP,20+2*(J-1)+2,2);//ErrPsi
+                    CONVER(X.data(),Delta.data(),NDEL,Nstart,STEP,N_CONV_ELI_BASE+2*(J-1)+0,1);//Delta
+                    CONVER(X.data(),ErrD.data() ,NDEL,Nstart,STEP,N_CONV_ELI_BASE+2*(J-1)+0,2);//ErrDelta
+                    CONVER(X.data(),Psi.data()  ,NDEL,Nstart,STEP,N_CONV_ELI_BASE+2*(J-1)+1,1);//Psi
+                    CONVER(X.data(),ErrP.data() ,NDEL,Nstart,STEP,N_CONV_ELI_BASE+2*(J-1)+1,2);//ErrPsi
                     X.clear();
                     Delta.clear();
                     ErrD.clear();
@@ -8245,7 +9271,7 @@ void ksemawc::CONVER(double *X,double *Y,int NDATI,int N1,int STEP,int I,int IUV
                 qDebug("... N=%d with NPM= %d -> set NPM=2",N,NPM);
             if(N>1 && N<NDATI){
                 bool adj=true;
-                while(adj && N<=NDATI && N>=1){
+                while(adj && N>=1 && N<=NDATI && N+STEP>=1 && N+STEP<=NDATI){//keep X[N-1] and X[N+STEP-1] in bounds (was reading X[NDATI] past end)
                     if(X[N-1]>WL)
                         N=N-STEP;
                     if(X[N+STEP-1]<WL)
@@ -8282,7 +9308,7 @@ void ksemawc::CONVER(double *X,double *Y,int NDATI,int N1,int STEP,int I,int IUV
                 qDebug("ATTENTION: X[N-1]<WL !!!");
         }
 
-        if(NPM>3 && I>=21 && nint(par[10][2])==0){ //ellissometric measurement and 3 points condition
+        if(NPM>3 && I>=N_CONV_ELI_BASE && nint(par[10][2])==0){ //ellissometric measurement and 3 points condition
             if(H==iwl2print ||iw==1)
                 qDebug()<<"... ELLI meas -> set NPM=3!";
             do{
@@ -8371,11 +9397,15 @@ void ksemawc::CONVER(double *X,double *Y,int NDATI,int N1,int STEP,int I,int IUV
         double YFIN=(a*WL*WL+b*WL+c)*FACO;
         if(H==iwl2print ||iw==1)
             qDebug("Final: WL=%f YFIN=%f",WL,YFIN);
-        if(I>=8 && I<=15){//nk file
+        if(I>=8 && I<=7+N_CNK_USER_MAX){//nk file
+            // file number = I-7. NANK[] only names slots 1..8 (and indices 9.. hold
+            // unrelated entries / are out of bounds), so use it only for 1..8.
+            QString nkName = (I-7>=1 && I-7<=8) ? NANK[I-7].simplified()
+                                                : QString("nk-")+QString::number(I-7);
             if(YFIN<.0 && ALARM==0 && nint(par[9][1])!=1){
                 if(IUVIR==1){
                     QMessageBox msgBox;
-                    msgBox.setText("n-file "+NANK[I-7].simplified()+" is <0 !!!\n Do you want impose n>=0?");
+                    msgBox.setText("n-file "+nkName+" is <0 !!!\n Do you want impose n>=0?");
                     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
                     msgBox.setDefaultButton(QMessageBox::Yes);
                     int ret = msgBox.exec();
@@ -8384,11 +9414,11 @@ void ksemawc::CONVER(double *X,double *Y,int NDATI,int N1,int STEP,int I,int IUV
                         par[9][1]=1;
                         break;
                     }
-                    qDebug()<<"n-file "<<NANK[I-7]<<" is <0 !!!";
+                    qDebug()<<"n-file "<<nkName<<" is <0 !!!";
                 }
                 else if(IUVIR==2){
                     QMessageBox msgBox;
-                    msgBox.setText("k-file "+NANK[I-7].simplified()+" is <0 !!!\n Do you want impose k>=0?");
+                    msgBox.setText("k-file "+nkName+" is <0 !!!\n Do you want impose k>=0?");
                     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
                     msgBox.setDefaultButton(QMessageBox::Yes);
                     int ret = msgBox.exec();
@@ -8397,13 +9427,13 @@ void ksemawc::CONVER(double *X,double *Y,int NDATI,int N1,int STEP,int I,int IUV
                         par[9][1]=1;
                         break;
                     }
-                    qDebug()<<"k-file "<<NANK[I-7]<<" is <0 !!!";
+                    qDebug()<<"k-file "<<nkName<<" is <0 !!!";
                 }
                 ALARM=1;
             }
             if(nint(par[9][1])==1 && YFIN<.0)
                 YFIN=.0;
-            int jM = I - 8;  // indice in nkMaterials: 0..7
+            int jM = I - 8;  // index in nkMaterials: 0..N_CNK_USER_MAX-1
             if(IUVIR == 1)
                 nkMaterials[jM].n[H-1] = YFIN;
             else
@@ -8423,8 +9453,9 @@ void ksemawc::CONVER(double *X,double *Y,int NDATI,int N1,int STEP,int I,int IUV
                 qDebug("ms.measures[%d].value[%d]= %f",I-1,H-1,YFIN);
             ms.measures[I-1].error[H-1] = errY;
         }
-        if(I>=21 && I<=28){//eli measurements
-            if(I==21||I==23||I==25||I==27){
+        if(I>=N_CONV_ELI_BASE && I<=N_CONV_ELI_BASE+7){//eli measurements
+            int eOff = I - N_CONV_ELI_BASE;  // 0..7: even=Delta, odd=Psi
+            if(eOff%2==0){
                 cosDelMin=min(cosDelMin,cos(YFIN*deg2rad));
                 cosDelMax=max(cosDelMax,cos(YFIN*deg2rad));
             }
@@ -8433,12 +9464,12 @@ void ksemawc::CONVER(double *X,double *Y,int NDATI,int N1,int STEP,int I,int IUV
                 tanPsiMax=max(tanPsiMax,tan(YFIN*deg2rad));
             }
             if(IUVIR==1){
-                ms.measures[I-21+6].value[H-1] = YFIN;
-                rxy[I-14][3]=min(rxy[I-14][3],YFIN);
-                rxy[I-14][4]=max(rxy[I-14][4],YFIN);
+                ms.measures[eOff+6].value[H-1] = YFIN;
+                rxy[7+eOff][3]=min(rxy[7+eOff][3],YFIN);
+                rxy[7+eOff][4]=max(rxy[7+eOff][4],YFIN);
             }
             else
-                ms.measures[I-21+6].error[H-1] = YFIN;
+                ms.measures[eOff+6].error[H-1] = YFIN;
         }
         if(iw==1){
             QMessageBox msgBox;
@@ -8453,8 +9484,8 @@ void ksemawc::CONVER(double *X,double *Y,int NDATI,int N1,int STEP,int I,int IUV
             }
         }
     }
-    if(I>=21 && I<=28 && IUVIR==1){
-        if(I==21||I==23||I==25||I==27){
+    if(I>=N_CONV_ELI_BASE && I<=N_CONV_ELI_BASE+7 && IUVIR==1){
+        if((I-N_CONV_ELI_BASE)%2==0){
             rxy[19][3]=min(rxy[19][3],cosDelMin);
             rxy[19][4]=max(rxy[19][4],cosDelMax);
         }
@@ -8591,7 +9622,7 @@ void ksemawc::PLOTline1bar2(int iL1B2, int iRD, int iCol, int ic,int Ndata, doub
         for(int i = 0; i < Ndata; i++)
             range[i] = QwtIntervalSample(Px[i], Py[i] - ErrYp[i], Py[i] + ErrYp[i]);
         QwtIntervalSymbol *errorbar = new QwtIntervalSymbol(QwtIntervalSymbol::Bar);
-        errorbar->setPen(QPen(myColor[iColor], wT));
+        errorbar->setPen(QPen(myColor[iCol], wT));//was iColor (global): use the curve's iCol like the symbol above
         errorbar->setWidth(wT);
         range_plot->setSamples(new QwtIntervalSeriesData(range));
         range_plot->setSymbol(errorbar);
@@ -8680,18 +9711,18 @@ void ksemawc::PLOTline1bar2(int iL1B2, int iRD, int iCol, int ic,int Ndata, doub
 }
 
 
-void ksemawc::COSVNK(double VNK[17][3],int L){
+void ksemawc::COSVNK(double VNK[][3],int L){
     // L = index of wavelenght
     if(L==iwl2print)
         qDebug("COSVNK @ iWL=%d WL=%f",L,ms.lambda[L-1]);
     double f2;
-    for(int J=1;J<=16;J++){
-        int iForce=nint(CNK[J][0]);
-        int i1=nint(CNK[J][1]);
+    for(int J=1;J<=N_CNK_MAX;J++){
+        int iForce=nint(cnk[J].forceMode);
+        int i1=nint(cnk[J].nSrc);
         SETVNK(i1,J,VNK,L,2);
-        int i2=nint(CNK[J][4]);
+        int i2=nint(cnk[J].emaSrc);
         if(i2>=0){
-            f2=pm[70+J][1];
+            f2=pmFe[J][1];
             double n1=VNK[J][1];
             double k1=VNK[J][2];
             SETVNK(i2,J,VNK,L,5);
@@ -8702,25 +9733,25 @@ void ksemawc::COSVNK(double VNK[17][3],int L){
             VNK[J][2]=kEff;
         }
         if(iForce==1)
-            VNK[J][1]=CNK[J][7];
+            VNK[J][1]=cnk[J].nForced;
         else if(iForce==2)
-            VNK[J][2]=CNK[J][8];
+            VNK[J][2]=cnk[J].kForced;
         else if(iForce==3){
-            VNK[J][1]=CNK[J][7];
-            VNK[J][2]=CNK[J][8];
+            VNK[J][1]=cnk[J].nForced;
+            VNK[J][2]=cnk[J].kForced;
         }
         if(L==iwl2print)
-            qDebug("COSVNK: CNK[%d][0]=%d i1=%d i2=%d VNK[%d][1]=%f VNK[%d]=%f",J,nint(CNK[J][0]),i1,i2,J,VNK[J][1],J,VNK[J][2]);
+            qDebug("COSVNK: cnk[%d].forceMode=%d i1=%d i2=%d VNK[%d][1]=%f VNK[%d]=%f",J,nint(cnk[J].forceMode),i1,i2,J,VNK[J][1],J,VNK[J][2]);
     }
 }
 
 
-void ksemawc::SETVNK(int io,int J,double VNK[17][3],int L,int Kcte){
+void ksemawc::SETVNK(int io,int J,double VNK[][3],int L,int Kcte){
     // L = index of wavelenght
     // set VNK(J,1) and VNK(J,2) given CNK(J,k)
     if(io==0){
-        VNK[J][1]=CNK[J][Kcte];
-        VNK[J][2]=CNK[J][Kcte+1];
+        VNK[J][1]=cnk[J].col(Kcte);
+        VNK[J][2]=cnk[J].col(Kcte+1);
     }
     else if(io>=1 && io<=7){ // 1-7 Fit options
         double WL=ms.lambda[L-1];
@@ -8729,11 +9760,11 @@ void ksemawc::SETVNK(int io,int J,double VNK[17][3],int L,int Kcte){
         VNK[J][1]=fd.sqn;
         VNK[J][2]=fd.sqk;
     }
-    else if(io>=8 &&io<=15){
+    else if(io>=8 && io<=7+N_CNK_USER_MAX){
         VNK[J][1]=nkMaterials[io-8].n[L-1];
         VNK[J][2]=nkMaterials[io-8].k[L-1];
     }
-    else if(io==16){
+    else if(io==NSRC_MATREF1){// "Material#1": reuse material #1's n,k (COSVNK fills VNK[1] first)
         VNK[J][1]=VNK[1][1];
         VNK[J][2]=VNK[1][2];
     }
@@ -8789,11 +9820,11 @@ FdispResult FDISP(int iopt,double eV){
     long double eprj,epij;
     for(int io=2;io<=noscFT+1;io++){
         int i=nint(pf[iopt][io]);
-        int ifu=nint(pm[101+(i-1)*5][1]);
-        long double C=std::abs(pm[102+(i-1)*5][1]);
-        long double E0=std::abs(pm[103+(i-1)*5][1]);
-        long double D=std::abs(pm[104+(i-1)*5][1]);
-        long double K=std::abs(pm[105+(i-1)*5][1]);
+        int ifu=nint(pmOs[1+(i-1)*5][1]);
+        long double C=std::abs(pmOs[2+(i-1)*5][1]);
+        long double E0=std::abs(pmOs[3+(i-1)*5][1]);
+        long double D=std::abs(pmOs[4+(i-1)*5][1]);
+        long double K=std::abs(pmOs[5+(i-1)*5][1]);
         //qDebug("i=%d ifu=%d C=%Lf E0=%Lf D=%Lf K=%Lf",i,ifu,C,E0,D,K);
         eprj=0.;
         epij=0.;
@@ -8993,8 +10024,10 @@ FdispResult FDISP(int iopt,double eV){
         }
         epr=epr+eprj;
         epi=epi+epij;
-        if(isnan(eprj) || isnan(epij))
+        if(isnan(eprj) || isnan(epij)){
             qWarning("->FDISP-ERROR: iopt=%d OscNumber=%d ifu=%d E(eV)=%f eprj=%Lf epij=%Lf C=%Lf",iopt,io-1,ifu,eV,eprj,epij,C);
+            iStop=true;
+        }
     }
     double r_sqn = sqrt(sqrt(epr*epr + epi*epi) + epr) / sqrt(2.);
     double r_sqk = par[11][1] * (sqrt(sqrt(epr*epr + epi*epi) - epr) / sqrt(2.)+kVolSca);
@@ -9694,7 +10727,7 @@ long double ReTaucM1M2(long double E,long double C,long double E0,long double E3
 
 void ksemawc::ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
     int ivnkdw,ivnkup;
-    double VNK[17][3],vosi[6][3];
+    double VNK[N_CNK_HARD_MAX+1][3],vosi[6][3];
     double alfa=1.;
     complex<double> irup,irdw,irup2,irdw2,mups,mupp,mdws,mdwp,pq,rr;
 
@@ -9729,23 +10762,26 @@ void ksemawc::ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
 
     //complex refractive indices and initialization entrance medium
     COSVNK(VNK,iwl);
-    ivnkup=9+ikind;// entrance medium; it depends of the kind of measurement
+    // all ELI measurements share a single input medium (CNK_IN_ELI)
+    ivnkup=cnkInputMedium(ikind);
     irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
     pq=pow(irup*sin(teta),2.);// (N_entrance*sin(teta))**2.
     //*** multilayer parameters
-    int Nlayer=nint(par[51][2]);//Nlayer
+    int Nlayer=stack.nLayers();
 
     //*** loop on the interfaces = Nlayer+1
     int i=1;
     while(i<=Nlayer+1){
         int ncoe=0;
         //*** computing R T at i interface
-        if(nint(par[50+i][3])>1 || pm[50+i][1]>.0){//film or roughness
+        // Guard i<=Nlayer REQUIRED here: the last iteration (i==Nlayer+1)
+        // represents the exit medium interface and has no corresponding layer.
+        if(i <= Nlayer && (stack.layers[i-1].type > 0 || stack.layers[i-1].roughness.value > 0.)){//film or roughness
             int ifst=i;
             //thin film
-            if(nint(par[50+i][3])>1){//film!
+            if(stack.layers[i-1].type > 0){//film!
                 ncoe=1;
-                while(ifst+ncoe<=Nlayer && nint(par[50+ifst+ncoe][3])>1){//multilayer
+                while(ifst+ncoe<=Nlayer && stack.layers[ifst+ncoe-1].type > 0){//multilayer
                     ncoe=ncoe+1;
                 }
                 BUILDER(iwl,ikind,ifst,ncoe,pq,vosi);
@@ -9756,7 +10792,7 @@ void ksemawc::ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
             }
 
             //bulk with roughness
-            else if(pm[50+i][1]>.0){ //rough bulk!
+            else if(stack.layers[i-1].roughness.value > 0.){ //rough bulk!
                 ncoe=1;//need to use builder
                 BUILDER(iwl,ikind,ifst,ncoe,pq,vosi);//pq was theta
                 //save the physical parameters affering to the single interface
@@ -9770,13 +10806,13 @@ void ksemawc::ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
         //ideal interface between two media
         else{
             if(i==1)
-                ivnkup=9+ikind;// input medium; it depends of the kind of measurement
+                ivnkup=cnkInputMedium(ikind);// ELI all share CNK_IN_ELI
             else
-                ivnkup=nint(par[50+i-1][1]);
+                ivnkup=stack.layers[i-2].materialIndex;
             if(i<=Nlayer)
-                ivnkdw=nint(par[50+i][1]);
+                ivnkdw=stack.layers[i-1].materialIndex;
             else //the next medium is the exit one for SF
-                ivnkdw=9;
+                ivnkdw=CNK_OUT_SF;
             irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
             irup2=irup*irup;
             irdw=complex<double>(VNK[ivnkdw][1],-VNK[ivnkdw][2]);
@@ -9786,7 +10822,7 @@ void ksemawc::ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
             mdws=sqrt(irdw2-pq);
             mdwp=irdw2/mdws;
             //symmetric coating on back surface
-            if(i==Nlayer+1 && nint(par[50+i-1][3])==1 && nint(par[52][2])==1){ //symmetric multistrate on the rear face last layer
+            if(i==Nlayer+1 && stack.layers[i-2].type == 0 && nint(par[52][2])==1){ //symmetric multistrate on the rear face last layer
                 for(int ii=1;ii<=2;ii++){
                     vosi[1][ii]=vot[1][ii];
                     vosi[2][ii]=vot[3][ii];
@@ -9818,11 +10854,11 @@ void ksemawc::ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
         if(i==1)
             alfa=1.;
         else{
-            ivnkup=nint(par[50+i-1][1]);
+            ivnkup=stack.layers[i-2].materialIndex;
             irup=complex<double>(VNK[ivnkup][1],-VNK[ivnkup][2]);
             irup2=irup*irup;
             mups=sqrt(irup2-pq);
-            alfa=exp(-4.*PIG*pm[i-1][1]/wl*imag(-mups));
+            alfa=exp(-4.*PIG*stack.layers[i-2].thickness.value/wl*imag(-mups));
         }
         double uguales=alfa/(1.-vot[3][1]*vosi[2][1]*alfa*alfa);
         double ugualep=alfa/(1.-vot[3][2]*vosi[2][2]*alfa*alfa);
@@ -9840,19 +10876,23 @@ void ksemawc::ASSEMBLER(int iwl, int ikind, double teta, double vot[6][3]){
         vot[3][2]=r1p;
         i=i+ncoe+1;
     }
-    //if(iwl==283)
-        //qDebug("->ASS: VNK[1][1]=%f VNK[1][2]=%f vot[2][1]=%f",VNK[1][1],VNK[1][2],vot[2][1]);
 }
 
 
 void ksemawc::BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> pq,double vosi[6][3]){
-    int ivnk,NFA,iv[10]={},irougfa[11],irougms[11],iv2[10]={};
-    int nu[10][3];
+    // Sized on N_LAYER_HARD_MAX (stack.nLayers() can reach it) +2: the layer loop
+    // below also addresses index ifst+ncoe == imax+1. Zero-initialised: only rows
+    // 1..imax are filled from the stack, the extra row must not hold garbage.
+    constexpr int NLB=N_LAYER_HARD_MAX+2;
+    int ivnk,NFA,iv[NLB]={},irougfa[NLB]={},irougms[NLB]={},iv2[NLB]={};
+    int nu[NLB][3]={};
     //           [ i][0]=Nlayer with thickness nonuniform
     //           [ i][1]=NFAmin
     //           [ i][1]=NFAmax
-    double ds[10],gn[10],cn[10],gk[10],ck[10],ru[10],nmedio,kmedio,al[10],VNK[17][3],
-            dz,BpN,zz,ApN,ApK,BpK,CpK,CpN,Rs,R1s,Rp,R1p,Ts,Tp,As,Ap,ra,Ps,Pp,dsnu[10],DELTA,PSI;
+    double ds[NLB]={},gn[NLB]={},cn[NLB]={},gk[NLB]={},
+            ck[NLB]={},ru[NLB]={},nmedio,kmedio,al[NLB]={},VNK[N_CNK_HARD_MAX+1][3],
+            dz,BpN,zz,ApN,ApK,BpK,CpK,CpN,Rs,R1s,Rp,R1p,Ts,Tp,As,Ap,ra,Ps,Pp,
+            dsnu[NLB]={},DELTA,PSI;
     std::vector<double> d;
     complex<double> NQ,mus,mup,rhoS,rhopS,tauS,rhoP,rhopP,tauP,nq1,mus1,mup1,out[10][3],Bs,Cs,Bp,Cp,denoS,denoP;
     std::vector<std::complex<double>> ir;
@@ -9861,18 +10901,19 @@ void ksemawc::BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> 
     double wl=ms.lambda[iwl-1];//wavelength
 
     //layer parameters
-    int imax=nint(par[51][2]);// N. layers
+    int imax=stack.nLayers();
     int nino=nint(par[29][1]);//discretization inhomogeneity
     int N=nint(par[28][1]);//   discretization roughness
-    for(int i=1;i<=9;i++){  //9 is N_layer max
-        ds[i]=pm[i][1];     // layer thickness
-        al[i]=par[50+i][3]; // kind of layer
-        gn[i]=pm[10+i][1]+1240./wl*pm[60+i][1]; //Dn/<n>
-        cn[i]=pm[20+i][1];   //curv_n
-        gk[i]=pm[30+i][1];   //Dk/<k>
-        ck[i]=pm[40+i][1];   //curv_k
-        ru[i]=pm[50+i][1];   //roughness
-        dsnu[i]=pm[90+i][1]; //nonuniform thickness = (d_max-d_min)/(d_max+d_min)
+    for(int i=1;i<=imax;i++){
+        const Layer& l = stack.layers[i-1];
+        ds[i]=l.thickness.value;
+        al[i]=l.type + 1;                            // 0-based type → 1-based legacy al
+        gn[i]=l.nGrad.value + 1240./wl*l.slopeNGrad.value;
+        cn[i]=l.nCurv.value;
+        gk[i]=l.kGrad.value;
+        ck[i]=l.kCurv.value;
+        ru[i]=l.roughness.value;
+        dsnu[i]=l.nonUniformity.value;
         if(ru[i]>0.){//reduce the thickness of the layers which interface is rough for 3*sigma
             ds[i]=ds[i]-3.*ru[i];
             if(i>1)
@@ -9882,13 +10923,13 @@ void ksemawc::BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> 
 
     //refractive indices
     COSVNK(VNK,iwl);
-    int ivnk1=9+ikind;
+    int ivnk1=cnkInputMedium(ikind);
     ir.push_back({0.,0.});//to create ir[0] which is not used
     ir.push_back(complex<double>(VNK[ivnk1][1],-VNK[ivnk1][2]));//this is ir[1]
     d.push_back(0.);//to create d[0] which is not used
     d.push_back(0.);//d[1]
     if(ifst>1){
-        ivnk1=nint(par[50+ifst-1][1]);
+        ivnk1=stack.layers[ifst-2].materialIndex;
         ir[1]=complex<double>(VNK[ivnk1][1],-VNK[ivnk1][2]);
     }
     NFA=1;
@@ -9898,7 +10939,12 @@ void ksemawc::BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> 
     int nroug=0;
     int Nnouni=0;
     int iDWroug=0;
-    while(ims<=(ifst+ncoe-1) || (ims==ifst+ncoe && ru[ims]>0. && iDWroug==0)){
+    // The trailing (ims==ifst+ncoe) pass adds the rough interface shared with the
+    // NEXT layer down; ims<=imax is REQUIRED because that layer only exists when
+    // the coherent group does not end on the last one. Without it, a rough bulk as
+    // last layer (ncoe=1, ifst=imax) reads ru[imax+1] and then indexes
+    // stack.layers[imax] out of bounds.
+    while(ims<=(ifst+ncoe-1) || (ims==ifst+ncoe && ims<=imax && ru[ims]>0. && iDWroug==0)){
         if(ds[ims]<0.00001){
             if(iwl==iwl2print) qDebug("Skip layer %d because has zero thickness",ims);
             ims++;
@@ -9913,7 +10959,7 @@ void ksemawc::BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> 
             NFA++;
             irougfa[nroug]=NFA;//NFA assigned to the new layer
             irougms[nroug]=ims;//index of the concerning model-layer
-            ivnk=static_cast<int>(par[50+ims][1]);//to assign the complex refractive index
+            ivnk=stack.layers[ims-1].materialIndex;
             ir.push_back(complex<double>(VNK[ivnk][1],-VNK[ivnk][2]));
             d.push_back(3.*ru[ims]);//second half rough thickness
             if(ims==ifst+ncoe){
@@ -9923,7 +10969,7 @@ void ksemawc::BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> 
         }
         if(ds[ims]>0.00001){
             if(nint(al[ims])==3){ //inomogeneous layer
-                ivnk=nint(par[50+ims][1]);
+                ivnk=stack.layers[ims-1].materialIndex;
                 nmedio=VNK[ivnk][1];
                 kmedio=VNK[ivnk][2];
                 dz=1./real(nino);
@@ -9950,7 +10996,7 @@ void ksemawc::BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> 
             }
             else if(nint(al[ims])==2){// homogeneous layer
                 NFA=NFA+1;
-                ivnk=nint(par[50+ims][1]);
+                ivnk=stack.layers[ims-1].materialIndex;
                 ir.push_back(complex<double>(VNK[ivnk][1],-VNK[ivnk][2]));
                 d.push_back(ds[ims]);
                 if(dsnu[ims]>0.){//nonuniform thickness
@@ -9968,11 +11014,11 @@ void ksemawc::BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> 
     // substrate
     NFA=NFA+1;
     if(ims<=imax)
-        ivnk=nint(par[50+ims][1]);
+        ivnk=stack.layers[ims-1].materialIndex;
     else if(imax==1 && nint(al[1])==1)
-        ivnk=nint(par[50+imax][1]);
-    else{ //without substrate
-        ivnk=9;//16
+        ivnk=stack.layers[imax-1].materialIndex;
+    else{ //without substrate: the exit medium closes the stack
+        ivnk=CNK_OUT_SF;
     }
     ir.push_back(complex<double>(VNK[ivnk][1],-VNK[ivnk][2]));
     d.push_back(0.);
@@ -9999,7 +11045,7 @@ void ksemawc::BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> 
                     iv2[Jnu]++;
             }
             if(iv2[Jnu]+1>M)
-                iv2[Jnu]=iv[Jnu]-M*static_cast<int>(iv2[Jnu]/M);
+                iv2[Jnu]=iv2[Jnu]-M*static_cast<int>(iv2[Jnu]/M);//was iv[Jnu] (roughness array): wrap must use iv2, cf. roughness loop iv[j] below
             int NFAmin=nu[Jnu+1][1];
             int NFAmax=nu[Jnu+1][2];
             double Dd=1./static_cast<double>(NFAmax-NFAmin+1);
@@ -10117,16 +11163,6 @@ void ksemawc::BUILDER(int iwl,int ikind,int ifst,int ncoe, std::complex<double> 
         // vosi[5][2]=vosi[5][2]+arg(rhoP/rhoS)/deg2rad/Dit2;//DELTA
         vosi[5][1]=vosi[5][1]+PSI/Dit2;//PSI
         vosi[5][2]=vosi[5][2]+DELTA/Dit2;//DELTA
-        // if(iwl==iwl2print){
-        //     qDebug("|BUILD>final output:\n DELTA=%f  PSI=%f\n",vosi[5][2],vosi[5][1]);
-        //     qDebug(" tauP= %f +i%f Tp=%f\n tauS= %f +i%f Ts=%f\n",
-        //        real(tauP),imag(tauP),real(mup)/real(mup1)*pow(std::abs(tauP),2.),real(tauS),imag(tauS),real(mus)/real(mus1)*pow(std::abs(tauS),2.));
-        //     qDebug(" rhoP= %f +i%f Rp=%f\n rhoS= %f +i%f Rs=%f\n",
-        //        real(rhoP),imag(rhoP),pow(std::abs(rhoP),2.),real(rhoP),imag(rhoP),pow(std::abs(rhoP),2.));
-        //     qDebug(" rho1P= %f +i%f R1p=%f\n rho1S= %f +i%f R1s=%f\n",
-        //        real(rhopP),imag(rhopP),pow(std::abs(rhopP),2.),real(rhopS),imag(rhopS),pow(std::abs(rhopS),2.));
-        //     fflush(stdout);
-        // }
     }
 }
 
@@ -10320,25 +11356,25 @@ int ksemawc::SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp){
     }
     else if(imis==7 || imis==8){
         ikind=3;
-        tetar=pm[86][1];
+        tetar=pmTe[1][1];
         ivot=5;
         IPD=imis-static_cast<int>(imis/2.)*2;
     }
     else if(imis==9 || imis==10){
         ikind=4;
-        tetar=pm[87][1];
+        tetar=pmTe[2][1];
         ivot=5;
         IPD=imis-static_cast<int>(imis/2.)*2;
     }
     else if(imis==11 ||imis==12){
         ikind=5;
-        tetar=pm[88][1];
+        tetar=pmTe[3][1];
         ivot=5;
         IPD=imis-static_cast<int>(imis/2.)*2;
     }
     else if(imis==13||imis==14){
         ikind=6;
-        tetar=pm[89][1];
+        tetar=pmTe[4][1];
         ivot=5;
         IPD=imis-static_cast<int>(imis/2.)*2;
     }
@@ -10355,11 +11391,11 @@ int ksemawc::SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp){
     double Dk=(par[2][2]-par[2][1])/500.;//k-step
     double k1,FM,FMold=1.E+10;
     for(int iN=0;iN<101;iN++){
-        CNK[1][7]=par[1][1]+iN*Dn;
+        cnk[1].nForced=par[1][1]+iN*Dn;
         FMold=1.E+10;
         for(int iK=0;iK<501;iK++){
             KCL=par[2][1]+iK*Dk;
-            CNK[1][8]=KCL;
+            cnk[1].kForced=KCL;
             ASSEMBLER(iWL,ikind,tetar,vot);
             if(imis<=6)
                 FM=std::abs(ms.measures[imis-1].value[iWL-1]-vot[ivot][s1p2])/ms.measures[imis-1].error[iWL-1];
@@ -10369,7 +11405,7 @@ int ksemawc::SOLVE(int imis,int iWL,double *Xp,double *Yp,double *ErrYp){
                 k1=KCL;
             }
             else if(FM>1. && FMold<=1.){
-                Xp[Ndat]=CNK[1][7];
+                Xp[Ndat]=cnk[1].nForced;
                 Yp[Ndat]=0.5*(k1+KCL);
                 ErrYp[Ndat]=0.5*(KCL-k1);
                 if(ErrYp[Ndat]<Dk/4.)
@@ -10389,12 +11425,12 @@ double ksemawc::FMER(double k){
     int s1p2=nint(par[27][2]);
     int iSpec0Hemi1=nint(par[54][2]);
     double teta[6];
-    CNK[1][8]=k;
+    cnk[1].kForced=k;
     teta[1]=par[6][1];
-    teta[2]=pm[86][1];
-    teta[3]=pm[87][1];
-    teta[4]=pm[88][1];
-    teta[5]=pm[89][1];
+    teta[2]=pmTe[1][1];
+    teta[3]=pmTe[2][1];
+    teta[4]=pmTe[3][1];
+    teta[5]=pmTe[4][1];
     for(int i=1;i<=5;i++)
         teta[i]=teta[i]*deg2rad;
     double vot[6][3];
@@ -10415,11 +11451,10 @@ double ksemawc::FMER(double k){
         }
     }
     if(DATO[2]==2 || DATO[4]==2){
-        int iSpec0Hemi1=nint(par[54][2]);
         par[54][2]=0;//Tp and Rp are always direct/specular
         iShemispherical=false;
         ASSEMBLER(iWL,1,teta[1],vot);
-        par[54][2]=iSpec0Hemi1;
+        par[54][2]=iSpec0Hemi1;//restore (uses the function-scope iSpec0Hemi1; inner shadow removed)
         for(int i=1;i<=2;i++){
             int j=2*i;
             if(DATO[j]==2){
@@ -10469,19 +11504,17 @@ double ksemawc::FMER(double k){
 int ksemawc::FSQ(void *p, int m, int n, const double *x, double *fvec, int iflag){
     /* calculate the functions at x and return the values in fvec[0] through fvec[m-1] */
     //struct pointToFit2 *pTF2 = (struct pointToFit2 *)p;
-    ksemawc* self = static_cast<ksemawc*>(p);
-
-    int ioptf=nint(pm[100][1]);
+    int ioptf=nint(pmOs[0][1]);
     // addressing fit-parameters to PM
     for(int i=0;i<n;i++){
-        int ip=nint(pm[i+1][3]);
-        pm[ip][1]=x[i];
+        int ip=nint(pmAt(i+1)[3]);
+        pmAt(ip)[1]=x[i];
     }
 
     // computing fvec for n fit
     int j=-1;
     double chi2=0.;
-    double fredeg=real(m-n);
+    double fredeg=real(m>n?m-n:1);//guard m==n (avoid /0)
     double erynMIN=(rxy[16][2]-rxy[16][1])/1.e4;
     double erykMIN=(rxy[17][2]-rxy[17][1])/1.e4;
     double ere1MIN=(rxy[26][2]-rxy[26][1])/1.e4;
@@ -10555,7 +11588,7 @@ int ksemawc::FSEM(void *p, int m, int n, const double *x, double *fvec, int ifla
     //***** Function to fit selected experimental measurements
     ksemawc* self = static_cast<ksemawc*>(p);
 
-    CNK[1][0]=0;//n-unknown by the chosen option
+    cnk[1].forceMode=0;//n-unknown by the chosen option
     int mwl=NeV;
     int s1p2=nint(par[27][2]);
     int iSpec0Hemi1=nint(par[54][2]);
@@ -10564,12 +11597,14 @@ int ksemawc::FSEM(void *p, int m, int n, const double *x, double *fvec, int ifla
     // addressing fit parameter onto PM
     int ip;
     for(int i=1;i<=n;i++){
-        ip=nint(pm[i][3]);
-        pm[ip][1]=x[i-1];
+        ip=nint(pmAt(i)[3]);
+        pmAt(ip)[1]=x[i-1];
         if(iw>0) qDebug("|FSEM> p[%d]=%f",i,x[i-1]);
     }
+    // Sync stack so ASSEMBLER sees the updated layer parameters
+    pmValuesToStack(self->stack);
     double chi2=.0;
-    double fredeg=static_cast<double>(m-n);
+    double fredeg=static_cast<double>(m>n?m-n:1);//guard m==n (avoid /0)
     //computing fvec
     int ivec=0;
     for(int i=1;i<=mwl;i++){
@@ -10619,7 +11654,7 @@ int ksemawc::FSEM(void *p, int m, int n, const double *x, double *fvec, int ifla
         iShemispherical=false;
         for(int j=1;j<=4;j++){
             if(DATO[7+2*(j-1)]==2 || DATO[8+2*(j-1)]==2){
-                te=pm[85+j][1]*deg2rad;
+                te=pmTe[j][1]*deg2rad;
                 self->ASSEMBLER(i,2+j,te,vot);
                 if(DATO[7+2*(j-1)]==2){//DELTA
                     double offset=nint((self->ms.measures[6+2*(j-1)].value[i-1]-vot[5][2])/Dperiod)*Dperiod;
@@ -10664,31 +11699,33 @@ int ksemawc::FRCK(void *p, int m, int n, const double *x, double *fvec, int ifla
     ksemawc* self = static_cast<ksemawc*>(p);
 
 
-    CNK[1][0]=2;//k-unknown will bet set to forced values
+    cnk[1].forceMode=2;//k-unknown will bet set to forced values
     int mwl=NeV;
     int s1p2=nint(par[27][2]);
     int iSpec0Hemi1=nint(par[54][2]);
-    double vot[6][3],VNK[17][3];
+    double vot[6][3],VNK[N_CNK_HARD_MAX+1][3];
     double te=0.;
     if(DATO[4]==2)
         te=par[6][1]*deg2rad;
     else if(DATO[8]==2)
-        te=pm[86][1]*deg2rad;
+        te=pmTe[1][1]*deg2rad;
     else if(DATO[10]==2)
-        te=pm[87][1]*deg2rad;
+        te=pmTe[2][1]*deg2rad;
     else if(DATO[12]==2)
-        te=pm[88][1]*deg2rad;
+        te=pmTe[3][1]*deg2rad;
     else if(DATO[14]==2)
-        te=pm[89][1]*deg2rad;
+        te=pmTe[4][1]*deg2rad;
     // addressing fit parameter onto PM
     int ip;
     for(int i=1;i<=n;i++){
-        ip=nint(pm[i][3]);
-        pm[ip][1]=x[i-1];
+        ip=nint(pmAt(i)[3]);
+        pmAt(ip)[1]=x[i-1];
         if(iw>0) qDebug("|FRCK> p[%d]=%f",i,x[i-1]);
     }
+    // Sync stack so ASSEMBLER sees the updated layer parameters
+    pmValuesToStack(self->stack);
     double chi2=.0;
-    double fredeg=static_cast<double>(m-n);
+    double fredeg=static_cast<double>(m>n?m-n:1);//guard m==n (avoid /0)
     //computing fvec
     int ivec=0;
     double wl;
@@ -10697,15 +11734,15 @@ int ksemawc::FRCK(void *p, int m, int n, const double *x, double *fvec, int ifla
         par[24][2]=i;
         self->COSVNK(VNK,i);
         self-> nkSol.n[i-1]=VNK[1][1];
-        CNK[1][7]=VNK[1][1];
-        CNK[1][8]=self->nkSol.k[i-1];
+        cnk[1].nForced=VNK[1][1];
+        cnk[1].kForced=self->nkSol.k[i-1];
         // computing k from T
         //DELTA_k
         double Trasm=1.,dt,dlim,tol;;
         if(nint(par[50+nint(par[53][2])][3])==1){//incoherent layer
             if(DATO[1]>0) Trasm=self->ms.measures[0].value[i-1];
             if(DATO[2]>0) Trasm=self->ms.measures[1].value[i-1];
-            double dinco=pm[nint(par[53][2])][1];
+            double dinco=pmD[nint(par[53][2])][1];
             if(iw==1) qDebug("Trasm = %f",Trasm);
             dt=-0.1*wl/4./3.14/dinco*log(Trasm);
             dlim=1.e-10;//dlim
@@ -10715,12 +11752,12 @@ int ksemawc::FRCK(void *p, int m, int n, const double *x, double *fvec, int ifla
             dlim=1.e-5;//dlim
         }
         tol=dt/1000.;//tol
-        double k=CNK[1][8];
+        double k=cnk[1].kForced;
         //FindRoot([this](double k){ return DELTAT(k); },k,dt,dlim,tol);
-        double result = self->FindRoot([self](double k) {
+        self->FindRoot([self](double k) {
                 return self->DELTAT(k);
-            }, k, dt, dlim, tol);
-        self->nkSol.k[i-1]=CNK[1][8];
+            }, k, dt, dlim, tol);//root is delivered via cnk[1].kForced side effect; return value unused here
+        self->nkSol.k[i-1]=cnk[1].kForced;
         //computing R
         if(DATO[3]==2 || DATO[5]==2){
             if(iSpec0Hemi1==1)
@@ -10773,7 +11810,7 @@ int ksemawc::FRCK(void *p, int m, int n, const double *x, double *fvec, int ifla
         }
         par[54][2]=iSpec0Hemi1;
     }
-    CNK[1][0]=0;//nk-unknown by the chosen option
+    cnk[1].forceMode=0;//nk-unknown by the chosen option
     // monitor values
     // qDebug("|FRCK> chi2=%g\t",chi2);
     // for(int i=0;i<n;i++)
@@ -10820,8 +11857,8 @@ double ksemawc::DELTAT(double k){
         par[54][2]=0;//Tp and Rp are always direct/specular
         iShemispherical=false;
     }
-    //CNK[1][2]=sqn;
-    CNK[1][8]=k;
+    //cnk[1].nConst=sqn;
+    cnk[1].kForced=k;
     ASSEMBLER(iwl,1,te,vot);
     par[54][2]=iSpec0Hemi1;
     tcalc=vot[1][s1p2];
@@ -11068,7 +12105,7 @@ void lubksb(int np,double **a,int n, int *indx,double *b){
     //qDebug("-> lubksb\n");
     int i,ii,j,ll;
     double sum;
-    ii=0;
+    ii=-1;// sentinel "no nonvanishing element of b seen yet" (0-based: -1, NOT 0, which is a valid index)
     /* When ii is set to a positive value, it will become the index
     of the first nonvanishing element of b. We now do
     the forward substitution, equation (2.3.6). The only new
@@ -11078,8 +12115,8 @@ void lubksb(int np,double **a,int n, int *indx,double *b){
         ll=indx[i];
         sum=b[ll];
         b[ll]=b[i];
-        if(ii!=0){
-            for(j=ii;j<i-1;j++)
+        if(ii>=0){
+            for(j=ii;j<i;j++)// FORTRAN do j=ii,i-1 -> 0-based j<i
                 sum=sum-a[i][j]*b[j];
         }
         else if(sum!=0.)
@@ -11126,16 +12163,16 @@ bool ludcmp(int np,double **a,int n,int *indx,double& d){
         vv[i]=1./aamax;//Save the scaling.
     }
     for(j=0;j<n;j++){// This is the loop over columns of Crout's method.
-        for(i=0;i<j-1;i++){// This is equation (2.3.12) except for i=j.
+        for(i=0;i<j;i++){// This is equation (2.3.12) except for i=j.  FORTRAN do i=1,j-1 -> 0-based i<j
             sum=a[i][j];
-            for(k=0;k<i-1;k++)
+            for(k=0;k<i;k++)// FORTRAN do k=1,i-1 -> 0-based k<i
                 sum=sum-a[i][k]*a[k][j];
             a[i][j]=sum;
         }
         aamax=0.;// Initialize for the search for largest pivot element.
         for(i=j;i<n;i++){// This is i=j of equation (2.3.12) and i=j+1...N of equation (2.3.13).
             sum=a[i][j];
-            for(k=0;k<j-1;k++)
+            for(k=0;k<j;k++)// FORTRAN do k=1,j-1 -> 0-based k<j
                 sum=sum-a[i][k]*a[k][j];
             a[i][j]=sum;
             dum=vv[i]*std::abs(sum);// Figure of merit for the pivot.
@@ -11158,7 +12195,7 @@ bool ludcmp(int np,double **a,int n,int *indx,double& d){
         /* If the pivot element is zero the matrix is singular (at least to the precision of the algorithm).
    For some applications on singular matrices, it is desirable to substitute TINY for zero.
    */
-        if(j!=n){//         Now,finally, divide by the pivot element.
+        if(j!=n-1){//         Now,finally, divide by the pivot element.  FORTRAN if(j.ne.n) -> 0-based j!=n-1
             dum=1./a[j][j];
             for(i=j+1;i<n;i++)
                 a[i][j]=a[i][j]*dum;

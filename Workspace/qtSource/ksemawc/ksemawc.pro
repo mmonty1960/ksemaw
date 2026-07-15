@@ -17,7 +17,7 @@ QT += core gui
     include( .\QWT_win.pri )
     CONFIG+= c++14 gui console
 #	INCLUDEPATH += . c:\Qwt-6.2.0\src c:\Programmi\Tools\mingw810_64\cminpack-1.3.8
-        INCLUDEPATH += C:\gsl-2.7\include C:\gsl-2.7\include\gsl C:\qwt-6.3.0\include
+        INCLUDEPATH += C:\gsl-2.7\include C:\gsl-2.7\include\gsl C:\qwt-6.2.0\include
     LIBS += -L"C:/gsl-2.7/bin" -lgsl-25
     LIBS += -L"C:/Qt/Tools/mingw810_64/cminpack-1.3.8/build" -lcminpack
 }
